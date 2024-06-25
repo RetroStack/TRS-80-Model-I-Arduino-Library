@@ -31,13 +31,10 @@ void asmWait(uint16_t outerLoopCount, uint16_t innerLoopCount);
 
 void convertHexStringToByteArray(char* hexString, unsigned char* byteArray);
 void sprintfBinary(uint8_t value);
-void enterTestMode(bool silent=true);
-void exitTestMode(bool silent=true);
 
 // Called last from the variadic template function
 void printLine(); // Declaration of the non-template function
 void readSerialInput2();
-void readSerialInput(char *buffer, int bufferSize);
 
 // Template function definition
 template <typename T, typename... Types>
