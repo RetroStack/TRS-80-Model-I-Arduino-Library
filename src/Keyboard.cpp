@@ -4,10 +4,10 @@
 /*
   TODO:
     - need to test with numeric keypad
-    - convert to class
 */
 
 #include "Keyboard.h"
+#include "Model1.h"
 
 // Look-up table for uppercase characters
 const uint8_t lookupTable[8][8] = {
@@ -20,23 +20,27 @@ const uint8_t lookupTable[8][8] = {
   {0x0D, 0x1F, 0x01, 0x5B, 0x0A, 0x08, 0x09, 0x20}, // 3840
 };
 
+// Constructor
+Keyboard::Keyboard(Model1* model) : model1(model) {  
+}
+
 // Decodes key from keyboard, supports shift key. Does not support multiple keys being
 // held down.
-uint8_t scanKeyboard() {
-  Shield::setAddressLinesToOutput(KEYBOARD_MEM_ADDRESS);
-  Shield::setDataLinesToInput();
+uint8_t Keyboard::scanKeyboard() {
+  model1->setAddressLinesToOutput(KEYBOARD_MEM_ADDRESS);
+  model1->setDataLinesToInput();
 
   // Roll thru the mapped keyboard addresses
   for (int i = 0; i < 7; i++) {
     uint16_t keyMemAddress = KEYBOARD_MEM_ADDRESS + (1 << i);
-    uint8_t keyCode = Video::readByteVRAM(keyMemAddress);
+    uint8_t keyCode = model1->video.readByteVRAM(keyMemAddress);
 
     // Roll thru the bit positions
     for (int bit = 0; bit < 8; bit++) {
       bool shift = false;
   
       // Check if shift is being held down
-      if (Video::readByteVRAM(0x3880) & 1 ) {
+      if (model1->video.readByteVRAM(KEYBOARD_SHIFT_KEY) & 1 ) {
         shift = true;
       }
 

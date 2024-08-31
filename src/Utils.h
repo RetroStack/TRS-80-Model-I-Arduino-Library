@@ -1,9 +1,10 @@
+// Utils.h
+
 #ifndef UTILS_H
 #define UTILS_H
 
 #include <Arduino.h>
 #include <avr/io.h>
-// #include "Shield.h"
 
 #define MAX_BUFFER_SIZE       100
 #define MAX_INPUT_PARAMETERS  5
@@ -31,10 +32,13 @@ void asmWait(uint16_t outerLoopCount, uint16_t innerLoopCount);
 
 void convertHexStringToByteArray(char* hexString, unsigned char* byteArray);
 void sprintfBinary(uint8_t value);
+void enterTestMode(bool silent=true);
+void exitTestMode(bool silent=true);
 
 // Called last from the variadic template function
 void printLine(); // Declaration of the non-template function
 void readSerialInput2();
+void readSerialInput(char *buffer, int bufferSize);
 
 // Template function definition
 template <typename T, typename... Types>
@@ -47,4 +51,4 @@ void printLine(T first, Types... other) {
 uint8_t inputPrompt(const char* str);
 void serialFlush();
 
-#endif
+#endif // UTILS_H

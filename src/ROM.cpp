@@ -1,6 +1,8 @@
 // ROM.cpp
 // ROM related operations
+
 #include "ROM.h"
+#include "Model1.h"
 
 // Thanks to Ira @ trs-80.com: https://www.trs-80.com/wordpress/roms/checksums-mod-1/
 M1_ROMs romTable[] = {
@@ -20,7 +22,7 @@ M1_ROMs romTable[] = {
 int numberOfROMEntries = sizeof(romTable) / sizeof(romTable[0]);
 
 // Class constructor
-ROM::ROM() {
+ROM::ROM(Model1* model) : model1(model) {    
 }
 
 void ROM::dump() {
@@ -36,7 +38,7 @@ uint32_t ROM::getROMChecksum(bool sentToSerialPort) {
   uint8_t data;
 
   // Init control pins
-  Shield::setDataLinesToInput();
+  model1->setDataLinesToInput();
 
   pinMode(RAS_L, OUTPUT);
   digitalWrite(RAS_L, LOW);
@@ -51,7 +53,7 @@ uint32_t ROM::getROMChecksum(bool sentToSerialPort) {
   // Note: NOT toggling the RAS and RD signals per each memory location as we do
   // for VRAM/SRAM and DRAM - this may change, for now it seems to be working
   for (uint32_t i = 0; i <= totalBytes; ++i) {
-    Shield::setAddressLinesToOutput(i);       // Update address for each byte
+    model1->setAddressLinesToOutput(i);       // Update address for each byte
     asmWait(5);
 
     // Read a byte and process
@@ -66,7 +68,7 @@ uint32_t ROM::getROMChecksum(bool sentToSerialPort) {
   }
 
   // turn off RAS*, RD*, WR* lines
-  Shield::turnOffReadWriteRASLines();
+  model1->turnOffReadWriteRASLines();
 
   return crc.finalize();
 }

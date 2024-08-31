@@ -1,12 +1,20 @@
 // Video.cpp
 // Supports video operations, lowercase. SRAM/VRAM operations are used for ROM as well (for now)
-#include "Video.h"
 
-uint8_t Video::videoData[VIDEO_MEM_SIZE];
-uint8_t Video::memPattern[10];
-unsigned int Video::cursorPosition = VIDEO_MEM_START;
-CRC32 Video::crc;
-uint32_t Video::vramChecksumTable[6] = {
+#include "Video.h"
+#include "Model1.h"
+
+Video::Video(Model1* model) : model1(model) {
+  // Constructor
+  Serial.println("Video constructor done.");
+}
+
+// uint8_t videoData[VIDEO_MEM_SIZE];
+// uint8_t memPattern[10];
+// unsigned int cursorPosition = VIDEO_MEM_START;
+// CRC32 crc;
+
+uint32_t vramChecksumTable[6] = {
   0xEFB5AF2E,   // 0x00
   0x24D7C38D,   // 0x20
   0xAB58F48B,   // 0x6F
@@ -43,8 +51,8 @@ void Video::fillVRAMwithPattern(bool silent, const char* pattern, uint16_t start
 
   // make sure other control lines are set correct
   pinMode(RD_L, INPUT);
-  Shield::setAddressLinesToOutput(0x3c00);
-  Shield::setDataLinesToOutput();
+  model1->setAddressLinesToOutput(0x3c00);
+  model1->setDataLinesToOutput();
 
   // Fill VRAM
   for (uint16_t i = 0; i <= (end - start); i++) {
@@ -74,13 +82,13 @@ void Video::fillVRAMwithPattern(bool silent, const char* pattern, uint16_t start
     asmWait(3);
 
     // Exit (keep this order)
-    Shield::turnOffReadWriteRASLines();
+    model1->turnOffReadWriteRASLines();
   }
   
   // prep pins for exit
-  Shield::turnOffReadWriteRASLines();
-  Shield::setAddressLinesToInput();
-  Shield::setDataLinesToInput();
+  model1->turnOffReadWriteRASLines();
+  model1->setAddressLinesToInput();
+  model1->setDataLinesToInput();
   asmWait(3);
 }
 
@@ -96,8 +104,8 @@ void Video::fillVRAM(bool silent, uint8_t fillValue, uint16_t start, uint16_t en
   SILENT_PRINTLN(silent, stringBuffer);
 
   pinMode(RD_L, INPUT);     // JIC
-  Shield::setAddressLinesToOutput(VIDEO_MEM_START);
-  Shield::setDataLinesToOutput();
+  model1->setAddressLinesToOutput(VIDEO_MEM_START);
+  model1->setDataLinesToOutput();
 
   // Fill VRAM
   for (uint16_t i = start; i <= end; i++) {
@@ -128,9 +136,9 @@ void Video::fillVRAM(bool silent, uint8_t fillValue, uint16_t start, uint16_t en
   }
 
   // Exit
-  Shield::turnOffReadWriteRASLines();
-  Shield::setAddressLinesToInput();
-  Shield::setDataLinesToInput();
+  model1->turnOffReadWriteRASLines();
+  model1->setAddressLinesToInput();
+  model1->setDataLinesToInput();
   asmWait(3);
 }
 
@@ -141,8 +149,8 @@ void Video::displayCharacterSet() {
 
   // set control lines
   pinMode(RD_L, INPUT);             // prob OK not to force it HIGH
-  Shield::setAddressLinesToOutput(0x3c00);
-  Shield::setDataLinesToOutput();
+  model1->setAddressLinesToOutput(0x3c00);
+  model1->setDataLinesToOutput();
 
   // Fill VRAM
   for (int i = 0; i < 255; i++) {
@@ -175,9 +183,9 @@ void Video::displayCharacterSet() {
   }
   
   // prep pins for exit
-  Shield::turnOffReadWriteRASLines();
-  Shield::setAddressLinesToInput();
-  Shield::setDataLinesToInput();
+  model1->turnOffReadWriteRASLines();
+  model1->setAddressLinesToInput();
+  model1->setDataLinesToInput();
   asmWait(3);
 }
 
@@ -189,9 +197,11 @@ void Video::printToScreen(const char *str, uint16_t startAddress) {
     return;
   }
 
-  Shield::setAddressLinesToOutput(0x3C00);
-  Shield::setDataLinesToOutput();
+  // setup address and data lines for write
+  model1->setAddressLinesToOutput(0x3C00);
+  model1->setDataLinesToOutput();
 
+  // go thru string and write to display memory
   uint16_t bufferIndex = startAddress;
   for (const char *p = str; *p != '\0'; p++) {
     if (bufferIndex >= (VIDEO_MEM_START + VIDEO_MEM_SIZE)) {
@@ -245,8 +255,8 @@ void Video::printToScreen(const char *str, uint16_t startAddress) {
   pinMode(WR_L, INPUT);
   pinMode(RAS_L, INPUT);
 
-  Shield::setAddressLinesToInput();
-  Shield::setDataLinesToInput();
+  model1->setAddressLinesToInput();
+  model1->setDataLinesToInput();
   asmWait(3);
 }
 
@@ -263,8 +273,8 @@ uint32_t Video::readVRAM(bool silent, bool showInHex, bool dumpVRAM) {
   SILENT_PRINTLN(silent, "Reading VRAM...");
 
   // Setup to write VRAM
-  Shield::setAddressLinesToOutput(VIDEO_MEM_START);
-  Shield::setDataLinesToInput();
+  model1->setAddressLinesToOutput(VIDEO_MEM_START);
+  model1->setDataLinesToInput();
 
   // this seems to be needed otherwise a random character gets written to the VRAM
   // at the start of the address in the loop below.
@@ -299,10 +309,10 @@ uint32_t Video::readVRAM(bool silent, bool showInHex, bool dumpVRAM) {
     asmWait(3);
   }
 
-  // Exit out
-  Shield::turnOffReadWriteRASLines();
-  Shield::setAddressLinesToInput();
-  Shield::setDataLinesToInput();
+  // release the control, data and address lines by setting to INPUT
+  model1->turnOffReadWriteRASLines();
+  model1->setAddressLinesToInput();
+  model1->setDataLinesToInput();
   asmWait(3);
 
   // calcuate CRC
@@ -400,7 +410,7 @@ uint8_t Video::readByteVRAM(uint16_t memAddress) {
   data = PINF;
 
   // prep for exit
-  Shield::turnOffReadWriteRASLines();
+  model1->turnOffReadWriteRASLines();
 
   return data;
 }
@@ -432,7 +442,7 @@ void Video::writeByteVRAM(uint16_t memAddress, uint8_t data) {
   asmWait(3);
 
   // prep for exit
-  Shield::turnOffReadWriteRASLines();
+  model1->turnOffReadWriteRASLines();
 }
 
 // Checks if a lowercase mod exists in system, by first writing 20, then BF
@@ -463,24 +473,24 @@ bool Video::lowercaseModExists(bool silent) {
 
 // Move VRAM contents around in VRAM only
 void Video::memmoveVRAM(unsigned int dest, unsigned int src, unsigned int n) {
-  Shield::setAddressLinesToOutput(dest);
+  model1->setAddressLinesToOutput(dest);
   if (dest < src) {
     for (unsigned int i = 0; i < n; i++) {
-      Shield::setDataLinesToInput();
+      model1->setDataLinesToInput();
       uint8_t data = readByteVRAM(src + i);
-      Shield::setDataLinesToOutput();
+      model1->setDataLinesToOutput();
       writeByteVRAM(dest + i, data);
     }
   } else {
     for (int i = n - 1; i >= 0; i--) {
-      Shield::setDataLinesToInput();
+      model1->setDataLinesToInput();
       uint8_t data = readByteVRAM(src + i);
-      Shield::setDataLinesToOutput();
+      model1->setDataLinesToOutput();
       writeByteVRAM(dest + i, data);
     }
   }
-  Shield::setAddressLinesToInput();
-  Shield::setDataLinesToInput();
+  model1->setAddressLinesToInput();
+  model1->setDataLinesToInput();
 }
 
 // Move screen contents up by 1 line
@@ -501,14 +511,14 @@ void Video::printToScreen(const char *str) {
 // Print to the TRS-80 screen at specific coordinates. Supports carriage returns and auto line feeds,
 // along with placement of characters without impacting last written location
 void Video::printToScreen(const char *str, unsigned int x, unsigned int y, bool updateCursorPosition) {
-  Shield::setAddressLinesToOutput(VIDEO_MEM_START);
-  Shield::setDataLinesToOutput();
+  model1->setAddressLinesToOutput(VIDEO_MEM_START);
+  model1->setDataLinesToOutput();
 
   if (y >= VIDEO_ROWS) {
     scrollScreenUp();
     y--;
-    Shield::setAddressLinesToOutput(VIDEO_MEM_START);
-    Shield::setDataLinesToOutput();
+    model1->setAddressLinesToOutput(VIDEO_MEM_START);
+    model1->setDataLinesToOutput();
   }
 
   // pointer to memory
@@ -520,8 +530,8 @@ void Video::printToScreen(const char *str, unsigned int x, unsigned int y, bool 
       y++;
       if (y >= VIDEO_ROWS) {
         scrollScreenUp();
-        Shield::setAddressLinesToOutput(memdAddress);
-        Shield::setDataLinesToOutput();
+        model1->setAddressLinesToOutput(memdAddress);
+        model1->setDataLinesToOutput();
         y--;
       }
       x = 0;
@@ -532,8 +542,8 @@ void Video::printToScreen(const char *str, unsigned int x, unsigned int y, bool 
         y++;
         if (y >= VIDEO_ROWS) {
           scrollScreenUp();
-          Shield::setAddressLinesToOutput(memdAddress);
-          Shield::setDataLinesToOutput();
+          model1->setAddressLinesToOutput(memdAddress);
+          model1->setDataLinesToOutput();
           y--;
         }
         memdAddress = y * VIDEO_COLS + VIDEO_MEM_START;
@@ -551,7 +561,7 @@ void Video::printToScreen(const char *str, unsigned int x, unsigned int y, bool 
     cursorPosition = memdAddress;
   }
 
-  Shield::turnOffReadWriteRASLines();
-  Shield::setAddressLinesToInput();
-  Shield::setDataLinesToInput();
+  model1->turnOffReadWriteRASLines();
+  model1->setAddressLinesToInput();
+  model1->setDataLinesToInput();
 }

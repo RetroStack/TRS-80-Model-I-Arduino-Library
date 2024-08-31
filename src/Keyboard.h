@@ -1,12 +1,26 @@
 // Keyboard.h
-#ifndef keyboard_h
-#define keyboard_h
 
-#include "Shield.h"
-#include "Video.h"
+#ifndef KEYBOARD_H
+#define KEYBOARD_H
+
+#include <Arduino.h>
+#include "Common.h"
+#include "Utils.h"
 
 #define KEYBOARD_MEM_ADDRESS 0x3800
+#define KEYBOARD_SHIFT_KEY   0x3880
 
-uint8_t scanKeyboard();   // scan keyboard
+class Model1; // Forward declaration
 
-#endif
+class Keyboard {
+  public:
+    Keyboard(Model1* model);
+    
+    Keyboard();
+    uint8_t scanKeyboard();
+
+  private:
+    Model1* model1;
+};
+
+#endif // KEYBOARD_H
