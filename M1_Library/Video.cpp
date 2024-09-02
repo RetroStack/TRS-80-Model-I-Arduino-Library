@@ -4,7 +4,8 @@
 #include "Video.h"
 #include "Model1.h"
 
-Video::Video(Model1* model) : model1(model) {
+Video::Video(Model1 *model) : model1(model)
+{
   // Constructor
   Serial.println("Video constructor done.");
 }
@@ -15,28 +16,31 @@ Video::Video(Model1* model) : model1(model) {
 // CRC32 crc;
 
 uint32_t vramChecksumTable[6] = {
-  0xEFB5AF2E,   // 0x00
-  0x24D7C38D,   // 0x20
-  0xAB58F48B,   // 0x6F
-  0x235141FA,   // 0x7F
-  0xF58F20F3,   // 0xBF
-  0xB83AFFF4    // 0xFF
+    0xEFB5AF2E, // 0x00
+    0x24D7C38D, // 0x20
+    0xAB58F48B, // 0x6F
+    0x235141FA, // 0x7F
+    0xF58F20F3, // 0xBF
+    0xB83AFFF4  // 0xFF
 };
 
-void Video::init() {
+void Video::init()
+{
   // Initialize static members if needed
 }
 
 // clear screen
-void Video::cls() {
+void Video::cls()
+{
   cursorPosition = VIDEO_MEM_START;
-  fillVRAM();     // defaults to filling video memory with blanks
+  fillVRAM(); // defaults to filling video memory with blanks
 }
 
 // Fill VRAM with a pattern
-void Video::fillVRAMwithPattern(bool silent, const char* pattern, uint16_t start, uint16_t end) {
+void Video::fillVRAMwithPattern(bool silent, const char *pattern, uint16_t start, uint16_t end)
+{
   int patternSize = strlen(pattern);
-  
+
   SILENT_PRINT(silent, "Pattern size = ");
   SILENT_PRINTLN(silent, patternSize);
 
@@ -44,10 +48,11 @@ void Video::fillVRAMwithPattern(bool silent, const char* pattern, uint16_t start
   SILENT_PRINTLN(silent, pattern);
 
   SILENT_PRINT(silent, F("pattern = "));
-  for (int i = 0; i < patternSize; i++) {
+  for (int i = 0; i < patternSize; i++)
+  {
     SILENT_PRINT(silent, pattern[i], HEX);
   }
-  SILENT_PRINT(silent,"\n");
+  SILENT_PRINT(silent, "\n");
 
   // make sure other control lines are set correct
   pinMode(RD_L, INPUT);
@@ -55,14 +60,15 @@ void Video::fillVRAMwithPattern(bool silent, const char* pattern, uint16_t start
   model1->setDataLinesToOutput();
 
   // Fill VRAM
-  for (uint16_t i = 0; i <= (end - start); i++) {
+  for (uint16_t i = 0; i <= (end - start); i++)
+  {
     uint16_t memAddress = i + start;
     // Split address
     uint8_t lowerByte = (uint8_t)(memAddress & 0xFF); // Masking to get the lower byte
     uint8_t upperByte = (uint8_t)(memAddress >> 8);   // Shifting to get the upper byte
-    
-    PORTA = lowerByte;    // Write the lower byte of the address to PORTA
-    PORTC = upperByte;    // Write the upper byte of the address to PORTC
+
+    PORTA = lowerByte; // Write the lower byte of the address to PORTA
+    PORTC = upperByte; // Write the upper byte of the address to PORTC
 
     // RAS*
     pinMode(RAS_L, OUTPUT);
@@ -84,7 +90,7 @@ void Video::fillVRAMwithPattern(bool silent, const char* pattern, uint16_t start
     // Exit (keep this order)
     model1->turnOffReadWriteRASLines();
   }
-  
+
   // prep pins for exit
   model1->turnOffReadWriteRASLines();
   model1->setAddressLinesToInput();
@@ -99,22 +105,24 @@ void Video::fillVRAMwithPattern(bool silent, const char* pattern, uint16_t start
     Data
     Read/Write
 */
-void Video::fillVRAM(bool silent, uint8_t fillValue, uint16_t start, uint16_t end) {
+void Video::fillVRAM(bool silent, uint8_t fillValue, uint16_t start, uint16_t end)
+{
   sprintf(stringBuffer, "Fill: start=%4X, end=%4X, value=%02X", start, end, fillValue);
   SILENT_PRINTLN(silent, stringBuffer);
 
-  pinMode(RD_L, INPUT);     // JIC
+  pinMode(RD_L, INPUT); // JIC
   model1->setAddressLinesToOutput(VIDEO_MEM_START);
   model1->setDataLinesToOutput();
 
   // Fill VRAM
-  for (uint16_t i = start; i <= end; i++) {
+  for (uint16_t i = start; i <= end; i++)
+  {
     // Split address
     uint8_t lowerByte = (uint8_t)(i & 0xFF); // Masking to get the lower byte
     uint8_t upperByte = (uint8_t)(i >> 8);   // Shifting to get the upper byte
-    
-    PORTA = lowerByte;    // Write the lower byte of the address to PORTA
-    PORTC = upperByte;    // Write the upper byte of the address to PORTC
+
+    PORTA = lowerByte; // Write the lower byte of the address to PORTA
+    PORTC = upperByte; // Write the upper byte of the address to PORTC
 
     // RAS*
     pinMode(RAS_L, OUTPUT);
@@ -143,25 +151,27 @@ void Video::fillVRAM(bool silent, uint8_t fillValue, uint16_t start, uint16_t en
 }
 
 // Show character to display
-void Video::displayCharacterSet() {
+void Video::displayCharacterSet()
+{
   cls();
   printToScreen("ROM CHARACTER FONT DUMP", VIDEO_MEM_START + 20);
 
   // set control lines
-  pinMode(RD_L, INPUT);             // prob OK not to force it HIGH
+  pinMode(RD_L, INPUT); // prob OK not to force it HIGH
   model1->setAddressLinesToOutput(0x3c00);
   model1->setDataLinesToOutput();
 
   // Fill VRAM
-  for (int i = 0; i < 255; i++) {
+  for (int i = 0; i < 255; i++)
+  {
     uint16_t address = i + 0x3C80;
 
     // Split address
     uint8_t lowerByte = (uint8_t)(address & 0xFF); // Masking to get the lower byte
     uint8_t upperByte = (uint8_t)(address >> 8);   // Shifting to get the upper byte
-    
-    PORTA = lowerByte;    // Write the lower byte of the address to PORTA
-    PORTC = upperByte;    // Write the upper byte of the address to PORTC
+
+    PORTA = lowerByte; // Write the lower byte of the address to PORTA
+    PORTC = upperByte; // Write the upper byte of the address to PORTC
 
     // RAS*
     pinMode(RAS_L, OUTPUT);
@@ -169,7 +179,7 @@ void Video::displayCharacterSet() {
     asmWait(1);
 
     // fill VRAM with fillValue
-    PORTF = (uint8_t) i;
+    PORTF = (uint8_t)i;
 
     // WR*
     pinMode(WR_L, OUTPUT);
@@ -181,7 +191,7 @@ void Video::displayCharacterSet() {
     pinMode(RAS_L, INPUT);
     asmWait(3);
   }
-  
+
   // prep pins for exit
   model1->turnOffReadWriteRASLines();
   model1->setAddressLinesToInput();
@@ -190,8 +200,10 @@ void Video::displayCharacterSet() {
 }
 
 // Prints to video memory using address
-void Video::printToScreen(const char *str, uint16_t startAddress) {
-  if (startAddress < VIDEO_MEM_START || startAddress > (VIDEO_MEM_START + VIDEO_MEM_SIZE)) {
+void Video::printToScreen(const char *str, uint16_t startAddress)
+{
+  if (startAddress < VIDEO_MEM_START || startAddress > (VIDEO_MEM_START + VIDEO_MEM_SIZE))
+  {
     sprintf(stringBuffer, "Invalid range. Must be between %04X and %04X.", VIDEO_MEM_START, (VIDEO_MEM_START + VIDEO_MEM_SIZE));
     Serial.println(stringBuffer);
     return;
@@ -203,15 +215,19 @@ void Video::printToScreen(const char *str, uint16_t startAddress) {
 
   // go thru string and write to display memory
   uint16_t bufferIndex = startAddress;
-  for (const char *p = str; *p != '\0'; p++) {
-    if (bufferIndex >= (VIDEO_MEM_START + VIDEO_MEM_SIZE)) {
+  for (const char *p = str; *p != '\0'; p++)
+  {
+    if (bufferIndex >= (VIDEO_MEM_START + VIDEO_MEM_SIZE))
+    {
       Serial.println("Buffer overflow.");
       break;
     }
 
-    if (*p == '\r') {  // Carriage return handling
+    if (*p == '\r')
+    { // Carriage return handling
       bufferIndex += VIDEO_COLS - (bufferIndex % VIDEO_COLS);
-      if (bufferIndex >= (VIDEO_MEM_START + VIDEO_MEM_SIZE)) {
+      if (bufferIndex >= (VIDEO_MEM_START + VIDEO_MEM_SIZE))
+      {
         Serial.println("Buffer overflow.");
         break;
       }
@@ -222,9 +238,9 @@ void Video::printToScreen(const char *str, uint16_t startAddress) {
     uint16_t memAddress = bufferIndex;
     uint8_t lowerByte = (uint8_t)(memAddress & 0xFF); // Masking to get the lower byte
     uint8_t upperByte = (uint8_t)(memAddress >> 8);   // Shifting to get the upper byte
-    
-    PORTA = lowerByte;    // Write the lower byte of the address to PORTA
-    PORTC = upperByte;    // Write the upper byte of the address to PORTC
+
+    PORTA = lowerByte; // Write the lower byte of the address to PORTA
+    PORTC = upperByte; // Write the upper byte of the address to PORTC
 
     // RAS*
     pinMode(RAS_L, OUTPUT);
@@ -267,7 +283,8 @@ void Video::printToScreen(const char *str, uint16_t startAddress) {
     Data
     Read
 */
-uint32_t Video::readVRAM(bool silent, bool showInHex, bool dumpVRAM) {
+uint32_t Video::readVRAM(bool silent, bool showInHex, bool dumpVRAM)
+{
   uint32_t checksum = 0;
 
   SILENT_PRINTLN(silent, "Reading VRAM...");
@@ -283,14 +300,15 @@ uint32_t Video::readVRAM(bool silent, bool showInHex, bool dumpVRAM) {
   pinMode(WR_L, INPUT);
 
   // loop thru and read
-  for (int i = 0; i < VIDEO_MEM_SIZE; ++i) {
+  for (int i = 0; i < VIDEO_MEM_SIZE; ++i)
+  {
     // Split address
     uint16_t memAddress = VIDEO_MEM_START + i;
     uint8_t lowerByte = (uint8_t)(memAddress & 0xFF); // Masking to get the lower byte
     uint8_t upperByte = (uint8_t)(memAddress >> 8);   // Shifting to get the upper byte
-    
-    PORTA = lowerByte;    // Write the lower byte of the address to PORTA
-    PORTC = upperByte;    // Write the upper byte of the address to PORTC
+
+    PORTA = lowerByte; // Write the lower byte of the address to PORTA
+    PORTC = upperByte; // Write the upper byte of the address to PORTC
 
     // RAS*
     pinMode(RAS_L, OUTPUT);
@@ -298,7 +316,7 @@ uint32_t Video::readVRAM(bool silent, bool showInHex, bool dumpVRAM) {
     asmWait(2);
 
     // RD*
-    pinMode(RD_L, OUTPUT);  
+    pinMode(RD_L, OUTPUT);
     digitalWrite(RD_L, LOW);
     asmWait(3);
 
@@ -320,23 +338,30 @@ uint32_t Video::readVRAM(bool silent, bool showInHex, bool dumpVRAM) {
   crc.update(videoData, VIDEO_MEM_SIZE);
   checksum = crc.finalize();
 
-  if (dumpVRAM) {
+  if (dumpVRAM)
+  {
     Serial.println(F("--- Video buffer dump start ---"));
 
-    for (int i = 0; i < VIDEO_MEM_SIZE; ++i) {
-      if (i % 64 == 0) {  // Check if 64 characters have been printed
+    for (int i = 0; i < VIDEO_MEM_SIZE; ++i)
+    {
+      if (i % 64 == 0)
+      { // Check if 64 characters have been printed
         sprintf(stringBuffer, "%04X", 0x3C00 + i);
-        Serial.print(stringBuffer);     // Print newline character
+        Serial.print(stringBuffer); // Print newline character
         Serial.print(" ");
       }
 
-      if (showInHex) {
+      if (showInHex)
+      {
         Serial.print(videoData[i], HEX);
-      } else {
-        Serial.print((char) videoData[i]);
       }
-      if ((i + 1) % 64 == 0) {  // Check if 64 characters have been printed
-        Serial.print('\n');     // Print newline character
+      else
+      {
+        Serial.print((char)videoData[i]);
+      }
+      if ((i + 1) % 64 == 0)
+      {                     // Check if 64 characters have been printed
+        Serial.print('\n'); // Print newline character
       }
     }
     Serial.println(F("\n--- Video buffer dump end   ---"));
@@ -348,9 +373,11 @@ uint32_t Video::readVRAM(bool silent, bool showInHex, bool dumpVRAM) {
   return checksum;
 }
 
-bool Video::checkVRAMFillChecksum(uint8_t fillValues[], int fillValuesCount) {
+bool Video::checkVRAMFillChecksum(uint8_t fillValues[], int fillValuesCount)
+{
   bool retVal = true;
-  for (int i = 0; i < fillValuesCount; i++) {
+  for (int i = 0; i < fillValuesCount; i++)
+  {
     bool valid = false;
     uint32_t checksum = 0;
     // Serial.print("Filling VRAM with: ");
@@ -359,11 +386,14 @@ bool Video::checkVRAMFillChecksum(uint8_t fillValues[], int fillValuesCount) {
     asmWait(65535, 50);
     checksum = readVRAM(true, false, false);
     valid = compareVRAMChecksum(checksum);
-    if (!valid) {
+    if (!valid)
+    {
       printLine(F("VRAM checksum did not match."));
       retVal = false;
       break;
-    } else {
+    }
+    else
+    {
       printLine(F("VRAM checksum matched."));
     }
   }
@@ -372,10 +402,13 @@ bool Video::checkVRAMFillChecksum(uint8_t fillValues[], int fillValuesCount) {
 }
 
 // Function to compare a passed checksum against the checksum table
-bool Video::compareVRAMChecksum(uint32_t checksum) {
+bool Video::compareVRAMChecksum(uint32_t checksum)
+{
   int checksumCounts = sizeof(vramChecksumTable) / sizeof(vramChecksumTable[0]);
-  for (int i = 0; i < checksumCounts; i++) {
-    if (vramChecksumTable[i] == checksum) {
+  for (int i = 0; i < checksumCounts; i++)
+  {
+    if (vramChecksumTable[i] == checksum)
+    {
       return true;
     }
   }
@@ -387,14 +420,15 @@ bool Video::compareVRAMChecksum(uint32_t checksum) {
   - Arduino address lines should be set for output
   - Arduino data lines should be set for input
 */
-uint8_t Video::readByteVRAM(uint16_t memAddress) {
+uint8_t Video::readByteVRAM(uint16_t memAddress)
+{
   uint8_t data = 0;
 
   uint8_t lowerByte = (uint8_t)(memAddress & 0xFF); // Masking to get the lower byte
   uint8_t upperByte = (uint8_t)(memAddress >> 8);   // Shifting to get the upper byte
 
-  PORTA = lowerByte;    // Write the lower byte of the address to PORTA
-  PORTC = upperByte;    // Write the upper byte of the address to PORTC
+  PORTA = lowerByte; // Write the lower byte of the address to PORTA
+  PORTC = upperByte; // Write the upper byte of the address to PORTC
 
   // RAS*
   pinMode(RAS_L, OUTPUT);
@@ -420,13 +454,14 @@ uint8_t Video::readByteVRAM(uint16_t memAddress) {
   - Arduino address lines should be set for output
   - Arduino data lines should be set for output
 */
-void Video::writeByteVRAM(uint16_t memAddress, uint8_t data) {
+void Video::writeByteVRAM(uint16_t memAddress, uint8_t data)
+{
 
   uint8_t lowerByte = (uint8_t)(memAddress & 0xFF); // Masking to get the lower byte
   uint8_t upperByte = (uint8_t)(memAddress >> 8);   // Shifting to get the upper byte
 
-  PORTA = lowerByte;    // Write the lower byte of the address to PORTA
-  PORTC = upperByte;    // Write the upper byte of the address to PORTC
+  PORTA = lowerByte; // Write the lower byte of the address to PORTA
+  PORTC = upperByte; // Write the upper byte of the address to PORTC
 
   // RAS*
   pinMode(RAS_L, OUTPUT);
@@ -446,10 +481,11 @@ void Video::writeByteVRAM(uint16_t memAddress, uint8_t data) {
 }
 
 // Checks if a lowercase mod exists in system, by first writing 20, then BF
-// if no errors found then assumes that video memory is good. Then writes 
+// if no errors found then assumes that video memory is good. Then writes
 // 6F, 7F, FF to video memory - if checksums pass then LC additional SRAM
 // chip was installed and is working.
-bool Video::lowercaseModExists(bool silent) {
+bool Video::lowercaseModExists(bool silent)
+{
   bool retVal = false;
 
   SILENT_PRINTLN(silent, F("Checking for lowercase mod - requires additional SRAM chip and correct character ROM"));
@@ -457,7 +493,8 @@ bool Video::lowercaseModExists(bool silent) {
   uint8_t fillValues[] = {0x20, 0xBF};
   retVal = checkVRAMFillChecksum(fillValues, 2);
 
-  if (!retVal) {
+  if (!retVal)
+  {
     Serial.println(F("Unable to clear VRAM, please run VRAM diagnostics to troubleshoot."));
     return retVal;
   }
@@ -472,17 +509,23 @@ bool Video::lowercaseModExists(bool silent) {
 }
 
 // Move VRAM contents around in VRAM only
-void Video::memmoveVRAM(unsigned int dest, unsigned int src, unsigned int n) {
+void Video::memmoveVRAM(unsigned int dest, unsigned int src, unsigned int n)
+{
   model1->setAddressLinesToOutput(dest);
-  if (dest < src) {
-    for (unsigned int i = 0; i < n; i++) {
+  if (dest < src)
+  {
+    for (unsigned int i = 0; i < n; i++)
+    {
       model1->setDataLinesToInput();
       uint8_t data = readByteVRAM(src + i);
       model1->setDataLinesToOutput();
       writeByteVRAM(dest + i, data);
     }
-  } else {
-    for (int i = n - 1; i >= 0; i--) {
+  }
+  else
+  {
+    for (int i = n - 1; i >= 0; i--)
+    {
       model1->setDataLinesToInput();
       uint8_t data = readByteVRAM(src + i);
       model1->setDataLinesToOutput();
@@ -494,13 +537,15 @@ void Video::memmoveVRAM(unsigned int dest, unsigned int src, unsigned int n) {
 }
 
 // Move screen contents up by 1 line
-void Video::scrollScreenUp() {
+void Video::scrollScreenUp()
+{
   memmoveVRAM(VIDEO_MEM_START, VIDEO_MEM_START + VIDEO_COLS, VIDEO_COLS * (VIDEO_ROWS - 1));
   fillVRAM(0x20, false, VIDEO_LAST_ROW, VIDEO_LAST_ROW + VIDEO_COLS);
 }
 
 // Print to screen from last cursor position
-void Video::printToScreen(const char *str) {
+void Video::printToScreen(const char *str)
+{
   int curPos = cursorPosition - VIDEO_MEM_START;
   int x = curPos % VIDEO_COLS;
   int y = curPos / VIDEO_COLS;
@@ -510,11 +555,13 @@ void Video::printToScreen(const char *str) {
 
 // Print to the TRS-80 screen at specific coordinates. Supports carriage returns and auto line feeds,
 // along with placement of characters without impacting last written location
-void Video::printToScreen(const char *str, unsigned int x, unsigned int y, bool updateCursorPosition) {
+void Video::printToScreen(const char *str, unsigned int x, unsigned int y, bool updateCursorPosition)
+{
   model1->setAddressLinesToOutput(VIDEO_MEM_START);
   model1->setDataLinesToOutput();
 
-  if (y >= VIDEO_ROWS) {
+  if (y >= VIDEO_ROWS)
+  {
     scrollScreenUp();
     y--;
     model1->setAddressLinesToOutput(VIDEO_MEM_START);
@@ -523,12 +570,15 @@ void Video::printToScreen(const char *str, unsigned int x, unsigned int y, bool 
 
   // pointer to memory
   unsigned int memdAddress = y * VIDEO_COLS + x + VIDEO_MEM_START;
- 
+
   // process the string, requires string terminated with a '\0'
-  while (*str != '\0') {
-    if (*str == '\n') {
+  while (*str != '\0')
+  {
+    if (*str == '\n')
+    {
       y++;
-      if (y >= VIDEO_ROWS) {
+      if (y >= VIDEO_ROWS)
+      {
         scrollScreenUp();
         model1->setAddressLinesToOutput(memdAddress);
         model1->setDataLinesToOutput();
@@ -536,11 +586,15 @@ void Video::printToScreen(const char *str, unsigned int x, unsigned int y, bool 
       }
       x = 0;
       memdAddress = y * VIDEO_COLS + VIDEO_MEM_START;
-    } else {
-      if (x >= VIDEO_COLS) {
+    }
+    else
+    {
+      if (x >= VIDEO_COLS)
+      {
         x = 0;
         y++;
-        if (y >= VIDEO_ROWS) {
+        if (y >= VIDEO_ROWS)
+        {
           scrollScreenUp();
           model1->setAddressLinesToOutput(memdAddress);
           model1->setDataLinesToOutput();
@@ -551,13 +605,14 @@ void Video::printToScreen(const char *str, unsigned int x, unsigned int y, bool 
       writeByteVRAM(memdAddress, *str);
       // Serial.print(*str);
       x++;
-      memdAddress++;    // TODO: better as memdAddress = x * y?
+      memdAddress++; // TODO: better as memdAddress = x * y?
     }
     str++;
   }
-  
+
   // update the cursor positon or not
-  if (updateCursorPosition) {
+  if (updateCursorPosition)
+  {
     cursorPosition = memdAddress;
   }
 

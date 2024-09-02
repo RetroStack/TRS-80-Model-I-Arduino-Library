@@ -8,19 +8,20 @@
 #include "Utils.h"
 
 #define KEYBOARD_MEM_ADDRESS 0x3800
-#define KEYBOARD_SHIFT_KEY   0x3880
+#define KEYBOARD_SHIFT_KEY 0x3880
 
 class Model1; // Forward declaration
 
-class Keyboard {
-  public:
-    Keyboard(Model1* model);
-    
-    Keyboard();
-    uint8_t scanKeyboard();
+class Keyboard
+{
+public:
+  Keyboard(Model1 *model);
 
-  private:
-    Model1* model1;
+  Keyboard();
+  uint8_t scanKeyboard();
+
+private:
+  Model1 *model1;
 };
 
 #endif // KEYBOARD_H

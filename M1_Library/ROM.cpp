@@ -16,23 +16,25 @@ M1_ROMs romTable[] = {
     {"1.2\0", 0xAD8C, 0xDA45, 0x40BA, 0xFDC1F12C, "N\0"},
     {"1.2\0", 0xAD8C, 0xDA45, 0x40BA, 0xD6FD9041, "N\0"},
 
-    {"1.3\0", 0xAED7, 0xDA45, 0x4006, 0x39F02E2F, "N\0"}
-};
+    {"1.3\0", 0xAED7, 0xDA45, 0x4006, 0x39F02E2F, "N\0"}};
 
 int numberOfROMEntries = sizeof(romTable) / sizeof(romTable[0]);
 
 // Class constructor
-ROM::ROM(Model1* model) : model1(model) {    
+ROM::ROM(Model1 *model) : model1(model)
+{
 }
 
-void ROM::dump() {
+void ROM::dump()
+{
   Serial.println(F("----- BEGIN ROM DUMP -----"));
   getROMChecksum(true);
   Serial.println(F("\n----- END ROM DUMP -----"));
 }
 
 // Get the ROM's checksum, also supports dumping ROM to ATMega's serial port
-uint32_t ROM::getROMChecksum(bool sentToSerialPort) {
+uint32_t ROM::getROMChecksum(bool sentToSerialPort)
+{
   CRC32 crc;
   const uint32_t totalBytes = 0x2FFF;
   uint8_t data;
@@ -49,11 +51,12 @@ uint32_t ROM::getROMChecksum(bool sentToSerialPort) {
 
   pinMode(RD_L, OUTPUT);
   digitalWrite(RD_L, LOW);
-  
+
   // Note: NOT toggling the RAS and RD signals per each memory location as we do
   // for VRAM/SRAM and DRAM - this may change, for now it seems to be working
-  for (uint32_t i = 0; i <= totalBytes; ++i) {
-    model1->setAddressLinesToOutput(i);       // Update address for each byte
+  for (uint32_t i = 0; i <= totalBytes; ++i)
+  {
+    model1->setAddressLinesToOutput(i); // Update address for each byte
     asmWait(5);
 
     // Read a byte and process
@@ -62,7 +65,8 @@ uint32_t ROM::getROMChecksum(bool sentToSerialPort) {
     crc.update(data);
 
     // send to serial port if dumping ROM
-    if (sentToSerialPort) {
+    if (sentToSerialPort)
+    {
       Serial.print(data, HEX);
     }
   }
@@ -74,7 +78,8 @@ uint32_t ROM::getROMChecksum(bool sentToSerialPort) {
 }
 
 // See if ROM's CRC value exists in table and if it a known good or bad CRC.
-bool ROM::isROMValid(uint32_t crcValue, bool silent) {
+bool ROM::isROMValid(uint32_t crcValue, bool silent)
+{
   isValid = false;
 
   SILENT_PRINT(silent, F("Known ROM versions: "));
@@ -84,8 +89,10 @@ bool ROM::isROMValid(uint32_t crcValue, bool silent) {
   SILENT_PRINTLN(silent, crcValue, HEX);
 
   strcpy(romVersion, "Unknown\0");
-  for (int i = 0; i < numberOfROMEntries; i++) {
-    if (romTable[i].crc32 == crcValue) {
+  for (int i = 0; i < numberOfROMEntries; i++)
+  {
+    if (romTable[i].crc32 == crcValue)
+    {
       SILENT_PRINT(silent, "ROM match found: ");
       SILENT_PRINT(silent, romTable[i].version);
       SILENT_PRINT(silent, ", valid: ");
@@ -96,7 +103,8 @@ bool ROM::isROMValid(uint32_t crcValue, bool silent) {
     }
   }
 
-  if (!isValid) {
+  if (!isValid)
+  {
     SILENT_PRINTLN(silent, F("Unknown ROM - contact RetroStack"));
   }
 
