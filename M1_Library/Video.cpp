@@ -2,12 +2,14 @@
 // Supports video operations, lowercase. SRAM/VRAM operations are used for ROM as well (for now)
 
 #include "Video.h"
-#include "Model1.h"
+#include "./Model1.h"
 
-Video::Video(Model1 *model) : model1(model)
+Video::Video(ILogger *logger, Model1 *model)
 {
-  // Constructor
-  Serial.println("Video constructor done.");
+  model1 = model;
+  _logger = logger;
+
+  _logger->info("Video constructor done.");
 }
 
 // uint8_t videoData[VIDEO_MEM_SIZE];
@@ -37,22 +39,12 @@ void Video::cls()
 }
 
 // Fill VRAM with a pattern
-void Video::fillVRAMwithPattern(bool silent, const char *pattern, uint16_t start, uint16_t end)
+void Video::fillVRAMwithPattern(const char *pattern, uint16_t start, uint16_t end)
 {
   int patternSize = strlen(pattern);
 
-  SILENT_PRINT(silent, "Pattern size = ");
-  SILENT_PRINTLN(silent, patternSize);
-
-  SILENT_PRINT(silent, F("pattern = "));
-  SILENT_PRINTLN(silent, pattern);
-
-  SILENT_PRINT(silent, F("pattern = "));
-  for (int i = 0; i < patternSize; i++)
-  {
-    SILENT_PRINT(silent, pattern[i], HEX);
-  }
-  SILENT_PRINT(silent, "\n");
+  _logger->info("Pattern size = %d", patternSize);
+  _logger->info("pattern = %s", pattern);
 
   // make sure other control lines are set correct
   pinMode(RD_L, INPUT);
@@ -78,9 +70,7 @@ void Video::fillVRAMwithPattern(bool silent, const char *pattern, uint16_t start
     // fill VRAM with fillValue
     PORTF = pattern[i % patternSize];
 
-    sprintf(stringBuffer, "Mem: %04X, Index: %i, Char: %c", i + VIDEO_MEM_START, i % patternSize, (char)pattern[i % patternSize]);
-    Serial.println(stringBuffer);
-    // printLine(i + VIDEO_MEM_START, ", ", i % patternSize, ", pattern=", pattern[i % patternSize]);
+    _logger->info("Mem: %04X, Index: %i, Char: %c", i + VIDEO_MEM_START, i % patternSize, (char)pattern[i % patternSize]);
 
     // WR*
     pinMode(WR_L, OUTPUT);
@@ -105,10 +95,9 @@ void Video::fillVRAMwithPattern(bool silent, const char *pattern, uint16_t start
     Data
     Read/Write
 */
-void Video::fillVRAM(bool silent, uint8_t fillValue, uint16_t start, uint16_t end)
+void Video::fillVRAM(uint8_t fillValue, uint16_t start, uint16_t end)
 {
-  sprintf(stringBuffer, "Fill: start=%4X, end=%4X, value=%02X", start, end, fillValue);
-  SILENT_PRINTLN(silent, stringBuffer);
+  _logger->info("Fill: start=%4X, end=%4X, value=%02X", start, end, fillValue);
 
   pinMode(RD_L, INPUT); // JIC
   model1->setAddressLinesToOutput(VIDEO_MEM_START);
@@ -204,8 +193,7 @@ void Video::printToScreen(const char *str, uint16_t startAddress)
 {
   if (startAddress < VIDEO_MEM_START || startAddress > (VIDEO_MEM_START + VIDEO_MEM_SIZE))
   {
-    sprintf(stringBuffer, "Invalid range. Must be between %04X and %04X.", VIDEO_MEM_START, (VIDEO_MEM_START + VIDEO_MEM_SIZE));
-    Serial.println(stringBuffer);
+    _logger->info("Invalid range. Must be between %04X and %04X.", VIDEO_MEM_START, (VIDEO_MEM_START + VIDEO_MEM_SIZE));
     return;
   }
 
@@ -219,7 +207,7 @@ void Video::printToScreen(const char *str, uint16_t startAddress)
   {
     if (bufferIndex >= (VIDEO_MEM_START + VIDEO_MEM_SIZE))
     {
-      Serial.println("Buffer overflow.");
+      _logger->info("Buffer overflow.");
       break;
     }
 
@@ -228,7 +216,7 @@ void Video::printToScreen(const char *str, uint16_t startAddress)
       bufferIndex += VIDEO_COLS - (bufferIndex % VIDEO_COLS);
       if (bufferIndex >= (VIDEO_MEM_START + VIDEO_MEM_SIZE))
       {
-        Serial.println("Buffer overflow.");
+        _logger->info("Buffer overflow.");
         break;
       }
       continue;
@@ -283,11 +271,11 @@ void Video::printToScreen(const char *str, uint16_t startAddress)
     Data
     Read
 */
-uint32_t Video::readVRAM(bool silent, bool showInHex, bool dumpVRAM)
+uint32_t Video::readVRAM(bool showInHex, bool dumpVRAM)
 {
   uint32_t checksum = 0;
 
-  SILENT_PRINTLN(silent, "Reading VRAM...");
+  _logger->info("Reading VRAM...");
 
   // Setup to write VRAM
   model1->setAddressLinesToOutput(VIDEO_MEM_START);
@@ -340,34 +328,30 @@ uint32_t Video::readVRAM(bool silent, bool showInHex, bool dumpVRAM)
 
   if (dumpVRAM)
   {
-    Serial.println(F("--- Video buffer dump start ---"));
+    _logger->info("--- Video buffer dump start ---");
 
     for (int i = 0; i < VIDEO_MEM_SIZE; ++i)
     {
       if (i % 64 == 0)
       { // Check if 64 characters have been printed
-        sprintf(stringBuffer, "%04X", 0x3C00 + i);
-        Serial.print(stringBuffer); // Print newline character
-        Serial.print(" ");
+        _logger->info("%04X", 0x3C00 + i);
       }
 
       if (showInHex)
       {
-        Serial.print(videoData[i], HEX);
+        _logger->info("%02X", videoData[i]);
       }
       else
       {
-        Serial.print((char)videoData[i]);
+        _logger->info("%c", videoData[i]);
       }
       if ((i + 1) % 64 == 0)
-      {                     // Check if 64 characters have been printed
-        Serial.print('\n'); // Print newline character
+      {                    // Check if 64 characters have been printed
+        _logger->info(""); // Print newline character
       }
     }
-    Serial.println(F("\n--- Video buffer dump end   ---"));
-
-    Serial.print("Checksum: ");
-    Serial.println(checksum, HEX);
+    _logger->info("--- Video buffer dump end ---");
+    _logger->info("Checksum: %08X", checksum);
   }
 
   return checksum;
@@ -384,17 +368,17 @@ bool Video::checkVRAMFillChecksum(uint8_t fillValues[], int fillValuesCount)
     // Serial.println(fillValues[i], HEX);
     fillVRAM(true, fillValues[i]);
     asmWait(65535, 50);
-    checksum = readVRAM(true, false, false);
+    checksum = readVRAM(false, false);
     valid = compareVRAMChecksum(checksum);
     if (!valid)
     {
-      printLine(F("VRAM checksum did not match."));
+      _logger->info("VRAM checksum did not match.");
       retVal = false;
       break;
     }
     else
     {
-      printLine(F("VRAM checksum matched."));
+      _logger->info("VRAM checksum matched.");
     }
   }
 
@@ -484,18 +468,18 @@ void Video::writeByteVRAM(uint16_t memAddress, uint8_t data)
 // if no errors found then assumes that video memory is good. Then writes
 // 6F, 7F, FF to video memory - if checksums pass then LC additional SRAM
 // chip was installed and is working.
-bool Video::lowercaseModExists(bool silent)
+bool Video::lowercaseModExists()
 {
   bool retVal = false;
 
-  SILENT_PRINTLN(silent, F("Checking for lowercase mod - requires additional SRAM chip and correct character ROM"));
+  _logger->info("Checking for lowercase mod - requires additional SRAM chip and correct character ROM");
 
   uint8_t fillValues[] = {0x20, 0xBF};
   retVal = checkVRAMFillChecksum(fillValues, 2);
 
   if (!retVal)
   {
-    Serial.println(F("Unable to clear VRAM, please run VRAM diagnostics to troubleshoot."));
+    _logger->info("Unable to clear VRAM, please run VRAM diagnostics to troubleshoot.");
     return retVal;
   }
 
@@ -540,7 +524,7 @@ void Video::memmoveVRAM(unsigned int dest, unsigned int src, unsigned int n)
 void Video::scrollScreenUp()
 {
   memmoveVRAM(VIDEO_MEM_START, VIDEO_MEM_START + VIDEO_COLS, VIDEO_COLS * (VIDEO_ROWS - 1));
-  fillVRAM(0x20, false, VIDEO_LAST_ROW, VIDEO_LAST_ROW + VIDEO_COLS);
+  fillVRAM(0x20, VIDEO_LAST_ROW, VIDEO_LAST_ROW + VIDEO_COLS);
 }
 
 // Print to screen from last cursor position

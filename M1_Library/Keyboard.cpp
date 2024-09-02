@@ -6,8 +6,8 @@
     - need to test with numeric keypad
 */
 
-#include "Keyboard.h"
-#include "Model1.h"
+#include "./Keyboard.h"
+#include "./Model1.h"
 
 // Look-up table for uppercase characters
 const uint8_t lookupTable[8][8] = {
@@ -21,8 +21,10 @@ const uint8_t lookupTable[8][8] = {
 };
 
 // Constructor
-Keyboard::Keyboard(Model1 *model) : model1(model)
+Keyboard::Keyboard(ILogger *logger, Model1 *model)
 {
+  model1 = model;
+  _logger = logger;
 }
 
 // Decodes key from keyboard, supports shift key. Does not support multiple keys being

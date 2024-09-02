@@ -9,21 +9,25 @@
 #include "ROM.h"
 #include "Utils.h"
 #include "Video.h"
+#include "./ILogger.h"
 
 class Model1
 {
+private:
+  ILogger *_logger;
+
 public:
-  Model1();
+  Model1(ILogger *logger);
   void init();
 
-  void displayCtrlPinStatus(bool silent = true);
-  void initControlPins(bool silent = true);
+  void displayCtrlPinStatus();
+  void initControlPins();
   void setAddressLinesToInput();
   void setAddressLinesToOutput(uint16_t memAddress = 0x3C00);
-  void setAllPinsPortsToInput(bool silent = true);
+  void setAllPinsPortsToInput();
   void setDataLinesToInput();
   void setDataLinesToOutput();
-  void setTESTPin(int state, bool silent = true);
+  void setTESTPin(int state);
   void turnOffReadWriteRASLines();
 
   Video video;
