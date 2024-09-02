@@ -2,7 +2,6 @@
 #define NOOP_LOGGER_H
 
 #include <Arduino.h>
-
 #include "./ILogger.h"
 
 class NoopLogger : public ILogger

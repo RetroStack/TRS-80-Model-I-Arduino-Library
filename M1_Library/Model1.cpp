@@ -1,24 +1,34 @@
-// Model1.cpp
 // Main class for Test Harness library
 
-#include "Model1.h"
+#include "./Model1.h"
 
-Model1::Model1(ILogger *logger) : video(logger, this), keyboard(logger, this), rom(logger, this)
+Model1::Model1(ILogger *logger)
 {
   _logger = logger;
-}
 
-// Initialization code for Model1
-void Model1::init()
-{
+  _keyboard = new Keyboard(logger, this);
+  _rom = new ROM(logger, this);
+  _video = new Video(logger, this);
+
   _logger->info("Initalizing shield and entering TEST mode.");
+
   initControlPins();
+
   setAddressLinesToInput();
   setDataLinesToInput();
-  // OR setAllPinsPortsToInput();
+}
 
-  // set TEST* to active low
-  setTESTPin(LOW);
+Keyboard *Model1::getKeyboard()
+{
+  return _keyboard;
+}
+ROM *Model1::getROM()
+{
+  return _rom;
+}
+Video *Model1::getVideo()
+{
+  return _video;
 }
 
 // Display status of control pins. WARNING - set all control pins to input, excluding TEST*
@@ -34,9 +44,7 @@ void Model1::displayCtrlPinStatus()
   {
     pinMode(pins[i], INPUT); // Set the pin mode to input
     int state = digitalRead(pins[i]);
-    Serial.print(pinNames[i]);
-    Serial.print(": ");
-    Serial.println(state == HIGH ? "HIGH" : "LOW");
+    _logger->info("%s: %s", pinNames[i], state == HIGH ? "HIGH" : "LOW");
   }
 }
 
@@ -84,7 +92,7 @@ void Model1::setAddressLinesToOutput(uint16_t memAddress)
   DDRC = 0xFF; // upper 8
 
   PORTA = (uint8_t)(memAddress & 0xFF);
-  PORTC = (uint8_t)((memAddress >> 8) & 0xFF);
+  PORTC = (uint8_t)((memAddress & 0xFF00) >> 8);
 }
 
 // Set ATMega pins mapped to bus data lines to INPUT
@@ -102,7 +110,6 @@ void Model1::setDataLinesToOutput()
 // Set bus TEST* pin to active low or to high
 void Model1::setTESTPin(int state)
 {
-  // TEST pin is active low
   if (state == 0)
   {
     _logger->info("Setting TEST* to LOW (active).");

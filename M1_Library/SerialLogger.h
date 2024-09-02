@@ -2,7 +2,6 @@
 #define SERIAL_LOGGER_H
 
 #include <Arduino.h>
-
 #include "./ILogger.h"
 
 class SerialLogger : public ILogger

@@ -1,5 +1,3 @@
-#include <arduino.h>
-
 #include "./NoopLogger.h"
 
 void NoopLogger::log(const char *fmt, ...)

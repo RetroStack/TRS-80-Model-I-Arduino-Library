@@ -1,6 +1,3 @@
-// Keyboard.cpp
-// Keyboard functions
-
 /*
   TODO:
     - need to test with numeric keypad
@@ -8,6 +5,9 @@
 
 #include "./Keyboard.h"
 #include "./Model1.h"
+
+#define KEYBOARD_MEM_ADDRESS 0x3800
+#define KEYBOARD_SHIFT_KEY 0x3880
 
 // Look-up table for uppercase characters
 const uint8_t lookupTable[8][8] = {
@@ -20,37 +20,33 @@ const uint8_t lookupTable[8][8] = {
     {0x0D, 0x1F, 0x01, 0x5B, 0x0A, 0x08, 0x09, 0x20}, // 3840
 };
 
-// Constructor
-Keyboard::Keyboard(ILogger *logger, Model1 *model)
+Keyboard::Keyboard(ILogger *logger, Model1 *model1)
 {
-  model1 = model;
+  _model1 = model1;
   _logger = logger;
 }
 
-// Decodes key from keyboard, supports shift key. Does not support multiple keys being
-// held down.
-uint8_t Keyboard::scanKeyboard()
+// Decodes key from keyboard, supports shift key.
+// Does not support multiple keys being held down.
+uint8_t Keyboard::scan()
 {
-  model1->setAddressLinesToOutput(KEYBOARD_MEM_ADDRESS);
-  model1->setDataLinesToInput();
+  Video *video = _model1->getVideo();
+
+  _model1->setAddressLinesToOutput(KEYBOARD_MEM_ADDRESS);
+  _model1->setDataLinesToInput();
+
+  // Check if shift is pressed
+  bool shift = video->readByteVRAM(KEYBOARD_SHIFT_KEY) & 1;
 
   // Roll thru the mapped keyboard addresses
   for (int i = 0; i < 7; i++)
   {
     uint16_t keyMemAddress = KEYBOARD_MEM_ADDRESS + (1 << i);
-    uint8_t keyCode = model1->video.readByteVRAM(keyMemAddress);
+    uint8_t keyCode = video->readByteVRAM(keyMemAddress);
 
     // Roll thru the bit positions
     for (int bit = 0; bit < 8; bit++)
     {
-      bool shift = false;
-
-      // Check if shift is being held down
-      if (model1->video.readByteVRAM(KEYBOARD_SHIFT_KEY) & 1)
-      {
-        shift = true;
-      }
-
       // See if any other keys are being held down and apply the shift
       // Key codes mapped to KEYBOARD LOOKUP TABLE at this link:
       // https://www.trs-80.com/wordpress/roms/mod-1-rom-disassembled-page-1/

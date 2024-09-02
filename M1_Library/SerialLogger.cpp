@@ -1,5 +1,3 @@
-#include <arduino.h>
-
 #include "./SerialLogger.h"
 
 void SerialLogger::_log(const char *fmt, ...)
