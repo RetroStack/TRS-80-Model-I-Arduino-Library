@@ -2,7 +2,6 @@
 #define SERIAL_LOGGER_H
 
 #include <Arduino.h>
-
 #include "./ILogger.h"
 
 class SerialLogger : public ILogger
@@ -10,7 +9,7 @@ class SerialLogger : public ILogger
 private:
     bool _silent = false;
 
-    void _log(const char *fmt, ...);
+    void _log(const char *fmt, va_list arguments);
 
 public:
     void info(const char *fmt, ...);
