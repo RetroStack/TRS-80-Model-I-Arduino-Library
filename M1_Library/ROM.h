@@ -6,6 +6,7 @@
 #include <Arduino.h>
 #include "CRC32.h"
 #include "Utils.h"
+#include "./ILogger.h"
 
 class Model1; // forward decleration
 
@@ -23,9 +24,8 @@ typedef struct
 class ROM
 {
 public:
-  ROM(Model1 *model);
+  ROM(ILogger *logger, Model1 *model);
 
-  ROM();
   void dump();
   uint32_t getROMChecksum(bool = true);
   bool isROMValid(uint32_t, bool = true);
@@ -34,6 +34,7 @@ public:
 
 private:
   Model1 *model1;
+  ILogger *_logger;
 
 protected:
 };

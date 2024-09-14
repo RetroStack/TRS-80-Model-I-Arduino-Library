@@ -9,18 +9,6 @@
 #define MAX_BUFFER_SIZE 100
 #define MAX_INPUT_PARAMETERS 5
 #define CPU_BUS_WAIT 7 // assume 16MHz arudino, asmWait is about 187.5ns per cycle, assume 1.77MHz Z80
-#define SILENT_PRINT(silentPrint, ...) \
-  do                                   \
-  {                                    \
-    if (!silentPrint)                  \
-      Serial.print(__VA_ARGS__);       \
-  } while (0)
-#define SILENT_PRINTLN(silentPrint, ...) \
-  do                                     \
-  {                                      \
-    if (!silentPrint)                    \
-      Serial.println(__VA_ARGS__);       \
-  } while (0)
 
 extern bool inGlobalTestMode; // State variable for test mode status
 extern bool isBUSAKWired;
@@ -46,18 +34,11 @@ void enterTestMode(bool silent = true);
 void exitTestMode(bool silent = true);
 
 // Called last from the variadic template function
-void printLine(); // Declaration of the non-template function
 void readSerialInput2();
 void readSerialInput(char *buffer, int bufferSize);
 
 // Template function definition
 template <typename T, typename... Types>
-
-void printLine(T first, Types... other)
-{
-  Serial.print(first);
-  printLine(other...);
-}
 
 uint8_t inputPrompt(const char *str);
 void serialFlush();

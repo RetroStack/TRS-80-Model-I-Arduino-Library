@@ -48,12 +48,6 @@ void asmWait(uint16_t outerLoopCount, uint16_t innerLoopCount)
   );
 }
 
-// Base case: When no more arguments are left, print a newline.
-void printLine()
-{
-  Serial.println();
-}
-
 // Wait for input
 uint8_t inputPrompt(const char *str)
 {
@@ -152,9 +146,4 @@ void convertHexStringToByteArray(char *hexString, unsigned char *byteArray)
     buffer[1] = hexString[2 * i + 1];
     byteArray[i] = (unsigned char)strtoul(buffer, NULL, 16);
   }
-}
-
-void printLine(const __FlashStringHelper *line)
-{
-  Serial.println(line);
 }
