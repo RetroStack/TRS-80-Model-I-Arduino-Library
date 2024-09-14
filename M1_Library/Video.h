@@ -3,42 +3,66 @@
 
 #include <Arduino.h>
 #include "./ILogger.h"
+#include "./Model1.h"
 
-#define VIDEO_COLS 64
-#define VIDEO_ROWS 16
-#define VIDEO_MEM_START 0x3C00
-#define VIDEO_MEM_SIZE (VIDEO_COLS * VIDEO_ROWS)
-#define VIDEO_MEM_END VIDEO_MEM_START + VIDEO_MEM_SIZE
-#define VIDEO_LAST_ROW (VIDEO_MEM_START + VIDEO_MEM_SIZE - VIDEO_COLS)
-
-class Model1; // forward decleration
+struct ViewPort
+{
+  uint8_t x;
+  uint8_t y;
+  uint8_t width;
+  uint8_t height;
+};
 
 class Video
 {
 private:
-  Model1 *model1;
+  Model1 *_model1;
   ILogger *_logger;
+  ViewPort _viewPort;
 
-  uint16_t _cursorPosition;
+  uint8_t _cursorPositionX;
+  uint8_t _cursorPositionY;
+  bool _wrap;
+
+  uint16_t _getRowAddress(uint8_t y);
+  uint16_t _getColumnAddress(uint16_t rowAddress, uint8_t x);
+  uint16_t _getAddress(uint8_t x, uint8_t y);
 
 public:
-  Video(ILogger *logger, Model1 *model);
+  Video(Model1 *model1, ILogger *logger = nullptr);
+  Video(Model1 *model1, ViewPort viewPort, ILogger *logger = nullptr);
+
+  uint8_t getX();
+  void setX(uint8_t x);
+  uint8_t getY();
+  void setY(uint8_t y);
+  void setXY(uint8_t x, uint8_t y);
+
+  uint8_t getStartX();
+  uint8_t getEndX();
+  uint8_t getStartY();
+  uint8_t getEndY();
+  uint8_t getWidth();
+  uint8_t getHeight();
+  uint16_t getSize();
+
+  uint8_t getAbsoluteX(uint8_t x);
+  uint8_t getAbsoluteY(uint8_t y);
 
   void cls();
+  void cls(char character);
+  void cls(char *characters, uint16_t length);
 
-  void printToScreen(const char *str);
-  void printToScreen(const char *str, uint16_t startAddress);
-  void printToScreen(const char *str, uint8_t x, uint8_t y, bool updateCursorPosition = false);
+  void scroll();
+  void scroll(uint8_t rows);
 
-  void fillVRAM(uint8_t fillValue = 0x20, uint16_t start = VIDEO_MEM_START, uint16_t end = VIDEO_MEM_END);
-  void fillVRAMwithPattern(const char *pattern = "5150", uint16_t start = VIDEO_MEM_START, uint16_t end = VIDEO_MEM_END);
+  void print(const char character);
+  void print(const char *str, uint16_t length);
 
-  uint8_t *readVRAM();
-  uint8_t readByteVRAM(uint16_t memAddress);
-  void writeByteVRAM(uint16_t memAddress, uint8_t data);
+  void printLn();
+  void printLn(const char *str, uint16_t length);
 
-  void memmoveVRAM(unsigned int dest, unsigned int src, unsigned int n);
-  void scrollScreenUp();
+  void print(const char *str, uint16_t length, uint8_t x, uint8_t y);
 };
 
 #endif // VIDEO_H

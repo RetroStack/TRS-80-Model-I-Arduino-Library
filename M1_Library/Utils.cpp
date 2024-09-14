@@ -2,12 +2,58 @@
 
 #include "./utils.h"
 
+/**
+ * Converts an 8-bit value to a string
+ */
+char *uint8ToBinary(uint8_t value, char *buffer)
+{
+  for (int i = 7; i >= 0; i--)
+  {
+    buffer[7 - i] = ((value >> i) & 1) ? '1' : '0';
+  }
+  buffer[8] = '\0'; // Null-terminate the string
+  return buffer;
+}
+
+/**
+ * Returns the pin status
+ */
+char pinStatus(bool value)
+{
+  return value ? 'o' : 'i';
+}
+char busStatus(uint8_t value)
+{
+  if (value == 0xff) // Output
+  {
+    return 'o';
+  }
+  else if (value == 0x00) // Input
+  {
+    return 'i';
+  }
+  else // Some unknown state (should not happen)
+  {
+    return '?';
+  }
+}
+
+/**
+ * Wait two noop cycles
+ */
+void asmNoop()
+{
+  __asm__ volatile("nop\nnop");
+}
+
 // This assumes ATMega 2560, 1 cycle = 62.5ns
 // The main loop is 3 cycles, excluding the mov
 // Min = 250ns, Max = 12266812.5ns (12.2668125 ms)
-// Example: wait = 10, then delay will be 10us
+// Example: wait = 1, then delay will be 250ns
 void asmWait(uint16_t wait)
 {
+  if (wait == 0)
+    return;
   __asm__ volatile(
       " mov r16,%0\n"
       "1: nop\n"

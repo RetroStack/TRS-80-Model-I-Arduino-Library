@@ -3,8 +3,7 @@
 
 #include <Arduino.h>
 #include "./ILogger.h"
-
-class Model1; // Forward declaration
+#include "./Model1.h"
 
 class Keyboard
 {
@@ -13,8 +12,9 @@ private:
   ILogger *_logger;
 
 public:
-  Keyboard(ILogger *logger, Model1 *model);
+  Keyboard(Model1 *model1, ILogger *logger = nullptr);
 
+  bool isKeyPressed();
   uint8_t scan();
 };
 

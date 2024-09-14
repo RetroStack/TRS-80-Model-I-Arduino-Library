@@ -9,7 +9,7 @@ class SerialLogger : public ILogger
 private:
     bool _silent = false;
 
-    void _log(const char *fmt, ...);
+    void _log(const char *fmt, va_list arguments);
 
 public:
     void info(const char *fmt, ...);

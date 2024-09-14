@@ -3,8 +3,7 @@
 
 #include <Arduino.h>
 #include "./ILogger.h"
-
-class Model1; // forward decleration
+#include "./Model1.h"
 
 class ROM
 {
@@ -13,9 +12,9 @@ private:
   ILogger *_logger;
 
 public:
-  ROM(ILogger *logger, Model1 *model);
+  ROM(Model1 *model1, ILogger *logger = nullptr);
 
-  uint32_t getChecksum();
+  uint8_t *ROM::getContent();
 };
 
 #endif // ROM_H

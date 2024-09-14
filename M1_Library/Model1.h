@@ -2,39 +2,128 @@
 #define MODEL1_H
 
 #include <Arduino.h>
-#include "./Common.h"
-#include "./Utils.h"
-#include "./Keyboard.h"
-#include "./ROM.h"
-#include "./Video.h"
 #include "./ILogger.h"
+#include "./AddressBus.h"
+#include "./DataBus.h"
+
+const uint8_t EVENT_MEMORY_READ = 1;
+const uint8_t EVENT_MEMORY_WRITE = 2;
+const uint8_t EVENT_IO_READ = 3;
+const uint8_t EVENT_IO_WRITE = 4;
+
+struct EventData
+{
+    uint8_t type;
+    uint16_t address;
+    uint8_t data;
+};
+
+typedef void (*EventMemoryReadCallback)(const EventData &);
+typedef void (*EventMemoryWriteCallback)(const EventData &);
+typedef void (*EventIOReadCallback)(const EventData &);
+typedef void (*EventIOWriteCallback)(const EventData &);
 
 class Model1
 {
 private:
-  ILogger *_logger;
+    ILogger *_logger;
+    AddressBus *_addressBus;
+    DataBus *_dataBus;
 
-  Keyboard *_keyboard;
-  ROM *_rom;
-  Video *_video;
+    volatile bool _mutability;
+    volatile uint8_t _nextMemoryRefreshRow;
+    volatile bool _activeRefresh;
 
-  void initControlPins();
-  void setAllPinsPortsToInput();
+    EventMemoryReadCallback _memoryReadCallback = nullptr;
+    EventMemoryWriteCallback _memoryWriteCallback = nullptr;
+
+    EventIOReadCallback _ioReadCallback = nullptr;
+    EventIOWriteCallback _ioWriteCallback = nullptr;
+
+    EventData *_createEventData(uint8_t type);
+
+    void _setMutable();
+    void _setImmutable();
+    void _setMutability(bool value);
+    bool _isMutable();
+    bool _checkMutability();
+
+    void _initSystemControlSignals();
+    void _initExternalControlSignals();
+
+    void _setupMemoryRefresh();
+    void _activateMemoryRefresh();
+    void _deactivateMemoryRefresh();
+
+    void _setupMemoryInterrupts();
+    void _removeMemoryInterrupts();
+    void _setupIOInterrupts();
+    void _removeIOInterrupts();
+
+    void _activateBusControlSignals();
+    void _deactivateBusControlSignals();
+    void _resetBusControlSignals();
+
+    void _activateBusAccessSignals();
+    void _deactivateBusAccessSignals();
+    void _resetBusAccessSignals();
+
+    void _setInterruptRequestSignal(bool value);
+    void _setTestSignal(bool value);
+    void _setWaitSignal(bool value);
 
 public:
-  Model1(ILogger *logger);
+    Model1(ILogger *logger = nullptr, bool memoryRefresh = false);
+    ~Model1();
 
-  Keyboard *getKeyboard();
-  ROM *getROM();
-  Video *getVideo();
+    // ---------- Refresh DRAM
+    void refreshNextMemoryRow();
 
-  void displayCtrlPinStatus();
-  void setAddressLinesToInput();
-  void setAddressLinesToOutput(uint16_t memAddress = 0x3C00);
-  void setDataLinesToInput();
-  void setDataLinesToOutput();
-  void setTESTPin(int state);
-  void turnOffReadWriteRASLines();
+    // ---------- Memory
+    uint8_t readMemory(uint16_t address);
+    void writeMemory(uint16_t address, uint8_t data);
+    uint8_t *readMemory(uint16_t address, uint16_t length);
+    void writeMemory(uint16_t address, uint8_t *data, uint16_t length);
+    void writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint16_t offset);
+    void copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length);
+    void fillMemory(uint8_t fill_data, uint16_t address, uint16_t length);
+    void fillMemory(uint8_t *fill_data, uint16_t length, uint16_t start_address, uint16_t end_address);
+
+    void setMemoryReadCallback(EventMemoryReadCallback callback);
+    void triggerMemoryReadEvent();
+
+    void setMemoryWriteCallback(EventMemoryWriteCallback callback);
+    void triggerMemoryWriteEvent();
+
+    // ---------- IO
+    uint8_t readIO(uint8_t address);
+    void writeIO(uint8_t address, uint8_t data);
+
+    void setIOReadCallback(EventIOReadCallback callback);
+    void triggerIOReadEvent();
+
+    void setIOWriteCallback(EventIOWriteCallback callback);
+    void triggerIOWriteEvent();
+
+    // ---------- System Control Signals
+    bool readSystemResetSignal();
+    bool readInterruptAcknowledgeSignal();
+
+    // ---------- Interrupt Request Signal
+    void activateInterruptRequestSignal();
+    void deactivateInterruptRequestSignal();
+
+    // ---------- Test Signal
+    void activateTestSignal();
+    void deactivateTestSignal();
+
+    // ---------- Wait Signal
+    void activateWaitSignal();
+    void deactivateWaitSignal();
+
+    // ---------- State
+    char *getState();
+    void logState();
 };
 
-#endif // MODEL1_H
+#endif /* MODEL1_H */

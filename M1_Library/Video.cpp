@@ -1,433 +1,390 @@
-// Supports video operations, lowercase. SRAM/VRAM operations are used for ROM as well (for now)
-
 #include "./Video.h"
 #include "./Model1.h"
 
-Video::Video(ILogger *logger, Model1 *model)
+const uint8_t VIDEO_COLS = 64;
+const uint8_t VIDEO_ROWS = 16;
+const uint16_t VIDEO_MEM_START = 0x3C00;
+
+const uint8_t SPACE_CHARACTER = 0x20;
+
+/**
+ * Initializes the TRS-80 Model 1 Video Subsystem
+ */
+Video::Video(Model1 *model1, ILogger *logger = nullptr)
 {
-  model1 = model;
+  _model1 = model1;
   _logger = logger;
+
+  _cursorPositionX = 0;
+  _cursorPositionY = 0;
+
+  _viewPort.x = 0;
+  _viewPort.y = 0;
+  _viewPort.width = VIDEO_COLS;
+  _viewPort.height = VIDEO_ROWS;
 }
 
-// clear screen
-void Video::cls()
+/**
+ * Initializes the TRS-80 Model 1 Video Subsystem with custom viewport
+ */
+Video::Video(Model1 *model1, ViewPort viewPort, ILogger *logger = nullptr)
 {
-  _cursorPosition = VIDEO_MEM_START;
-  fillVRAM(); // defaults to filling video memory with blanks
-}
+  _model1 = model1;
+  _logger = logger;
 
-// Fill VRAM with a pattern
-void Video::fillVRAMwithPattern(const char *pattern, uint16_t start, uint16_t end)
-{
-  int patternSize = strlen(pattern);
+  _cursorPositionX = 0;
+  _cursorPositionY = 0;
 
-  _logger->info("Pattern size = %d", patternSize);
-  _logger->info("pattern = %s", pattern);
-
-  // make sure other control lines are set correct
-  pinMode(RD_L, INPUT);
-  model1->setAddressLinesToOutput(VIDEO_MEM_START);
-  model1->setDataLinesToOutput();
-
-  // Fill VRAM
-  for (uint16_t i = start; i <= end; i++)
+  // Validate and auto-correct viewport
+  if (viewPort.x >= VIDEO_COLS)
   {
-    uint16_t memAddress = i + start;
-    // Split address
-    uint8_t lowerByte = (uint8_t)(memAddress & 0xFF); // Masking to get the lower byte
-    uint8_t upperByte = (uint8_t)(memAddress >> 8);   // Shifting to get the upper byte
-
-    PORTA = lowerByte; // Write the lower byte of the address to PORTA
-    PORTC = upperByte; // Write the upper byte of the address to PORTC
-
-    // RAS*
-    pinMode(RAS_L, OUTPUT);
-    digitalWrite(RAS_L, LOW);
-    asmWait(1);
-
-    // fill VRAM with fillValue
-    PORTF = pattern[i % patternSize];
-
-    _logger->info("Mem: %04X, Index: %i, Char: %c", i + VIDEO_MEM_START, i % patternSize, (char)pattern[i % patternSize]);
-
-    // WR*
-    pinMode(WR_L, OUTPUT);
-    digitalWrite(WR_L, LOW);
-    asmWait(3);
-
-    // Exit (keep this order)
-    model1->turnOffReadWriteRASLines();
+    viewPort.x = VIDEO_COLS - 1;
+    if (logger)
+      logger->warn("X coordinate of viewport is larger than there is space. Reset to %d.", viewPort.x);
+  }
+  if (viewPort.y >= VIDEO_ROWS)
+  {
+    viewPort.y = VIDEO_ROWS - 1;
+    if (logger)
+      logger->warn("Y coordinate of viewport is larger than there is space. Reset to %d.", viewPort.y);
+  }
+  if (viewPort.x + viewPort.width > VIDEO_COLS)
+  {
+    viewPort.width = VIDEO_COLS - viewPort.x;
+    if (logger)
+      logger->warn("Width of viewport is larger than there is space. Reset to %d.", viewPort.width);
+  }
+  if (viewPort.y + viewPort.height > VIDEO_ROWS)
+  {
+    viewPort.height = VIDEO_ROWS - viewPort.y;
+    if (logger)
+      logger->warn("Height of viewport is larger than there is space. Reset to %d.", viewPort.height);
   }
 
-  // prep pins for exit
-  model1->turnOffReadWriteRASLines();
-  model1->setAddressLinesToInput();
-  model1->setDataLinesToInput();
-  asmWait(3);
+  _viewPort = viewPort;
 }
 
-/*
-  Write Cycle Waveform
-    Address
-    Chip Enable
-    Data
-    Read/Write
-*/
-void Video::fillVRAM(uint8_t fillValue, uint16_t start, uint16_t end)
+/**
+ * Calculates the physical address of the row
+ *
+ * NOTE: No overflow is checked.
+ */
+uint16_t Video::_getRowAddress(uint8_t y)
 {
-  _logger->info("Fill: start=%4X, end=%4X, value=%02X", start, end, fillValue);
+  return VIDEO_MEM_START + ((_viewPort.y + y) * VIDEO_ROWS);
+}
 
-  pinMode(RD_L, INPUT); // JIC
-  model1->setAddressLinesToOutput(VIDEO_MEM_START);
-  model1->setDataLinesToOutput();
+/**
+ * Calulates the physical address of the column
+ *
+ * NOTE: No overflow is checked.
+ */
+uint16_t Video::_getColumnAddress(uint16_t rowAddress, uint8_t x)
+{
+  return rowAddress + _viewPort.x + x;
+}
 
-  // Fill VRAM
-  for (uint16_t i = start; i <= end; i++)
+/**
+ * Calculates the physical address for x and y coordinate
+ *
+ * NOTE: No overflow is checked.
+ */
+uint16_t Video::_getAddress(uint8_t x, uint8_t y)
+{
+  uint16_t rowAddress = _getRowAddress(y);
+  return _getColumnAddress(rowAddress, x);
+}
+
+/**
+ * Gets the current x coordinate within the viewport
+ */
+uint8_t Video::getX()
+{
+  return _cursorPositionX;
+}
+
+/**
+ * Sets the cursor to a specified x coordinate
+ */
+void Video::setX(uint8_t x)
+{
+  if (x > _viewPort.width)
   {
-    uint16_t memAddress = i + start;
-    // Split address
-    uint8_t lowerByte = (uint8_t)(memAddress & 0xFF); // Masking to get the lower byte
-    uint8_t upperByte = (uint8_t)(memAddress >> 8);   // Shifting to get the upper byte
-
-    PORTA = lowerByte; // Write the lower byte of the address to PORTA
-    PORTC = upperByte; // Write the upper byte of the address to PORTC
-
-    // RAS*
-    pinMode(RAS_L, OUTPUT);
-    digitalWrite(RAS_L, LOW);
-    asmWait(1);
-
-    // fill VRAM with fillValue
-    PORTF = fillValue;
-
-    // WR*
-    pinMode(WR_L, OUTPUT);
-    digitalWrite(WR_L, LOW);
-    asmWait(3);
-
-    // Exit
-    pinMode(WR_L, INPUT);
-    pinMode(RAS_L, INPUT);
-    asmWait(3);
-  }
-
-  // Exit
-  model1->turnOffReadWriteRASLines();
-  model1->setAddressLinesToInput();
-  model1->setDataLinesToInput();
-  asmWait(3);
-}
-
-// Prints to video memory using address
-void Video::printToScreen(const char *str, uint16_t startAddress)
-{
-  if (startAddress < VIDEO_MEM_START || startAddress > (VIDEO_MEM_START + VIDEO_MEM_SIZE))
-  {
-    _logger->info("Invalid range. Must be between %04X and %04X.", VIDEO_MEM_START, (VIDEO_MEM_START + VIDEO_MEM_SIZE));
-    return;
-  }
-
-  // setup address and data lines for write
-  model1->setAddressLinesToOutput(VIDEO_MEM_START);
-  model1->setDataLinesToOutput();
-
-  // go thru string and write to display memory
-  uint16_t bufferIndex = startAddress;
-  for (const char *p = str; *p != '\0'; p++)
-  {
-    if (bufferIndex >= (VIDEO_MEM_START + VIDEO_MEM_SIZE))
-    {
-      _logger->info("Buffer overflow.");
-      break;
-    }
-
-    if (*p == '\r')
-    { // Carriage return handling
-      bufferIndex += VIDEO_COLS - (bufferIndex % VIDEO_COLS);
-      if (bufferIndex >= (VIDEO_MEM_START + VIDEO_MEM_SIZE))
-      {
-        _logger->info("Buffer overflow.");
-        break;
-      }
-      continue;
-    }
-
-    // Split address
-    uint16_t memAddress = bufferIndex;
-    uint8_t lowerByte = (uint8_t)(memAddress & 0xFF); // Masking to get the lower byte
-    uint8_t upperByte = (uint8_t)(memAddress >> 8);   // Shifting to get the upper byte
-
-    PORTA = lowerByte; // Write the lower byte of the address to PORTA
-    PORTC = upperByte; // Write the upper byte of the address to PORTC
-
-    // RAS*
-    pinMode(RAS_L, OUTPUT);
-    digitalWrite(RAS_L, LOW);
-    asmWait(1);
-
-    // write the byte
-    PORTF = *p;
-    // Serial.print(memAddress, (HEX));
-    // Serial.print("-");
-    // Serial.println(*p, (HEX));
-
-    // WR*
-    pinMode(WR_L, OUTPUT);
-    digitalWrite(WR_L, LOW);
-    asmWait(3);
-
-    // Exit write
-    pinMode(WR_L, INPUT);
-    pinMode(RAS_L, INPUT);
-    asmWait(3);
-
-    bufferIndex++;
-  }
-
-  // prep pins for exit
-  pinMode(RD_L, INPUT);
-  pinMode(WR_L, INPUT);
-  pinMode(RAS_L, INPUT);
-
-  model1->setAddressLinesToInput();
-  model1->setDataLinesToInput();
-  asmWait(3);
-}
-
-/*
-  Read Cycle Waveform
-    Address
-    Chip Enable
-    Data
-    Read
-*/
-uint8_t *Video::readVRAM()
-{
-  _logger->info("Reading VRAM...");
-
-  uint8_t videoData[VIDEO_MEM_SIZE];
-
-  // Setup to write VRAM
-  model1->setAddressLinesToOutput(VIDEO_MEM_START);
-  model1->setDataLinesToInput();
-
-  // this seems to be needed otherwise a random character gets written to the VRAM
-  // at the start of the address in the loop below.
-  pinMode(WR_L, OUTPUT);
-  digitalWrite(WR_L, HIGH);
-  pinMode(WR_L, INPUT);
-
-  // loop thru and read
-  for (int i = 0; i < VIDEO_MEM_SIZE; ++i)
-  {
-    // Split address
-    uint16_t memAddress = VIDEO_MEM_START + i;
-    uint8_t lowerByte = (uint8_t)(memAddress & 0xFF); // Masking to get the lower byte
-    uint8_t upperByte = (uint8_t)(memAddress >> 8);   // Shifting to get the upper byte
-
-    PORTA = lowerByte; // Write the lower byte of the address to PORTA
-    PORTC = upperByte; // Write the upper byte of the address to PORTC
-
-    // RAS*
-    pinMode(RAS_L, OUTPUT);
-    digitalWrite(RAS_L, LOW);
-    asmWait(2);
-
-    // RD*
-    pinMode(RD_L, OUTPUT);
-    digitalWrite(RD_L, LOW);
-    asmWait(3);
-
-    // fill VRAM with fillValue
-    videoData[i] = PINF;
-
-    // Exit read
-    asmWait(3);
-  }
-
-  // release the control, data and address lines by setting to INPUT
-  model1->turnOffReadWriteRASLines();
-  model1->setAddressLinesToInput();
-  model1->setDataLinesToInput();
-  asmWait(3);
-
-  return videoData;
-}
-
-/*
-  Read byte from VRAM
-  - Arduino address lines should be set for output
-  - Arduino data lines should be set for input
-*/
-uint8_t Video::readByteVRAM(uint16_t memAddress)
-{
-  uint8_t data = 0;
-
-  uint8_t lowerByte = (uint8_t)(memAddress & 0xFF); // Masking to get the lower byte
-  uint8_t upperByte = (uint8_t)(memAddress >> 8);   // Shifting to get the upper byte
-
-  PORTA = lowerByte; // Write the lower byte of the address to PORTA
-  PORTC = upperByte; // Write the upper byte of the address to PORTC
-
-  // RAS*
-  pinMode(RAS_L, OUTPUT);
-  digitalWrite(RAS_L, LOW);
-  asmWait(1);
-
-  // RD*
-  pinMode(RD_L, OUTPUT);
-  digitalWrite(RD_L, LOW);
-  asmWait(3);
-
-  // get data
-  data = PINF;
-
-  // prep for exit
-  model1->turnOffReadWriteRASLines();
-
-  return data;
-}
-
-/*
-  Write byte to VRAM
-  - Arduino address lines should be set for output
-  - Arduino data lines should be set for output
-*/
-void Video::writeByteVRAM(uint16_t memAddress, uint8_t data)
-{
-
-  uint8_t lowerByte = (uint8_t)(memAddress & 0xFF); // Masking to get the lower byte
-  uint8_t upperByte = (uint8_t)(memAddress >> 8);   // Shifting to get the upper byte
-
-  PORTA = lowerByte; // Write the lower byte of the address to PORTA
-  PORTC = upperByte; // Write the upper byte of the address to PORTC
-
-  // RAS*
-  pinMode(RAS_L, OUTPUT);
-  digitalWrite(RAS_L, LOW);
-  asmWait(1);
-
-  // put data
-  PORTF = data;
-
-  // WR*
-  pinMode(WR_L, OUTPUT);
-  digitalWrite(WR_L, LOW);
-  asmWait(3);
-
-  // prep for exit
-  model1->turnOffReadWriteRASLines();
-}
-
-// Move VRAM contents around in VRAM only
-void Video::memmoveVRAM(unsigned int dest, unsigned int src, unsigned int n)
-{
-  model1->setAddressLinesToOutput(dest);
-  if (dest < src)
-  {
-    for (unsigned int i = 0; i < n; i++)
-    {
-      model1->setDataLinesToInput();
-      uint8_t data = readByteVRAM(src + i);
-      model1->setDataLinesToOutput();
-      writeByteVRAM(dest + i, data);
-    }
+    _cursorPositionX = _viewPort.width - 1;
   }
   else
   {
-    for (int i = n - 1; i >= 0; i--)
-    {
-      model1->setDataLinesToInput();
-      uint8_t data = readByteVRAM(src + i);
-      model1->setDataLinesToOutput();
-      writeByteVRAM(dest + i, data);
-    }
+    _cursorPositionX = x;
   }
-  model1->setAddressLinesToInput();
-  model1->setDataLinesToInput();
 }
 
-// Move screen contents up by 1 line
-void Video::scrollScreenUp()
+/**
+ * Gets the current y coordinate within the viewport
+ */
+uint8_t Video::getY()
 {
-  memmoveVRAM(VIDEO_MEM_START, VIDEO_MEM_START + VIDEO_COLS, VIDEO_COLS * (VIDEO_ROWS - 1));
-  fillVRAM(0x20, VIDEO_LAST_ROW, VIDEO_LAST_ROW + VIDEO_COLS);
+  return _cursorPositionY;
 }
 
-// Print to screen from last cursor position
-void Video::printToScreen(const char *str)
+/**
+ * Sets the cursor to a specified y coordinate
+ */
+void Video::setY(uint8_t y)
 {
-  int curPos = _cursorPosition - VIDEO_MEM_START;
-  int x = curPos % VIDEO_COLS;
-  int y = curPos / VIDEO_COLS;
-
-  printToScreen(str, x, y, true);
+  if (y > _viewPort.height)
+  {
+    _cursorPositionY = _viewPort.height - 1;
+  }
+  else
+  {
+    _cursorPositionY = y;
+  }
 }
 
-// Print to the TRS-80 screen at specific coordinates. Supports carriage returns and auto line feeds,
-// along with placement of characters without impacting last written location
-void Video::printToScreen(const char *str, uint8_t x, uint8_t y, bool updateCursorPosition)
+/**
+ * Sets the cursor to a specified x & y coordinate
+ */
+void Video::setXY(uint8_t x, uint8_t y)
 {
-  model1->setAddressLinesToOutput(VIDEO_MEM_START);
-  model1->setDataLinesToOutput();
+  setX(x);
+  setY(y);
+}
 
-  if (y >= VIDEO_ROWS)
+/**
+ * Gets the absolute horizontal start position of viewport
+ */
+uint8_t Video::getStartX()
+{
+  return _viewPort.x;
+}
+
+/**
+ * Gets the absolute horizontal end position of viewport
+ */
+uint8_t Video::getEndX()
+{
+  return _viewPort.x + _viewPort.width;
+}
+
+/**
+ * Gets the absolute vertical start position of viewport
+ */
+uint8_t Video::getStartY()
+{
+  return _viewPort.y;
+}
+
+/**
+ * Gets the absolute vertical end position of viewport
+ */
+uint8_t Video::getEndY()
+{
+  return _viewPort.y + _viewPort.height;
+}
+
+/**
+ * Gets the width of the viewport
+ */
+uint8_t Video::getWidth()
+{
+  return _viewPort.width;
+}
+
+/**
+ * Gets the height of the viewport
+ */
+uint8_t Video::getHeight()
+{
+  return _viewPort.height;
+}
+
+/**
+ * Gets the total size of the viewport
+ */
+uint16_t Video::getSize()
+{
+  return _viewPort.width * _viewPort.height;
+}
+
+/**
+ * Gets the absolute X coordinate when given the viewport x coordinate
+ */
+uint8_t Video::getAbsoluteX(uint8_t x)
+{
+  int xCoord = _viewPort.x + x;
+  return xCoord > VIDEO_COLS ? VIDEO_COLS : xCoord;
+}
+
+/**
+ * Gets the absolute Y coordinate when given the viewport y coordinate
+ */
+uint8_t Video::getAbsoluteY(uint8_t y)
+{
+  int yCoord = _viewPort.y + y;
+  return yCoord > VIDEO_ROWS ? VIDEO_ROWS : yCoord;
+}
+
+/**
+ * Clears the screen, filling it with space characters
+ */
+void Video::cls()
+{
+  cls(SPACE_CHARACTER);
+}
+
+/**
+ * Clears the screen, filling it with a specific character
+ */
+void Video::cls(char character)
+{
+  cls(&character, 1);
+}
+
+/**
+ * Clears the screen, filling it with a specific string
+ */
+void Video::cls(char *characters, uint16_t length)
+{
+  int i = 0;
+  for (uint16_t y = 0; y < _viewPort.height; y++)
   {
-    scrollScreenUp();
-    y--;
-    model1->setAddressLinesToOutput(VIDEO_MEM_START);
-    model1->setDataLinesToOutput();
-  }
-
-  // pointer to memory
-  unsigned int memdAddress = y * VIDEO_COLS + x + VIDEO_MEM_START;
-
-  // process the string, requires string terminated with a '\0'
-  while (*str != '\0')
-  {
-    if (*str == '\n')
+    int rowAddress = _getRowAddress(y);
+    for (uint16_t x = 0; x < _viewPort.width; x++)
     {
-      y++;
-      if (y >= VIDEO_ROWS)
-      {
-        scrollScreenUp();
-        model1->setAddressLinesToOutput(memdAddress);
-        model1->setDataLinesToOutput();
-        y--;
-      }
-      x = 0;
-      memdAddress = y * VIDEO_COLS + VIDEO_MEM_START;
+      _model1->writeMemory(_getColumnAddress(rowAddress, x), characters[i % length]);
+      i++;
     }
-    else
-    {
-      if (x >= VIDEO_COLS)
-      {
-        x = 0;
-        y++;
-        if (y >= VIDEO_ROWS)
-        {
-          scrollScreenUp();
-          model1->setAddressLinesToOutput(memdAddress);
-          model1->setDataLinesToOutput();
-          y--;
-        }
-        memdAddress = y * VIDEO_COLS + VIDEO_MEM_START;
-      }
-      writeByteVRAM(memdAddress, *str);
-      // Serial.print(*str);
-      x++;
-      memdAddress++; // TODO: better as memdAddress = x * y?
-    }
-    str++;
   }
+  _cursorPositionX = 0;
+  _cursorPositionY = 0;
+}
 
-  // update the cursor positon or not
-  if (updateCursorPosition)
+/**
+ * Scrolls the screen by 1 row, including the cursor
+ */
+void Video::scroll()
+{
+  scroll(1);
+}
+
+/**
+ * Scrolls the screen by x rows, including the cursor
+ */
+void Video::scroll(uint8_t rows)
+{
+  if (rows == 0)
+    return;
+
+  // If there are more rows than available, just cap it at the maximum number of rows
+  if (rows > _viewPort.height)
   {
-    _cursorPosition = memdAddress;
+    rows = _viewPort.height;
   }
 
-  model1->turnOffReadWriteRASLines();
-  model1->setAddressLinesToInput();
-  model1->setDataLinesToInput();
+  // Only copy if not the whole memory gets replaced with spaces anyways
+  if (rows < _viewPort.height)
+  {
+    for (uint16_t y = rows; y < _viewPort.height; y++)
+    {
+      _model1->copyMemory(_getColumnAddress(_getRowAddress(y), _viewPort.x), _getColumnAddress(_getRowAddress(y - rows), _viewPort.x), _viewPort.width);
+    }
+  }
+
+  // Fill the copied area with spaces
+  for (uint16_t y = _viewPort.height - rows; y < _viewPort.height; y++)
+  {
+    _model1->fillMemory(SPACE_CHARACTER, _getColumnAddress(_getRowAddress(y), _viewPort.x), _viewPort.width);
+  }
+
+  // Move the current cursor position the rows up
+  uint16_t cursorPositionY = _cursorPositionY - rows;
+  if (cursorPositionY < 0)
+  {
+    _cursorPositionY = 0;
+  }
+  else
+  {
+    _cursorPositionY = cursorPositionY;
+  }
+}
+
+/**
+ * Prints one character to the current cursor position
+ */
+void Video::print(const char character)
+{
+  switch (character)
+  {
+  case '\0':
+    return;
+  case '\n':
+    _cursorPositionX = 0;
+    _cursorPositionY++;
+    break;
+  case '\r':
+    break; // Do nothing
+  case '\t':
+    uint8_t len = _cursorPositionX % 4;
+    if (len == 0)
+      len = 4;
+    for (int i = 0; i < len; i++)
+    {
+      print(' ');
+    }
+    break;
+  default:
+    _model1->writeMemory(_getAddress(_cursorPositionX, _cursorPositionY), character);
+    _cursorPositionX++;
+  }
+
+  if (_cursorPositionX >= _viewPort.width)
+  {
+    _cursorPositionX = 0;
+    _cursorPositionY++;
+  }
+
+  if (_cursorPositionY >= _viewPort.height)
+  {
+    scroll(1);
+  }
+}
+
+/**
+ * Prints a string to the current cursor position
+ */
+void Video::print(const char *str, uint16_t length)
+{
+  for (uint16_t i = 0; i < length; i++)
+  {
+    if (str[i] == '\0')
+      return;
+    print(str[i]);
+  }
+}
+
+/**
+ * Prints a new line to the current cursor position
+ */
+void Video::printLn()
+{
+  print('\n');
+}
+
+/**
+ * Prints a string with a new line to the current cursor position
+ */
+void Video::printLn(const char *str, uint16_t length)
+{
+  print(str, length);
+  print('\n');
+}
+
+/**
+ * Prints a string to the given x and y coordinate within the viewport
+ */
+void Video::print(const char *str, uint16_t length, uint8_t x, uint8_t y)
+{
+  setX(x);
+  setY(y);
+  print(str, length);
 }
