@@ -64,4 +64,15 @@ void loop()
     // You can also supply the coordinates directly
     video->print("RIGHT BOTTOM", 50, 15);
     delay(5000);
+
+    // Check wether the video mode is 64
+    bool is64Mode = video->is64Mode();
+
+    // Set to 32 character mode
+    video->set32Mode();
+    delay(5000);
+
+    // Set back to 64 character mode
+    video->set64Mode();
+    delay(5000);
 }
