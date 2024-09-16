@@ -76,6 +76,10 @@ public:
 
   void print(const char *str, uint8_t x, uint8_t y);
   void print(const char *str, uint16_t length, uint8_t x, uint8_t y);
+
+  bool is64Mode();
+  void set32Mode();
+  void set64Mode();
 };
 
 #endif // VIDEO_H

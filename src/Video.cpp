@@ -425,3 +425,27 @@ void Video::print(const char *str, uint16_t length, uint8_t x, uint8_t y)
   setXY(x, y);
   print(str, length);
 }
+
+/**
+ * Checks wether video mode is in 64 characters
+ */
+bool Video::is64Mode()
+{
+  return (_model1->readIO(0xff) & 0b01000000) > 0;
+}
+
+/**
+ * Changes the video mode to 32 characters
+ */
+void Video::set32Mode()
+{
+  _model1->writeIO(0xff, 0b00001000);
+}
+
+/**
+ * Changes the video mode to 64 characters
+ */
+void Video::set64Mode()
+{
+  _model1->writeIO(0xff, 0b00000000);
+}
