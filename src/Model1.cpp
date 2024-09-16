@@ -109,6 +109,74 @@ EventData *Model1::_createEventData(uint8_t type)
 }
 
 // ----------------------------------------
+// ---------- Address Space
+// ----------------------------------------
+
+/**
+ * Checks wether an address is in the ROM address space
+ */
+bool Model1::isROMAddress(uint16_t address)
+{
+    return (address <= 0x2FFF);
+}
+
+/**
+ * Checks wether an address is in the unused address space
+ */
+bool Model1::isUnusedAddress(uint16_t address)
+{
+    return (address >= 0x3000 && address <= 0x37DF);
+}
+
+/**
+ * Checks wether an address is in the memory-mapped IO address space
+ */
+bool Model1::isMemoryMappedIOAddress(uint16_t address)
+{
+    return (address >= 0x37E0 && address <= 0x37FF);
+}
+
+/**
+ * Checks wether an address is in the keyboard address space
+ */
+bool Model1::isKeyboardAddress(uint16_t address)
+{
+    return (address >= 0x3800 && address <= 0x3BFF); // memory space is shadowed from 0x3900 to 0x3BFF (3x)
+}
+
+/**
+ * Checks wether an address is in the video address space
+ */
+bool Model1::isVideoAddress(uint16_t address)
+{
+    return (address >= 0x3C00 && address <= 0x3FFF);
+}
+
+/**
+ * Checks wether an address is in the system address space
+ */
+bool Model1::isSystemAddress(uint16_t address)
+{
+    return (address >= 0x4000 && address <= 0x41FF);
+}
+
+/**
+ * Checks wether an address is in the lower memory address space
+ */
+bool Model1::isLowerMemoryAddress(uint16_t address)
+{
+    return (address >= 0x4200 && address <= 0x7FFF);
+}
+
+/**
+ * Checks wether an address is in the higher memory address space
+ */
+bool Model1::isHigherMemoryAddress(uint16_t address)
+{
+    return (address >= 0x8000 && address <= 0xFFFF);
+}
+
+// ----------------------------------------
 // ---------- Mutability
 // ----------------------------------------
 

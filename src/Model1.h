@@ -85,6 +85,16 @@ public:
     void begin(bool memoryRefresh = false);
     void end();
 
+    // ---------- Address Space
+    bool isROMAddress(uint16_t address);
+    bool isUnusedAddress(uint16_t address);
+    bool isMemoryMappedIOAddress(uint16_t address);
+    bool isKeyboardAddress(uint16_t address);
+    bool isVideoAddress(uint16_t address);
+    bool isSystemAddress(uint16_t address);
+    bool isLowerMemoryAddress(uint16_t address);
+    bool isHigherMemoryAddress(uint16_t address);
+
     // ---------- Refresh DRAM
     void refreshNextMemoryRow();
 
