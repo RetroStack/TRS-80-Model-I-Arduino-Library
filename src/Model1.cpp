@@ -3,6 +3,11 @@
 #include "port_config.h"
 #include "port_macros.h"
 
+// Version constants
+const uint8_t VERSION_MAJOR = 0;
+const uint8_t VERSION_MINOR = 9;
+const uint8_t VERSION_REVISION = 1;
+
 /**
  * Tracking the first instance create for interrupt/event handling
  */
@@ -1002,4 +1007,47 @@ void Model1::logState()
         _logger->info("State: %s", state);
         free(state);
     }
+}
+
+// ---------- Version
+
+/**
+ * Gets the major version number
+ */
+uint8_t Model1::getVersionMajor()
+{
+    return VERSION_MAJOR;
+}
+
+/**
+ * Gets the minor version number
+ */
+uint8_t Model1::getVersionMinor()
+{
+    return VERSION_MINOR;
+}
+
+/**
+ * Gets the revision version number
+ */
+uint8_t Model1::getVersionRevision()
+{
+    return VERSION_REVISION;
+}
+
+/**
+ * Returns a version string
+ */
+char *Model1::getVersion()
+{
+    const int LEN = 255;
+    char *buffer = new char[LEN];
+    snprintf(
+        buffer,
+        LEN,
+        "%d.%d.%d",
+        VERSION_MAJOR,
+        VERSION_MINOR,
+        VERSION_REVISION);
+    return buffer;
 }

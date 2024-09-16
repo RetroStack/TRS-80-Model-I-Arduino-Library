@@ -134,6 +134,11 @@ public:
     // ---------- State
     char *getState();
     void logState();
+
+    uint8_t getVersionMajor();
+    uint8_t getVersionMinor();
+    uint8_t getVersionRevision();
+    char *getVersion();
 };
 
 #endif /* MODEL1_H */
