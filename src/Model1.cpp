@@ -52,8 +52,8 @@ void Model1::begin(bool memoryRefresh = false)
     _deactivateBusAccessSignals();
 
     // TODO: Locks up somehow
-    //  _setupMemoryInterrupts();
-    //  _setupIOInterrupts();
+    _setupMemoryInterrupts();
+    _setupIOInterrupts();
 
     if (memoryRefresh)
     {
@@ -90,6 +90,7 @@ Model1::~Model1()
  */
 EventData *Model1::_createEventData(uint8_t type)
 {
+    uint8_t oldSREG = SREG;
     noInterrupts();
 
     EventData *data = new EventData;
@@ -97,7 +98,7 @@ EventData *Model1::_createEventData(uint8_t type)
     data->address = _addressBus->readMemoryAddress();
     data->data = _dataBus->readData();
 
-    interrupts();
+    SREG = oldSREG;
 
     return data;
 }
@@ -160,6 +161,7 @@ bool Model1::_checkMutability()
  */
 void Model1::_setupMemoryRefresh()
 {
+    uint8_t oldSREG = SREG;
     noInterrupts();
 
     // Reset and init
@@ -173,7 +175,7 @@ void Model1::_setupMemoryRefresh()
     TCCR1B |= (1 << CS10);   // Set prescaler to 1
     TIMSK1 |= (1 << OCIE1A); // Enable timer compare interrupt
 
-    interrupts();
+    SREG = oldSREG;
 }
 
 /**
@@ -205,6 +207,7 @@ void Model1::refreshNextMemoryRow()
     if (!_mutability) // Need direct check here to improve performance; instead _checkMutability
         return;
 
+    uint8_t oldSREG = SREG;
     noInterrupts();
 
     uint8_t currentRefreshRow = _nextMemoryRefreshRow;
@@ -226,7 +229,7 @@ void Model1::refreshNextMemoryRow()
     // Reset, leaving address as-is
     pinWrite(RAS, HIGH);
 
-    interrupts();
+    SREG = oldSREG;
 }
 
 // ----------------------------------------
@@ -242,6 +245,7 @@ uint8_t Model1::readMemory(uint16_t address)
     if (!_checkMutability())
         return 0;
 
+    uint8_t oldSREG = SREG;
     noInterrupts();
 
     // Set address and then data
@@ -263,7 +267,7 @@ uint8_t Model1::readMemory(uint16_t address)
     pinWrite(MUX, LOW);
     pinWrite(CAS, HIGH);
 
-    interrupts();
+    SREG = oldSREG;
 
     return data;
 }
@@ -277,6 +281,7 @@ void Model1::writeMemory(uint16_t address, uint8_t data)
     if (!_checkMutability())
         return;
 
+    uint8_t oldSREG = SREG;
     noInterrupts();
 
     // Configure bus
@@ -303,7 +308,7 @@ void Model1::writeMemory(uint16_t address, uint8_t data)
     pinWrite(CAS, HIGH);
     _dataBus->setAsReadable();
 
-    interrupts();
+    SREG = oldSREG;
 }
 
 /**
@@ -484,6 +489,7 @@ uint8_t Model1::readIO(uint8_t address)
     if (!_checkMutability())
         return 0;
 
+    uint8_t oldSREG = SREG;
     noInterrupts();
 
     // Set address and then data
@@ -502,7 +508,7 @@ uint8_t Model1::readIO(uint8_t address)
     pinWrite(MUX, LOW);
     pinWrite(CAS, HIGH);
 
-    interrupts();
+    SREG = oldSREG;
 
     return data;
 }
@@ -516,6 +522,7 @@ void Model1::writeIO(uint8_t address, uint8_t data)
     if (!_checkMutability())
         return;
 
+    uint8_t oldSREG = SREG;
     noInterrupts();
 
     // Configure bus
@@ -537,7 +544,7 @@ void Model1::writeIO(uint8_t address, uint8_t data)
     pinWrite(CAS, HIGH);
     _dataBus->setAsReadable();
 
-    interrupts();
+    SREG = oldSREG;
 }
 
 /**
