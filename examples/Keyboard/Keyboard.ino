@@ -31,6 +31,6 @@ void loop()
 
         // Scans the key that was pressed
         // If no key is pressed, then it will return 0.
-        uint8_t pressedKey = keyboard->scanKey();
+        uint8_t pressedKey = keyboard->scan();
     }
 }

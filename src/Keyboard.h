@@ -21,7 +21,9 @@ public:
   Keyboard(Model1 *model1, ILogger *logger = nullptr);
 
   bool isKeyPressed();
-  uint8_t scanKey();
+  bool isShiftPressed();
+
+  uint8_t scan();
 };
 
 #endif // KEYBOARD_H

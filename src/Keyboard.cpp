@@ -32,17 +32,25 @@ bool Keyboard::isKeyPressed()
 }
 
 /**
+ * Checks wether a shift key is pressed on the keyboard
+ */
+bool Keyboard::isShiftPressed()
+{
+  return (_model1->readMemory(KEYBOARD_SHIFT_KEY) & 0x01) > 0;
+}
+
+/**
  * Decodes key from keyboard, supports shift key.
  *
  * Does not support multiple keys being held down.
  */
-uint8_t Keyboard::scanKey()
+uint8_t Keyboard::scan()
 {
   if (!isKeyPressed()) // Skip out when nothing is pressed
     return 0;
 
   // Check if shift is pressed
-  bool shift = _model1->readMemory(KEYBOARD_SHIFT_KEY) & 1;
+  bool shift = isShiftPressed();
 
   // Roll thru the mapped keyboard addresses
   for (int i = 0; i < 7; i++)
