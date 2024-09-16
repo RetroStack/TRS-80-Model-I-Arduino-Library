@@ -5,6 +5,7 @@
 .idea
 .vscode
 .pio
+.development
 
 # Mac OS
 .DS_Store
