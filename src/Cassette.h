@@ -22,7 +22,8 @@ private:
 public:
     Cassette(Model1 *model1, ILogger *logger = nullptr);
 
-    void setOutput(bool value1, bool value2);
+    void writeRaw(bool value1, bool value2);
+    uint8_t read();
 
     void activateRemote();
     void deactivateRemote();
