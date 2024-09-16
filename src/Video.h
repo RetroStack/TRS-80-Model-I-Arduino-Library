@@ -66,6 +66,8 @@ public:
   void scroll();
   void scroll(uint8_t rows);
 
+  char *readString(uint16_t address, uint16_t length);
+
   void print(const char character);
   void print(const char *str);
   void print(const char *str, uint16_t length);
@@ -80,6 +82,9 @@ public:
   bool is64Mode();
   void set32Mode();
   void set64Mode();
+
+  char convertModel1CharacterToLocal(char character);
+  char convertLocalCharacterToModel1(char character);
 };
 
 #endif // VIDEO_H

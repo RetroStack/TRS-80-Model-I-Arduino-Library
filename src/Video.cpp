@@ -320,6 +320,19 @@ void Video::scroll(uint8_t rows)
 }
 
 /**
+ * Reads a string from memory
+ */
+char *Video::readString(uint16_t address, uint16_t length)
+{
+  uint8_t *buffer = _model1->readMemory(address, length);
+  for (int i = 0; i < length; i++)
+  {
+    buffer[i] = convertModel1CharacterToLocal(buffer[i]);
+  }
+  return (char *)buffer;
+}
+
+/**
  * Prints one character to the current cursor position
  */
 void Video::print(const char character)
@@ -340,11 +353,12 @@ void Video::print(const char character)
       len = 4;
     for (int i = 0; i < len; i++)
     {
-      print(' ');
+      print(convertLocalCharacterToModel1(' '));
     }
     break;
   default:
-    _model1->writeMemory(_getAddress(_cursorPositionX, _cursorPositionY), character);
+    uint16_t address = _getAddress(_cursorPositionX, _cursorPositionY);
+    _model1->writeMemory(address, convertLocalCharacterToModel1(character));
     _cursorPositionX++;
   }
 
@@ -450,4 +464,38 @@ void Video::set32Mode()
 void Video::set64Mode()
 {
   _model1->writeIO(CASSETTE_PORT, 0b00000000);
+}
+
+/**
+ * Converts a string coming from the Model 1 to the local ASCII format
+ */
+char Video::convertModel1CharacterToLocal(char character)
+{
+  if (character < 32)
+  {
+    character += 64; // Shift to normal ASCII code
+  }
+  else if (character >= 128)
+  {
+    character = 63; // '?'
+  }
+
+  return character;
+}
+
+/**
+ * Converts an ASCII string to the Model 1 format
+ */
+char Video::convertLocalCharacterToModel1(char character)
+{
+  if (character < 32 || character >= 12)
+  {
+    character = 63; // '?'
+  }
+  else if (character >= 64 && character < 96)
+  {
+    character -= 64; // Shift to first occurrence on Model 1
+  }
+
+  return character;
 }
