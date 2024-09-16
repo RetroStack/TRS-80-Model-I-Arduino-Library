@@ -119,6 +119,7 @@ public:
     bool readInterruptAcknowledgeSignal();
 
     // ---------- Interrupt Request Signal
+    bool triggerInterrupt(uint8_t interrupt, uint16_t timeout = 1000);
     void activateInterruptRequestSignal();
     void deactivateInterruptRequestSignal();
 

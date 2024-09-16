@@ -27,29 +27,49 @@ void loop()
     uint8_t *byte_array = model1->readMemory(0x3c00, 300);
     free(byte_array); // Remember to free up memory when you don't need it anymore
 
-    // void writeMemory(uint16_t address, uint8_t data);
-    // void writeMemory(uint16_t address, uint8_t * data, uint16_t length);
-    // void writeMemory(uint16_t address, uint8_t * data, uint16_t length, uint16_t offset);
-    // void copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length);
-    // void fillMemory(uint8_t fill_data, uint16_t address, uint16_t length);
-    // void fillMemory(uint8_t * fill_data, uint16_t length, uint16_t start_address, uint16_t end_address);
+    // Writes a byte value of 0x20 (spacebar) to location 0x3c00 in the video RAM
+    model1->writeMemory(0x3c00, 0x20);
 
-    // uint8_t readIO(uint8_t address);
-    // void writeIO(uint8_t address, uint8_t data);
+    uint8_t data[] = {'a', 'b', 'c', 'd', 'e'};
 
-    // // ---------- System Control Signals
-    // bool readSystemResetSignal();
-    // bool readInterruptAcknowledgeSignal();
+    // Writes a block of 5 bytes to starting location 0x3c00 in the video RAM
+    model1->writeMemory(0x3c00, data, 5);
 
-    // // ---------- Interrupt Request Signal
-    // void activateInterruptRequestSignal();
-    // void deactivateInterruptRequestSignal();
+    // Writes a block of 2 bytes to starting location 0x3c00 in the video RAM with offset of 1 in data
+    // Bytes written: 'b', 'c'
+    model1->writeMemory(0x3c00, data, 2, 1);
 
-    // // ---------- Test Signal
-    // void activateTestSignal();
-    // void deactivateTestSignal();
+    // Copies the first 10 bytes in the video RAM to the second row of the video RAM (0x40 bytes later = 64 characters)
+    model1->copyMemory(0x3c00, 0x3c40, 10);
 
-    // // ---------- Wait Signal
-    // void activateWaitSignal();
-    // void deactivateWaitSignal();
+    // Fills the memory at location 0x3c00 and length 20 with the 'a' character
+    model1->fillMemory('a', 0x3c00, 20);
+
+    const char *str = "HELLO WORLD!";
+
+    // Fill the whole screen with "HELLO WORLD!"
+    model1->fillMemory(str, strlen(str), 0x3c00, 0x3c00 + (16 * 64))
+
+        // Reads from port 0x3e one byte
+        uint8_t byte2 = model1->readIO(0x3e);
+
+    // Write 128 to the port 0x3F
+    model1->writeIO(0x3f, 128);
+
+    // Determines wether the Model 1 system is in active reset
+    bool isInReset = model1->readSystemResetSignal();
+
+    // Requests interrupt 0x2a to be triggered by the Z80
+    // wasTriggered determines wether the Z80 triggered the interrupt within timeout
+    bool wasTriggered = model1->triggerInterrupt(0x2a);
+
+    // Activates the wait signal for the Z80, freezing it
+    model1->activateWaitSignal();
+
+    // Deactivates the wait signal, freeing the Z80 up again to do other things
+    model1->deactivateWaitSignal();
+
+    // Deactivates the test signal
+    // This will stop you from controlling the Model 1 busses.
+    // model1->deactivateTestSignal();
 }

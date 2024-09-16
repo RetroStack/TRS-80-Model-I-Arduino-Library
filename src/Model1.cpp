@@ -385,7 +385,7 @@ void Model1::fillMemory(uint8_t fill_data, uint16_t address, uint16_t length)
 }
 
 /**
- * Fill a specific block of memory with a byte-array
+ * Fill a specific block of memory with a byte-array, repeated until the end address
  */
 void Model1::fillMemory(uint8_t *fill_data, uint16_t length, uint16_t start_address, uint16_t end_address)
 {
@@ -768,6 +768,30 @@ void Model1::_setInterruptRequestSignal(bool value)
     {
         pinWrite(INT, HIGH);
     }
+}
+
+/**
+ * Triggeres an interrupt within the Model 1
+ *
+ * NOTE: The timeout unit is in about microseconds.
+ */
+bool Model1::triggerInterrupt(uint8_t interrupt, uint16_t timeout = 1000)
+{
+    _setInterruptRequestSignal(true);
+
+    for (uint16_t i = 0; i < timeout; i++)
+    {
+        if (pinRead(INT_ACK) == LOW)
+        {
+            _setInterruptRequestSignal(false);
+            return true;
+        }
+        asmNoop();
+    }
+
+    _setInterruptRequestSignal(false);
+
+    return false; // CPU did not respond within timeout
 }
 
 /**
