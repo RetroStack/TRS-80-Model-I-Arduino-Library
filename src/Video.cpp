@@ -7,6 +7,8 @@ const uint16_t VIDEO_MEM_START = 0x3C00;
 
 const uint8_t SPACE_CHARACTER = 0x20;
 
+const uint8_t CASSETTE_PORT = 0xff;
+
 /**
  * Initializes the TRS-80 Model 1 Video Subsystem
  */
@@ -431,7 +433,7 @@ void Video::print(const char *str, uint16_t length, uint8_t x, uint8_t y)
  */
 bool Video::is64Mode()
 {
-  return (_model1->readIO(0xff) & 0b01000000) > 0;
+  return (_model1->readIO(CASSETTE_PORT) & 0b01000000) > 0;
 }
 
 /**
@@ -439,7 +441,7 @@ bool Video::is64Mode()
  */
 void Video::set32Mode()
 {
-  _model1->writeIO(0xff, 0b00001000);
+  _model1->writeIO(CASSETTE_PORT, 0b00001000);
 }
 
 /**
@@ -447,5 +449,5 @@ void Video::set32Mode()
  */
 void Video::set64Mode()
 {
-  _model1->writeIO(0xff, 0b00000000);
+  _model1->writeIO(CASSETTE_PORT, 0b00000000);
 }
