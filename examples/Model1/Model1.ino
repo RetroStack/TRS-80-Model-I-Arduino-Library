@@ -48,10 +48,10 @@ void loop()
     const char *str = "HELLO WORLD!";
 
     // Fill the whole screen with "HELLO WORLD!"
-    model1->fillMemory(str, strlen(str), 0x3c00, 0x3c00 + (16 * 64))
+    model1->fillMemory(str, strlen(str), 0x3c00, 0x3c00 + (16 * 64));
 
-        // Reads from port 0x3e one byte
-        uint8_t byte2 = model1->readIO(0x3e);
+    // Reads from port 0x3e one byte
+    uint8_t byte2 = model1->readIO(0x3e);
 
     // Write 128 to the port 0x3F
     model1->writeIO(0x3f, 128);
