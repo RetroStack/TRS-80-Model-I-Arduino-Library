@@ -9,3 +9,7 @@ This is the initial version written by Ven Reddy
 - General cleanup of the codebase
 - Adding Arduino library pattern
 - Adding cassette interface
+
+## 27th September 2024 - Initial Version (0.9.2)
+
+- General cleanup of the codebase
