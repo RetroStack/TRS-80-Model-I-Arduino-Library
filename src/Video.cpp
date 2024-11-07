@@ -488,7 +488,7 @@ char Video::convertModel1CharacterToLocal(char character)
  */
 char Video::convertLocalCharacterToModel1(char character)
 {
-  if (character < 32 || character >= 12)
+  if (character < 32 || character >= 128)
   {
     character = 63; // '?'
   }

@@ -6,7 +6,7 @@
 // Version constants
 const uint8_t VERSION_MAJOR = 0;
 const uint8_t VERSION_MINOR = 9;
-const uint8_t VERSION_REVISION = 1;
+const uint8_t VERSION_REVISION = 2;
 
 /**
  * Tracking the first instance create for interrupt/event handling
@@ -29,7 +29,7 @@ Model1::Model1(ILogger *logger = nullptr)
     if (globalModel1)
     {
         if (_logger)
-            _logger->warn("Global model 1 already setup. You can only have one.");
+            _logger->warn("Global Model 1 already setup. You can only have one.");
     }
     else
     {
@@ -39,6 +39,7 @@ Model1::Model1(ILogger *logger = nullptr)
     // Defines the mutability of the bus systems and signals (e.g. activate TEST signal)
     _mutability = false;
 
+    // Initializes memory refresh to default values
     _deactivateMemoryRefresh();
 }
 
@@ -56,7 +57,6 @@ void Model1::begin(bool memoryRefresh = false)
     _deactivateBusControlSignals();
     _deactivateBusAccessSignals();
 
-    // TODO: Locks up somehow
     _setupMemoryInterrupts();
     _setupIOInterrupts();
 
@@ -95,7 +95,10 @@ Model1::~Model1()
  */
 EventData *Model1::_createEventData(uint8_t type)
 {
+    // Remember the old interrupt values
     uint8_t oldSREG = SREG;
+
+    // Turn off interrupts (if it isn't already)
     noInterrupts();
 
     EventData *data = new EventData;
@@ -103,6 +106,7 @@ EventData *Model1::_createEventData(uint8_t type)
     data->address = _addressBus->readMemoryAddress();
     data->data = _dataBus->readData();
 
+    // Restore previous interrupt configuration (may need interrupts to be off still)
     SREG = oldSREG;
 
     return data;
@@ -416,7 +420,7 @@ void Model1::writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint1
 {
     for (uint16_t i = 0; i < length; i++)
     {
-        writeMemory(address + offset + i, data[i]);
+        writeMemory(address + i, data[offset + i]);
     }
 }
 
@@ -467,6 +471,10 @@ void Model1::fillMemory(uint8_t *fill_data, uint16_t length, uint16_t start_addr
         for (uint16_t j = 0; j < length; j++)
         {
             writeMemory(i + j, fill_data[j]);
+
+            // Check if we reached the end address
+            if (i + j >= end_address)
+                return;
         }
     }
 }
@@ -844,25 +852,33 @@ void Model1::_setInterruptRequestSignal(bool value)
 }
 
 /**
- * Triggeres an interrupt within the Model 1
+ * Triggers an interrupt within the Model 1
  *
  * NOTE: The timeout unit is in about microseconds.
  */
 bool Model1::triggerInterrupt(uint8_t interrupt, uint16_t timeout = 1000)
 {
-    _setInterruptRequestSignal(true);
+    activateInterruptRequestSignal();
 
     for (uint16_t i = 0; i < timeout; i++)
     {
         if (pinRead(INT_ACK) == LOW)
         {
-            _setInterruptRequestSignal(false);
+            _dataBus->setAsWritable();
+            _dataBus->writeData(interrupt);
+
+            asmWait(3);
+            deactivateInterruptRequestSignal();
+            asmWait(3);
+
+            _dataBus->setAsReadable();
+
             return true;
         }
         asmNoop();
     }
 
-    _setInterruptRequestSignal(false);
+    deactivateInterruptRequestSignal();
 
     return false; // CPU did not respond within timeout
 }
