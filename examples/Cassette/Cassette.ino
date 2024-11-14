@@ -26,7 +26,7 @@ void setup()
 void loop()
 {
     // Sets the output to low and high
-    cassette->setOutput(false, true);
+    cassette->writeRaw(false, true);
 
     // Activates the remote driver
     cassette->activateRemote();
