@@ -30,5 +30,5 @@ void loop()
     uint8_t *contents = rom->getContents();
 
     // Make sure to free up that memory again
-    free(contents);
+    delete[] contents;
 }

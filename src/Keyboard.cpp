@@ -24,7 +24,7 @@ Keyboard::Keyboard(Model1 *model1, ILogger *logger = nullptr)
 }
 
 /**
- * Checks wether any key is pressed at the moment
+ * Checks whether any key is pressed at the moment
  */
 bool Keyboard::isKeyPressed()
 {
@@ -32,7 +32,7 @@ bool Keyboard::isKeyPressed()
 }
 
 /**
- * Checks wether a shift key is pressed on the keyboard
+ * Checks whether a shift key is pressed on the keyboard
  */
 bool Keyboard::isShiftPressed()
 {

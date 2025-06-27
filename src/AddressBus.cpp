@@ -97,7 +97,7 @@ void AddressBus::writeIOAddress(uint8_t address)
 }
 
 /**
- * Checks wether the bus is readable
+ * Checks whether the bus is readable
  */
 bool AddressBus::isReadable()
 {
@@ -105,7 +105,7 @@ bool AddressBus::isReadable()
 }
 
 /**
- * Checks wether the bus is writable
+ * Checks whether the bus is writable
  */
 bool AddressBus::isWritable()
 {

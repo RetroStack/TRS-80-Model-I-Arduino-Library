@@ -443,7 +443,7 @@ void Video::print(const char *str, uint16_t length, uint8_t x, uint8_t y)
 }
 
 /**
- * Checks wether video mode is in 64 characters
+ * Checks whether video mode is in 64 characters
  */
 bool Video::is64Mode()
 {
