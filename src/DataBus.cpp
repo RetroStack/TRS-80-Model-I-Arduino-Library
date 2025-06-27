@@ -53,7 +53,7 @@ void DataBus::writeData(uint8_t data)
 }
 
 /**
- * Checks wether bus is readable
+ * Checks whether bus is readable
  */
 bool DataBus::isReadable()
 {
@@ -61,7 +61,7 @@ bool DataBus::isReadable()
 }
 
 /**
- * Checks wether bus is writable
+ * Checks whether bus is writable
  */
 bool DataBus::isWritable()
 {

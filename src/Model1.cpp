@@ -117,7 +117,7 @@ EventData *Model1::_createEventData(uint8_t type)
 // ----------------------------------------
 
 /**
- * Checks wether an address is in the ROM address space
+ * Checks whether an address is in the ROM address space
  */
 bool Model1::isROMAddress(uint16_t address)
 {
@@ -125,7 +125,7 @@ bool Model1::isROMAddress(uint16_t address)
 }
 
 /**
- * Checks wether an address is in the unused address space
+ * Checks whether an address is in the unused address space
  */
 bool Model1::isUnusedAddress(uint16_t address)
 {
@@ -133,7 +133,7 @@ bool Model1::isUnusedAddress(uint16_t address)
 }
 
 /**
- * Checks wether an address is in the memory-mapped IO address space
+ * Checks whether an address is in the memory-mapped IO address space
  */
 bool Model1::isMemoryMappedIOAddress(uint16_t address)
 {
@@ -141,7 +141,7 @@ bool Model1::isMemoryMappedIOAddress(uint16_t address)
 }
 
 /**
- * Checks wether an address is in the keyboard address space
+ * Checks whether an address is in the keyboard address space
  */
 bool Model1::isKeyboardAddress(uint16_t address)
 {
@@ -149,7 +149,7 @@ bool Model1::isKeyboardAddress(uint16_t address)
 }
 
 /**
- * Checks wether an address is in the video address space
+ * Checks whether an address is in the video address space
  */
 bool Model1::isVideoAddress(uint16_t address)
 {
@@ -157,7 +157,7 @@ bool Model1::isVideoAddress(uint16_t address)
 }
 
 /**
- * Checks wether an address is in the system address space
+ * Checks whether an address is in the system address space
  */
 bool Model1::isSystemAddress(uint16_t address)
 {
@@ -165,7 +165,7 @@ bool Model1::isSystemAddress(uint16_t address)
 }
 
 /**
- * Checks wether an address is in the lower memory address space
+ * Checks whether an address is in the lower memory address space
  */
 bool Model1::isLowerMemoryAddress(uint16_t address)
 {
@@ -173,7 +173,7 @@ bool Model1::isLowerMemoryAddress(uint16_t address)
 }
 
 /**
- * Checks wether an address is in the higher memory address space
+ * Checks whether an address is in the higher memory address space
  */
 bool Model1::isHigherMemoryAddress(uint16_t address)
 {
@@ -209,7 +209,7 @@ void Model1::_setMutability(bool value)
 }
 
 /**
- * Checks wether
+ * Checks whether the system is mutable
  */
 bool Model1::_isMutable()
 {
@@ -394,9 +394,9 @@ void Model1::writeMemory(uint16_t address, uint8_t data)
 uint8_t *Model1::readMemory(uint16_t address, uint16_t length)
 {
     if (length == 0)
-        return;
+        return nullptr;
 
-    uint8_t *buffer = new uint8_t(length);
+    uint8_t *buffer = new uint8_t[length];
     for (uint16_t i = 0; i < length; i++)
     {
         buffer[i] = readMemory(address + i);
@@ -532,7 +532,7 @@ void Model1::triggerMemoryReadEvent()
     {
         EventData *data = _createEventData(EVENT_MEMORY_READ);
         _memoryReadCallback(*data);
-        free(data);
+        delete data;
     }
 }
 
@@ -553,7 +553,7 @@ void Model1::triggerMemoryWriteEvent()
     {
         EventData *data = _createEventData(EVENT_MEMORY_WRITE);
         _memoryWriteCallback(*data);
-        free(data);
+        delete data;
     }
 }
 
@@ -681,7 +681,7 @@ void Model1::triggerIOReadEvent()
     {
         EventData *data = _createEventData(EVENT_IO_READ);
         _ioReadCallback(*data);
-        free(data);
+        delete data;
     }
 }
 
@@ -702,7 +702,7 @@ void Model1::triggerIOWriteEvent()
     {
         EventData *data = _createEventData(EVENT_IO_WRITE);
         _ioWriteCallback(*data);
-        free(data);
+        delete data;
     }
 }
 
@@ -722,7 +722,7 @@ void Model1::_initSystemControlSignals()
 }
 
 /**
- * Reads wether a system reset has occurred.
+ * Reads whether a system reset has occurred.
  */
 bool Model1::readSystemResetSignal()
 {
@@ -730,7 +730,7 @@ bool Model1::readSystemResetSignal()
 }
 
 /**
- * Reads wether the CPU has acknowledged an interrupt request.
+ * Reads whether the CPU has acknowledged an interrupt request.
  */
 bool Model1::readInterruptAcknowledgeSignal()
 {
@@ -1074,8 +1074,8 @@ char *Model1::getState()
         pinStatus(pinConfigRead(TEST)), pinRead(TEST),
         pinStatus(pinConfigRead(WAIT)), pinRead(WAIT));
 
-    free(addrStatus);
-    free(dataStatus);
+    delete[] addrStatus;
+    delete[] dataStatus;
 
     return buffer;
 }
@@ -1089,7 +1089,7 @@ void Model1::logState()
     {
         char *state = getState();
         _logger->info("State: %s", state);
-        free(state);
+        delete[] state;
     }
 }
 
