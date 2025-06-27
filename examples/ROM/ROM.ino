@@ -27,7 +27,7 @@ void loop()
 {
     // Request the full contents of the ROM
     // It reads all of the 12k of ROM and returns it as a byte array.
-    uint8_t *contents = rom->getContents();
+    uint8_t *contents = rom->getContent();
 
     // Make sure to free up that memory again
     delete[] contents;
