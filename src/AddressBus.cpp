@@ -15,7 +15,7 @@ void AddressBus::_configurePort(uint8_t config)
 /**
  * Initializes the Bus Access
  */
-AddressBus::AddressBus(ILogger *logger = nullptr)
+AddressBus::AddressBus(ILogger *logger)
 {
     _logger = logger;
     _writable = false;

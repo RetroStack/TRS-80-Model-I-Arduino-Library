@@ -18,7 +18,7 @@ Model1 *globalModel1 = nullptr;
  *
  * @param logger
  */
-Model1::Model1(ILogger *logger = nullptr)
+Model1::Model1(ILogger *logger)
 {
     _logger = logger;
 
