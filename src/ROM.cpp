@@ -6,7 +6,7 @@
 const uint16_t ROM_START = 0x00;
 const uint16_t ROM_LENGTH = 1024 * 12; // 12k
 
-ROM::ROM(Model1 *model1, ILogger *logger = nullptr)
+ROM::ROM(Model1 *model1, ILogger *logger)
 {
   _model1 = model1;
   _logger = logger;
