@@ -12,7 +12,7 @@ const uint8_t CASSETTE_PORT = 0xff;
 /**
  * Initializes the TRS-80 Model 1 Video Subsystem
  */
-Video::Video(Model1 *model1, ILogger *logger = nullptr)
+Video::Video(Model1 *model1, ILogger *logger)
 {
   _model1 = model1;
   _logger = logger;
@@ -29,7 +29,7 @@ Video::Video(Model1 *model1, ILogger *logger = nullptr)
 /**
  * Initializes the TRS-80 Model 1 Video Subsystem with custom viewport
  */
-Video::Video(Model1 *model1, ViewPort viewPort, ILogger *logger = nullptr)
+Video::Video(Model1 *model1, ViewPort viewPort, ILogger *logger)
 {
   _model1 = model1;
   _logger = logger;
