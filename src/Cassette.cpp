@@ -8,7 +8,7 @@ const uint8_t CASSETTE_PORT = 0xff;
 /**
  * Initializes the cassette interface
  */
-Cassette::Cassette(Model1 *model1, ILogger *logger = nullptr)
+Cassette::Cassette(Model1 *model1, ILogger *logger)
 {
     _model1 = model1;
     _logger = logger;

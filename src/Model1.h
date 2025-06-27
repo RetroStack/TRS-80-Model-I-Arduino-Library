@@ -101,6 +101,7 @@ public:
     // ---------- Memory
     uint8_t readMemory(uint16_t address);
     void writeMemory(uint16_t address, uint8_t data);
+    // Returns a newly allocated buffer; caller must delete[] the result
     uint8_t *readMemory(uint16_t address, uint16_t length);
     void writeMemory(uint16_t address, uint8_t *data, uint16_t length);
     void writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint16_t offset);

@@ -18,7 +18,7 @@ Model1 *globalModel1 = nullptr;
  *
  * @param logger
  */
-Model1::Model1(ILogger *logger = nullptr)
+Model1::Model1(ILogger *logger)
 {
     _logger = logger;
 
@@ -394,9 +394,9 @@ void Model1::writeMemory(uint16_t address, uint8_t data)
 uint8_t *Model1::readMemory(uint16_t address, uint16_t length)
 {
     if (length == 0)
-        return;
+        return nullptr;
 
-    uint8_t *buffer = new uint8_t(length);
+    uint8_t *buffer = new uint8_t[length];
     for (uint16_t i = 0; i < length; i++)
     {
         buffer[i] = readMemory(address + i);
