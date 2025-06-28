@@ -209,7 +209,7 @@ void Model1::_setMutability(bool value)
 }
 
 /**
- * Checks whether
+ * Checks whether the system is mutable
  */
 bool Model1::_isMutable()
 {
