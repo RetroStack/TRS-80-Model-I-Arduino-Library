@@ -217,7 +217,7 @@ bool Model1::_isMutable()
 }
 
 /**
- * Runs a check wheter the system is mutable.
+ * Runs a check whether the system is mutable.
  */
 bool Model1::_checkMutability()
 {
@@ -339,10 +339,10 @@ uint8_t Model1::readMemory(uint16_t address)
     uint8_t data = _dataBus->readData();
 
     // Reset, leaving address as-is
+    pinWrite(CAS, HIGH);
     pinWrite(RD, HIGH);
     pinWrite(RAS, HIGH);
     pinWrite(MUX, LOW);
-    pinWrite(CAS, HIGH);
 
     SREG = oldSREG;
 
@@ -380,9 +380,9 @@ void Model1::writeMemory(uint16_t address, uint8_t data)
 
     // Reset, leaving address as-is, removing data
     pinWrite(WR, HIGH);
+    pinWrite(CAS, HIGH);
     pinWrite(RAS, HIGH);
     pinWrite(MUX, LOW);
-    pinWrite(CAS, HIGH);
     _dataBus->setAsReadable();
 
     SREG = oldSREG;
@@ -585,9 +585,9 @@ uint8_t Model1::readIO(uint8_t address)
     uint8_t data = _dataBus->readData();
 
     // Reset, leaving address as-is
+    pinWrite(CAS, HIGH);
     pinWrite(IN, HIGH);
     pinWrite(MUX, LOW);
-    pinWrite(CAS, HIGH);
 
     SREG = oldSREG;
 
@@ -620,9 +620,9 @@ void Model1::writeIO(uint8_t address, uint8_t data)
     asmWait(1);
 
     // Reset, leving address as-is, removing data
+    pinWrite(CAS, HIGH);
     pinWrite(OUT, HIGH);
     pinWrite(MUX, LOW);
-    pinWrite(CAS, HIGH);
     _dataBus->setAsReadable();
 
     SREG = oldSREG;

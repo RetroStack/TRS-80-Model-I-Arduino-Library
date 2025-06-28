@@ -73,11 +73,11 @@ Video::Video(Model1 *model1, ViewPort viewPort, ILogger *logger)
  */
 uint16_t Video::_getRowAddress(uint8_t y)
 {
-  return VIDEO_MEM_START + ((_viewPort.y + y) * VIDEO_ROWS);
+  return VIDEO_MEM_START + ((_viewPort.y + y) * VIDEO_COLS);
 }
 
 /**
- * Calulates the physical address of the column
+ * Calculates the physical address of the column
  *
  * NOTE: No overflow is checked.
  */
