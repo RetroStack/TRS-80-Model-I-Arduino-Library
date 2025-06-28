@@ -65,7 +65,7 @@ void loop()
     video->print("RIGHT BOTTOM", 50, 15);
     delay(5000);
 
-    // Check wether the video mode is 64
+    // Check whether the video mode is 64
     bool is64Mode = video->is64Mode();
 
     // Set to 32 character mode

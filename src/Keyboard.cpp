@@ -17,14 +17,14 @@ const uint8_t lookupTable[8][8] = {
     {0x0D, 0x1F, 0x01, 0x5B, 0x0A, 0x08, 0x09, 0x20}, // 3840
 };
 
-Keyboard::Keyboard(Model1 *model1, ILogger *logger = nullptr)
+Keyboard::Keyboard(Model1 *model1, ILogger *logger)
 {
   _model1 = model1;
   _logger = logger;
 }
 
 /**
- * Checks wether any key is pressed at the moment
+ * Checks whether any key is pressed at the moment
  */
 bool Keyboard::isKeyPressed()
 {
@@ -32,7 +32,7 @@ bool Keyboard::isKeyPressed()
 }
 
 /**
- * Checks wether a shift key is pressed on the keyboard
+ * Checks whether a shift key is pressed on the keyboard
  */
 bool Keyboard::isShiftPressed()
 {

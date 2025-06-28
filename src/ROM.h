@@ -20,7 +20,7 @@ private:
 public:
   ROM(Model1 *model1, ILogger *logger = nullptr);
 
-  uint8_t *ROM::getContent();
+  uint8_t *getContent();
 };
 
 #endif // ROM_H

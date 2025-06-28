@@ -12,7 +12,7 @@ const uint8_t CASSETTE_PORT = 0xff;
 /**
  * Initializes the TRS-80 Model 1 Video Subsystem
  */
-Video::Video(Model1 *model1, ILogger *logger = nullptr)
+Video::Video(Model1 *model1, ILogger *logger)
 {
   _model1 = model1;
   _logger = logger;
@@ -29,7 +29,7 @@ Video::Video(Model1 *model1, ILogger *logger = nullptr)
 /**
  * Initializes the TRS-80 Model 1 Video Subsystem with custom viewport
  */
-Video::Video(Model1 *model1, ViewPort viewPort, ILogger *logger = nullptr)
+Video::Video(Model1 *model1, ViewPort viewPort, ILogger *logger)
 {
   _model1 = model1;
   _logger = logger;
@@ -73,11 +73,11 @@ Video::Video(Model1 *model1, ViewPort viewPort, ILogger *logger = nullptr)
  */
 uint16_t Video::_getRowAddress(uint8_t y)
 {
-  return VIDEO_MEM_START + ((_viewPort.y + y) * VIDEO_ROWS);
+  return VIDEO_MEM_START + ((_viewPort.y + y) * VIDEO_COLS);
 }
 
 /**
- * Calulates the physical address of the column
+ * Calculates the physical address of the column
  *
  * NOTE: No overflow is checked.
  */
@@ -443,7 +443,7 @@ void Video::print(const char *str, uint16_t length, uint8_t x, uint8_t y)
 }
 
 /**
- * Checks wether video mode is in 64 characters
+ * Checks whether video mode is in 64 characters
  */
 bool Video::is64Mode()
 {

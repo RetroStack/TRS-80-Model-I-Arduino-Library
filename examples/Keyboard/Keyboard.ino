@@ -25,7 +25,7 @@ void setup()
 
 void loop()
 {
-    // Check wether a key is pressed
+    // Check whether a key is pressed
     if (keyboard->isKeyPressed())
     {
 

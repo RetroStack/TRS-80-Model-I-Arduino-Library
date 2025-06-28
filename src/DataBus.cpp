@@ -14,7 +14,7 @@ void DataBus::_configurePort(uint8_t config)
 /**
  * Initializes the data bus
  */
-DataBus::DataBus(ILogger *logger = nullptr)
+DataBus::DataBus(ILogger *logger)
 {
   _logger = logger;
   _writable = false;
@@ -53,7 +53,7 @@ void DataBus::writeData(uint8_t data)
 }
 
 /**
- * Checks wether bus is readable
+ * Checks whether bus is readable
  */
 bool DataBus::isReadable()
 {
@@ -61,7 +61,7 @@ bool DataBus::isReadable()
 }
 
 /**
- * Checks wether bus is writable
+ * Checks whether bus is writable
  */
 bool DataBus::isWritable()
 {
