@@ -21,6 +21,7 @@ public:
   ROM(Model1 *model1, ILogger *logger = nullptr);
 
   uint8_t *getContent();
+  uint32_t getChecksum(uint8_t rom);
 };
 
 #endif // ROM_H

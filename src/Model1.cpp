@@ -57,8 +57,8 @@ void Model1::begin(bool memoryRefresh = false)
     _deactivateBusControlSignals();
     _deactivateBusAccessSignals();
 
-    _setupMemoryInterrupts();
-    _setupIOInterrupts();
+    // _setupMemoryInterrupts();
+    // _setupIOInterrupts();
 
     if (memoryRefresh)
     {
@@ -221,12 +221,13 @@ bool Model1::_isMutable()
  */
 bool Model1::_checkMutability()
 {
+    bool mutability = _isMutable();
     if (!_isMutable())
     {
         if (_logger)
             _logger->err("System is not mutable, but a request to access the system was made.");
     }
-    return _mutability;
+    return mutability;
 }
 
 // ----------------------------------------
@@ -434,19 +435,9 @@ void Model1::copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t len
     if (dst_address == src_address)
         return;
 
-    if (dst_address < src_address)
+    for (uint16_t i = 0; i < length; i++)
     {
-        for (uint16_t i = 0; i < length; i++)
-        {
-            writeMemory(dst_address + i, readMemory(src_address + i));
-        }
-    }
-    else
-    {
-        for (uint16_t i = length - 1; i >= 0; i--)
-        {
-            writeMemory(dst_address + i, readMemory(src_address + i));
-        }
+        writeMemory(dst_address + i, readMemory(src_address + i));
     }
 }
 
@@ -804,7 +795,7 @@ void Model1::_deactivateBusAccessSignals()
 }
 
 /**
- * Resetts the bus access signals to default
+ * Resets the bus access signals to default
  */
 void Model1::_resetBusAccessSignals()
 {

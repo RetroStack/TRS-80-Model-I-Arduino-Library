@@ -10,20 +10,23 @@
 #include <Arduino.h>
 #include "ILogger.h"
 #include "Model1.h"
+#include "KeyboardChangeIterator.h"
 
 class Keyboard
 {
 private:
   Model1 *_model1;
   ILogger *_logger;
+  uint8_t _previousState[8];
 
 public:
   Keyboard(Model1 *model1, ILogger *logger = nullptr);
 
-  bool isKeyPressed();
-  bool isShiftPressed();
+  bool isKeyPressed() const;
+  void readState();
 
-  uint8_t scan();
+  KeyboardChangeIterator changes();
+  uint8_t getFirstJustPressedKey();
 };
 
 #endif // KEYBOARD_H

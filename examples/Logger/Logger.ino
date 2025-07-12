@@ -53,4 +53,7 @@ void loop()
 
     // Log some debug states
     model1->logState();
+
+    // Avoid too many messages by delaying the loop
+    delay(1000);
 }
