@@ -20,6 +20,9 @@ Video::Video(Model1 *model1, ILogger *logger)
   _cursorPositionX = 0;
   _cursorPositionY = 0;
 
+  _autoScroll = true;
+  _hasLowerCaseMod = false;
+
   _viewPort.x = 0;
   _viewPort.y = 0;
   _viewPort.width = VIDEO_COLS;
@@ -36,6 +39,9 @@ Video::Video(Model1 *model1, ViewPort viewPort, ILogger *logger)
 
   _cursorPositionX = 0;
   _cursorPositionY = 0;
+
+  _autoScroll = true;
+  _hasLowerCaseMod = false;
 
   // Validate and auto-correct viewport
   if (viewPort.x >= VIDEO_COLS)
@@ -262,7 +268,7 @@ void Video::cls(char *characters, uint16_t length)
     int rowAddress = _getRowAddress(y);
     for (uint16_t x = 0; x < _viewPort.width; x++)
     {
-      _model1->writeMemory(_getColumnAddress(rowAddress, x), characters[i % length]);
+      _model1->writeMemory(_getColumnAddress(rowAddress, x), convertLocalCharacterToModel1(characters[i % length]));
       i++;
     }
   }
@@ -297,14 +303,16 @@ void Video::scroll(uint8_t rows)
   {
     for (uint16_t y = rows; y < _viewPort.height; y++)
     {
-      _model1->copyMemory(_getColumnAddress(_getRowAddress(y), _viewPort.x), _getColumnAddress(_getRowAddress(y - rows), _viewPort.x), _viewPort.width);
+      uint16_t src = _getColumnAddress(_getRowAddress(y), 0);
+      uint16_t dst = _getColumnAddress(_getRowAddress(y - rows), 0);
+      _model1->copyMemory(src, dst, _viewPort.width);
     }
   }
 
   // Fill the copied area with spaces
   for (uint16_t y = _viewPort.height - rows; y < _viewPort.height; y++)
   {
-    _model1->fillMemory(SPACE_CHARACTER, _getColumnAddress(_getRowAddress(y), _viewPort.x), _viewPort.width);
+    _model1->fillMemory(SPACE_CHARACTER, _getColumnAddress(_getRowAddress(y), 0), _viewPort.width);
   }
 
   // Move the current cursor position the rows up
@@ -320,15 +328,37 @@ void Video::scroll(uint8_t rows)
 }
 
 /**
- * Reads a string from memory
+ * Reads a string from the video memory at a specific location and length
  */
-char *Video::readString(uint16_t address, uint16_t length)
+char *Video::read(uint8_t x, uint8_t y, uint16_t length)
 {
-  uint8_t *buffer = _model1->readMemory(address, length);
+  uint8_t *buffer = new uint8_t[length + 1];
+
+  // Make sure this is filled with zeros in case the area is shorter than length
+  for (int i = 0; i < length + 1; i++)
+  {
+    buffer[i] = 0;
+  }
+
+  // Read in string
   for (int i = 0; i < length; i++)
   {
-    buffer[i] = convertModel1CharacterToLocal(buffer[i]);
+    uint16_t addr = _getColumnAddress(_getRowAddress(y), x);
+    uint8_t character = _model1->readMemory(addr);
+    buffer[i] = convertModel1CharacterToLocal(character);
+
+    x++;
+    if (x >= _viewPort.width)
+    {
+      x = 0;
+      y++;
+      if (y >= _viewPort.height)
+      {
+        break; // Prevent reading out of bounds
+      }
+    }
   }
+
   return (char *)buffer;
 }
 
@@ -337,17 +367,22 @@ char *Video::readString(uint16_t address, uint16_t length)
  */
 void Video::print(const char character)
 {
-  switch (character)
+  if (character == '\0')
   {
-  case '\0':
     return;
-  case '\n':
+  }
+  else if (character == '\n')
+  {
     _cursorPositionX = 0;
     _cursorPositionY++;
-    break;
-  case '\r':
-    break; // Do nothing
-  case '\t':
+    return;
+  }
+  else if (character == '\r')
+  {
+    return; // Do nothing
+  }
+  else if (character == '\t')
+  {
     uint8_t len = _cursorPositionX % 4;
     if (len == 0)
       len = 4;
@@ -355,22 +390,33 @@ void Video::print(const char character)
     {
       print(convertLocalCharacterToModel1(' '));
     }
-    break;
-  default:
+    return;
+  }
+  else
+  {
     uint16_t address = _getAddress(_cursorPositionX, _cursorPositionY);
     _model1->writeMemory(address, convertLocalCharacterToModel1(character));
     _cursorPositionX++;
   }
 
+  // Check if we need to wrap the cursor position
   if (_cursorPositionX >= _viewPort.width)
   {
     _cursorPositionX = 0;
     _cursorPositionY++;
   }
 
+  // Check if we need to scroll the screen
   if (_cursorPositionY >= _viewPort.height)
   {
-    scroll(1);
+    if (_autoScroll)
+    {
+      scroll(1);
+    }
+    else
+    {
+      _cursorPositionY = 0;
+    }
   }
 }
 
@@ -467,17 +513,31 @@ void Video::set64Mode()
 }
 
 /**
+ * Sets whether the video should automatically scroll when the cursor reaches the end of the viewport
+ */
+void Video::setAutoScroll(bool autoScroll)
+{
+  _autoScroll = autoScroll;
+}
+
+/**
+ * Sets whether the video has a lower-case mod or not
+ */
+void Video::setLowerCaseMod(bool hasLowerCaseMod)
+{
+  _hasLowerCaseMod = hasLowerCaseMod;
+}
+
+/**
  * Converts a string coming from the Model 1 to the local ASCII format
  */
 char Video::convertModel1CharacterToLocal(char character)
 {
-  if (character < 32)
+  character &= 0x7F; // Clear the high bit - No graphics support
+
+  if (character >= 0 && character < 32)
   {
-    character += 64; // Shift to normal ASCII code
-  }
-  else if (character >= 128)
-  {
-    character = 63; // '?'
+    character += 64; // Shift to real upper-case
   }
 
   return character;
@@ -488,13 +548,11 @@ char Video::convertModel1CharacterToLocal(char character)
  */
 char Video::convertLocalCharacterToModel1(char character)
 {
-  if (character < 32 || character >= 128)
+  character &= 0x7F; // Clear the high bit - No graphics support
+
+  if (!_hasLowerCaseMod && (character >= 96 && character < 128))
   {
-    character = 63; // '?'
-  }
-  else if (character >= 64 && character < 96)
-  {
-    character -= 64; // Shift to first occurrence on Model 1
+    character -= 32; // Shift to upper-case
   }
 
   return character;

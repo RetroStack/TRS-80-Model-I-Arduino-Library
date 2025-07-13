@@ -31,7 +31,8 @@ private:
 
   uint8_t _cursorPositionX;
   uint8_t _cursorPositionY;
-  bool _wrap;
+  bool _autoScroll;
+  bool _hasLowerCaseMod;
 
   uint16_t _getRowAddress(uint8_t y);
   uint16_t _getColumnAddress(uint16_t rowAddress, uint8_t x);
@@ -66,7 +67,7 @@ public:
   void scroll();
   void scroll(uint8_t rows);
 
-  char *readString(uint16_t address, uint16_t length);
+  char *read(uint8_t x, uint8_t y, uint16_t length);
 
   void print(const char character);
   void print(const char *str);
@@ -82,6 +83,9 @@ public:
   bool is64Mode();
   void set32Mode();
   void set64Mode();
+
+  void setAutoScroll(bool autoScroll);
+  void setLowerCaseMod(bool hasLowerCaseMod);
 
   char convertModel1CharacterToLocal(char character);
   char convertLocalCharacterToModel1(char character);
