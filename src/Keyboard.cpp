@@ -24,7 +24,7 @@ bool Keyboard::isKeyPressed() const
 /**
  * Reads the current state of the keyboard, dismissing all changes.
  */
-void Keyboard::readState()
+void Keyboard::update()
 {
   for (int i = 0; i < 8; i++)
   {

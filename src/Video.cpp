@@ -518,30 +518,6 @@ void Video::print(const char *str, uint16_t length, uint8_t x, uint8_t y)
 }
 
 /**
- * Checks whether video mode is in 64 characters
- */
-bool Video::is64Mode()
-{
-  return (_model1->readIO(CASSETTE_PORT) & 0b01000000) > 0;
-}
-
-/**
- * Changes the video mode to 32 characters
- */
-void Video::set32Mode()
-{
-  _model1->writeIO(CASSETTE_PORT, 0b00001000);
-}
-
-/**
- * Changes the video mode to 64 characters
- */
-void Video::set64Mode()
-{
-  _model1->writeIO(CASSETTE_PORT, 0b00000000);
-}
-
-/**
  * Sets whether the video should automatically scroll when the cursor reaches the end of the viewport
  */
 void Video::setAutoScroll(bool autoScroll)

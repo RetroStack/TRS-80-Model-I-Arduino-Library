@@ -26,7 +26,7 @@ void setup()
     model1->activateTestSignal();
 
     // Read the latest state to establish a reference point (optional)
-    keyboard->readState();
+    keyboard->update();
 }
 
 void loop()

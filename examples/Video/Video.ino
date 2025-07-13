@@ -1,10 +1,12 @@
 #include <Arduino.h>
 #include <Model1.h>
 #include <Video.h>
+#include <Cassette.h>
 
 // Define an accessible variable for the Model 1 & video subsystem instance
 Model1 *model1;
 Video *video;
+Cassette *cassette;
 
 void setup()
 {
@@ -22,8 +24,13 @@ void setup()
     // The Arduino will also be blocked from accessing the bus without activation.
     model1->activateTestSignal();
 
+    // Initialize the cassette interface
+    // This is needed for the 32/64 character mode selection.
+    // This was combined with the cassette interface by Tandy.
+    cassette = new Cassette(model1);
+
     // Set to 64 character mode (in case it isn't)
-    video->set64Mode();
+    cassette->set64CharacterMode();
 
     // Sets wether the Model 1 has a lower-case mod
     // Keeping it "false" (default) is the safest option,
@@ -78,13 +85,13 @@ void loop()
     delay(2000); // Wait 2 seconds
 
     // Check whether the video mode is 64
-    bool is64Mode = video->is64Mode();
+    bool is64Mode = cassette->is64CharacterMode();
 
     // Set to 32 character mode
-    video->set32Mode();
+    cassette->set32CharacterMode();
     delay(2000); // Wait 2 seconds
 
     // Set back to 64 character mode
-    video->set64Mode();
+    cassette->set64CharacterMode();
     delay(2000); // Wait 2 seconds
 }

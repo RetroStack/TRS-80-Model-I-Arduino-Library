@@ -23,7 +23,7 @@ public:
   Keyboard(Model1 *model1, ILogger *logger = nullptr);
 
   bool isKeyPressed() const;
-  void readState();
+  void update();
 
   KeyboardChangeIterator changes();
   uint8_t getFirstJustPressedKey();
