@@ -367,6 +367,22 @@ char *Video::read(uint8_t x, uint8_t y, uint16_t length)
  */
 void Video::print(const char character)
 {
+  _print(character, false);
+}
+
+/**
+ * Prints one character to the current cursor position
+ */
+void Video::print(const char character, bool raw)
+{
+  _print(character, raw);
+}
+
+/**
+ * Prints one character to the current cursor position
+ */
+void Video::_print(const char character, bool raw)
+{
   if (character == '\0')
   {
     return;
@@ -388,14 +404,19 @@ void Video::print(const char character)
       len = 4;
     for (int i = 0; i < len; i++)
     {
-      print(convertLocalCharacterToModel1(' '));
+      print(' ');
     }
     return;
   }
   else
   {
     uint16_t address = _getAddress(_cursorPositionX, _cursorPositionY);
-    _model1->writeMemory(address, convertLocalCharacterToModel1(character));
+    uint8_t data = character;
+    if (!raw)
+    {
+      data = convertLocalCharacterToModel1(character);
+    }
+    _model1->writeMemory(address, data);
     _cursorPositionX++;
   }
 

@@ -38,6 +38,8 @@ private:
   uint16_t _getColumnAddress(uint16_t rowAddress, uint8_t x);
   uint16_t _getAddress(uint8_t x, uint8_t y);
 
+  void _print(const char character, bool raw);
+
 public:
   Video(Model1 *model1, ILogger *logger = nullptr);
   Video(Model1 *model1, ViewPort viewPort, ILogger *logger = nullptr);
@@ -70,6 +72,8 @@ public:
   char *read(uint8_t x, uint8_t y, uint16_t length);
 
   void print(const char character);
+  void print(const char character, bool raw);
+
   void print(const char *str);
   void print(const char *str, uint16_t length);
 
