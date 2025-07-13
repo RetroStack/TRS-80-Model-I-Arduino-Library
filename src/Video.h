@@ -69,7 +69,7 @@ public:
   void scroll();
   void scroll(uint8_t rows);
 
-  char *read(uint8_t x, uint8_t y, uint16_t length);
+  char *read(uint8_t x, uint8_t y, uint16_t length, bool raw);
 
   void print(const char character);
   void print(const char character, bool raw);

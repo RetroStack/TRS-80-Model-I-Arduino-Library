@@ -330,7 +330,7 @@ void Video::scroll(uint8_t rows)
 /**
  * Reads a string from the video memory at a specific location and length
  */
-char *Video::read(uint8_t x, uint8_t y, uint16_t length)
+char *Video::read(uint8_t x, uint8_t y, uint16_t length, bool raw)
 {
   uint8_t *buffer = new uint8_t[length + 1];
 
@@ -345,7 +345,15 @@ char *Video::read(uint8_t x, uint8_t y, uint16_t length)
   {
     uint16_t addr = _getColumnAddress(_getRowAddress(y), x);
     uint8_t character = _model1->readMemory(addr);
-    buffer[i] = convertModel1CharacterToLocal(character);
+
+    if (raw)
+    {
+      buffer[i] = character;
+    }
+    else
+    {
+      buffer[i] = convertModel1CharacterToLocal(character);
+    }
 
     x++;
     if (x >= _viewPort.width)
