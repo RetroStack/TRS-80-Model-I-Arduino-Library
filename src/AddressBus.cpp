@@ -54,20 +54,11 @@ void AddressBus::writeMemoryAddress(uint16_t address)
 
 /**
  * Writes a refresh address to the bus
+ *
+ * NOTE: Careful when using this directly as it doesn't make any checks to improve performance.
  */
 void AddressBus::writeRefreshAddress(uint8_t address)
 {
-    if (address >= 128)
-    {
-        if (_logger)
-            _logger->err("Refresh initiated on row %d which is not allowed (max=128).", address);
-    }
-    if (!_writable)
-    {
-        if (_logger)
-            _logger->err("Address bus is not writable.");
-    }
-
     // Direct call to ports to save time
     busWrite(ADDR_LOW, address);
     busWrite(ADDR_HIGH, 0);

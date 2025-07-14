@@ -38,33 +38,101 @@ char busStatus(uint8_t value)
   }
 }
 
-/**
- * Wait two noop cycles
- */
-void asmNoop()
-{
-  __asm__ volatile("nop\nnop");
-}
-
-// This assumes ATMega 2560, 1 cycle = 62.5ns
-// The main loop is 3 cycles, excluding the mov
-// Min = 250ns, Max = 12266812.5ns (12.2668125 ms)
-// Example: wait = 1, then delay will be 250ns
+// This assumes ATMega running at 16 MHz:
+// - 1 cycle = 62.5 ns
+// - Each iteration of the loop takes 4 cycles, except the final iteration, which takes 3 cycles.
+// - Total cycles = (wait - 1)*4 + 3 = 4*wait -1 cycles.
+// - Calling overhead is 190ns
+// - So, for example:
+//      wait=1: ~252 ns total delay (3 cycles + call overhead)
+//      wait=2: ~512 ns total delay (7 cycles + call overhead)
+//      wait=3: ~772 ns total delay (11 cycles + call overhead)
+//      wait=4: ~1032 ns total delay (15 cycles + call overhead)
+//      wait=5: ~1292 ns total delay (19 cycles + call overhead)
+//
+// - To get ~1 µs delay, use wait=4.
+// - To get ~2 µs delay, use wait=8.
+//
+// Example usage:
+//     asmWait(3); // ~772 ns delay including overhead
 void asmWait(uint16_t wait)
 {
   if (wait == 0)
     return;
   __asm__ volatile(
-      " mov r16,%0\n"
-      "1: nop\n"
-      " dec r16\n"
-      " brne 1b\n" // 1 cycle if branching, 2 if not
+      " mov r16,%0\n" // set wait countdown
+      "1: nop\n"      // noop
+      " dec r16\n"    // decrement
+      " brne 1b\n"    // 1 cycle if branching, 2 if not
       :
       : "r"(wait) // input operands if any, here
       : "r16"     // clobbered regs here
   );
 }
 
+/**
+ * Busy-wait delay loop using nested counters.
+ *
+ * Timing details (ATmega2560, 16 MHz CPU clock):
+ *
+ *  - Each inner loop iteration:
+ *      - 4 cycles per iteration (2 cycles for sbiw + 2 cycles for brne when branching)
+ *      - except the final iteration: 3 cycles (sbiw + brne fallthrough)
+ *
+ *  - Each outer loop iteration executes the inner loop fully, plus:
+ *      - 4 cycles for outer sbiw/brne when branching
+ *      - or 3 cycles when exiting after the final iteration
+ *
+ *  - Therefore:
+ *
+ *      innerLoopCycles = (innerCount - 1) * 4 + 3
+ *
+ *      totalCycles =
+ *          (outerCount - 1) * (innerLoopCycles + 4)
+ *          + (innerLoopCycles + 3)
+ *
+ *  - 1 cycle = 62.5 ns
+ *  - Function call overhead: ~375 ns (before loop starts)
+ *
+ *  - Example delays (including call overhead):
+ *
+ *      outer=1, inner=1:
+ *          innerLoopCycles = 3
+ *          totalCycles = 3 + 3 = 6 cycles
+ *          delay = (6 * 62.5 ns) + 375 ns = 750 ns
+ *
+ *      outer=1, inner=2:
+ *          innerLoopCycles = 7
+ *          totalCycles = 7 + 3 = 10 cycles
+ *          delay = (10 * 62.5 ns) + 375 ns = 1.0 µs
+ *
+ *      outer=1, inner=3:
+ *          innerLoopCycles = 11
+ *          totalCycles = 11 + 3 = 14 cycles
+ *          delay = (14 * 62.5 ns) + 375 ns = 1.25 µs
+ *
+ *      outer=1, inner=4:
+ *          innerLoopCycles = 15
+ *          totalCycles = 15 + 3 = 18 cycles
+ *          delay = (18 * 62.5 ns) + 375 ns = 1.5 µs
+ *
+ *      outer=2, inner=1:
+ *          innerLoopCycles = 3
+ *          totalCycles = (1)*(3+4) + (3+3) = (7) + (6) =13 cycles
+ *          delay = (13 * 62.5 ns) + 375 ns =1.1875 µs
+ *
+ *      outer=3, inner=1:
+ *          innerLoopCycles = 3
+ *          totalCycles = (2)*(3+4) + (3+3) = (2*7) +6 =14+6=20 cycles
+ *          delay = (20 *62.5 ns) +375 ns =1.625 µs
+ *
+ *      outer=10, inner=10:
+ *          innerLoopCycles = (10-1)*4 +3 =39
+ *          totalCycles = (9)*(39+4) + (39+3) = (9*43) +42 =387+42=429 cycles
+ *          delay = (429*62.5 ns)+375 ns =26.8 µs +375 ns ≈27.2 µs
+ *
+ * Use this function for precise longer delays.
+ */
 void asmWait(uint16_t outerLoopCount, uint16_t innerLoopCount)
 {
   asm volatile(

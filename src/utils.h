@@ -9,11 +9,23 @@
 
 #include <Arduino.h>
 
+/**
+ * Wait for exactly 1 CPU cycles (1× nop), total delay:
+ *   - 16 MHz CPU: 62.5 ns
+ *   - Each nop = 62.5 ns
+ */
+#define asmShortNoop() __asm__ __volatile__("nop")
+
+/**
+ * Wait for exactly 2 CPU cycles (2× nop), total delay:
+ *   - 16 MHz CPU: 125 ns
+ *   - Each nop = 62.5 ns
+ */
+#define asmNoop() __asm__ __volatile__("nop\nnop")
+
 char *uint8ToBinary(uint8_t value, char *buffer);
 char pinStatus(bool value);
 char busStatus(uint8_t value);
-
-void asmNoop();
 
 void asmWait(uint16_t wait);
 void asmWait(uint16_t outerLoopCount, uint16_t innerLoopCount);

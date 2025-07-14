@@ -37,8 +37,9 @@ private:
     DataBus *_dataBus;
 
     volatile bool _mutability;
-    volatile uint8_t _nextMemoryRefreshRow;
+    uint8_t _nextMemoryRefreshRow;
     volatile bool _activeRefresh;
+    int _timer;
 
     EventMemoryReadCallback _memoryReadCallback = nullptr;
     EventMemoryWriteCallback _memoryWriteCallback = nullptr;
@@ -57,7 +58,8 @@ private:
     void _initSystemControlSignals();
     void _initExternalControlSignals();
 
-    void _setupMemoryRefresh();
+    void _setupMemoryRefreshTimer1();
+    void _setupMemoryRefreshTimer2();
     void _activateMemoryRefresh();
     void _deactivateMemoryRefresh();
 
@@ -82,7 +84,7 @@ public:
     Model1(ILogger *logger = nullptr);
     ~Model1();
 
-    void begin(bool memoryRefresh = false);
+    void begin(int refreshTimer = -1);
     void end();
 
     // ---------- Address Space

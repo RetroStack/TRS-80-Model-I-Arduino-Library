@@ -11,7 +11,7 @@ SerialLogger *logger;
 void setup()
 {
     // Setup the serial interface
-    Serial.begin(9600); // baud rate
+    Serial.begin(500000); // baud rate
 
     // Initialize the serial logger
     logger = new SerialLogger();
@@ -20,15 +20,20 @@ void setup()
     model1 = new Model1(logger);
 
     // Be sure to configure the DRAM refresh and setup the hardware pins
-    // It uses the Timer1, but you can set this to false and setup your own timer.
-    model1->begin(true);
+    // It uses the Timer 2, but you can set this to false and setup your own timer.
+    model1->begin(2); // Timer 2
+
+    // You can also use Timer 1, but this is often used for lots of other things
+    // Timer 0 is not allowed and won't do anything. -1 turns this off.
+
+    Serial.println("Started");
 
     // Give the system a bit of time to start up
     delay(5000);
 }
 
-// Define a callback for the timer1
-ISR(TIMER1_COMPA_vect)
+// Define a callback for Timer 2
+ISR(TIMER2_COMPA_vect)
 {
     // Trigger a refresh to happen
     model1->refreshNextMemoryRow();
@@ -37,8 +42,8 @@ ISR(TIMER1_COMPA_vect)
 void loop()
 {
     // Activate the test signal
-    model1->activateTestSignal();
     Serial.println("Activated");
+    model1->activateTestSignal();
 
     // At this point, the Arduino took over the execution of the Model 1
     // With the refresh interrupt above, we make sure that the DRAM is refreshed regularly
@@ -53,5 +58,5 @@ void loop()
     // At this point, you should be able to use the Model 1 again as normal
 
     // Let's give it 20 seconds before we go back in the loop and lock things up again.
-    delay(20000);
+    delay(5000);
 }

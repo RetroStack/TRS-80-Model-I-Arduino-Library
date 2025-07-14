@@ -3,6 +3,21 @@
 #include "port_config.h"
 #include "port_macros.h"
 
+// Refresh trigger
+//
+// Fasted possible with current code:
+//   (71+1) × 62.5ns = 4.5µs -> 4.5µs * 128 rows => 0.576ms
+//
+// Reasonable:
+//   (89+1) × 62.5ns = 5.625µs -> 5.625µs * 128 rows => 0.720ms
+//
+// Reasonable:
+//   (100+1) × 62.5ns = 6.3125µs -> 6.3125µs * 128 rows => 0.808ms
+//
+// Minimum needed:
+//   (124+1) × 62.5ns = 7.8125µs -> 7.8125µs * 128 rows => 1.0ms
+#define CTC_TRIGGER 89
+
 // Version constants
 const uint8_t VERSION_MAJOR = 0;
 const uint8_t VERSION_MINOR = 9;
@@ -24,6 +39,7 @@ Model1::Model1(ILogger *logger)
 
     _addressBus = new AddressBus(logger);
     _dataBus = new DataBus(logger);
+    _timer = -1; // Set to default off
 
     // Register the first Model 1 initialized for interrupt/event handling
     if (globalModel1)
@@ -46,7 +62,7 @@ Model1::Model1(ILogger *logger)
 /**
  * Hardware initialization
  */
-void Model1::begin(bool memoryRefresh = false)
+void Model1::begin(int refreshTimer = -1)
 {
     _addressBus->begin();
     _dataBus->begin();
@@ -60,9 +76,14 @@ void Model1::begin(bool memoryRefresh = false)
     // _setupMemoryInterrupts();
     // _setupIOInterrupts();
 
-    if (memoryRefresh)
+    _timer = refreshTimer;
+    if (refreshTimer == 1)
     {
-        _setupMemoryRefresh();
+        _setupMemoryRefreshTimer1();
+    }
+    else if (refreshTimer == 2)
+    {
+        _setupMemoryRefreshTimer2();
     }
 }
 
@@ -235,9 +256,9 @@ bool Model1::_checkMutability()
 // ----------------------------------------
 
 /**
- * Sets up a predefined memory refresh interrupt
+ * Sets up a predefined memory refresh interrupt for Timer 1
  */
-void Model1::_setupMemoryRefresh()
+void Model1::_setupMemoryRefreshTimer1()
 {
     uint8_t oldSREG = SREG;
     noInterrupts();
@@ -246,12 +267,34 @@ void Model1::_setupMemoryRefresh()
     TCCR1A = 0;
     TCCR1B = 0;
     TCNT1 = 0;
+    TIMSK1 &= ~(1 << OCIE1A);
 
-    OCR1A = 250; // ~15.6us -> 15.6us * 128 rows => !0.002ms
+    OCR1A = CTC_TRIGGER;
 
-    TCCR1B |= (1 << WGM12);  // Turn on CTC mode
-    TCCR1B |= (1 << CS10);   // Set prescaler to 1
-    TIMSK1 |= (1 << OCIE1A); // Enable timer compare interrupt
+    TCCR1B |= (1 << WGM12); // Turn on CTC mode
+    TCCR1B |= (1 << CS10);  // Set prescaler to 1
+
+    SREG = oldSREG;
+}
+
+/**
+ * Sets up a predefined memory refresh interrupt for Timer 2
+ */
+void Model1::_setupMemoryRefreshTimer2()
+{
+    uint8_t oldSREG = SREG;
+    noInterrupts();
+
+    // Reset and init
+    TCCR2A = 0;
+    TCCR2B = 0;
+    TCNT2 = 0;
+    TIMSK2 &= ~(1 << OCIE2A);
+
+    OCR2A = CTC_TRIGGER;
+
+    TCCR2A |= (1 << WGM21); // Turn on CTC mode
+    TCCR2B |= (1 << CS20);  // Set prescaler to 1
 
     SREG = oldSREG;
 }
@@ -262,6 +305,16 @@ void Model1::_setupMemoryRefresh()
 void Model1::_activateMemoryRefresh()
 {
     _activeRefresh = true;
+    if (_timer == 1)
+    {
+        TCNT1 = 0;
+        TIMSK1 |= (1 << OCIE1A); // Enable timer compare interrupt
+    }
+    else if (_timer == 2)
+    {
+        TCNT2 = 0;
+        TIMSK2 |= (1 << OCIE2A); // Enable timer compare interrupt
+    }
 }
 
 /**
@@ -269,45 +322,41 @@ void Model1::_activateMemoryRefresh()
  */
 void Model1::_deactivateMemoryRefresh()
 {
+    if (_timer == 1)
+    {
+        TIMSK1 &= ~(1 << OCIE1A); // Disable timer compare interrupt
+    }
+    else if (_timer == 2)
+    {
+        TIMSK2 &= ~(1 << OCIE2A); // Disable timer compare interrupt
+    }
     _activeRefresh = false;
-    _nextMemoryRefreshRow = 0;
 }
 
 /**
  * Refreshes the next row-address for dynamic RAM.
  *
- * NOTE: The function keeps track of the address counting.
+ * NOTE: The function keeps track of the address counting. Make sure the bus is mutable before calling this.
  */
 void Model1::refreshNextMemoryRow()
 {
-    if (!_activeRefresh)
-        return;
-    if (!_mutability) // Need direct check here to improve performance; instead _checkMutability
-        return;
-
-    uint8_t oldSREG = SREG;
-    noInterrupts();
-
+    // This function expects mutibility as well as that the refresh is activated
     uint8_t currentRefreshRow = _nextMemoryRefreshRow;
 
-    // Prepare next address
-    _nextMemoryRefreshRow++;
-    if (_nextMemoryRefreshRow >= 128)
-    {
-        _nextMemoryRefreshRow = 0;
-    }
+    // Prepare next address; quicker way to manage overflow
+    _nextMemoryRefreshRow = (_nextMemoryRefreshRow + 1) & 0x7F;
 
-    // Set address and then data
+    // Set address
     _addressBus->writeRefreshAddress(currentRefreshRow);
 
     // Timing of various signals
-    pinWrite(RAS, LOW);
-    asmWait(1);
+    pinWrite(RAS, LOW); // 45ns (62.5ns, but when the pulse is down)
+    asmNoop();          // 125ns
+    asmNoop();          // 125ns
+    asmNoop();          // 125ns
 
     // Reset, leaving address as-is
-    pinWrite(RAS, HIGH);
-
-    SREG = oldSREG;
+    pinWrite(RAS, HIGH); // 45ns (62.5ns, but when the pulse is down)
 }
 
 // ----------------------------------------
@@ -334,7 +383,7 @@ uint8_t Model1::readMemory(uint16_t address)
     pinWrite(RD, LOW);
     pinWrite(MUX, HIGH);
     pinWrite(CAS, LOW);
-    asmWait(3);
+    asmWait(3); // 772 ns
 
     // Read data
     uint8_t data = _dataBus->readData();
@@ -377,7 +426,7 @@ void Model1::writeMemory(uint16_t address, uint8_t data)
     pinWrite(WR, LOW);
     pinWrite(MUX, HIGH);
     pinWrite(CAS, LOW);
-    asmWait(1);
+    asmWait(1); // 252 ns
 
     // Reset, leaving address as-is, removing data
     pinWrite(WR, HIGH);
@@ -608,7 +657,7 @@ void Model1::writeIO(uint8_t address, uint8_t data)
     pinWrite(OUT, LOW);
     pinWrite(MUX, HIGH);
     pinWrite(CAS, LOW);
-    asmWait(1);
+    asmWait(1); // 252 ns
 
     // Reset, leving address as-is, removing data
     pinWrite(CAS, HIGH);
@@ -946,7 +995,10 @@ void Model1::activateTestSignal()
     _setMutable();
 
     // Activate background services
-    _activateMemoryRefresh();
+    if (_timer != -1)
+    {
+        _activateMemoryRefresh();
+    }
 }
 
 /**
@@ -962,7 +1014,10 @@ void Model1::deactivateTestSignal()
     }
 
     // Deactivate background services
-    _deactivateMemoryRefresh();
+    if (_timer != -1)
+    {
+        _deactivateMemoryRefresh();
+    }
 
     // Set bus as immutable, blocking write requests from this code
     _setImmutable();
