@@ -12,23 +12,6 @@
 #include "AddressBus.h"
 #include "DataBus.h"
 
-const uint8_t EVENT_MEMORY_READ = 1;
-const uint8_t EVENT_MEMORY_WRITE = 2;
-const uint8_t EVENT_IO_READ = 3;
-const uint8_t EVENT_IO_WRITE = 4;
-
-struct EventData
-{
-    uint8_t type;
-    uint16_t address;
-    uint8_t data;
-};
-
-typedef void (*EventMemoryReadCallback)(const EventData &);
-typedef void (*EventMemoryWriteCallback)(const EventData &);
-typedef void (*EventIOReadCallback)(const EventData &);
-typedef void (*EventIOWriteCallback)(const EventData &);
-
 class Model1
 {
 private:
@@ -40,14 +23,6 @@ private:
     uint8_t _nextMemoryRefreshRow;
     volatile bool _activeRefresh;
     int _timer;
-
-    EventMemoryReadCallback _memoryReadCallback = nullptr;
-    EventMemoryWriteCallback _memoryWriteCallback = nullptr;
-
-    EventIOReadCallback _ioReadCallback = nullptr;
-    EventIOWriteCallback _ioWriteCallback = nullptr;
-
-    EventData *_createEventData(uint8_t type);
 
     void _setMutable();
     void _setImmutable();
@@ -62,11 +37,6 @@ private:
     void _setupMemoryRefreshTimer2();
     void _activateMemoryRefresh();
     void _deactivateMemoryRefresh();
-
-    void _setupMemoryInterrupts();
-    void _removeMemoryInterrupts();
-    void _setupIOInterrupts();
-    void _removeIOInterrupts();
 
     void _activateBusControlSignals();
     void _deactivateBusControlSignals();
@@ -111,21 +81,9 @@ public:
     void fillMemory(uint8_t fill_data, uint16_t address, uint16_t length);
     void fillMemory(uint8_t *fill_data, uint16_t length, uint16_t start_address, uint16_t end_address);
 
-    void setMemoryReadCallback(EventMemoryReadCallback callback);
-    void triggerMemoryReadEvent();
-
-    void setMemoryWriteCallback(EventMemoryWriteCallback callback);
-    void triggerMemoryWriteEvent();
-
     // ---------- IO
     uint8_t readIO(uint8_t address);
     void writeIO(uint8_t address, uint8_t data);
-
-    void setIOReadCallback(EventIOReadCallback callback);
-    void triggerIOReadEvent();
-
-    void setIOWriteCallback(EventIOWriteCallback callback);
-    void triggerIOWriteEvent();
 
     // ---------- System Control Signals
     bool readSystemResetSignal();

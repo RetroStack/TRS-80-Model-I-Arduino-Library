@@ -73,9 +73,6 @@ void Model1::begin(int refreshTimer = -1)
     _deactivateBusControlSignals();
     _deactivateBusAccessSignals();
 
-    // _setupMemoryInterrupts();
-    // _setupIOInterrupts();
-
     _timer = refreshTimer;
     if (refreshTimer == 1)
     {
@@ -92,8 +89,6 @@ void Model1::begin(int refreshTimer = -1)
  */
 void Model1::end()
 {
-    _removeMemoryInterrupts();
-    _removeIOInterrupts();
 }
 
 /**
@@ -109,28 +104,6 @@ Model1::~Model1()
 
     delete _addressBus;
     delete _dataBus;
-}
-
-/**
- * Constructs the event data
- */
-EventData *Model1::_createEventData(uint8_t type)
-{
-    // Remember the old interrupt values
-    uint8_t oldSREG = SREG;
-
-    // Turn off interrupts (if it isn't already)
-    noInterrupts();
-
-    EventData *data = new EventData;
-    data->type = type;
-    data->address = _addressBus->readMemoryAddress();
-    data->data = _dataBus->readData();
-
-    // Restore previous interrupt configuration (may need interrupts to be off still)
-    SREG = oldSREG;
-
-    return data;
 }
 
 // ----------------------------------------
@@ -519,84 +492,6 @@ void Model1::fillMemory(uint8_t *fill_data, uint16_t length, uint16_t start_addr
     }
 }
 
-/**
- * Internal memory read interrupt handler
- */
-void handleMemoryRead()
-{
-    if (globalModel1)
-        globalModel1->triggerMemoryReadEvent();
-}
-
-/**
- * Internal memory write interrupt handler
- */
-void handleMemoryWrite()
-{
-    if (globalModel1)
-        globalModel1->triggerMemoryWriteEvent();
-}
-
-/**
- * Sets up all the memory related interrupts
- */
-void Model1::_setupMemoryInterrupts()
-{
-    attachInterrupt(digitalPinToInterrupt(PIN_RD), handleMemoryRead, FALLING);
-    attachInterrupt(digitalPinToInterrupt(PIN_WR), handleMemoryWrite, FALLING);
-}
-
-/**
- * Removes all the memory related interrupts
- */
-void Model1::_removeMemoryInterrupts()
-{
-    detachInterrupt(digitalPinToInterrupt(PIN_RD));
-    detachInterrupt(digitalPinToInterrupt(PIN_WR));
-}
-
-/**
- * Sets a callback for memory read access
- */
-void Model1::setMemoryReadCallback(EventMemoryReadCallback callback)
-{
-    _memoryReadCallback = callback;
-}
-
-/**
- * Triggers the memory read event
- */
-void Model1::triggerMemoryReadEvent()
-{
-    if (_memoryReadCallback)
-    {
-        EventData *data = _createEventData(EVENT_MEMORY_READ);
-        _memoryReadCallback(*data);
-        delete data;
-    }
-}
-
-/**
- * Sets a callback for memory write access
- */
-void Model1::setMemoryWriteCallback(EventMemoryWriteCallback callback)
-{
-    _memoryWriteCallback = callback;
-}
-
-/**
- * Triggers the memory write event
- */
-void Model1::triggerMemoryWriteEvent()
-{
-    if (_memoryWriteCallback)
-    {
-        EventData *data = _createEventData(EVENT_MEMORY_WRITE);
-        _memoryWriteCallback(*data);
-        delete data;
-    }
-}
-
 // ----------------------------------------
 // ---------- IO
 // ----------------------------------------
@@ -666,84 +561,6 @@ void Model1::writeIO(uint8_t address, uint8_t data)
     _dataBus->setAsReadable();
 
     SREG = oldSREG;
-}
-
-/**
- * Internal IO read interrupt handler
- */
-void handleIORead()
-{
-    if (globalModel1)
-        globalModel1->triggerIOReadEvent();
-}
-
-/**
- * Internal IO write interrupt handler
- */
-void handleIOWrite()
-{
-    if (globalModel1)
-        globalModel1->triggerIOWriteEvent();
-}
-
-/**
- * Sets up all the IO related interrupts
- */
-void Model1::_setupIOInterrupts()
-{
-    attachInterrupt(digitalPinToInterrupt(PIN_IN), handleIORead, FALLING);
-    attachInterrupt(digitalPinToInterrupt(PIN_OUT), handleIOWrite, FALLING);
-}
-
-/**
- * Removes all the IO related interrupts
- */
-void Model1::_removeIOInterrupts()
-{
-    detachInterrupt(digitalPinToInterrupt(PIN_IN));
-    detachInterrupt(digitalPinToInterrupt(PIN_OUT));
-}
-
-/**
- * Sets a callback for IO read access
- */
-void Model1::setIOReadCallback(EventIOReadCallback callback)
-{
-    _ioReadCallback = callback;
-}
-
-/**
- * Triggers the IO read event
- */
-void Model1::triggerIOReadEvent()
-{
-    if (_ioReadCallback)
-    {
-        EventData *data = _createEventData(EVENT_IO_READ);
-        _ioReadCallback(*data);
-        delete data;
-    }
-}
-
-/**
- * Sets a callback for IO write access
- */
-void Model1::setIOWriteCallback(EventIOWriteCallback callback)
-{
-    _ioWriteCallback = callback;
-}
-
-/**
- * Triggers the IO write event
- */
-void Model1::triggerIOWriteEvent()
-{
-    if (_ioWriteCallback)
-    {
-        EventData *data = _createEventData(EVENT_IO_WRITE);
-        _ioWriteCallback(*data);
-        delete data;
-    }
 }
 
 // ----------------------------------------

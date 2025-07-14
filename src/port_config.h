@@ -45,25 +45,21 @@ const uint8_t PIN_MUX_OFF = ~(0b00000001 << 0);
 const uint8_t PIN_RD_ON = 0b00000001 << 2;
 const uint8_t PIN_RD_OFF = ~(0b00000001 << 2);
 #define PIN_RD_PORT D
-#define PIN_RD 19 // for Interrupt
 
 // Port G, Bit(0) 1, Pin 40
 const uint8_t PIN_WR_ON = 0b00000001 << 1;
 const uint8_t PIN_WR_OFF = ~(0b00000001 << 1);
 #define PIN_WR_PORT G
-#define PIN_WR 40 // for Interrupt
 
 // Port D, Bit(0) 3, Pin 18
 const uint8_t PIN_IN_ON = 0b00000001 << 3;
 const uint8_t PIN_IN_OFF = ~(0b00000001 << 3);
 #define PIN_IN_PORT D
-#define PIN_IN 18 // for Interrupt
 
 // Port D, Bit(0) 7, Pin 38
 const uint8_t PIN_OUT_ON = 0b00000001 << 7;
 const uint8_t PIN_OUT_OFF = ~(0b00000001 << 7);
 #define PIN_OUT_PORT D
-#define PIN_OUT 38 // for Interrupt
 
 // Port L, Bit(0) 1, Pin 48
 const uint8_t PIN_INT_ON = 0b00000001 << 1;
