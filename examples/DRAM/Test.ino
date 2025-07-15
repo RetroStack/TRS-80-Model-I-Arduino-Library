@@ -22,6 +22,10 @@ struct TestResult
 
 struct TestSuiteResult
 {
+    TestResult repeatedWriteNormal;
+    TestResult repeatedWriteInverted;
+    TestResult repeatedReadNormal;
+    TestResult repeatedReadInverted;
     TestResult checkerboardNormal;
     TestResult checkerboardInverted;
     TestResult walkingOnes;
@@ -78,6 +82,60 @@ ISR(TIMER2_COMPA_vect)
 {
     // Trigger a refresh to happen
     model1->refreshNextMemoryRow();
+}
+
+TestResult runRepeatedWriteTest(uint16_t start, uint16_t length, bool toggleStart)
+{
+    uint8_t data;
+    INIT_TEST_RESULT;
+
+    Serial.print("Repeated Write Test");
+
+    Serial.print(".");
+    for (uint16_t i = 0; i < length; i++)
+    {
+        for (uint16_t j = 0; j < 5; j++)
+        {
+            model1->writeMemory(start + i, 0x55);
+        }
+    }
+    Serial.print(".");
+    for (uint16_t i = 0; i < length; i++)
+    {
+        data = model1->readMemory(start + i);
+        uint8_t diff = data ^ 0x55;
+        UPDATE_ERRORS(diff);
+    }
+    Serial.println();
+
+    return result;
+}
+
+TestResult runRepeatedReadTest(uint16_t start, uint16_t length, bool toggleStart)
+{
+    uint8_t data;
+    INIT_TEST_RESULT;
+
+    Serial.print("Repeated Read Test");
+
+    Serial.print(".");
+    for (uint16_t i = 0; i < length; i++)
+    {
+        model1->writeMemory(start + i, 0x55);
+    }
+    Serial.print(".");
+    for (uint16_t i = 0; i < length; i++)
+    {
+        for (uint16_t j = 0; j < 5; j++)
+        {
+            data = model1->readMemory(start + i);
+        }
+        uint8_t diff = data ^ 0x55;
+        UPDATE_ERRORS(diff);
+    }
+    Serial.println();
+
+    return result;
 }
 
 TestResult runCheckerboardTest(uint16_t start, uint16_t length, bool toggleStart)
@@ -503,6 +561,10 @@ TestSuiteResult runMemoryTestSuite(uint16_t start, uint16_t length)
 {
     TestSuiteResult suite = {};
 
+    suite.repeatedWriteNormal = runRepeatedWriteTest(start, length, true);
+    suite.repeatedWriteInverted = runRepeatedWriteTest(start, length, false);
+    suite.repeatedReadNormal = runRepeatedReadTest(start, length, true);
+    suite.repeatedReadInverted = runRepeatedReadTest(start, length, false);
     suite.checkerboardNormal = runCheckerboardTest(start, length, true);
     suite.checkerboardInverted = runCheckerboardTest(start, length, false);
     suite.walkingOnes = runWalkingOnesTest(start, length);
@@ -547,6 +609,10 @@ void runAndEvaluate(uint16_t start, uint16_t length, const char *icRefs[8])
     // Serial.println();
     // Serial.println("--- Per-Test Results ---");
 
+    // printResult("Repeated Write Normal", suite.repeatedWriteNormal, icRefs);
+    // printResult("Repeated Write Inverted", suite.repeatedWriteInverted, icRefs);
+    // printResult("Repeated Read Normal", suite.repeatedReadNormal, icRefs);
+    // printResult("Repeated Read Inverted", suite.repeatedReadInverted, icRefs);
     // printResult("Checkerboard Normal", suite.checkerboardNormal, icRefs);
     // printResult("Checkerboard Inverted", suite.checkerboardInverted, icRefs);
     // printResult("Walking Ones", suite.walkingOnes, icRefs);
@@ -572,6 +638,10 @@ void runAndEvaluate(uint16_t start, uint16_t length, const char *icRefs[8])
 
     // 2) Create a pointer array to all TestResults for iteration
     const TestResult *allResults[] = {
+        &suite.repeatedWriteNormal,
+        &suite.repeatedWriteInverted,
+        &suite.repeatedReadNormal,
+        &suite.repeatedReadInverted,
         &suite.checkerboardNormal,
         &suite.checkerboardInverted,
         &suite.walkingOnes,
@@ -660,16 +730,4 @@ void loop()
     Serial.println("====================================");
     Serial.println("DRAM Tests");
     runAndEvaluate(dramStart, dramLength, dramICs);
-
-    Serial.println("====================================");
-    Serial.println("====================================");
-    Serial.println("====================================");
-    Serial.println("====================================");
-    Serial.println("====================================");
-    Serial.println("====================================");
-    Serial.println("====================================");
-    Serial.println("====================================");
-    Serial.println("====================================");
-    Serial.println("====================================");
-    Serial.println("====================================");
 }
