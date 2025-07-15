@@ -107,6 +107,7 @@ TestResult runCheckerboardTest(uint16_t start, uint16_t length, bool toggleStart
         {
             model1->writeMemory(start + i, 0xAA);
         }
+        toggle = !toggle;
     }
     Serial.print(".");
     for (uint16_t i = 0, toggle = toggleStart; i < length; i++)
@@ -122,6 +123,7 @@ TestResult runCheckerboardTest(uint16_t start, uint16_t length, bool toggleStart
             uint8_t diff = data ^ 0xAA;
             UPDATE_ERRORS(diff);
         }
+        toggle = !toggle;
     }
     Serial.println();
 

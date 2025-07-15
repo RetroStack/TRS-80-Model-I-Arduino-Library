@@ -802,6 +802,9 @@ void Model1::activateTestSignal()
     // Activate the TEST* signal
     _setTestSignal(true);
 
+    // Wait to avoid contention
+    asmWait(16); // Wait 4us. Only need 3 (value 12) for 5T, but this is to be safe
+
     // Set the signals as active from external system
     _addressBus->setAsWritable();
     _dataBus->setAsReadable();
@@ -847,6 +850,9 @@ void Model1::deactivateTestSignal()
 
     // Deactivate TEST* signal
     _setTestSignal(false);
+
+    // Wait to avoid contention
+    asmWait(16); // Wait 4us. Only need 3 (value 12) for 5T, but this is to be safe
 }
 
 // ---------- Wait Signal

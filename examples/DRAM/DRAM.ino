@@ -57,6 +57,6 @@ void loop()
 
     // At this point, you should be able to use the Model 1 again as normal
 
-    // Let's give it 20 seconds before we go back in the loop and lock things up again.
+    // Let's give it 5 seconds before we go back in the loop and lock things up again.
     delay(5000);
 }
