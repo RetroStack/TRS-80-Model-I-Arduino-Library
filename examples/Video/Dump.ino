@@ -24,30 +24,47 @@ void setup()
     // Be sure to setup the hardware pins
     model1->begin();
 
+    // Initialize the video interface
     video = new Video(model1);
 }
 
 void loop()
 {
-    model1->activateWaitSignal();
+    // Quickly activate TEST signal
     model1->activateTestSignal();
+
+    // Read all bytes of the video memory (1k at 0x3C00)
+    // And record it in a local array for display since we want to keep this quick.
     for (uint16_t i = 0; i < 1024; i++)
     {
         videoMemory[i] = model1->readMemory(0x3C00 + i);
     }
+
+    // Deactivate TEST signal
     model1->deactivateTestSignal();
-    model1->deactivateWaitSignal();
 
     Serial.println("---- Video Memory Dump ----");
 
+    // Start printing all characters one-by-one from the array
     for (uint16_t y = 0; y < 16; y++)
     {
         for (uint16_t x = 0; x < 64; x++)
         {
-            Serial.print(video->convertModel1CharacterToLocal((char)videoMemory[x + (y * 64)]));
+            // Calculate the x/y address in a two dimensional array
+            int addr = x + (y * 64);
+
+            // Convert from byte to character
+            char character = (char)videoMemory[addr];
+
+            // Convert from Model 1 character set to the local system character set
+            character = video->convertModel1CharacterToLocal(character);
+
+            // Print the character to the serial port
+            Serial.print(character);
         }
-        Serial.println();
+        Serial.println(); // Finish the line
     }
 
+    // Let's pause this for 1 second to then fetch a new screenshot
     delay(1000);
 }
