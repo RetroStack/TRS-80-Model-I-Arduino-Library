@@ -21,7 +21,7 @@
 // Version constants
 const uint8_t VERSION_MAJOR = 0;
 const uint8_t VERSION_MINOR = 9;
-const uint8_t VERSION_REVISION = 4;
+const uint8_t VERSION_REVISION = 5;
 
 /**
  * Tracking the first instance create for interrupt/event handling
