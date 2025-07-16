@@ -52,11 +52,13 @@ _(Link will be updated once the repository is public.)_
 **⚠️ WARNING:**  
 When connecting to hardware, you often need to connect everything, turn the Model I on, and ensure it is in a good state **before** powering the Arduino. Many scripts assert the `TEST*` signal to take over execution. This is safe if the Model I has fully booted but can corrupt memory or cause instability if asserted immediately on startup.
 
-## Main TRS-80 Model I Repository
+## Main TRS-80 Model 1 Repository
 
-For additional resources related to the TRS-80 Model I, be sure to check out the central project page on RetroStack:
+For additional resources related to the TRS-80 Model 1, be sure to check out the [central page for the TRS-80 Model 1](https://www.github.com/RetroStack/TRS-80-Model-I) on [RetroStack](https://www.github.com/RetroStack).
 
-[RetroStack – TRS-80 Model I](https://www.github.com/RetroStack/TRS-80-Model-I)
+## Support this Project
+
+RetroStack is passionate about exploring and preserving the legacy of older computer systems. My work involves creating detailed documentation and videos to share the knowledge. I am also dedicated to reviving these classic systems by reimplementing them and offering replacement parts at no cost. If you're keen on supporting this unique project, I invite you to visit my [Patreon page](https://www.patreon.com/RetroStack). Your support would be immensely valuable and greatly appreciated!
 
 ## License
 
