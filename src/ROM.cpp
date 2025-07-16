@@ -23,8 +23,8 @@ const char SYS80_ROM4[] PROGMEM = "System-80-ROM-4 Blue Label";
 const char SYS80_ROM3[] PROGMEM = "System-80-ROM-3 Blue Label";
 const char SYS80_ROM2[] PROGMEM = "System-80-ROM-2 Black Label";
 const char SYS80_ROM1[] PROGMEM = "System-80-ROM-1 Black Label";
-const char LMW80_ROM2[] PROGMEM = "LNW-80 Rom 2";
-const char LMW80_ROM1[] PROGMEM = "LNW-80 Rom 1";
+const char LNW80_ROM2[] PROGMEM = "LNW-80 Rom 2";
+const char LNW80_ROM1[] PROGMEM = "LNW-80 Rom 1";
 const char HT1080Z[] PROGMEM = "HT-1080z v2.2 HT-1080Z";
 const char L2V1_3_TEC_KANA[] PROGMEM = "LII v1.3 TEC Kana";
 const char L2V1_3_TEC[] PROGMEM = "LII v1.3 TEC";
@@ -48,8 +48,8 @@ const ROMSignature signatures[] PROGMEM = {
     {SYS80_ROM3, 0xA94F, 0xDA67, 0x40BA, 0xB4AD},
     {SYS80_ROM2, 0xA94F, 0xDA67, 0x40BA, 0x0000},
     {SYS80_ROM1, 0xA94F, 0xDA67, 0x40BA, 0x0000},
-    {LMW80_ROM2, 0xAB79, 0xDA56, 0x40BA, 0x0000},
-    {LMW80_ROM1, 0xAB79, 0xDA45, 0x40BA, 0x0000},
+    {LNW80_ROM2, 0xAB79, 0xDA56, 0x40BA, 0x0000},
+    {LNW80_ROM1, 0xAB79, 0xDA45, 0x40BA, 0x0000},
     {HT1080Z, 0xC437, 0xDA30, 0x40BA, 0x0000},
     {L2V1_3_TEC_KANA, 0xA1CA, 0xDA45, 0x3DC0, 0x75AA},
     {L2V1_3_TEC, 0xA1CA, 0xDA45, 0x3DC0, 0x0000},
