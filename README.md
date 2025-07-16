@@ -9,10 +9,11 @@ This Arduino library enables interfacing a TRS-80 Model I mainboard directly wit
 - Direct connection to the TRS-80 Model I system bus via the edge connector.
 - Control over the address and data bus, abstracted in an easy-to-use interface.
 - **Model1 Class**
-  - Provides convenience functions to check address spaces.
   - Enables reading and writing to all addresses, including video RAM, DRAM, ROM (read-only), keyboard, and any other address space you want to inspect or modify.
+  - Provides support for DRAM refresh
   - Supports I/O access as well.
   - Additional support for interrupt, WAIT, and TEST signals.
+  - Provides convenience functions to check address spaces.
 - **Other Classes**
   - **Cassette** – Higher-level access for the cassette interface.
   - **Keyboard** – Class to read keyboard state, including press and release events.
