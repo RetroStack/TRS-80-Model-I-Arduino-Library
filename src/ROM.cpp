@@ -40,6 +40,7 @@ const char L1V1_2[] PROGMEM = "LI v1.2";
 const char L1V1_1[] PROGMEM = "LI v1.1";
 const char L1V1_0[] PROGMEM = "LI v1.0";
 
+// Information sourced from https://www.trs-80.com/wordpress/roms/checksums-mod-1/
 // Entries in reverse order
 const ROMSignature signatures[] PROGMEM = {
     {SYS80_ROM5, 0xA74E, 0xDA67, 0x40BA, 0x0000},
