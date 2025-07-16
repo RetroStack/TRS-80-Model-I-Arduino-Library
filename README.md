@@ -26,8 +26,6 @@ This Arduino library enables interfacing a TRS-80 Model I mainboard directly wit
 
 You can find detailed documentation of all features [here](/docs).
 
-![Overview](/Images/Overview.png)
-
 ## Hardware Requirements
 
 - **Arduino Mega 2560** (required)
@@ -41,7 +39,7 @@ A dedicated shield is available to make the connection cleaner and more reliable
 
 [TRS-80 Model I Arduino Shield](LINK_TO_SHIELD_DOCS)
 
-*(Link will be updated once the repository is public.)*
+_(Link will be updated once the repository is public.)_
 
 ## Installation
 
