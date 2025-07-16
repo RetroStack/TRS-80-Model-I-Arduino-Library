@@ -18,6 +18,8 @@ This Arduino library enables interfacing a TRS-80 Model I mainboard directly wit
   - **Keyboard** – Class to read keyboard state, including press and release events.
   - **ROM** – Access to ROM content and checksum comparison.
   - **Video** – Provides direct access to video reading/writing, including viewports with scrolling support.
+  - **ILogger** - Standard interface for all logging events.
+  - **SerialLogger** - Specific implementation of an ILogger for Serial logging.
 
 ## Documentation
 
