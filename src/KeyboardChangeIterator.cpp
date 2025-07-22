@@ -30,8 +30,8 @@ const uint8_t lookupTable[8][8] PROGMEM = {
     {'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'},                                                                         // 3802
     {'p', 'q', 'r', 's', 't', 'u', 'v', 'w'},                                                                         // 3804
     {'x', 'y', 'z', KEY_UNUSED_1, KEY_UNUSED_2, KEY_UNUSED_3, KEY_UNUSED_4, KEY_UNUSED_5},                            // 3808
-    {'0', '!', '"', '#', '$', '%', '&', '\''},                                                                        // 3810
-    {'(', ')', '*', '+', '<', '=', '>', '?'},                                                                         // 3820
+    {'0', '1', '2', '3', '4', '5', '6', '7'},                                                                         // 3810
+    {'8', '9', ':', ';', ',', '-', '.', '/'},                                                                         // 3820
     {KEY_ENTER, KEY_CLEAR, KEY_BREAK, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_SPACE},                              // 3840
     {KEY_SHIFT, KEY_UNUSED_6, KEY_UNUSED_7, KEY_UNUSED_8, KEY_UNUSED_9, KEY_UNUSED_10, KEY_UNUSED_11, KEY_UNUSED_12}, // 3860
 };
@@ -40,8 +40,8 @@ const uint8_t lookupTableShift[8][8] PROGMEM = {
     {'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'},                                                                         // 3802
     {'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W'},                                                                         // 3804
     {'X', 'Y', 'Z', KEY_UNUSED_1, KEY_UNUSED_2, KEY_UNUSED_3, KEY_UNUSED_4, KEY_UNUSED_5},                            // 3808
-    {'0', '1', '2', '3', '4', '5', '6', '7'},                                                                         // 3810
-    {'8', '9', ':', ';', ',', '-', '.', '/'},                                                                         // 3820
+    {'0', '!', '"', '#', '$', '%', '&', '\''},                                                                        // 3810
+    {'(', ')', '*', '+', '<', '=', '>', '?'},                                                                         // 3820
     {KEY_ENTER, KEY_CLEAR, KEY_BREAK, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_SPACE},                              // 3840
     {KEY_SHIFT, KEY_UNUSED_6, KEY_UNUSED_7, KEY_UNUSED_8, KEY_UNUSED_9, KEY_UNUSED_10, KEY_UNUSED_11, KEY_UNUSED_12}, // 3860
 };

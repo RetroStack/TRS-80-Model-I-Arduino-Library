@@ -25,7 +25,6 @@ struct ViewPort
 class Video
 {
 private:
-  Model1 *_model1;
   ILogger *_logger;
   ViewPort _viewPort;
 
@@ -41,8 +40,10 @@ private:
   void _print(const char character, bool raw);
 
 public:
-  Video(Model1 *model1, ILogger *logger = nullptr);
-  Video(Model1 *model1, ViewPort viewPort, ILogger *logger = nullptr);
+  Video();
+
+  void setLogger(ILogger &logger);
+  void setViewPort(ViewPort viewPort);
 
   uint8_t getX();
   void setX(uint8_t x);

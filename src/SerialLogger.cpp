@@ -13,6 +13,34 @@ void SerialLogger::_log(const char *fmt, va_list arguments)
 }
 
 /**
+ * Write a byte to the serial logger and return byte written.
+ */
+size_t SerialLogger::write(uint8_t ch)
+{
+    if (ch == '\n')
+    {
+        return Serial.println();
+    }
+    else
+    {
+        return Serial.print(ch);
+    }
+}
+
+/**
+ * Write a list of bytes to the serial logger and returns the number of bytes written.
+ */
+size_t SerialLogger::write(const uint8_t *buffer, size_t size)
+{
+    size_t result = 0;
+    for (uint16_t i = 0; i < size; i++)
+    {
+        result += write(buffer[i]);
+    }
+    return result;
+}
+
+/**
  * Logs a formatted info string
  */
 void SerialLogger::info(const char *fmt, ...)

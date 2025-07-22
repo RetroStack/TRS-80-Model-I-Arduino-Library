@@ -16,13 +16,14 @@ typedef void (*ContentPrinter)(const uint8_t *data, uint16_t length, uint16_t of
 class ROM
 {
 private:
-  Model1 *_model1;
   ILogger *_logger;
 
   bool _checkROMNumber(uint8_t rom) const;
 
 public:
-  ROM(Model1 *model1, ILogger *logger = nullptr);
+  ROM();
+
+  void setLogger(ILogger &logger);
 
   uint16_t getROMStartAddress(uint8_t rom);
   uint16_t getROMLength(uint8_t rom);
@@ -30,7 +31,7 @@ public:
   uint32_t getChecksum(uint8_t rom);
   const __FlashStringHelper *identifyROM();
 
-  void printROMContents(uint8_t rom);
+  void printROMContents(uint8_t rom, PRINT_STYLE style = BOTH, bool relative = true, uint16_t bytesPerLine = 32);
 };
 
 #endif // ROM_H

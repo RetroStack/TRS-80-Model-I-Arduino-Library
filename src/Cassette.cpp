@@ -19,10 +19,9 @@
 /**
  * Initializes the cassette interface
  */
-Cassette::Cassette(Model1 *model1, ILogger *logger)
+Cassette::Cassette()
 {
-    _model1 = model1;
-    _logger = logger;
+    _logger = nullptr;
     _state = CASSETTE_DEFAULT_STATE;
 }
 
@@ -35,7 +34,7 @@ uint8_t Cassette::_read()
     uint8_t result = 0;
 
     // Read the cassette input I/O port
-    uint8_t input = _model1->readIO(CASSETTE_PORT);
+    uint8_t input = Model1.readIO(CASSETTE_PORT);
 
     // Set the MODE SELECT to the right value
     if (!bitRead(input, CASSETTE_BIT_MODESEL))
@@ -51,7 +50,7 @@ uint8_t Cassette::_read()
  */
 void Cassette::_write(uint8_t data)
 {
-    _model1->writeIO(CASSETTE_PORT, data);
+    Model1.writeIO(CASSETTE_PORT, data);
 }
 
 /**
@@ -110,6 +109,26 @@ void Cassette::writeRaw(bool value1, bool value2)
     }
 
     _write(_state);
+}
+
+/**
+ * Reads the raw data on cassette-in
+ */
+bool Cassette::readRaw()
+{
+    uint8_t input = Model1.readIO(CASSETTE_PORT);
+
+    // Reset flip-flop
+    _write(_state);
+
+    if (bitRead(input, CASSETTE_BIT_CASSIN))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 /**

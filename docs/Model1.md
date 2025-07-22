@@ -15,6 +15,7 @@ The `Model1` class provides the main interface for interacting with the TRS-80 M
 
 - [Constructor](#constructor)
 - [Initialization](#initialization)
+- [Loggers](#loggers)
 - [Address Space Checks](#address-space-checks)
 - [Memory Access](#memory-access)
 - [I/O Access](#io-access)
@@ -28,14 +29,10 @@ The `Model1` class provides the main interface for interacting with the TRS-80 M
 ## Constructor
 
 ```cpp
-Model1(ILogger* logger = nullptr)
+Model1()
 ```
 
 Creates a new `Model1` instance.
-
-- `logger`: Optional logger implementing `ILogger`. If provided, warnings and errors are logged.
-
-If another `Model1` already exists, a warning is logged.
 
 ## Initialization
 
@@ -65,6 +62,14 @@ ISR(TIMER2_COMPA_vect)
 Deinitializes hardware. Called automatically in the destructor.
 
 You most likely never will need this.
+
+## Loggers
+
+### `void setLogger(ILogger &logger)`
+
+Sets the logger used for errors and warnings.
+
+_This is often useful for debugging as it tells what went wrong._
 
 ## Address Space Checks
 
@@ -267,18 +272,16 @@ Controls whether the CPU is held in a wait state.
 ```cpp
 #include <Model1.h>
 
-Model1 model1;
-
 void setup() {
   Serial.begin(115200);
-  model1.begin();
+  Model1.begin();
 
   // Take control of the bus
-  model1.activateTestSignal();
+  Model1.activateTestSignal();
 
   // Read the first 256 bytes of ROM
   for (uint16_t i = 0x0000; i < 0x0100; i++) {
-    uint8_t val = model1.readMemory(i);
+    uint8_t val = Model1.readMemory(i);
     Serial.print("0x");
     Serial.print(i, HEX);
     Serial.print(": ");
@@ -286,7 +289,7 @@ void setup() {
   }
 
   // Release control
-  model1.deactivateTestSignal();
+  Model1.deactivateTestSignal();
 }
 
 void loop() {
@@ -296,4 +299,3 @@ void loop() {
 ## Notes
 
 - Always call `activateTestSignal()` before memory or I/O operations.
-- Only one `Model1` instance should be active at a time.

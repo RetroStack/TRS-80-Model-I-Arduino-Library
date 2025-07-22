@@ -14,9 +14,9 @@ void DataBus::_configurePort(uint8_t config)
 /**
  * Initializes the data bus
  */
-DataBus::DataBus(ILogger *logger)
+DataBus::DataBus()
 {
-  _logger = logger;
+  _logger = nullptr;
   _writable = false;
 }
 
@@ -26,6 +26,14 @@ DataBus::DataBus(ILogger *logger)
 void DataBus::begin()
 {
   _configurePort(0x00);
+}
+
+/**
+ * Sets a logger being used.
+ */
+void DataBus::setLogger(ILogger &logger)
+{
+  _logger = &logger;
 }
 
 /**

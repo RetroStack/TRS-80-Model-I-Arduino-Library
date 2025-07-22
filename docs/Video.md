@@ -4,8 +4,15 @@ The `Video` class provides comprehensive control over the TRS-80 Model I video R
 
 ## Constructor
 
-- `Video(Model1* model1, ILogger* logger = nullptr)`: Creates an instance using the full 64×16 screen.
-- `Video(Model1* model1, ViewPort viewPort, ILogger* logger = nullptr)`: Creates an instance using a custom viewport. If the viewport exceeds bounds, it is automatically corrected.
+- `Video()`: Creates an instance using the full 64×16 screen.
+
+## Setters
+
+### `void setLogger(ILogger &logger)`
+
+Sets the logger used for errors and warnings.
+
+_This is often useful for debugging as it tells what went wrong._
 
 ## Methods
 
@@ -78,31 +85,26 @@ _Without lowercase mod enabled, all lowercase characters will be converted to up
 #include <Model1.h>
 #include <Video.h>
 
-Model1* model1;
-Video* video;
+Video video;
 
 void setup() {
   Serial.begin(115200);
 
-  model1 = new Model1();
-  model1->begin();
-
-  video = new Video(model1);
-
-  model1->activateTestSignal();
+  Model1.begin();
+  Model1.activateTestSignal();
 }
 
 void loop() {
-    video->cls();
+    video.cls();
 
-    video->printLn("Hello World!");
-    video->print("Second line");
+    video.printLn("Hello World!");
+    video.print("Second line");
 
-    video->setXY(20, 12);
-    video->print("Somewhere in the middle");
+    video.setXY(20, 12);
+    video.print("Somewhere in the middle");
 
-    video->scroll();
-    video->print("Scrolled up.");
+    video.scroll();
+    video.print("Scrolled up.");
 
     delay(2000);
 }

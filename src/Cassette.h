@@ -106,7 +106,6 @@
 class Cassette
 {
 private:
-    Model1 *_model1;
     ILogger *_logger;
     uint8_t _state;
 
@@ -114,11 +113,14 @@ private:
     void _write(uint8_t data);
 
 public:
-    Cassette(Model1 *model1, ILogger *logger = nullptr);
+    Cassette();
 
     void update();
+    void setLogger(ILogger &logger);
 
     void writeRaw(bool value1, bool value2);
+    bool readRaw();
+
     void play(uint16_t frequency, uint32_t duration);
     void playSong(int *melody, float *durations, size_t numNotes, int bpm);
 

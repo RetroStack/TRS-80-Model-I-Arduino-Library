@@ -5,6 +5,10 @@ The `Cassette` class provides control over the TRS-80 Model I cassette interface
 ## Table of Contents
 
 - [Constructor](#constructor)
+- [Setters](#setters)
+
+  - [setLogger](#void-setlogger-ilogger-logger)
+
 - [Methods](#methods)
 
   - [update](#void-update)
@@ -26,11 +30,16 @@ The `Cassette` class provides control over the TRS-80 Model I cassette interface
 ## Constructor
 
 ```cpp
-Cassette(Model1* model1, ILogger* logger = nullptr)
+Cassette()
 ```
 
-- `model1`: Pointer to a `Model1` instance.
-- `logger`: Optional logger.
+## Setters
+
+### `void setLogger(ILogger &logger)`
+
+Sets the logger used for errors and warnings.
+
+_This is often useful for debugging as it tells what went wrong._
 
 ## Methods
 
@@ -106,26 +115,22 @@ Switches video mode to 64 characters per line. (default)
 #include <Model1.h>
 #include <Cassette.h>
 
-Model1* model1;
-Cassette* cassette;
+Cassette cassette;
 
 void setup() {
   Serial.begin(115200);
 
-  model1 = new Model1();
-  model1->begin();
+  Model1.begin();
 
-  cassette = new Cassette(model1);
-
-  model1->activateTestSignal();
+  Model1.activateTestSignal();
 
   // Play a 1 kHz tone for 2 seconds
-  cassette->play(1000, 2000);
+  cassette.play(1000, 2000);
 
   // Switch to 32-character mode
-  cassette->set32CharacterMode();
+  cassette.set32CharacterMode();
 
-  model1->deactivateTestSignal();
+  Model1.deactivateTestSignal();
 }
 
 void loop() {
@@ -139,7 +144,7 @@ A set of note frequency constants is also available for use with `play` and `pla
 These constants are defined as macros mapping note names to their frequencies in Hertz. You can use them like this:
 
 ```cpp
-cassette->play(NOTE_A4, 500);
+cassette.play(NOTE_A4, 500);
 ```
 
 ## More Examples
@@ -148,15 +153,15 @@ Here are more specific examples:
 
 ```cpp
 // Play middle C for 1 second
-cassette->play(NOTE_C4, 1000);
+cassette.play(NOTE_C4, 1000);
 
 // Play a short beep at 880 Hz (A5) for 200 ms
-cassette->play(NOTE_A5, 200);
+cassette.play(NOTE_A5, 200);
 
 // Play a melody
 int melody[] = { NOTE_E4, NOTE_D4, NOTE_C4 };
 float durations[] = { 0.25, 0.25, 0.5 };
-cassette->playSong(melody, durations, 3, 120);
+cassette.playSong(melody, durations, 3, 120);
 ```
 
 ## Full List of Note Constants

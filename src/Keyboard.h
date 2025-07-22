@@ -15,12 +15,13 @@
 class Keyboard
 {
 private:
-  Model1 *_model1;
   ILogger *_logger;
   uint8_t _previousState[8];
 
 public:
-  Keyboard(Model1 *model1, ILogger *logger = nullptr);
+  Keyboard();
+
+  void setLogger(ILogger &logger);
 
   bool isKeyPressed() const;
   void update();

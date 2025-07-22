@@ -2,10 +2,7 @@
 #include <Model1.h>
 #include <Video.h>
 
-// Define an accessible variable for the Model 1 instance
-Model1 *model1;
-
-Video *video;
+Video video;
 
 // 1K video memory mirror
 uint8_t videoMemory[1024];
@@ -18,30 +15,24 @@ void setup()
     // Clear video memory mirror
     memset(videoMemory, 0, sizeof(videoMemory));
 
-    // Initialize a Model 1 instance to access it
-    model1 = new Model1();
-
     // Be sure to setup the hardware pins
-    model1->begin();
-
-    // Initialize the video interface
-    video = new Video(model1);
+    Model1.begin();
 }
 
 void loop()
 {
     // Quickly activate TEST signal
-    model1->activateTestSignal();
+    Model1.activateTestSignal();
 
     // Read all bytes of the video memory (1k at 0x3C00)
     // And record it in a local array for display since we want to keep this quick.
     for (uint16_t i = 0; i < 1024; i++)
     {
-        videoMemory[i] = model1->readMemory(0x3C00 + i);
+        videoMemory[i] = Model1.readMemory(0x3C00 + i);
     }
 
     // Deactivate TEST signal
-    model1->deactivateTestSignal();
+    Model1.deactivateTestSignal();
 
     Serial.println("---- Video Memory Dump ----");
 
@@ -57,7 +48,7 @@ void loop()
             char character = (char)videoMemory[addr];
 
             // Convert from Model 1 character set to the local system character set
-            character = video->convertModel1CharacterToLocal(character);
+            character = video.convertModel1CharacterToLocal(character);
 
             // Print the character to the serial port
             Serial.print(character);

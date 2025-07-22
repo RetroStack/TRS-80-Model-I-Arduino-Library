@@ -22,6 +22,9 @@ public:
     void warn(const char *fmt, ...);
     void err(const char *fmt, ...);
 
+    size_t write(uint8_t ch) override;
+    size_t write(const uint8_t *buffer, size_t size) override;
+
     void mute();
     void unmute();
 };

@@ -19,38 +19,22 @@
 #define CTC_TRIGGER 89
 
 // Version constants
-const uint8_t VERSION_MAJOR = 0;
-const uint8_t VERSION_MINOR = 9;
-const uint8_t VERSION_REVISION = 5;
+#define M1_VERSION_MAJOR 0
+#define M1_VERSION_MINOR 9
+#define M1_VERSION_REVISION 5
 
-/**
- * Tracking the first instance create for interrupt/event handling
- */
-Model1 *globalModel1 = nullptr;
+// Define global instance
+Model1Class Model1;
 
 /**
  * Constructor for accessing the Model 1
  *
  * @param logger
  */
-Model1::Model1(ILogger *logger)
+Model1Class::Model1Class()
 {
-    _logger = logger;
-
-    _addressBus = new AddressBus(logger);
-    _dataBus = new DataBus(logger);
+    _logger = nullptr;
     _timer = -1; // Set to default off
-
-    // Register the first Model 1 initialized for interrupt/event handling
-    if (globalModel1)
-    {
-        if (_logger)
-            _logger->warn("Global Model 1 already setup. You can only have one.");
-    }
-    else
-    {
-        globalModel1 = this;
-    }
 
     // Defines the mutability of the bus systems and signals (e.g. activate TEST signal)
     _mutability = false;
@@ -62,10 +46,10 @@ Model1::Model1(ILogger *logger)
 /**
  * Hardware initialization
  */
-void Model1::begin(int refreshTimer = -1)
+void Model1Class::begin(int refreshTimer = -1)
 {
-    _addressBus->begin();
-    _dataBus->begin();
+    _addressBus.begin();
+    _dataBus.begin();
 
     _initSystemControlSignals();
     _initExternalControlSignals();
@@ -87,23 +71,18 @@ void Model1::begin(int refreshTimer = -1)
 /**
  * Hardware deinitialization
  */
-void Model1::end()
+void Model1Class::end()
 {
 }
 
 /**
- * Deconstructor
+ * Sets a logger being used.
  */
-Model1::~Model1()
+void Model1Class::setLogger(ILogger &logger)
 {
-    if (this == globalModel1)
-    {
-        globalModel1 = nullptr;
-    }
-    end();
-
-    delete _addressBus;
-    delete _dataBus;
+    _logger = &logger;
+    _addressBus.setLogger(logger);
+    _dataBus.setLogger(logger);
 }
 
 // ----------------------------------------
@@ -113,7 +92,7 @@ Model1::~Model1()
 /**
  * Checks whether an address is in the ROM address space
  */
-bool Model1::isROMAddress(uint16_t address)
+bool Model1Class::isROMAddress(uint16_t address)
 {
     return (address <= 0x2FFF);
 }
@@ -121,7 +100,7 @@ bool Model1::isROMAddress(uint16_t address)
 /**
  * Checks whether an address is in the unused address space
  */
-bool Model1::isUnusedAddress(uint16_t address)
+bool Model1Class::isUnusedAddress(uint16_t address)
 {
     return (address >= 0x3000 && address <= 0x37DF);
 }
@@ -129,7 +108,7 @@ bool Model1::isUnusedAddress(uint16_t address)
 /**
  * Checks whether an address is in the memory-mapped IO address space
  */
-bool Model1::isMemoryMappedIOAddress(uint16_t address)
+bool Model1Class::isMemoryMappedIOAddress(uint16_t address)
 {
     return (address >= 0x37E0 && address <= 0x37FF);
 }
@@ -137,7 +116,7 @@ bool Model1::isMemoryMappedIOAddress(uint16_t address)
 /**
  * Checks whether an address is in the keyboard address space
  */
-bool Model1::isKeyboardAddress(uint16_t address)
+bool Model1Class::isKeyboardAddress(uint16_t address)
 {
     return (address >= 0x3800 && address <= 0x3BFF); // memory space is shadowed from 0x3900 to 0x3BFF (3x)
 }
@@ -145,7 +124,7 @@ bool Model1::isKeyboardAddress(uint16_t address)
 /**
  * Checks whether an address is in the video address space
  */
-bool Model1::isVideoAddress(uint16_t address)
+bool Model1Class::isVideoAddress(uint16_t address)
 {
     return (address >= 0x3C00 && address <= 0x3FFF);
 }
@@ -153,7 +132,7 @@ bool Model1::isVideoAddress(uint16_t address)
 /**
  * Checks whether an address is in the system address space
  */
-bool Model1::isSystemAddress(uint16_t address)
+bool Model1Class::isSystemAddress(uint16_t address)
 {
     return (address >= 0x4000 && address <= 0x41FF);
 }
@@ -161,7 +140,7 @@ bool Model1::isSystemAddress(uint16_t address)
 /**
  * Checks whether an address is in the lower memory address space
  */
-bool Model1::isLowerMemoryAddress(uint16_t address)
+bool Model1Class::isLowerMemoryAddress(uint16_t address)
 {
     return (address >= 0x4200 && address <= 0x7FFF);
 }
@@ -169,7 +148,7 @@ bool Model1::isLowerMemoryAddress(uint16_t address)
 /**
  * Checks whether an address is in the higher memory address space
  */
-bool Model1::isHigherMemoryAddress(uint16_t address)
+bool Model1Class::isHigherMemoryAddress(uint16_t address)
 {
     return (address >= 0x8000 && address <= 0xFFFF);
 }
@@ -181,7 +160,7 @@ bool Model1::isHigherMemoryAddress(uint16_t address)
 /**
  * Marks bus systems and signals as mutable
  */
-void Model1::_setMutable()
+void Model1Class::_setMutable()
 {
     _setMutability(true);
 }
@@ -189,7 +168,7 @@ void Model1::_setMutable()
 /**
  * Marks bus systems and signals as immutable
  */
-void Model1::_setImmutable()
+void Model1Class::_setImmutable()
 {
     _setMutability(false);
 }
@@ -197,7 +176,7 @@ void Model1::_setImmutable()
 /**
  * Sets the mutability of the bus systems and signals
  */
-void Model1::_setMutability(bool value)
+void Model1Class::_setMutability(bool value)
 {
     _mutability = value;
 }
@@ -205,7 +184,7 @@ void Model1::_setMutability(bool value)
 /**
  * Checks whether the system is mutable
  */
-bool Model1::_isMutable()
+bool Model1Class::_isMutable()
 {
     return _mutability;
 }
@@ -213,7 +192,7 @@ bool Model1::_isMutable()
 /**
  * Runs a check whether the system is mutable.
  */
-bool Model1::_checkMutability()
+bool Model1Class::_checkMutability()
 {
     bool mutability = _isMutable();
     if (!_isMutable())
@@ -231,7 +210,7 @@ bool Model1::_checkMutability()
 /**
  * Sets up a predefined memory refresh interrupt for Timer 1
  */
-void Model1::_setupMemoryRefreshTimer1()
+void Model1Class::_setupMemoryRefreshTimer1()
 {
     uint8_t oldSREG = SREG;
     noInterrupts();
@@ -253,7 +232,7 @@ void Model1::_setupMemoryRefreshTimer1()
 /**
  * Sets up a predefined memory refresh interrupt for Timer 2
  */
-void Model1::_setupMemoryRefreshTimer2()
+void Model1Class::_setupMemoryRefreshTimer2()
 {
     uint8_t oldSREG = SREG;
     noInterrupts();
@@ -275,7 +254,7 @@ void Model1::_setupMemoryRefreshTimer2()
 /**
  * Activates the refresh timer
  */
-void Model1::_activateMemoryRefresh()
+void Model1Class::_activateMemoryRefresh()
 {
     _activeRefresh = true;
     if (_timer == 1)
@@ -293,7 +272,7 @@ void Model1::_activateMemoryRefresh()
 /**
  * Deactivates the refresh timer
  */
-void Model1::_deactivateMemoryRefresh()
+void Model1Class::_deactivateMemoryRefresh()
 {
     if (_timer == 1)
     {
@@ -307,11 +286,19 @@ void Model1::_deactivateMemoryRefresh()
 }
 
 /**
+ * Executing the next update for the model 1
+ */
+void Model1Class::nextUpdate()
+{
+    _refreshNextMemoryRow();
+}
+
+/**
  * Refreshes the next row-address for dynamic RAM.
  *
  * NOTE: The function keeps track of the address counting. Make sure the bus is mutable before calling this.
  */
-void Model1::refreshNextMemoryRow()
+void Model1Class::_refreshNextMemoryRow()
 {
     // This function expects mutibility as well as that the refresh is activated
     uint8_t currentRefreshRow = _nextMemoryRefreshRow;
@@ -320,7 +307,7 @@ void Model1::refreshNextMemoryRow()
     _nextMemoryRefreshRow = (_nextMemoryRefreshRow + 1) & 0x7F;
 
     // Set address
-    _addressBus->writeRefreshAddress(currentRefreshRow);
+    _addressBus.writeRefreshAddress(currentRefreshRow);
 
     // Timing of various signals
     pinWrite(RAS, LOW); // 45ns (62.5ns, but when the pulse is down)
@@ -339,7 +326,7 @@ void Model1::refreshNextMemoryRow()
 /**
  * Reads from a memory address
  */
-uint8_t Model1::readMemory(uint16_t address)
+uint8_t Model1Class::readMemory(uint16_t address)
 {
     // Verification of access
     if (!_checkMutability())
@@ -349,7 +336,7 @@ uint8_t Model1::readMemory(uint16_t address)
     noInterrupts();
 
     // Set address and then data
-    _addressBus->writeMemoryAddress(address);
+    _addressBus.writeMemoryAddress(address);
 
     // Timing of various signals
     pinWrite(RAS, LOW);
@@ -359,7 +346,7 @@ uint8_t Model1::readMemory(uint16_t address)
     asmWait(3); // 772 ns
 
     // Read data
-    uint8_t data = _dataBus->readData();
+    uint8_t data = _dataBus.readData();
 
     // Reset, leaving address as-is
     pinWrite(CAS, HIGH);
@@ -375,7 +362,7 @@ uint8_t Model1::readMemory(uint16_t address)
 /**
  * Writes to a memory address
  */
-void Model1::writeMemory(uint16_t address, uint8_t data)
+void Model1Class::writeMemory(uint16_t address, uint8_t data)
 {
     // Verification of access
     if (!_checkMutability())
@@ -385,11 +372,11 @@ void Model1::writeMemory(uint16_t address, uint8_t data)
     noInterrupts();
 
     // Configure bus
-    _dataBus->setAsWritable();
+    _dataBus.setAsWritable();
 
     // Set address and then data
-    _addressBus->writeMemoryAddress(address);
-    _dataBus->writeData(data);
+    _addressBus.writeMemoryAddress(address);
+    _dataBus.writeData(data);
 
     // Timing of various signals
     pinWrite(RAS, LOW);
@@ -406,7 +393,7 @@ void Model1::writeMemory(uint16_t address, uint8_t data)
     pinWrite(CAS, HIGH);
     pinWrite(RAS, HIGH);
     pinWrite(MUX, LOW);
-    _dataBus->setAsReadable();
+    _dataBus.setAsReadable();
 
     SREG = oldSREG;
 }
@@ -414,7 +401,7 @@ void Model1::writeMemory(uint16_t address, uint8_t data)
 /**
  * Reads a block of data from a memory address
  */
-uint8_t *Model1::readMemory(uint16_t address, uint16_t length)
+uint8_t *Model1Class::readMemory(uint16_t address, uint16_t length)
 {
     if (length == 0)
         return nullptr;
@@ -431,7 +418,7 @@ uint8_t *Model1::readMemory(uint16_t address, uint16_t length)
 /**
  * Writes a block of data to a memory address
  */
-void Model1::writeMemory(uint16_t address, uint8_t *data, uint16_t length)
+void Model1Class::writeMemory(uint16_t address, uint8_t *data, uint16_t length)
 {
     writeMemory(address, data, length, 0);
 }
@@ -439,7 +426,7 @@ void Model1::writeMemory(uint16_t address, uint8_t *data, uint16_t length)
 /**
  * Writes a block of data to a memory address by providing an offset of the original data
  */
-void Model1::writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint16_t offset)
+void Model1Class::writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint16_t offset)
 {
     for (uint16_t i = 0; i < length; i++)
     {
@@ -450,7 +437,7 @@ void Model1::writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint1
 /**
  * Copy a block of memory from a source to destination by providing the length of data to be copied
  */
-void Model1::copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length)
+void Model1Class::copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length)
 {
     if (length == 0)
         return;
@@ -466,7 +453,7 @@ void Model1::copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t len
 /**
  * Fill a specific block of memory with a byte
  */
-void Model1::fillMemory(uint8_t fill_data, uint16_t address, uint16_t length)
+void Model1Class::fillMemory(uint8_t fill_data, uint16_t address, uint16_t length)
 {
     for (uint16_t i = 0; i < length; i++)
     {
@@ -477,16 +464,16 @@ void Model1::fillMemory(uint8_t fill_data, uint16_t address, uint16_t length)
 /**
  * Fill a specific block of memory with a byte-array, repeated until the end address
  */
-void Model1::fillMemory(uint8_t *fill_data, uint16_t length, uint16_t start_address, uint16_t end_address)
+void Model1Class::fillMemory(uint8_t *fill_data, uint16_t length, uint16_t address, uint16_t address_length)
 {
-    for (uint16_t i = start_address; i <= end_address; i += length)
+    for (uint16_t i = 0; i < address_length; i += length)
     {
         for (uint16_t j = 0; j < length; j++)
         {
-            writeMemory(i + j, fill_data[j]);
+            writeMemory(address + i + j, fill_data[j]);
 
             // Check if we reached the end address
-            if (i + j >= end_address)
+            if (i + j >= address_length)
                 return;
         }
     }
@@ -499,7 +486,7 @@ void Model1::fillMemory(uint8_t *fill_data, uint16_t length, uint16_t start_addr
 /**
  * Reads from an IO address
  */
-uint8_t Model1::readIO(uint8_t address)
+uint8_t Model1Class::readIO(uint8_t address)
 {
     // Verification of access
     if (!_checkMutability())
@@ -509,7 +496,7 @@ uint8_t Model1::readIO(uint8_t address)
     noInterrupts();
 
     // Set address and then data
-    _addressBus->writeIOAddress(address);
+    _addressBus.writeIOAddress(address);
 
     // Timing of various signals
     pinWrite(IN, LOW);
@@ -517,7 +504,7 @@ uint8_t Model1::readIO(uint8_t address)
     pinWrite(CAS, LOW);
 
     // Read data
-    uint8_t data = _dataBus->readData();
+    uint8_t data = _dataBus.readData();
 
     // Reset, leaving address as-is
     pinWrite(CAS, HIGH);
@@ -532,7 +519,7 @@ uint8_t Model1::readIO(uint8_t address)
 /**
  * Writes to an IO address
  */
-void Model1::writeIO(uint8_t address, uint8_t data)
+void Model1Class::writeIO(uint8_t address, uint8_t data)
 {
     // Verification of access
     if (!_checkMutability())
@@ -542,11 +529,11 @@ void Model1::writeIO(uint8_t address, uint8_t data)
     noInterrupts();
 
     // Configure bus
-    _dataBus->setAsWritable();
+    _dataBus.setAsWritable();
 
     // Set address and then data
-    _addressBus->writeMemoryAddress(address);
-    _dataBus->writeData(data);
+    _addressBus.writeMemoryAddress(address);
+    _dataBus.writeData(data);
 
     // Timing of various signals
     pinWrite(OUT, LOW);
@@ -558,7 +545,7 @@ void Model1::writeIO(uint8_t address, uint8_t data)
     pinWrite(CAS, HIGH);
     pinWrite(OUT, HIGH);
     pinWrite(MUX, LOW);
-    _dataBus->setAsReadable();
+    _dataBus.setAsReadable();
 
     SREG = oldSREG;
 }
@@ -572,7 +559,7 @@ void Model1::writeIO(uint8_t address, uint8_t data)
  *
  * These are read-only signals.
  */
-void Model1::_initSystemControlSignals()
+void Model1Class::_initSystemControlSignals()
 {
     pinConfigWrite(SYS_RES, INPUT);
     pinConfigWrite(INT_ACK, INPUT);
@@ -581,7 +568,7 @@ void Model1::_initSystemControlSignals()
 /**
  * Reads whether a system reset has occurred.
  */
-bool Model1::readSystemResetSignal()
+bool Model1Class::readSystemResetSignal()
 {
     return pinRead(SYS_RES) == LOW ? true : false;
 }
@@ -589,7 +576,7 @@ bool Model1::readSystemResetSignal()
 /**
  * Reads whether the CPU has acknowledged an interrupt request.
  */
-bool Model1::readInterruptAcknowledgeSignal()
+bool Model1Class::readInterruptAcknowledgeSignal()
 {
     return pinRead(INT_ACK) == LOW ? true : false;
 }
@@ -601,7 +588,7 @@ bool Model1::readInterruptAcknowledgeSignal()
 /**
  * Activates bus control signals
  */
-void Model1::_activateBusControlSignals()
+void Model1Class::_activateBusControlSignals()
 {
     _resetBusControlSignals();
 
@@ -613,7 +600,7 @@ void Model1::_activateBusControlSignals()
 /**
  * Deactivates bus control signals
  */
-void Model1::_deactivateBusControlSignals()
+void Model1Class::_deactivateBusControlSignals()
 {
     pinConfigWrite(RAS, INPUT);
     pinConfigWrite(MUX, INPUT);
@@ -623,7 +610,7 @@ void Model1::_deactivateBusControlSignals()
 /**
  * Resets the bus control signals to the default configuration
  */
-void Model1::_resetBusControlSignals()
+void Model1Class::_resetBusControlSignals()
 {
     pinWrite(RAS, HIGH);
     pinWrite(MUX, LOW);
@@ -637,7 +624,7 @@ void Model1::_resetBusControlSignals()
 /**
  * Activates the bus access signals
  */
-void Model1::_activateBusAccessSignals()
+void Model1Class::_activateBusAccessSignals()
 {
     _resetBusAccessSignals();
 
@@ -651,7 +638,7 @@ void Model1::_activateBusAccessSignals()
 /**
  * Deactivates the bus access signals
  */
-void Model1::_deactivateBusAccessSignals()
+void Model1Class::_deactivateBusAccessSignals()
 {
     pinConfigWrite(RD, INPUT);
     pinConfigWrite(WR, INPUT);
@@ -663,7 +650,7 @@ void Model1::_deactivateBusAccessSignals()
 /**
  * Resets the bus access signals to default
  */
-void Model1::_resetBusAccessSignals()
+void Model1Class::_resetBusAccessSignals()
 {
     pinWrite(RD, HIGH);
     pinWrite(WR, HIGH);
@@ -680,7 +667,7 @@ void Model1::_resetBusAccessSignals()
  *
  * These are write-only signals.
  */
-void Model1::_initExternalControlSignals()
+void Model1Class::_initExternalControlSignals()
 {
     pinWrite(INT, HIGH);
     pinWrite(TEST, HIGH);
@@ -696,7 +683,7 @@ void Model1::_initExternalControlSignals()
 /**
  * Sets the interrupt request signal
  */
-void Model1::_setInterruptRequestSignal(bool value)
+void Model1Class::_setInterruptRequestSignal(bool value)
 {
     if (value)
     {
@@ -713,7 +700,7 @@ void Model1::_setInterruptRequestSignal(bool value)
  *
  * NOTE: The timeout unit is in about microseconds.
  */
-bool Model1::triggerInterrupt(uint8_t interrupt, uint16_t timeout = 1000)
+bool Model1Class::triggerInterrupt(uint8_t interrupt, uint16_t timeout = 1000)
 {
     activateInterruptRequestSignal();
 
@@ -721,14 +708,14 @@ bool Model1::triggerInterrupt(uint8_t interrupt, uint16_t timeout = 1000)
     {
         if (pinRead(INT_ACK) == LOW)
         {
-            _dataBus->setAsWritable();
-            _dataBus->writeData(interrupt);
+            _dataBus.setAsWritable();
+            _dataBus.writeData(interrupt);
 
             asmWait(3);
             deactivateInterruptRequestSignal();
             asmWait(3);
 
-            _dataBus->setAsReadable();
+            _dataBus.setAsReadable();
 
             return true;
         }
@@ -743,7 +730,7 @@ bool Model1::triggerInterrupt(uint8_t interrupt, uint16_t timeout = 1000)
 /**
  * Activates the interrupt request signal
  */
-void Model1::activateInterruptRequestSignal()
+void Model1Class::activateInterruptRequestSignal()
 {
     if (pinRead(INT) == LOW)
     {
@@ -758,7 +745,7 @@ void Model1::activateInterruptRequestSignal()
 /**
  * Deactivates the interrupt request signal
  */
-void Model1::deactivateInterruptRequestSignal()
+void Model1Class::deactivateInterruptRequestSignal()
 {
     if (pinRead(INT) == HIGH)
     {
@@ -775,7 +762,7 @@ void Model1::deactivateInterruptRequestSignal()
 /**
  * Sets *TEST system to define control of the Model 1
  */
-void Model1::_setTestSignal(bool value)
+void Model1Class::_setTestSignal(bool value)
 {
     if (value)
     {
@@ -790,7 +777,7 @@ void Model1::_setTestSignal(bool value)
 /**
  * Activates the *TEST signal and let's this system take over.
  */
-void Model1::activateTestSignal()
+void Model1Class::activateTestSignal()
 {
     if (pinRead(TEST) == LOW)
     {
@@ -806,8 +793,8 @@ void Model1::activateTestSignal()
     asmWait(16); // Wait 4us. Only need 3 (value 12) for 5T, but this is to be safe
 
     // Set the signals as active from external system
-    _addressBus->setAsWritable();
-    _dataBus->setAsReadable();
+    _addressBus.setAsWritable();
+    _dataBus.setAsReadable();
     _activateBusControlSignals();
     _activateBusAccessSignals();
 
@@ -824,7 +811,7 @@ void Model1::activateTestSignal()
 /**
  * Deactivates the *TEST signal and hands the system back to the CPU.
  */
-void Model1::deactivateTestSignal()
+void Model1Class::deactivateTestSignal()
 {
     if (pinRead(TEST) == HIGH)
     {
@@ -845,8 +832,8 @@ void Model1::deactivateTestSignal()
     // Set the signals as inactive from external system
     _deactivateBusAccessSignals();
     _deactivateBusControlSignals();
-    _dataBus->setAsReadable();
-    _addressBus->setAsReadable();
+    _dataBus.setAsReadable();
+    _addressBus.setAsReadable();
 
     // Deactivate TEST* signal
     _setTestSignal(false);
@@ -860,7 +847,7 @@ void Model1::deactivateTestSignal()
 /**
  * Sets the *WAIT signal to hold CPU
  */
-void Model1::_setWaitSignal(bool value)
+void Model1Class::_setWaitSignal(bool value)
 {
     if (value)
     {
@@ -875,7 +862,7 @@ void Model1::_setWaitSignal(bool value)
 /**
  * Activates the *WAIT signal to hold the CPU
  */
-void Model1::activateWaitSignal()
+void Model1Class::activateWaitSignal()
 {
     if (pinRead(WAIT) == LOW)
     {
@@ -890,7 +877,7 @@ void Model1::activateWaitSignal()
 /**
  * Deactivates the *WAIT signal, giving the CPU a "full-speed-ahead"
  */
-void Model1::deactivateWaitSignal()
+void Model1Class::deactivateWaitSignal()
 {
     if (pinRead(WAIT) == HIGH)
     {
@@ -907,10 +894,10 @@ void Model1::deactivateWaitSignal()
 /**
  * Returns the current state as string
  */
-char *Model1::getState()
+char *Model1Class::getState()
 {
-    char *addrStatus = _addressBus->getState();
-    char *dataStatus = _dataBus->getState();
+    char *addrStatus = _addressBus.getState();
+    char *dataStatus = _dataBus.getState();
 
     const int LEN = 255;
     char *buffer = new char[LEN];
@@ -952,7 +939,7 @@ char *Model1::getState()
 /**
  * Logs the current state
  */
-void Model1::logState()
+void Model1Class::logState()
 {
     if (_logger)
     {
@@ -967,31 +954,31 @@ void Model1::logState()
 /**
  * Gets the major version number
  */
-uint8_t Model1::getVersionMajor()
+uint8_t Model1Class::getVersionMajor()
 {
-    return VERSION_MAJOR;
+    return M1_VERSION_MAJOR;
 }
 
 /**
  * Gets the minor version number
  */
-uint8_t Model1::getVersionMinor()
+uint8_t Model1Class::getVersionMinor()
 {
-    return VERSION_MINOR;
+    return M1_VERSION_MINOR;
 }
 
 /**
  * Gets the revision version number
  */
-uint8_t Model1::getVersionRevision()
+uint8_t Model1Class::getVersionRevision()
 {
-    return VERSION_REVISION;
+    return M1_VERSION_REVISION;
 }
 
 /**
  * Returns a version string
  */
-char *Model1::getVersion()
+char *Model1Class::getVersion()
 {
     const int LEN = 255;
     char *buffer = new char[LEN];
@@ -999,8 +986,129 @@ char *Model1::getVersion()
         buffer,
         LEN,
         "%d.%d.%d",
-        VERSION_MAJOR,
-        VERSION_MINOR,
-        VERSION_REVISION);
+        M1_VERSION_MAJOR,
+        M1_VERSION_MINOR,
+        M1_VERSION_REVISION);
     return buffer;
+}
+
+/**
+ * Prints memory contents in a human readable format
+ */
+void Model1Class::printMemoryContents(uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32)
+{
+    if (!_logger)
+        return;
+
+    printMemoryContents(*_logger, start, length, style, relative, bytesPerLine);
+}
+
+/**
+ * Prints the contents of a memory location in a human-readable format
+ */
+void Model1Class::printMemoryContents(Print &output, uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32)
+{
+    if (bytesPerLine == 0 || bytesPerLine > 60)
+    {
+        if (_logger)
+            _logger->err("Unsupported value for bytesPerLine wth %d.", bytesPerLine);
+        return;
+    }
+
+    uint8_t *buffer = (uint8_t *)malloc(bytesPerLine);
+    if (!buffer)
+    {
+        if (_logger)
+            _logger->err("Cannot allocate byte buffer.");
+        return;
+    }
+
+    uint16_t lineLength = 6; // "0000: "
+    if (style == HEXADECIMAL || style == BOTH)
+        lineLength += 3 * bytesPerLine;
+    if (style == BOTH)
+        lineLength += 3; // " |" and closing '|'
+    if (style == ASCII || style == BOTH)
+        lineLength += bytesPerLine;
+    lineLength += 1;
+
+    char *lineBuffer = (char *)malloc(lineLength);
+    if (!lineBuffer)
+    {
+        if (_logger)
+            _logger->err("Cannot allocate line buffer.");
+        free(buffer);
+        return;
+    }
+
+    for (uint16_t offset = 0; offset < length; offset += bytesPerLine)
+    {
+        uint16_t lineLengthActual = (offset + bytesPerLine <= length)
+                                        ? bytesPerLine
+                                        : (length - offset);
+
+        // Load from ROM
+        for (uint16_t i = 0; i < lineLengthActual; ++i)
+        {
+            buffer[i] = readMemory(start + offset + i);
+        }
+
+        // Build the line string
+        char *p = lineBuffer;
+
+        // Address
+        uint16_t addr = relative ? offset : (start + offset);
+        p += sprintf(p, "%04X: ", addr);
+
+        // Hex bytes
+        if (style == BOTH || style == HEXADECIMAL)
+        {
+            for (uint16_t i = 0; i < bytesPerLine; ++i)
+            {
+                if (i < lineLengthActual)
+                {
+                    p += sprintf(p, "%02X ", buffer[i]);
+                }
+                else
+                {
+                    p += sprintf(p, "   "); // Padding for short lines
+                }
+            }
+        }
+
+        if (style == BOTH)
+        {
+            p += sprintf(p, " |");
+        }
+
+        // ASCII representation
+        if (style == BOTH || style == ASCII)
+        {
+            for (uint16_t i = 0; i < lineLengthActual; ++i)
+            {
+                uint8_t b = buffer[i];
+                if (b >= 32 && b <= 126)
+                {
+                    *p++ = b; // Printable ASCII
+                }
+                else
+                {
+                    *p++ = '.'; // Non-printable
+                }
+            }
+        }
+
+        if (style == BOTH)
+        {
+            *p++ = '|';
+        }
+
+        *p = '\0'; // Null-terminate
+
+        // Print the entire line
+        output.println(lineBuffer);
+    }
+
+    free(buffer);
+    free(lineBuffer);
 }

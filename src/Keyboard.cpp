@@ -5,12 +5,19 @@
 #define KEYBOARD_ALL_ADDRESS 0x38FF
 #define KEYBOARD_MEM_ADDRESS 0x3800
 
-Keyboard::Keyboard(Model1 *model1, ILogger *logger)
+Keyboard::Keyboard()
 {
-  _model1 = model1;
-  _logger = logger;
+  _logger = nullptr;
 
   memset(_previousState, 0, sizeof(_previousState));
+}
+
+/**
+ * Sets a logger being used.
+ */
+void Keyboard::setLogger(ILogger &logger)
+{
+  _logger = &logger;
 }
 
 /**
@@ -18,7 +25,7 @@ Keyboard::Keyboard(Model1 *model1, ILogger *logger)
  */
 bool Keyboard::isKeyPressed() const
 {
-  return _model1->readMemory(KEYBOARD_ALL_ADDRESS) > 0;
+  return Model1.readMemory(KEYBOARD_ALL_ADDRESS) > 0;
 }
 
 /**
@@ -29,7 +36,7 @@ void Keyboard::update()
   for (int i = 0; i < 8; i++)
   {
     uint16_t keyMemAddress = KEYBOARD_MEM_ADDRESS + (1 << i);
-    _previousState[i] = _model1->readMemory(keyMemAddress);
+    _previousState[i] = Model1.readMemory(keyMemAddress);
   }
 }
 
@@ -42,7 +49,7 @@ KeyboardChangeIterator Keyboard::changes()
   for (int i = 0; i < 8; i++)
   {
     uint16_t keyMemAddress = KEYBOARD_MEM_ADDRESS + (1 << i);
-    keyboardState[i] = _model1->readMemory(keyMemAddress);
+    keyboardState[i] = Model1.readMemory(keyMemAddress);
   }
 
   KeyboardChangeIterator it(_previousState, keyboardState);

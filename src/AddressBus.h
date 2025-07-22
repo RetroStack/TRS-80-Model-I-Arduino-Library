@@ -21,9 +21,10 @@ private:
     void _configurePort(uint8_t config);
 
 public:
-    AddressBus(ILogger *logger = nullptr);
+    AddressBus();
 
     void begin();
+    void setLogger(ILogger &logger);
 
     bool isReadable();
     bool isWritable();

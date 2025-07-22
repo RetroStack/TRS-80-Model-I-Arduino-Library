@@ -7,11 +7,16 @@ It uses the `Model1` object to read memory addresses corresponding to each keybo
 ## Constructor
 
 ```cpp
-Keyboard(Model1* model1, ILogger* logger = nullptr)
+Keyboard()
 ```
 
-- `model1`: Pointer to an initialized `Model1` instance.
-- `logger`: Optional logger for warnings or debugging.
+## Setters
+
+### `void setLogger(ILogger &logger)`
+
+Sets the logger used for errors and warnings.
+
+_This is often useful for debugging as it tells what went wrong._
 
 ## Methods
 

@@ -72,5 +72,5 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 lcd.begin(16, 2);
 
 LCDLogger logger(&lcd);
-Model1 model1(&logger);
+Model1.setLogger(logger);
 ```

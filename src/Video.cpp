@@ -12,10 +12,9 @@ const uint8_t CASSETTE_PORT = 0xff;
 /**
  * Initializes the TRS-80 Model 1 Video Subsystem
  */
-Video::Video(Model1 *model1, ILogger *logger)
+Video::Video()
 {
-  _model1 = model1;
-  _logger = logger;
+  _logger = nullptr;
 
   _cursorPositionX = 0;
   _cursorPositionY = 0;
@@ -30,43 +29,42 @@ Video::Video(Model1 *model1, ILogger *logger)
 }
 
 /**
- * Initializes the TRS-80 Model 1 Video Subsystem with custom viewport
+ * Sets a logger being used.
  */
-Video::Video(Model1 *model1, ViewPort viewPort, ILogger *logger)
+void Video::setLogger(ILogger &logger)
 {
-  _model1 = model1;
-  _logger = logger;
+  _logger = &logger;
+}
 
-  _cursorPositionX = 0;
-  _cursorPositionY = 0;
-
-  _autoScroll = true;
-  _hasLowerCaseMod = false;
-
+/**
+ * Sets the view port
+ */
+void Video::setViewPort(ViewPort viewPort)
+{
   // Validate and auto-correct viewport
   if (viewPort.x >= VIDEO_COLS)
   {
     viewPort.x = VIDEO_COLS - 1;
-    if (logger)
-      logger->warn("X coordinate of viewport is larger than there is space. Reset to %d.", viewPort.x);
+    if (_logger)
+      _logger->warn("X coordinate of viewport is larger than there is space. Reset to %d.", viewPort.x);
   }
   if (viewPort.y >= VIDEO_ROWS)
   {
     viewPort.y = VIDEO_ROWS - 1;
-    if (logger)
-      logger->warn("Y coordinate of viewport is larger than there is space. Reset to %d.", viewPort.y);
+    if (_logger)
+      _logger->warn("Y coordinate of viewport is larger than there is space. Reset to %d.", viewPort.y);
   }
   if (viewPort.x + viewPort.width > VIDEO_COLS)
   {
     viewPort.width = VIDEO_COLS - viewPort.x;
-    if (logger)
-      logger->warn("Width of viewport is larger than there is space. Reset to %d.", viewPort.width);
+    if (_logger)
+      _logger->warn("Width of viewport is larger than there is space. Reset to %d.", viewPort.width);
   }
   if (viewPort.y + viewPort.height > VIDEO_ROWS)
   {
     viewPort.height = VIDEO_ROWS - viewPort.y;
-    if (logger)
-      logger->warn("Height of viewport is larger than there is space. Reset to %d.", viewPort.height);
+    if (_logger)
+      _logger->warn("Height of viewport is larger than there is space. Reset to %d.", viewPort.height);
   }
 
   _viewPort = viewPort;
@@ -268,7 +266,7 @@ void Video::cls(char *characters, uint16_t length)
     int rowAddress = _getRowAddress(y);
     for (uint16_t x = 0; x < _viewPort.width; x++)
     {
-      _model1->writeMemory(_getColumnAddress(rowAddress, x), convertLocalCharacterToModel1(characters[i % length]));
+      Model1.writeMemory(_getColumnAddress(rowAddress, x), convertLocalCharacterToModel1(characters[i % length]));
       i++;
     }
   }
@@ -305,14 +303,14 @@ void Video::scroll(uint8_t rows)
     {
       uint16_t src = _getColumnAddress(_getRowAddress(y), 0);
       uint16_t dst = _getColumnAddress(_getRowAddress(y - rows), 0);
-      _model1->copyMemory(src, dst, _viewPort.width);
+      Model1.copyMemory(src, dst, _viewPort.width);
     }
   }
 
   // Fill the copied area with spaces
   for (uint16_t y = _viewPort.height - rows; y < _viewPort.height; y++)
   {
-    _model1->fillMemory(SPACE_CHARACTER, _getColumnAddress(_getRowAddress(y), 0), _viewPort.width);
+    Model1.fillMemory(SPACE_CHARACTER, _getColumnAddress(_getRowAddress(y), 0), _viewPort.width);
   }
 
   // Move the current cursor position the rows up
@@ -344,7 +342,7 @@ char *Video::read(uint8_t x, uint8_t y, uint16_t length, bool raw)
   for (int i = 0; i < length; i++)
   {
     uint16_t addr = _getColumnAddress(_getRowAddress(y), x);
-    uint8_t character = _model1->readMemory(addr);
+    uint8_t character = Model1.readMemory(addr);
 
     if (raw)
     {
@@ -424,7 +422,7 @@ void Video::_print(const char character, bool raw)
     {
       data = convertLocalCharacterToModel1(character);
     }
-    _model1->writeMemory(address, data);
+    Model1.writeMemory(address, data);
     _cursorPositionX++;
   }
 

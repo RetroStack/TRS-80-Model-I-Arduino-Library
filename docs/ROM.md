@@ -19,11 +19,16 @@ The `ROM` class provides high-level utilities for interacting with TRS-80 Model 
 ## Constructor
 
 ```cpp
-ROM(Model1* model1, ILogger* logger = nullptr)
+ROM()
 ```
 
-- `model1`: Pointer to an initialized `Model1` instance.
-- `logger`: Optional logger.
+## Setters
+
+### `void setLogger(ILogger &logger)`
+
+Sets the logger used for errors and warnings.
+
+_This is often useful for debugging as it tells what went wrong._
 
 ## Methods
 
@@ -60,29 +65,25 @@ _You need to provide a logger for this function._
 #include <Model1.h>
 #include <ROM.h>
 
-Model1* model1;
-ROM* rom;
+ROM rom;
 
 void setup() {
   Serial.begin(115200);
 
-  model1 = new Model1();
-  model1->begin();
-
-  rom = new ROM(model1);
+  Model1.begin();
 
   // Take control of the bus
-  model1->activateTestSignal();
+  Model1.activateTestSignal();
 
   // Get checksum of ROM A
-  uint32_t checksum = rom->getChecksum(0);
+  uint32_t checksum = rom.getChecksum(0);
 
   // Print checksum
   Serial.print("Checksum of ROM A: ");
   Serial.println(checksum, HEX);
 
   // Release control
-  model1->deactivateTestSignal();
+  Model1.deactivateTestSignal();
 }
 
 void loop() {

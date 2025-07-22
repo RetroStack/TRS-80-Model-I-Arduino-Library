@@ -2,6 +2,7 @@
 
 #include "ROM.h"
 #include "Model1.h"
+#include "utils.h"
 
 #define ROM_START 0x00
 #define ROM_1K_LENGTH 1024
@@ -67,15 +68,20 @@ const ROMSignature signatures[] PROGMEM = {
     {DIAG_ROM, 0xAE31, 0x0000, 0x0000, 0x0000},
 };
 
-const size_t signatureCount = sizeof(signatures) / sizeof(signatures[0]);
-
 /**
  * Constructor for the ROM class
  */
-ROM::ROM(Model1 *model1, ILogger *logger)
+ROM::ROM()
 {
-  _model1 = model1;
-  _logger = logger;
+  _logger = nullptr;
+}
+
+/**
+ * Sets a logger being used.
+ */
+void ROM::setLogger(ILogger &logger)
+{
+  _logger = &logger;
 }
 
 /**
@@ -118,7 +124,7 @@ uint32_t ROM::getChecksum(uint8_t rom)
   uint32_t checksum = 0;
   for (uint16_t i = 0; i < size; i++)
   {
-    uint8_t value = _model1->readMemory(addr + i);
+    uint8_t value = Model1.readMemory(addr + i);
     checksum += value;
   }
 
@@ -137,6 +143,7 @@ const __FlashStringHelper *ROM::identifyROM()
   uint16_t c = getChecksum(2);
   uint16_t d = getChecksum(3);
 
+  size_t signatureCount = sizeof(signatures) / sizeof(signatures[0]);
   for (size_t i = 0; i < signatureCount; ++i)
   {
     ROMSignature s;
@@ -159,76 +166,17 @@ const __FlashStringHelper *ROM::identifyROM()
 /**
  * Prints the contents of a ROM in a human-readable format
  */
-void ROM::printROMContents(uint8_t rom)
+void ROM::printROMContents(uint8_t rom, PRINT_STYLE style = BOTH, bool relative = true, uint16_t bytesPerLine = 32)
 {
+  if (!_logger)
+    return;
   if (!_checkROMNumber(rom))
     return;
 
   uint16_t addr = getROMStartAddress(rom);
   uint16_t size = getROMLength(rom);
 
-  const size_t bytesPerLine = 32;
-  uint8_t buffer[32];
-
-  // We need enough space for:
-  // - Address (4 hex digits + ": ")
-  // - Hex bytes (3 chars each * 32 = 96)
-  // - ASCII (" |" + 32 + "|" = 35)
-  // - Null terminator
-  // So 4+2+96+35 = ~137. We'll allocate 160 for safety.
-  char lineBuffer[160];
-
-  for (size_t offset = 0; offset < size; offset += bytesPerLine)
-  {
-    // Load from ROM
-    for (uint8_t i = 0; i < bytesPerLine; ++i)
-    {
-      buffer[i] = _model1->readMemory(addr + offset + i);
-    }
-
-    // Build the line string
-    char *p = lineBuffer;
-
-    // Address
-    p += sprintf(p, "%04X: ", offset);
-
-    // Hex bytes
-    for (size_t i = 0; i < bytesPerLine; ++i)
-    {
-      if (offset + i < size)
-      {
-        p += sprintf(p, "%02X ", buffer[i]);
-      }
-      else
-      {
-        p += sprintf(p, "   "); // Padding for short lines
-      }
-    }
-
-    // ASCII representation
-    p += sprintf(p, " |");
-    for (size_t i = 0; i < bytesPerLine; ++i)
-    {
-      if (offset + i < size)
-      {
-        uint8_t b = buffer[i];
-        if (b >= 32 && b <= 126)
-        {
-          *p++ = b; // Printable ASCII
-        }
-        else
-        {
-          *p++ = '.'; // Non-printable
-        }
-      }
-    }
-    *p++ = '|';
-    *p = '\0'; // Null-terminate
-
-    // Log the entire line
-    if (_logger)
-      _logger->info("%s", lineBuffer);
-  }
+  Model1.printMemoryContents(_logger, addr, size, style, relative);
 }
 
 /**

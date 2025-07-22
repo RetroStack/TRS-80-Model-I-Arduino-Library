@@ -12,12 +12,19 @@
 #include "AddressBus.h"
 #include "DataBus.h"
 
-class Model1
+enum PRINT_STYLE
+{
+    ASCII,
+    HEXADECIMAL,
+    BOTH
+};
+
+class Model1Class
 {
 private:
     ILogger *_logger;
-    AddressBus *_addressBus;
-    DataBus *_dataBus;
+    AddressBus _addressBus;
+    DataBus _dataBus;
 
     volatile bool _mutability;
     uint8_t _nextMemoryRefreshRow;
@@ -29,6 +36,8 @@ private:
     void _setMutability(bool value);
     bool _isMutable();
     bool _checkMutability();
+
+    void _refreshNextMemoryRow();
 
     void _initSystemControlSignals();
     void _initExternalControlSignals();
@@ -51,11 +60,12 @@ private:
     void _setWaitSignal(bool value);
 
 public:
-    Model1(ILogger *logger = nullptr);
-    ~Model1();
+    Model1Class();
 
     void begin(int refreshTimer = -1);
     void end();
+
+    void setLogger(ILogger &logger);
 
     // ---------- Address Space
     bool isROMAddress(uint16_t address);
@@ -67,8 +77,8 @@ public:
     bool isLowerMemoryAddress(uint16_t address);
     bool isHigherMemoryAddress(uint16_t address);
 
-    // ---------- Refresh DRAM
-    void refreshNextMemoryRow();
+    // ---------- Update
+    void nextUpdate();
 
     // ---------- Memory
     uint8_t readMemory(uint16_t address);
@@ -110,6 +120,11 @@ public:
     uint8_t getVersionMinor();
     uint8_t getVersionRevision();
     char *getVersion();
+
+    void printMemoryContents(uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32);
+    void printMemoryContents(Print &output, uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32);
 };
+
+extern Model1Class Model1;
 
 #endif /* MODEL1_H */

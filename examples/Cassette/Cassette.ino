@@ -2,9 +2,6 @@
 #include <Model1.h>
 #include <Cassette.h>
 
-Model1 *model1;
-Cassette *cassette;
-
 extern int imperialMelody[];
 extern float imperialDurations[];
 extern const size_t imperialMelodyLength;
@@ -37,21 +34,17 @@ extern int pacmanMelody[];
 extern float pacmanDurations[];
 extern const size_t pacmanMelodyLength;
 
+Cassette cassette;
+
 void setup()
 {
-    // Initialize a Model 1 instance to access it
-    model1 = new Model1();
-
     // Be sure to setup the hardware pins
-    model1->begin();
-
-    // Create an instance of the Cassette subsystem, supplying the Model 1 connection
-    cassette = new Cassette(model1);
+    Model1.begin();
 
     // Activate the test signal for the Arduino to take over the Model 1 system.
     // You need to activate it, otherwise the Z80 will continue to be in control.
     // The Arduino will also be blocked from accessing the bus without activation.
-    model1->activateTestSignal();
+    Model1.activateTestSignal();
 }
 
 void loop()
@@ -59,50 +52,50 @@ void loop()
     // Play various songs
     // Comment the ones you don't want out
 
-    cassette->playSong(imperialMelody, imperialDurations, imperialMelodyLength, 120);
+    cassette.playSong(imperialMelody, imperialDurations, imperialMelodyLength, 120);
     delay(2000);
 
-    cassette->playSong(tetrisMelodyLead, tetrisDurationsLead, tetrisMelodyLength, 140);
+    cassette.playSong(tetrisMelodyLead, tetrisDurationsLead, tetrisMelodyLength, 140);
     delay(2000);
 
-    cassette->playSong(marioMelody, marioDurations, marioMelodyLength, 180);
+    cassette.playSong(marioMelody, marioDurations, marioMelodyLength, 180);
     delay(2000);
 
-    cassette->playSong(underworldMelody, underworldDurations, underworldMelodyLength, 180);
+    cassette.playSong(underworldMelody, underworldDurations, underworldMelodyLength, 180);
     delay(2000);
 
-    cassette->playSong(simpsonsMelody, simpsonsDurations, simpsonsMelodyLength, 160);
+    cassette.playSong(simpsonsMelody, simpsonsDurations, simpsonsMelodyLength, 160);
     delay(2000);
 
-    cassette->playSong(gameOfThronesMelody, gameOfThronesDurations, gameOfThronesMelodyLength, 160);
+    cassette.playSong(gameOfThronesMelody, gameOfThronesDurations, gameOfThronesMelodyLength, 160);
     delay(2000);
 
-    cassette->playSong(doomMelody, doomDurations, doomMelodyLength, 140);
+    cassette.playSong(doomMelody, doomDurations, doomMelodyLength, 140);
     delay(2000);
 
-    cassette->playSong(pacmanMelody, pacmanDurations, pacmanMelodyLength, 120);
+    cassette.playSong(pacmanMelody, pacmanDurations, pacmanMelodyLength, 120);
     delay(2000);
 
     // Let's have a break!
     delay(5000);
 
     // Sets video in 32 character mode
-    cassette->set32CharacterMode();
+    cassette.set32CharacterMode();
     delay(2000);
 
     // Sets video in 64 character mode
-    cassette->set64CharacterMode();
+    cassette.set64CharacterMode();
     delay(2000);
 
     // You can also check wether it is in this mode
-    bool is64Mode = cassette->is64CharacterMode();
+    bool is64Mode = cassette.is64CharacterMode();
 
     // Activates the remote driver
-    cassette->activateRemote();
+    cassette.activateRemote();
     delay(2000);
 
     // Deactivates the remote driver
-    cassette->deactivateRemote();
+    cassette.deactivateRemote();
     delay(2000);
 }
 

@@ -43,26 +43,18 @@ struct TestSuiteResult
     TestResult retention;
 };
 
-// Define an accessible variable for the Model 1 instance
-Model1 *model1;
-
 // Define the serial logger
-SerialLogger *logger;
+SerialLogger logger;
 
 void setup()
 {
     // Setup the serial interface
     Serial.begin(500000); // baud rate
 
-    // Initialize the serial logger
-    logger = new SerialLogger();
-
-    // Initialize a Model 1 instance to access it
-    model1 = new Model1(logger);
-
     // Be sure to configure the DRAM refresh and setup the hardware pins
     // It uses the Timer 2, but you can set this to false and setup your own timer.
-    model1->begin(2); // Timer 2
+    Model1.begin(2); // Timer 2
+    Model1.setLogger(logger);
 
     // You can also use Timer 1, but this is often used for lots of other things
     // Timer 0 is not allowed and won't do anything. -1 turns this off.
@@ -74,14 +66,14 @@ void setup()
 
     // Activate the test signal
     Serial.println("Activated");
-    model1->activateTestSignal();
+    Model1.activateTestSignal();
 }
 
 // Define a callback for Timer 2
 ISR(TIMER2_COMPA_vect)
 {
     // Trigger a refresh to happen
-    model1->refreshNextMemoryRow();
+    Model1.nextUpdate();
 }
 
 TestResult runRepeatedWriteTest(uint16_t start, uint16_t length, bool toggleStart)
@@ -96,13 +88,13 @@ TestResult runRepeatedWriteTest(uint16_t start, uint16_t length, bool toggleStar
     {
         for (uint16_t j = 0; j < 5; j++)
         {
-            model1->writeMemory(start + i, 0x55);
+            Model1.writeMemory(start + i, 0x55);
         }
     }
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ 0x55;
         UPDATE_ERRORS(diff);
     }
@@ -121,14 +113,14 @@ TestResult runRepeatedReadTest(uint16_t start, uint16_t length, bool toggleStart
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        model1->writeMemory(start + i, 0x55);
+        Model1.writeMemory(start + i, 0x55);
     }
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
         for (uint16_t j = 0; j < 5; j++)
         {
-            data = model1->readMemory(start + i);
+            data = Model1.readMemory(start + i);
         }
         uint8_t diff = data ^ 0x55;
         UPDATE_ERRORS(diff);
@@ -159,18 +151,18 @@ TestResult runCheckerboardTest(uint16_t start, uint16_t length, bool toggleStart
     {
         if (toggle)
         {
-            model1->writeMemory(start + i, 0x55);
+            Model1.writeMemory(start + i, 0x55);
         }
         else
         {
-            model1->writeMemory(start + i, 0xAA);
+            Model1.writeMemory(start + i, 0xAA);
         }
         toggle = !toggle;
     }
     Serial.print(".");
     for (uint16_t i = 0, toggle = toggleStart; i < length; i++)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         if (toggle)
         {
             uint8_t diff = data ^ 0x55;
@@ -203,13 +195,13 @@ TestResult runWalkingOnesTest(uint16_t start, uint16_t length)
         // Write
         for (uint16_t i = 0; i < length; i++)
         {
-            model1->writeMemory(start + i, pattern);
+            Model1.writeMemory(start + i, pattern);
         }
 
         // Read
         for (uint16_t i = 0; i < length; i++)
         {
-            data = model1->readMemory(start + i);
+            data = Model1.readMemory(start + i);
             uint8_t diff = data ^ pattern;
             UPDATE_ERRORS(diff);
         }
@@ -234,13 +226,13 @@ TestResult runWalkingZerosTest(uint16_t start, uint16_t length)
         // Write
         for (uint16_t i = 0; i < length; i++)
         {
-            model1->writeMemory(start + i, pattern);
+            Model1.writeMemory(start + i, pattern);
         }
 
         // Read
         for (uint16_t i = 0; i < length; i++)
         {
-            data = model1->readMemory(start + i);
+            data = Model1.readMemory(start + i);
             uint8_t diff = data ^ pattern;
             UPDATE_ERRORS(diff);
         }
@@ -260,31 +252,31 @@ TestResult runMarchCTest(uint16_t start, uint16_t length)
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        model1->writeMemory(start + i, 0x00);
+        Model1.writeMemory(start + i, 0x00);
     }
 
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ 0x00;
         UPDATE_ERRORS(diff);
-        model1->writeMemory(start + i, 0xFF);
+        Model1.writeMemory(start + i, 0xFF);
     }
 
     Serial.print(".");
     for (int16_t i = length - 1; i >= 0; i--)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ 0xFF;
         UPDATE_ERRORS(diff);
-        model1->writeMemory(start + i, 0x00);
+        Model1.writeMemory(start + i, 0x00);
     }
 
     Serial.print(".");
     for (int16_t i = length - 1; i >= 0; i--)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ 0x00;
         UPDATE_ERRORS(diff);
     }
@@ -308,31 +300,31 @@ TestResult runMovingInversionTest(uint16_t start, uint16_t length, uint8_t patte
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        model1->writeMemory(start + i, pattern);
+        Model1.writeMemory(start + i, pattern);
     }
 
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ pattern;
         UPDATE_ERRORS(diff);
-        model1->writeMemory(start + i, antipattern);
+        Model1.writeMemory(start + i, antipattern);
     }
 
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ antipattern;
         UPDATE_ERRORS(diff);
-        model1->writeMemory(start + i, pattern);
+        Model1.writeMemory(start + i, pattern);
     }
 
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ pattern;
         UPDATE_ERRORS(diff);
     }
@@ -354,7 +346,7 @@ TestResult runRetentionTest(uint16_t start, uint16_t length, uint8_t pattern, ui
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        model1->writeMemory(start + i, pattern);
+        Model1.writeMemory(start + i, pattern);
     }
 
     for (uint16_t i = 0; i < repeatDelay; i++)
@@ -366,7 +358,7 @@ TestResult runRetentionTest(uint16_t start, uint16_t length, uint8_t pattern, ui
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ pattern;
         UPDATE_ERRORS(diff);
     }
@@ -386,54 +378,54 @@ TestResult runMarchSSTest(uint16_t start, uint16_t length)
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        model1->writeMemory(start + i, 0x00);
+        Model1.writeMemory(start + i, 0x00);
     }
 
     // Phase 2: Up read 0, write 1
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ 0x00;
         UPDATE_ERRORS(diff);
-        model1->writeMemory(start + i, 0xFF);
+        Model1.writeMemory(start + i, 0xFF);
     }
 
     // Phase 3: Down read 1, write 0
     Serial.print(".");
     for (int16_t i = length - 1; i >= 0; i--)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ 0xFF;
         UPDATE_ERRORS(diff);
-        model1->writeMemory(start + i, 0x00);
+        Model1.writeMemory(start + i, 0x00);
     }
 
     // Phase 4: Down read 0, write 1
     Serial.print(".");
     for (int16_t i = length - 1; i >= 0; i--)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ 0x00;
         UPDATE_ERRORS(diff);
-        model1->writeMemory(start + i, 0xFF);
+        Model1.writeMemory(start + i, 0xFF);
     }
 
     // Phase 5: Up read 1, write 0
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ 0xFF;
         UPDATE_ERRORS(diff);
-        model1->writeMemory(start + i, 0x00);
+        Model1.writeMemory(start + i, 0x00);
     }
 
     // Phase 6: Up read 0
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ 0x00;
         UPDATE_ERRORS(diff);
     }
@@ -453,34 +445,34 @@ TestResult runMarchLATest(uint16_t start, uint16_t length)
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        model1->writeMemory(start + i, 0x00);
+        Model1.writeMemory(start + i, 0x00);
     }
 
     // Phase 2: Up read 0, write 1
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ 0x00;
         UPDATE_ERRORS(diff);
-        model1->writeMemory(start + i, 0xFF);
+        Model1.writeMemory(start + i, 0xFF);
     }
 
     // Phase 3: Down read 1, write 0
     Serial.print(".");
     for (int32_t i = length - 1; i >= 0; i--)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ 0xFF;
         UPDATE_ERRORS(diff);
-        model1->writeMemory(start + i, 0x00);
+        Model1.writeMemory(start + i, 0x00);
     }
 
     // Phase 4: Down read 0
     Serial.print(".");
     for (int32_t i = length - 1; i >= 0; i--)
     {
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ 0x00;
         UPDATE_ERRORS(diff);
     }
@@ -504,7 +496,7 @@ TestResult runReadDestructiveTest(uint16_t start, uint16_t length, uint8_t patte
     Serial.print(".");
     for (uint16_t i = 0; i < length; i++)
     {
-        model1->writeMemory(start + i, pattern);
+        Model1.writeMemory(start + i, pattern);
     }
 
     // 2. Repeatedly read the same cell without re-writing
@@ -512,7 +504,7 @@ TestResult runReadDestructiveTest(uint16_t start, uint16_t length, uint8_t patte
     {
         for (uint8_t r = 0; r < numReads; r++)
         {
-            data = model1->readMemory(start + i);
+            data = Model1.readMemory(start + i);
             uint8_t diff = data ^ pattern;
             UPDATE_ERRORS(diff);
             if (diff != 0)
@@ -540,7 +532,7 @@ TestResult runAddressUniquenessTest(uint16_t start, uint16_t length, uint8_t pat
     for (uint16_t i = 0; i < length; i++)
     {
         uint8_t value = ((uint8_t)(i & 0xFF)) ^ pattern;
-        model1->writeMemory(start + i, value);
+        Model1.writeMemory(start + i, value);
     }
 
     // Phase 2: Verify
@@ -548,7 +540,7 @@ TestResult runAddressUniquenessTest(uint16_t start, uint16_t length, uint8_t pat
     for (uint16_t i = 0; i < length; i++)
     {
         uint8_t expected = ((uint8_t)(i & 0xFF)) ^ pattern;
-        data = model1->readMemory(start + i);
+        data = Model1.readMemory(start + i);
         uint8_t diff = data ^ expected;
         UPDATE_ERRORS(diff);
     }
@@ -704,8 +696,8 @@ void loop()
 {
     delay(1000);
 
-    model1->writeMemory(0x3C00, 0x61);
-    uint8_t data = model1->readMemory(0x3C00);
+    Model1.writeMemory(0x3C00, 0x61);
+    uint8_t data = Model1.readMemory(0x3C00);
     if (data == 0x21)
     { // Shifted in page due to circuitry
         Serial.println("Most likely a Model 1 without lower-case mod.");
