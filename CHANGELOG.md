@@ -13,3 +13,7 @@ This is the initial version written by Ven Reddy
 ## 27th September 2024 - Initial Version (0.9.2)
 
 - General cleanup of the codebase
+
+## 22th July 2025 - Initial Release (1.0.0)
+
+- General cleanup of the codebase

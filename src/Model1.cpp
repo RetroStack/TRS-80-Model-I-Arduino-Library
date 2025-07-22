@@ -19,9 +19,9 @@
 #define CTC_TRIGGER 89
 
 // Version constants
-#define M1_VERSION_MAJOR 0
-#define M1_VERSION_MINOR 9
-#define M1_VERSION_REVISION 5
+#define M1_VERSION_MAJOR 1
+#define M1_VERSION_MINOR 0
+#define M1_VERSION_REVISION 0
 
 // Define global instance
 Model1Class Model1;
