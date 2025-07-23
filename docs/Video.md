@@ -1,6 +1,7 @@
 # Video Class
 
 The `Video` class provides comprehensive control over the TRS-80 Model I video RAM and display behavior. It handles text output, viewport clipping, cursor movement, scrolling, and character encoding (including support for systems with or without lowercase modifications).
+The class inherits the `Print` behavior, and therefore all `Print::print` and `Print::println` methods are available.
 
 ## Constructor
 
@@ -24,11 +25,16 @@ _This is often useful for debugging as it tells what went wrong._
 
 ### Printing Text
 
-- `print(const char* str)`: Prints a string starting at the current cursor.
-- `print(const char character)`: Prints a single character.
+All the methods that `Print::print` and `Print::println` provide are available in additon to:
+
+- `print(const char character, bool raw)`: Prints a single character in raw format (as given) or automatically translates it with `convertLocalCharacterToModel1`.
 - `print(const char* str, uint8_t x, uint8_t y)`: Prints string at specified coordinates.
-- `printLn()`: Moves the cursor to the next line.
-- `printLn(const char* str)`: Prints a string and moves to the next line.
+- `print(const char* str, uint16_t length, uint8_t x, uint8_t y)`: Prints string at specified coordinates.
+
+_By default, all methods use `convertLocalCharacterToModel1` automatically._
+
+There is also the following method that changes the print behavior:
+
 - `setAutoScroll(bool enabled)`: Enables or disables automatic scrolling when reaching the bottom.
 
 ### Reading Video Memory

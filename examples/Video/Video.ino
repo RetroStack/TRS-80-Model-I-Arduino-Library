@@ -62,7 +62,7 @@ void loop()
     // Print at current cursor location
     // With the "Ln" at the end of "print" you can add a new line after the text
     // The cursor will move to the beginning of the next line.
-    video.printLn("MIDDLE");
+    video.println("MIDDLE");
     video.print("START");
 
     // String is cut-off and will continue on the next line

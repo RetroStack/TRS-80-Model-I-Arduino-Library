@@ -10,6 +10,7 @@
 #include <Arduino.h>
 #include "ILogger.h"
 #include "Model1.h"
+#include <Print.h>
 
 /**
  * Structure for the viewport information
@@ -22,7 +23,7 @@ struct ViewPort
   uint8_t height;
 };
 
-class Video
+class Video : public Print
 {
 private:
   ILogger *_logger;
@@ -72,16 +73,10 @@ public:
 
   char *read(uint8_t x, uint8_t y, uint16_t length, bool raw);
 
-  void print(const char character);
+  size_t write(uint8_t ch) override;
+  size_t write(const uint8_t *buffer, size_t size) override;
+
   void print(const char character, bool raw);
-
-  void print(const char *str);
-  void print(const char *str, uint16_t length);
-
-  void printLn();
-  void printLn(const char *str);
-  void printLn(const char *str, uint16_t length);
-
   void print(const char *str, uint8_t x, uint8_t y);
   void print(const char *str, uint16_t length, uint8_t x, uint8_t y);
 
@@ -90,6 +85,9 @@ public:
 
   char convertModel1CharacterToLocal(char character);
   char convertLocalCharacterToModel1(char character);
+
+  using Print::print;
+  using Print::println;
 };
 
 #endif // VIDEO_H

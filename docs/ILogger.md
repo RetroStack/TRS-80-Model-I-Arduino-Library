@@ -1,6 +1,7 @@
 # ILogger Interface
 
 The `ILogger` interface defines how logging works in the library. You can implement this yourself if you want to send logs to Serial, a file, or another output.
+The class inherits the `Print` behavior, and therefore all `Print::print` and `Print::println` methods are available.
 
 ## Methods
 

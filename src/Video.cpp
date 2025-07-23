@@ -369,11 +369,24 @@ char *Video::read(uint8_t x, uint8_t y, uint16_t length, bool raw)
 }
 
 /**
- * Prints one character to the current cursor position
+ * Write a byte to the viewport and return byte written.
  */
-void Video::print(const char character)
+size_t Video::write(uint8_t ch)
 {
-  _print(character, false);
+  _print((char)ch, false);
+}
+
+/**
+ * Write a list of bytes to the viewport and returns the number of bytes written.
+ */
+size_t Video::write(const uint8_t *buffer, size_t size)
+{
+  size_t result = 0;
+  for (uint16_t i = 0; i < size; i++)
+  {
+    result += write(buffer[i]);
+  }
+  return result;
 }
 
 /**
@@ -448,62 +461,13 @@ void Video::_print(const char character, bool raw)
 }
 
 /**
- * Prints a string to the current cursor position
- */
-void Video::print(const char *str)
-{
-  uint16_t length = strlen(str);
-  print(str, length);
-}
-
-/**
- * Prints a string to the current cursor position
- */
-void Video::print(const char *str, uint16_t length)
-{
-  for (uint16_t i = 0; i < length; i++)
-  {
-    if (str[i] == '\0')
-      return;
-    print(str[i]);
-  }
-}
-
-/**
- * Prints a new line to the current cursor position
- */
-void Video::printLn()
-{
-  print('\n');
-}
-
-/**
- * Prints a string with a new line to the current cursor position
- */
-void Video::printLn(const char *str)
-{
-  uint16_t length = strlen(str);
-  print(str, length);
-  print('\n');
-}
-
-/**
- * Prints a string with a new line to the current cursor position
- */
-void Video::printLn(const char *str, uint16_t length)
-{
-  print(str, length);
-  print('\n');
-}
-
-/**
  * Prints a string to the given x and y coordinate within the viewport
  */
 void Video::print(const char *str, uint8_t x, uint8_t y)
 {
   uint16_t length = strlen(str);
   setXY(x, y);
-  print(str, length);
+  write((const uint8_t *)str, length);
 }
 
 /**
@@ -512,7 +476,7 @@ void Video::print(const char *str, uint8_t x, uint8_t y)
 void Video::print(const char *str, uint16_t length, uint8_t x, uint8_t y)
 {
   setXY(x, y);
-  print(str, length);
+  write((const uint8_t *)str, length);
 }
 
 /**
