@@ -87,6 +87,6 @@ void loop()
     video.setAutoScroll(false);
 
     // You can also supply the coordinates (X and Y respectively) directly
-    video.print("RIGHT BOTTOM", 28, 4);
+    video.print(28, 4, "RIGHT BOTTOM");
     delay(2000); // Wait 2 seconds
 }

@@ -77,8 +77,8 @@ public:
   size_t write(const uint8_t *buffer, size_t size) override;
 
   void print(const char character, bool raw);
-  void print(const char *str, uint8_t x, uint8_t y);
-  void print(const char *str, uint16_t length, uint8_t x, uint8_t y);
+  void print(uint8_t x, uint8_t y, const char *str);
+  void print(uint8_t x, uint8_t y, const char *str, uint16_t length);
 
   void setAutoScroll(bool autoScroll);
   void setLowerCaseMod(bool hasLowerCaseMod);

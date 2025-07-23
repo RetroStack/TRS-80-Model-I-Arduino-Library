@@ -66,13 +66,13 @@ void loop()
     video.print("START");
 
     // String is cut-off and will continue on the next line
-    video.print("CUT OFF", 60, 10);
+    video.print(60, 10, "CUT OFF");
 
     // Disable auto-scrolling when the cursor reaches the end of the viewport
     video.setAutoScroll(false);
 
     // You can also supply the coordinates directly
-    video.print("RIGHT BOTTOM", 50, 15);
+    video.print(50, 15, "RIGHT BOTTOM");
     delay(2000); // Wait 2 seconds
 
     // Check whether the video mode is 64

@@ -463,7 +463,7 @@ void Video::_print(const char character, bool raw)
 /**
  * Prints a string to the given x and y coordinate within the viewport
  */
-void Video::print(const char *str, uint8_t x, uint8_t y)
+void Video::print(uint8_t x, uint8_t y, const char *str)
 {
   uint16_t length = strlen(str);
   setXY(x, y);
@@ -473,7 +473,7 @@ void Video::print(const char *str, uint8_t x, uint8_t y)
 /**
  * Prints a string to the given x and y coordinate within the viewport
  */
-void Video::print(const char *str, uint16_t length, uint8_t x, uint8_t y)
+void Video::print(uint8_t x, uint8_t y, const char *str, uint16_t length)
 {
   setXY(x, y);
   write((const uint8_t *)str, length);
