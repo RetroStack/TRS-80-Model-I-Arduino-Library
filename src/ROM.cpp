@@ -176,7 +176,7 @@ void ROM::printROMContents(uint8_t rom, PRINT_STYLE style = BOTH, bool relative 
   uint16_t addr = getROMStartAddress(rom);
   uint16_t size = getROMLength(rom);
 
-  Model1.printMemoryContents(_logger, addr, size, style, relative);
+  Model1.printMemoryContents(*_logger, addr, size, style, relative, bytesPerLine);
 }
 
 /**

@@ -27,6 +27,9 @@ public:
 
     void mute();
     void unmute();
+
+    using Print::print;
+    using Print::println;
 };
 
 #endif /* SERIAL_LOGGER_H */

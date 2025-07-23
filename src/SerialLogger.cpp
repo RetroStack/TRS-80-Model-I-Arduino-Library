@@ -23,7 +23,7 @@ size_t SerialLogger::write(uint8_t ch)
     }
     else
     {
-        return Serial.print(ch);
+        return Serial.print((char)ch);
     }
 }
 
