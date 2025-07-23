@@ -20,7 +20,7 @@
 
 // Version constants
 #define M1_VERSION_MAJOR 1
-#define M1_VERSION_MINOR 0
+#define M1_VERSION_MINOR 1
 #define M1_VERSION_REVISION 0
 
 // Define global instance
