@@ -19,8 +19,9 @@ constexpr uint16_t DEFAULT_CONSOLE_BG_COLOR = ST77XX_BLACK;
 /**
  * @brief Constructor - initialize console with default settings
  *
- * Sets up the console with default text size, colors, and cursor position.
- * The console starts at the top-left of the content area.
+ * Sets up the console with default text size, colors, cursor position,
+ * and timing for one-time execution. The console starts at the top-left
+ * of the content area.
  */
 ConsoleScreen::ConsoleScreen() : ContentScreen()
 {
@@ -61,6 +62,10 @@ ConsoleScreen::ConsoleScreen() : ContentScreen()
     _contentTop = 0;
     _contentWidth = 0;
     _contentHeight = 0;
+    
+    // Initialize one-time execution tracking
+    _screenOpenTime = 0;
+    _hasExecutedOnce = false;
 
     // Set default button labels
     const char *buttonItems[1] = {"[M] Back"};
@@ -89,11 +94,20 @@ void ConsoleScreen::_updateDimensions()
 /**
  * @brief Main loop processing for console screen updates
  *
- * Delegates to ContentScreen for standard screen processing.
- * Override this method in derived classes for custom behavior.
+ * Handles one-time execution timing and delegates to ContentScreen
+ * for standard screen processing. Override this method in derived
+ * classes for custom behavior.
  */
 void ConsoleScreen::loop()
 {
+    // Check for one-time execution
+    if (!_hasExecutedOnce && (millis() - _screenOpenTime >= 1000))
+    {
+        _executeOnce();
+        _hasExecutedOnce = true;
+    }
+    
+    // Call parent loop for standard processing
     ContentScreen::loop();
 }
 
@@ -190,6 +204,23 @@ void ConsoleScreen::_processTab()
     {
         _newLine();
     }
+}
+
+/**
+ * @brief Override Screen::open() to initialize timing for one-time execution
+ *
+ * Resets the one-time execution tracking when the console becomes active.
+ * This ensures _executeOnce() will be called 1 second after opening,
+ * even if the console was previously opened and closed.
+ */
+void ConsoleScreen::open()
+{
+    // Call parent implementation first
+    ContentScreen::open();
+    
+    // Reset one-time execution tracking
+    _screenOpenTime = millis();
+    _hasExecutedOnce = false;
 }
 
 // Text Output Methods
@@ -407,4 +438,63 @@ void ConsoleScreen::setTabSize(uint8_t size)
     if (size < 1)
         size = 1;
     _tabSize = size;
+}
+
+/**
+ * @brief Process a single character for output
+ *
+ * Handles special characters like newline (\n) and tab (\t),
+ * and renders printable characters to the screen.
+ *
+ * @param c Character to process and potentially render
+ */
+void ConsoleScreen::_processChar(char c)
+{
+    if (c == '\n')
+    {
+        _newLine();
+    }
+    else if (c == '\t')
+    {
+        _processTab();
+    }
+    else if (c >= 32 && c <= 126) // Printable ASCII characters
+    {
+        _renderChar(c);
+    }
+    // Ignore other control characters
+}
+
+/**
+ * @brief Render a single character at the current cursor position
+ *
+ * Draws the character with current color settings and advances
+ * the cursor position. Handles line wrapping automatically.
+ *
+ * @param c Character to render (must be printable)
+ */
+void ConsoleScreen::_renderChar(char c)
+{
+    _updateDimensions();
+
+    Adafruit_GFX &gfx = M1Shield.getGFX();
+
+    // Check if character would exceed line width
+    if (_currentX + _charWidth > _contentWidth)
+    {
+        _newLine();
+    }
+
+    // Calculate absolute screen position
+    uint16_t x = _contentLeft + _currentX;
+    uint16_t y = _contentTop + _currentY;
+
+    // Set text properties and render character
+    gfx.setTextColor(_textColor, _textBgColor);
+    gfx.setTextSize(_textSize);
+    gfx.setCursor(x, y);
+    gfx.print(c);
+
+    // Advance cursor position
+    _currentX += _charWidth;
 }

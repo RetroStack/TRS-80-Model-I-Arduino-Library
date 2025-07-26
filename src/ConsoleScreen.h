@@ -36,20 +36,31 @@
  * @example
  * @code
  * class DebugConsole : public ConsoleScreen {
+ * protected:
+ *     void _executeOnce() override {
+ *         // One-time initialization after 1 second
+ *         cls();
+ *         setTextColor(ST77XX_GREEN, ST77XX_BLACK);
+ *         println("=== DEBUG CONSOLE READY ===");
+ *         println("System initialized successfully");
+ *         println("Status: ONLINE");
+ *     }
+ *
  * public:
  *     DebugConsole() {
  *         _setTitle("Debug Console");
- *         setTextColor(ST77XX_GREEN, ST77XX_BLACK);
- *         cls();
- *         println("Console will auto-clear when full!");
+ *         // _executeOnce() will be called automatically after 1 second
  *     }
  *
  *     void loop() override {
- *         println("System Status: OK");
- *         print("Temperature: ");
- *         println(String(25.6) + "°C");
- *         // Console automatically clears and wraps when bottom is reached
- *         ContentScreen::loop();
+ *         // Optional: continuous updates after _executeOnce()
+ *         static unsigned long lastUpdate = 0;
+ *         if (millis() - lastUpdate > 5000) { // Every 5 seconds
+ *             lastUpdate = millis();
+ *             print("Uptime: ");
+ *             println(millis() / 1000);
+ *         }
+ *         ConsoleScreen::loop();
  *     }
  * };
  * @endcode
@@ -77,6 +88,10 @@ private:
     uint16_t _contentTop;    // Top edge of content area
     uint16_t _contentWidth;  // Width of content area
     uint16_t _contentHeight; // Height of content area
+
+    // One-time execution tracking
+    unsigned long _screenOpenTime; // Timestamp when screen was opened
+    bool _hasExecutedOnce;         // Whether _executeOnce() has been called
 
     /**
      * @brief Update cached screen dimensions from ContentScreen
@@ -120,6 +135,35 @@ private:
      */
     void _processTab();
 
+protected:
+    /**
+     * @brief Optional one-time execution method called 1 second after console opens
+     *
+     * This virtual method provides an alternative to continuous loop() processing
+     * for tasks that need to run exactly once after the console is displayed.
+     * Perfect for initialization, data loading, or setup tasks that don't need
+     * to be repeated continuously.
+     *
+     * Default implementation does nothing - derived classes can override to
+     * implement one-time processing logic.
+     *
+     * @note Called automatically 1 second after console becomes active
+     * @note Only called once per console activation
+     * @note Called before any loop() iterations
+     * @note Does not replace loop() - both can be used together
+     *
+     * @example One-time console initialization
+     * ```cpp
+     * void _executeOnce() override {
+     *     println("=== CONSOLE INITIALIZED ===");
+     *     println("Loading system data...");
+     *     _loadSystemStatus();
+     *     println("Ready for operation!");
+     * }
+     * ```
+     */
+    virtual void _executeOnce() {};
+
 public:
     /**
      * @brief Constructor - initialize console with default settings
@@ -133,6 +177,12 @@ public:
      * @brief Destructor
      */
     virtual ~ConsoleScreen();
+
+    /**
+     * @brief Override Screen::open() to initialize timing for one-time execution
+     * @note Resets the one-time execution timer when console becomes active
+     */
+    void open() override;
 
     // Screen Interface Implementation
 
