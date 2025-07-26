@@ -20,7 +20,7 @@
 
 // Version constants
 #define M1_VERSION_MAJOR 1
-#define M1_VERSION_MINOR 1
+#define M1_VERSION_MINOR 2
 #define M1_VERSION_REVISION 0
 
 // Define global instance
@@ -28,8 +28,6 @@ Model1Class Model1;
 
 /**
  * Constructor for accessing the Model 1
- *
- * @param logger
  */
 Model1Class::Model1Class()
 {
@@ -772,6 +770,14 @@ void Model1Class::_setTestSignal(bool value)
     {
         pinWrite(TEST, HIGH);
     }
+}
+
+/**
+ * Returns wether the test signal is active
+ */
+bool Model1Class::hasActiveTestSignal()
+{
+    return (pinRead(TEST) == LOW);
 }
 
 /**

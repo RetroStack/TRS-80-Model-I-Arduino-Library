@@ -21,6 +21,13 @@ This Arduino library enables interfacing a TRS-80 Model I mainboard directly wit
   - **Video** – Provides direct access to video reading/writing, including viewports with scrolling support.
   - **ILogger** - Standard interface for all logging events.
   - **SerialLogger** - Specific implementation of an ILogger for Serial logging.
+- **M1Shield Framework** – Complete hardware abstraction and UI framework for TRS-80 Model I Arduino Shield
+  - **M1Shield** – Hardware abstraction layer for display, input (buttons/joystick), LED control, and screen management with multi-display support (ST7789, ST7735, ILI9341).
+- **Screen Framework** – User interface abstractions
+  - **Screen** – Abstract base class for all UI screens with lifecycle management, input handling, and navigation system.
+  - **ContentScreen** – Structured layout template with automatic header, content, footer, and progress bar regions for consistent UI design.
+  - **MenuScreen** – Paginated menu framework with automatic navigation, selection handling, and memory management for building interactive menus.
+  - **M1TerminalScreen** – TRS-80 Model I terminal emulation with 64×16 character grid, incremental rendering, and direct Model1 system integration.
 
 ## Documentation
 
@@ -46,7 +53,10 @@ _(Link will be updated once the repository is public.)_
 1. Clone or download this repository.
 2. Copy the library folder into your Arduino libraries directory.
 3. Open the Arduino IDE.
-4. Go to **File → Examples → TRS-80 Model I** and choose an example.
+4. Go to **File → Examples → TRS-80 Model I** and choose an example:
+   - **Model1, Video, ROM, Keyboard, Cassette** examples for direct TRS-80 system access
+   - **M1Shield** examples for shield-based applications with display and input
+   - **Screen** examples for building custom user interfaces
 5. Compile and upload to test it.
 
 **⚠️ WARNING:**  

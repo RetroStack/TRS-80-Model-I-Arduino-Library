@@ -105,6 +105,7 @@ public:
     void deactivateInterruptRequestSignal();
 
     // ---------- Test Signal
+    bool hasActiveTestSignal();
     void activateTestSignal();
     void deactivateTestSignal();
 
