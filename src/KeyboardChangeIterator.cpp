@@ -22,7 +22,7 @@
 #define KEY_UNUSED_9 0xCA
 #define KEY_UNUSED_10 0xCB
 #define KEY_UNUSED_11 0xCC
-#define KEY_UNUSED_12 0xC2
+#define KEY_UNUSED_12 0xCD
 
 // Look-up table for uppercase characters
 const uint8_t lookupTable[8][8] PROGMEM = {
