@@ -116,7 +116,7 @@ uint16_t ROM::getROMLength(uint8_t rom)
 uint32_t ROM::getChecksum(uint8_t rom)
 {
   if (!_checkROMNumber(rom))
-    return;
+    return 0;
 
   uint16_t addr = getROMStartAddress(rom);
   uint16_t size = getROMLength(rom);
@@ -166,7 +166,7 @@ const __FlashStringHelper *ROM::identifyROM()
 /**
  * Prints the contents of a ROM in a human-readable format
  */
-void ROM::printROMContents(uint8_t rom, PRINT_STYLE style = BOTH, bool relative = true, uint16_t bytesPerLine = 32)
+void ROM::printROMContents(uint8_t rom, PRINT_STYLE style, bool relative, uint16_t bytesPerLine)
 {
   if (!_logger)
     return;

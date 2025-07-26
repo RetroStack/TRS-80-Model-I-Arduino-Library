@@ -44,7 +44,7 @@ Model1Class::Model1Class()
 /**
  * Hardware initialization
  */
-void Model1Class::begin(int refreshTimer = -1)
+void Model1Class::begin(int refreshTimer)
 {
     _addressBus.begin();
     _dataBus.begin();
@@ -698,7 +698,7 @@ void Model1Class::_setInterruptRequestSignal(bool value)
  *
  * NOTE: The timeout unit is in about microseconds.
  */
-bool Model1Class::triggerInterrupt(uint8_t interrupt, uint16_t timeout = 1000)
+bool Model1Class::triggerInterrupt(uint8_t interrupt, uint16_t timeout)
 {
     activateInterruptRequestSignal();
 
@@ -1001,7 +1001,7 @@ char *Model1Class::getVersion()
 /**
  * Prints memory contents in a human readable format
  */
-void Model1Class::printMemoryContents(uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32)
+void Model1Class::printMemoryContents(uint16_t start, uint16_t length, PRINT_STYLE style, bool relative, uint16_t bytesPerLine)
 {
     if (!_logger)
         return;
@@ -1012,7 +1012,7 @@ void Model1Class::printMemoryContents(uint16_t start, uint16_t length, PRINT_STY
 /**
  * Prints the contents of a memory location in a human-readable format
  */
-void Model1Class::printMemoryContents(Print &output, uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32)
+void Model1Class::printMemoryContents(Print &output, uint16_t start, uint16_t length, PRINT_STYLE style, bool relative, uint16_t bytesPerLine)
 {
     if (bytesPerLine == 0 || bytesPerLine > 60)
     {
