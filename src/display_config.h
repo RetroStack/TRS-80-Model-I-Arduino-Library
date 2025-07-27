@@ -80,7 +80,7 @@ constexpr const char *DISPLAY_NAME = "ILI9325";
 
 #else
 // Fallback to ST7789 if no display type was defined
-#define USE_ST7789
+// Note: The actual typedef is handled in M1Shield.h
 constexpr uint16_t DISPLAY_WIDTH = 320;
 constexpr uint16_t DISPLAY_HEIGHT = 240;
 constexpr const char *DISPLAY_NAME = "ST7789 (Default)";

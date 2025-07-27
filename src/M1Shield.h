@@ -44,6 +44,7 @@ typedef Adafruit_TFTLCD TFT_Display;
 // Default to ST7789 if no display type is specified
 // You can change this default to another screen if needed
 #include <Adafruit_ST7789.h>
+typedef Adafruit_ST7789 TFT_Display;
 #endif
 
 #include "Screen.h"
@@ -152,8 +153,13 @@ enum JoystickDirection
 class M1ShieldClass
 {
 private:
-    TFT_Display _tft; // TFT display instance
-    Screen *_screen;  // Currently active screen
+#if defined(USE_ILI9488)
+    TFT_Display *_tft;     // Pointer for Arduino_GFX displays
+    Arduino_DataBus *_bus; // DataBus for ILI9488
+#else
+    TFT_Display _tft; // Object for Adafruit_GFX displays
+#endif
+    Screen *_screen; // Currently active screen
 
     // Button debouncing state tracking
     unsigned long _menuPressed;     // Last menu button press timestamp

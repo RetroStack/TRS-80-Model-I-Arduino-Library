@@ -43,32 +43,32 @@ M1ShieldClass M1Shield;
 /**
  * Constructor: Initializes internal state.
  */
-M1ShieldClass::M1ShieldClass() : 
+M1ShieldClass::M1ShieldClass() :
 #if defined(USE_ILI9488)
-    // ILI9488 uses Arduino_GFX and requires special initialization in begin()
-    _tft(nullptr, 320, 480), // Temporary construction - proper bus will be set in begin()
+                                 _tft(nullptr), // Will be created in begin()
+                                 _bus(nullptr), // Will be created in begin()
 #elif defined(USE_ST7789) || defined(USE_ST7789_240x240)
-    _tft(TFT_CS, TFT_DC, TFT_RST),
+                                 _tft(TFT_CS, TFT_DC, TFT_RST),
 #elif defined(USE_ST7735)
-    _tft(TFT_CS, TFT_DC, TFT_RST),
+                                 _tft(TFT_CS, TFT_DC, TFT_RST),
 #elif defined(USE_ILI9341)
-    _tft(TFT_CS, TFT_DC, TFT_RST),
+                                 _tft(TFT_CS, TFT_DC, TFT_RST),
 #elif defined(USE_HX8357)
-    _tft(TFT_CS, TFT_DC, TFT_RST),
+                                 _tft(TFT_CS, TFT_DC, TFT_RST),
 #elif defined(USE_ILI9325)
-    _tft(TFT_CS, TFT_DC, TFT_RST),
+                                 _tft(TFT_CS, TFT_DC, TFT_RST),
 #else
-    _tft(TFT_CS, TFT_DC, TFT_RST),
+                                 _tft(TFT_CS, TFT_DC, TFT_RST),
 #endif
-    _menuPressed(0),
-    _upPressed(0),
-    _downPressed(0),
-    _leftPressed(0),
-    _rightPressed(0),
-    _joystickPressed(0),
-    _screenWidth(0),
-    _screenHeight(0),
-    _screen(nullptr)
+                                 _menuPressed(0),
+                                 _upPressed(0),
+                                 _downPressed(0),
+                                 _leftPressed(0),
+                                 _rightPressed(0),
+                                 _joystickPressed(0),
+                                 _screenWidth(0),
+                                 _screenHeight(0),
+                                 _screen(nullptr)
 {
 }
 
@@ -84,6 +84,20 @@ M1ShieldClass::~M1ShieldClass()
         delete _screen;
         _screen = nullptr;
     }
+
+#if defined(USE_ILI9488)
+    // Clean up ILI9488 resources
+    if (_tft)
+    {
+        delete _tft;
+        _tft = nullptr;
+    }
+    if (_bus)
+    {
+        delete _bus;
+        _bus = nullptr;
+    }
+#endif
 }
 
 /**
@@ -140,10 +154,11 @@ void M1ShieldClass::begin()
     _tft.setRotation(3);
 #elif defined(USE_ILI9488)
     // ILI9488 requires special initialization with Arduino_GFX
-    // The current architecture doesn't properly support Arduino_GFX initialization
-    // This is a temporary fix - proper support requires architectural changes
-    _tft.begin();
-    _tft.setRotation(3);
+    // Create the DataBus first, then the display object
+    _bus = new Arduino_HWSPI(TFT_DC, TFT_CS, TFT_RST); // Hardware SPI for Arduino
+    _tft = new Arduino_ILI9488(_bus, 320, 480);
+    _tft->begin();
+    _tft->setRotation(3);
 #elif defined(USE_HX8357)
     _tft.begin();
     _tft.setRotation(3);
@@ -172,7 +187,11 @@ bool M1ShieldClass::isDisplayInitialized() const
  */
 Adafruit_GFX &M1ShieldClass::getGFX()
 {
-    return _tft;
+#if defined(USE_ILI9488)
+    return *_tft; // Dereference pointer for ILI9488
+#else
+    return _tft; // Direct reference for Adafruit displays
+#endif
 }
 
 /**
