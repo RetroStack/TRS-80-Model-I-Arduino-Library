@@ -218,7 +218,7 @@ void loop() {
 Here's how the library uses these pins:
 
 ```arduino
-#include "Model1.h"
+#include <Model1.h>
 
 void setup() {
   Serial.begin(115200);

@@ -66,7 +66,7 @@ Display_ST7789 displayProvider;
 // Display_HX8357 displayProvider;
 
 // Include the libraries we need
-#include "M1Shield.h"      // Main M1Shield functions
+#include <M1Shield.h>      // Main M1Shield functions
 #include "ExampleScreen.h" // Our simple screen
 
 void setup()

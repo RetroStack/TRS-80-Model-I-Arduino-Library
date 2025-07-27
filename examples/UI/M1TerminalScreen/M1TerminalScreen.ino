@@ -73,9 +73,9 @@ Display_ST7789 displayProvider;
 // #include <Display_HX8357.h>
 // Display_HX8357 displayProvider;
 
-#include "Model1.h"
-#include "M1Shield.h"
-#include "M1TerminalScreen.h"
+#include <Model1.h>
+#include <M1Shield.h>
+#include <M1TerminalScreen.h>
 
 void setup()
 {

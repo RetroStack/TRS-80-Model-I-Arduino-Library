@@ -16,7 +16,7 @@
  */
 
 #include "SimpleContentScreen.h"
-#include "M1Shield.h"
+#include <M1Shield.h>
 
 // STEP 1: CONSTRUCTOR - Setting up the screen
 // This runs ONCE when you create the screen with "new SimpleContentScreen(...)"

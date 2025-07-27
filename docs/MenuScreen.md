@@ -177,9 +177,9 @@ protected:
     const char* _getMenuItemConfigValue(int index) override {
         switch(index) {
             case 0: return _soundEnabled ? "On" : "Off";        // Boolean setting
-            case 1: return _difficulty == 0 ? "Easy" : 
+            case 1: return _difficulty == 0 ? "Easy" :
                           _difficulty == 1 ? "Normal" : "Hard"; // Enum setting
-            case 2: 
+            case 2:
                 snprintf(_timeoutBuffer, sizeof(_timeoutBuffer), "%ds", _timeout);
                 return _timeoutBuffer;                          // Numeric value
             default: return nullptr;                           // No config value
@@ -241,7 +241,7 @@ protected:
     const char* _getMenuItemConfigValue(int index) override {
         switch(index) {
             case 1: return _soundEnabled ? "On" : "Off";        // Audio Settings
-            case 3: return _difficulty == 0 ? "Easy" : 
+            case 3: return _difficulty == 0 ? "Easy" :
                           _difficulty == 1 ? "Normal" : "Hard"; // Game Difficulty
             default: return nullptr;                           // No config for other items
         }
@@ -270,6 +270,7 @@ virtual bool _isMenuItemEnabled(int index) { return true; }
 - **Auto-adjustment**: If current selection becomes disabled, moves to next enabled item
 
 **Visual Appearance:**
+
 - **Enabled Items**: Normal colors with selection highlighting
 - **Disabled Items**: Grayed out colors, cannot be selected
 - **Selection**: Only enabled items can be highlighted and selected
@@ -286,14 +287,14 @@ public:
     GameMenu() {
         const char* items[] = {
             "New Game",
-            "Continue Game", 
+            "Continue Game",
             "Load Game",
             "Settings",
             "Exit"
         };
         _setMenuItems(items, 5);
         _setTitle("Main Menu");
-        
+
         // Check game state
         _gameInProgress = checkGameState();
         _hasSaveFile = checkSaveFile();
@@ -304,7 +305,7 @@ protected:
         switch(index) {
             case 0: return new NewGameScreen();
             case 1: return new ContinueGameScreen();
-            case 2: return new LoadGameScreen(); 
+            case 2: return new LoadGameScreen();
             case 3: return new SettingsScreen();
             case 4: return nullptr; // Exit
         }
@@ -407,9 +408,9 @@ protected:
 ## Example
 
 ```cpp
-#include "MenuScreen.h"
+#include <MenuScreen.h>
 #include "GameScreen.h"
-#include "SettingsScreen.h"
+#include <SettingsScreen.h>
 
 class MainMenu : public MenuScreen {
 private:

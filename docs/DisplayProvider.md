@@ -40,18 +40,24 @@ The DisplayProvider architecture replaces the old compile-time `#define` system 
 
 ```cpp
 #include <Display_ST7789.h>  // Choose your display type
-#include "M1Shield.h"
+#include <M1Shield.h>
 ```
 
 ### 2. Create Provider Instance
 
 ```cpp
+#include <Display_ST7789.h>
+#include <M1Shield.h>
+
 Display_ST7789 displayProvider;  // Must match your hardware
 ```
 
 ### 3. Initialize M1Shield
 
 ```cpp
+#include <Display_ST7789.h>
+#include <M1Shield.h>
+
 void setup() {
     M1Shield.begin(displayProvider);
 
@@ -105,7 +111,7 @@ public:
 
 ```cpp
 #define USE_ST7789
-#include "M1Shield.h"
+#include <M1Shield.h>
 
 void setup() {
     M1Shield.begin();
@@ -122,7 +128,7 @@ void setup() {
 
 ```cpp
 #include <Display_ST7789.h>
-#include "M1Shield.h"
+#include <M1Shield.h>
 
 Display_ST7789 displayProvider;
 
@@ -153,7 +159,7 @@ To add support for a new display controller:
 ```cpp
 // Display_NEWTYPE.h
 #include <Adafruit_NEWTYPE.h>
-#include "DisplayProvider.h"
+#include <DisplayProvider.h>
 
 class Display_NEWTYPE : public DisplayProvider {
 public:
@@ -221,7 +227,7 @@ includes=...,Display_NEWTYPE.h,...
 
    ```cpp
    #include <Display_ST7789.h>
-   #include "M1Shield.h"
+   #include <M1Shield.h>
 
    Display_ST7789 displayProvider;
 

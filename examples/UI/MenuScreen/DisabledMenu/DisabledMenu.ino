@@ -108,7 +108,7 @@ Display_ST7789 displayProvider;
 
 // STEP 2: Include required libraries
 #include "ConfigMenuExample.h" // Our configuration menu implementation
-#include "M1Shield.h"          // Main M1Shield functionality
+#include <M1Shield.h>          // Main M1Shield functionality
 
 void setup()
 {

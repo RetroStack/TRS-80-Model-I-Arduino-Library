@@ -73,7 +73,7 @@ Display_ST7789 displayProvider;
 // ----------------------------------
 
 // STEP 2: Include the libraries we need
-#include "M1Shield.h"            // Main M1Shield functions
+#include <M1Shield.h>            // Main M1Shield functions
 #include "SimpleContentScreen.h" // Our simple content screen
 
 // STEP 3: Create our simple menu items

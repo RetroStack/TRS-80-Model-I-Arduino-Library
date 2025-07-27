@@ -8,7 +8,7 @@
 #ifndef EXAMPLE_SCREEN_H
 #define EXAMPLE_SCREEN_H
 
-#include "Screen.h"
+#include <Screen.h>
 
 class ExampleScreen : public Screen
 {

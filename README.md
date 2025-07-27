@@ -64,7 +64,7 @@ This Arduino library enables interfacing a TRS-80 Model I mainboard directly wit
 3. **Select your display provider** by modifying the M1Shield example:
    ```cpp
    #include <Display_ST7789.h>    // Choose your display type
-   #include "M1Shield.h"
+   #include <M1Shield.h>
    
    Display_ST7789 displayProvider;  // Create provider instance
    

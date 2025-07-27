@@ -29,7 +29,7 @@
 #ifndef SIMPLE_CONTENT_SCREEN_H
 #define SIMPLE_CONTENT_SCREEN_H
 
-#include "ContentScreen.h" // This gives us the ContentScreen base class
+#include <ContentScreen.h> // This gives us the ContentScreen base class
 
 class SimpleContentScreen : public ContentScreen
 {

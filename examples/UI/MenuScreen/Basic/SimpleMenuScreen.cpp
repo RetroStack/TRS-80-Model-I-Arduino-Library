@@ -6,7 +6,7 @@
  */
 
 #include "SimpleMenuScreen.h"
-#include "M1Shield.h"
+#include <M1Shield.h>
 #include <Arduino.h>
 
 // Define the static constexpr members

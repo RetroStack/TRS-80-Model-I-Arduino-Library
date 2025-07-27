@@ -115,7 +115,7 @@ Display_ST7789 displayProvider;
 
 // ===================================================================
 
-#include "M1Shield.h"
+#include <M1Shield.h>
 
 // ===================================================================
 // SETUP FUNCTION - Runs once when Arduino starts

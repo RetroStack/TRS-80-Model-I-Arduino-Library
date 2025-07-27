@@ -13,7 +13,7 @@
 #ifndef CONFIG_MENU_EXAMPLE_H
 #define CONFIG_MENU_EXAMPLE_H
 
-#include "MenuScreen.h"
+#include <MenuScreen.h>
 
 class ConfigMenuExample : public MenuScreen
 {

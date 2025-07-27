@@ -105,7 +105,7 @@ Display_ST7789 displayProvider;
 
 // STEP 2: Include the required libraries
 #include "SimpleMenuScreen.h" // Our menu screen implementation
-#include "M1Shield.h"         // Main M1Shield functionality
+#include <M1Shield.h>         // Main M1Shield functionality
 
 void setup()
 {

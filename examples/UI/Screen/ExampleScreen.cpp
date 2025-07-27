@@ -6,7 +6,7 @@
  */
 
 #include "ExampleScreen.h"
-#include "M1Shield.h"
+#include <M1Shield.h>
 
 // Constructor - runs once when screen is created
 ExampleScreen::ExampleScreen()

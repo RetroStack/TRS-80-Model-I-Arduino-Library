@@ -215,7 +215,7 @@ public:
 ## Example
 
 ```cpp
-#include "ContentScreen.h"
+#include <ContentScreen.h>
 
 class StatusScreen : public ContentScreen {
 private:

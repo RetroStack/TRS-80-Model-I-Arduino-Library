@@ -19,7 +19,7 @@ Here is an example logger that prints messages to a character LCD display (using
 
 ```cpp
 #include <LiquidCrystal.h>
-#include "ILogger.h"
+#include <ILogger.h>
 
 class LCDLogger : public ILogger {
 public:

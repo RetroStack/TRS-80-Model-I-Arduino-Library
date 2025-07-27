@@ -40,6 +40,7 @@ Initializes all M1Shield hardware components using the specified display provide
 
 ```cpp
 #include <Display_ST7789.h>
+#include <M1Shield.h>
 
 void setup() {
     Display_ST7789 displayProvider;
@@ -79,7 +80,7 @@ Display_ST7789 displayProvider;
 void setup() {
     // Initialize with provider
     M1Shield.begin(displayProvider);
-    
+
     // Get display information
     Serial.print("Display: ");
     Serial.println(displayProvider.name());        // "ST7789 240x320"
@@ -100,23 +101,6 @@ void setup() {
 - `bool isDisplayInitialized()`: Returns true if display initialization was successful
 
 ### Display Types
-
-The library automatically detects and supports multiple display types:
-
-| Display | Resolution | Define                 |
-| ------- | ---------- | ---------------------- |
-| ST7789  | 240×240    | `USE_ST7789_240x240`   |
-| ST7789  | 320×240    | `USE_ST7789` (default) |
-| ST7735  | 128×160    | `USE_ST7735`           |
-| ILI9341 | 240×320    | `USE_ILI9341`          |
-| HX8357  | 320×480    | `USE_HX8357`           |
-| ILI9325 | 240×320    | `USE_ILI9325`          |
-
-```cpp
-// Select display type before including M1Shield.h
-#define USE_ST7735  // For 128×160 displays
-#include "M1Shield.h"
-```
 
 ## Input Handling
 
@@ -278,12 +262,15 @@ void renderScreen()                         // Render current screen if needed
 ```cpp
 #include "MenuScreen.h"
 #include "GameScreen.h"
+#include <Display_ST7789.h>
+#include <M1Shield.h>
 
+Display_ST7789 displayProvider;
 MenuScreen* mainMenu = new MenuScreen();
 GameScreen* game = new GameScreen();
 
 void setup() {
-    M1Shield.begin();
+    M1Shield.begin(displayProvider);
     M1Shield.setScreen(mainMenu);  // Start with main menu
 }
 
@@ -303,8 +290,10 @@ bool isDisplayInitialized()     // Display ready for use
 **Example Usage:**
 
 ```cpp
+Display_ST7789 displayProvider;
+
 void setup() {
-    M1Shield.begin();
+    M1Shield.begin(displayProvider);
 
     if (M1Shield.isDisplayInitialized()) {
         Serial.println("M1Shield ready!");
@@ -336,28 +325,31 @@ void setup() {
 
 ### Supported Display Types
 
-| Provider Class | Display Controller | Resolution | Notes |
-|---|---|---|---|
-| `Display_ST7789` | ST7789 | 240x320 → 320x240 | Most common, landscape oriented |
-| `Display_ST7789_240x240` | ST7789 | 240x240 | Square displays |
-| `Display_ST7735` | ST7735 | 128x160 | Smaller displays |
-| `Display_ILI9341` | ILI9341 | 240x320 → 320x240 | Alternative common display |
-| `Display_ST7796` | ST7796 | 320x480 → 480x320 | Large displays, landscape |
-| `Display_HX8357` | HX8357 | 320x480 | Large displays, portrait |
-| `Display_ILI9325` | ILI9325 | 240x320 → 320x240 | Parallel interface |
+| Provider Class           | Display Controller | Resolution        | Notes                           |
+| ------------------------ | ------------------ | ----------------- | ------------------------------- |
+| `Display_ST7789`         | ST7789             | 240x320 → 320x240 | Most common, landscape oriented |
+| `Display_ST7789_240x240` | ST7789             | 240x240           | Square displays                 |
+| `Display_ST7735`         | ST7735             | 128x160           | Smaller displays                |
+| `Display_ILI9341`        | ILI9341            | 240x320 → 320x240 | Alternative common display      |
+| `Display_ST7796`         | ST7796             | 320x480 → 480x320 | Large displays, landscape       |
+| `Display_HX8357`         | HX8357             | 320x480           | Large displays, portrait        |
+| `Display_ILI9325`        | ILI9325            | 240x320 → 320x240 | Parallel interface              |
 
 ### Migration from Legacy System
 
 **Old way (deprecated):**
+
 ```cpp
 #define USE_ST7789  // Compile-time selection
-#include "M1Shield.h"
+#include <M1Shield.h>
 M1Shield.begin();
 ```
 
 **New way (recommended):**
+
 ```cpp
 #include <Display_ST7789.h>  // Runtime selection
+#include <M1Shield.h>
 Display_ST7789 displayProvider;
 M1Shield.begin(displayProvider);
 ```
@@ -367,6 +359,9 @@ M1Shield.begin(displayProvider);
 Get display information from the provider:
 
 ```cpp
+#include <Display_ST7789.h>
+#include <M1Shield.h>
+
 Display_ST7789 displayProvider;
 M1Shield.begin(displayProvider);
 
@@ -393,7 +388,7 @@ uint16_t h = M1Shield.getScreenHeight();        // Same as provider.height()
 
 ```cpp
 #include <Display_ST7789.h>  // Select your display provider
-#include "M1Shield.h"
+#include <M1Shield.h>
 
 // Create display provider instance
 Display_ST7789 displayProvider;

@@ -255,9 +255,9 @@ int16_t screenY = (terminalY - _verticalScrollOffset) * CHAR_HEIGHT;
 ## Example
 
 ```cpp
-#include "M1TerminalScreen.h"
-#include "Model1.h"
-#include "M1Shield.h"
+#include <M1TerminalScreen.h>
+#include <Model1.h>
+#include <M1Shield.h>
 
 M1TerminalScreen* terminal;
 
