@@ -49,7 +49,7 @@ protected:
     const char *_getMenuItemConfigValue(uint8_t index) override;
 
     // Determine if menu items should be enabled/disabled
-    bool _isMenuItemEnabled(uint8_t index) override;
+    bool _isMenuItemEnabled(uint8_t index) const override;
 
 public:
     ConfigMenuExample();

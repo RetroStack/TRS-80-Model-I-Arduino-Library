@@ -25,7 +25,7 @@ ConfigMenuExample::ConfigMenuExample() : MenuScreen()
     _language = 0; // English
 
     // Set up the menu
-    _setTitle("Configuration Menu");
+    _setTitle("Configuration");
     _setMenuItems(CONFIG_MENU_ITEMS, CONFIG_MENU_COUNT);
 
     // Set custom footer buttons
@@ -87,7 +87,7 @@ const char *ConfigMenuExample::_getMenuItemConfigValue(uint8_t index)
 }
 
 // Determine which menu items should be enabled/disabled
-bool ConfigMenuExample::_isMenuItemEnabled(uint8_t index)
+bool ConfigMenuExample::_isMenuItemEnabled(uint8_t index) const
 {
     switch (index)
     {
