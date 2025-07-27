@@ -17,6 +17,8 @@ constexpr uint16_t NO_DATA_COLOR_FG = 0xFFE0;
 constexpr uint16_t TERMINAL_COLOR_BG = ST77XX_BLACK;
 constexpr uint16_t TERMINAL_COLOR_FG = ST77XX_WHITE;
 
+constexpr uint16_t TERMINAL_PADDING = 3;
+
 // ============================================================================
 // Character Display Constants
 // ============================================================================
@@ -466,8 +468,8 @@ M1TerminalScreen::M1TerminalScreen() : ContentScreen()
     _verticalScrollOffset = 0;   // Start with no vertical scroll
 
     // Initialize display state
-    _model1VideoLoaded = false; // Model1 content not yet loaded
-    _redrawIndex = -1;          // No redraw in progress
+    _model1VideoLoadTime = 0; // Model1 content not yet loaded
+    _redrawIndex = -1;        // No redraw in progress
 
     // Set initial content area (uninitialized)
     _contentLeft = 0;
@@ -925,15 +927,21 @@ void M1TerminalScreen::_scrollDown()
 {
     // Calculate maximum scroll based on content area height
     uint8_t visibleRows = _contentHeight / CHAR_FULL_HEIGHT;
-    uint8_t maxVerticalScroll = (TERM_ROWS > visibleRows) ? (TERM_ROWS - visibleRows) : 0;
+    Serial.print("Visible Rows: ");
+    Serial.println(visibleRows);
+    uint8_t maxVerticalScroll = (TERM_ROWS > visibleRows) ? (TERM_ROWS - visibleRows) - 1 : 0;
+    Serial.print("Max Vertical Scroll: ");
+    Serial.println(maxVerticalScroll);
 
     // Scroll down by up to 10 rows, but not beyond maximum
     if (_verticalScrollOffset + 10 <= maxVerticalScroll)
     {
+        Serial.print("Scrolling Down by 10 Rows\n");
         _verticalScrollOffset += 10;
     }
     else
     {
+        Serial.print("Scrolling Down by Max\n");
         _verticalScrollOffset = maxVerticalScroll;
     }
     _redraw(); // Schedule full redraw with new viewport
@@ -1005,14 +1013,12 @@ void M1TerminalScreen::_loadFromModel1()
         {
             _bufferedVidMem[i] = videoData[i];
         }
-        _model1VideoLoaded = true;
 
         // Clean up allocated memory
         delete[] videoData;
-
-        // Force a complete redraw to show Model1 content
-        _redraw();
     }
+
+    _model1VideoLoadTime = millis(); // Mark video memory as loaded
 }
 
 /**
@@ -1045,31 +1051,31 @@ void M1TerminalScreen::_loadFromModel1()
 void M1TerminalScreen::loop()
 {
     // Process incremental character rendering when terminal is active
-    if (isActive())
+    if (!isActive())
+        return;
+
+    if (_model1VideoLoadTime == 0 || (_currentUpdateIndex == 0 && _model1VideoLoadTime + 500 < millis()))
     {
-        if (!_model1VideoLoaded || _currentUpdateIndex == 1)
+        _loadFromModel1();
+
+        // First time setting content area dimensions
+        if (_contentHeight == 0 || _contentWidth == 0)
         {
-            _loadFromModel1();
+            _contentLeft = _getContentLeft() + TERMINAL_PADDING;
+            _contentTop = _getContentTop() + TERMINAL_PADDING;
+            _contentWidth = _getContentWidth() - TERMINAL_PADDING - TERMINAL_PADDING;
+            _contentHeight = _getContentHeight() - TERMINAL_PADDING - TERMINAL_PADDING;
 
-            // First time setting content area dimensions
-            if (_contentHeight == 0 || _contentWidth == 0)
-            {
-                _contentLeft = _getContentLeft() + 2;
-                _contentTop = _getContentTop() + 2;
-                _contentWidth = _getContentWidth() - 4;
-                _contentHeight = _getContentHeight() - 4;
-
-                refresh();
-            }
-            else
-            {
-                _updateNext(); // Update one character position per frame
-            }
+            refresh();
         }
         else
         {
             _updateNext(); // Update one character position per frame
         }
+    }
+    else
+    {
+        _updateNext(); // Update one character position per frame
     }
 }
 
@@ -1098,7 +1104,7 @@ void M1TerminalScreen::_drawContent()
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
-    if (_model1VideoLoaded)
+    if (_model1VideoLoadTime > 0)
     {
         // Clear with normal background color
         gfx.fillRect(left, top, width, height, TERMINAL_COLOR_BG);
@@ -1162,21 +1168,21 @@ Screen *M1TerminalScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8
     }
 
     // Font switching (Left + Right combination)
-    if ((action & BUTTON_LEFT) && (action & BUTTON_RIGHT))
+    if (((action & BUTTON_LEFT) && (action & BUTTON_RIGHT)) || action & BUTTON_JOYSTICK)
     {
         _nextFont();
         return nullptr;
     }
 
     // Scroll right (Right button / → key)
-    if (action & BUTTON_RIGHT)
+    if (action & RIGHT_ANY)
     {
         _scrollRight();
         return nullptr;
     }
 
     // Scroll left (Left button / ← key)
-    if (action & BUTTON_LEFT)
+    if (action & LEFT_ANY)
     {
         if (_horizontalScrollOffset == 0)
         {
@@ -1190,7 +1196,7 @@ Screen *M1TerminalScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8
     }
 
     // Scroll up (Up button / ↑ key)
-    if (action & BUTTON_UP)
+    if (action & UP_ANY)
     {
         if (_verticalScrollOffset == 0)
         {
@@ -1204,7 +1210,7 @@ Screen *M1TerminalScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8
     }
 
     // Scroll down (Down button / ↓ key)
-    if (action & BUTTON_DOWN)
+    if (action & DOWN_ANY)
     {
         _scrollDown();
         return nullptr;

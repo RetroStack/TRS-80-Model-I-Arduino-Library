@@ -101,7 +101,7 @@ private:
     uint8_t _horizontalScrollOffset; // Horizontal scroll offset
     uint8_t _verticalScrollOffset;   // Vertical scroll offset
 
-    bool _model1VideoLoaded; // Flag indicating if Model1 video memory has been loaded
+    unsigned long _model1VideoLoadTime; // Timestamp for when Model1 video memory was loaded
 
     int _redrawIndex; // Index for full screen redraw operations
 
