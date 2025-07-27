@@ -13,6 +13,34 @@
 #include <Arduino.h>
 #include "Model1.h"
 
+#if defined(USE_ST7789)
+// ST7789 (240x320 SPI) – very common, vibrant display
+#include <Adafruit_ST7789.h>
+#elif defined(USE_ST7789_240x240)
+// ST7789 (240x240 SPI) – very common, vibrant display
+#include <Adafruit_ST7789.h>
+#elif defined(USE_ST7735)
+// ST7735 (128x160 SPI) – older/smaller displays
+#include <Adafruit_ST7735.h>
+#elif defined(USE_ILI9341)
+// ILI9341 (240x320 SPI) – widely used 2.4–2.8" displays
+#include <Adafruit_ILI9341.h>
+#elif defined(USE_ILI9488)
+// ILI9488 (320x480 SPI, 3-byte RGB888) – newer 3.5" displays
+#include <Arduino_GFX_Library.h>
+#elif defined(USE_HX8357)
+// HX8357D (320x480 SPI) – 3.5" displays, older than ILI9488
+#include <Adafruit_HX8357.h>
+#elif defined(USE_ILI9325)
+// ILI9325 (240x320, usually parallel interface) – for some shield-based displays
+#include <Adafruit_TFTLCD.h> // Adafruit's legacy parallel TFT library
+#else
+// Default to ST7789 if no display type is specified
+// You can change this default to another screen if needed
+#include <Adafruit_ST7789.h>
+typedef Adafruit_ST7789 TFT_Display;
+#endif
+
 // Hardware timing constants
 constexpr unsigned long DEBOUNCE_TIME = 250; // Button debounce time in milliseconds
 
