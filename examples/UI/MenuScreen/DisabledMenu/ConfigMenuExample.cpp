@@ -9,6 +9,10 @@
 #include "M1Shield.h"
 #include <Arduino.h>
 
+// Define the static constexpr members
+constexpr const char *ConfigMenuExample::CONFIG_MENU_ITEMS[8];
+constexpr uint8_t ConfigMenuExample::CONFIG_MENU_COUNT;
+
 // Constructor: Initialize settings and set up the menu
 ConfigMenuExample::ConfigMenuExample() : MenuScreen()
 {
@@ -31,7 +35,7 @@ ConfigMenuExample::ConfigMenuExample() : MenuScreen()
 }
 
 // Return configuration values for display
-const char *ConfigMenuExample::_getMenuItemConfigValue(int index)
+const char *ConfigMenuExample::_getMenuItemConfigValue(uint8_t index)
 {
     switch (index)
     {
@@ -83,7 +87,7 @@ const char *ConfigMenuExample::_getMenuItemConfigValue(int index)
 }
 
 // Determine which menu items should be enabled/disabled
-bool ConfigMenuExample::_isMenuItemEnabled(int index)
+bool ConfigMenuExample::_isMenuItemEnabled(uint8_t index)
 {
     switch (index)
     {
@@ -117,7 +121,7 @@ bool ConfigMenuExample::_isMenuItemEnabled(int index)
 }
 
 // Handle menu item selection
-Screen *ConfigMenuExample::_getSelectedMenuItemScreen(int index)
+Screen *ConfigMenuExample::_getSelectedMenuItemScreen(uint8_t index)
 {
     // Handle exit request
     if (index == -1)

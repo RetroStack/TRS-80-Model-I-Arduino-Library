@@ -9,6 +9,10 @@
 #include "M1Shield.h"
 #include <Arduino.h>
 
+// Define the static constexpr members
+constexpr const char *SimpleMenuScreen::MAIN_MENU_ITEMS[12];
+constexpr uint8_t SimpleMenuScreen::MAIN_MENU_COUNT;
+
 // Constructor: Set up the menu title, items, and initial progress
 SimpleMenuScreen::SimpleMenuScreen() : MenuScreen()
 {
@@ -18,7 +22,7 @@ SimpleMenuScreen::SimpleMenuScreen() : MenuScreen()
 
 // Handle menu item selection
 // Return nullptr to stay on menu, or new Screen() to navigate to different screen
-Screen *SimpleMenuScreen::_getSelectedMenuItemScreen(int index)
+Screen *SimpleMenuScreen::_getSelectedMenuItemScreen(uint8_t index)
 {
     // Handle exit request
     if (index == -1)

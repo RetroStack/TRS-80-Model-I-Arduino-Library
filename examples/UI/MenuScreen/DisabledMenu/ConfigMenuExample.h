@@ -6,7 +6,7 @@
  * 2. Disabled menu items - some items are conditionally disabled based on other settings
  * 3. Visual feedback - disabled items appear grayed out and cannot be selected
  * 4. Logical dependencies - certain settings depend on others being enabled
- * 
+ *
  * Perfect for settings menus with complex interdependencies between options.
  */
 
@@ -43,13 +43,13 @@ private:
 
 protected:
     // Handle menu item selection
-    Screen *_getSelectedMenuItemScreen(int index) override;
+    Screen *_getSelectedMenuItemScreen(uint8_t index) override;
 
     // Return configuration values for each menu item
-    const char *_getMenuItemConfigValue(int index) override;
+    const char *_getMenuItemConfigValue(uint8_t index) override;
 
     // Determine if menu items should be enabled/disabled
-    bool _isMenuItemEnabled(int index) override;
+    bool _isMenuItemEnabled(uint8_t index) override;
 
 public:
     ConfigMenuExample();

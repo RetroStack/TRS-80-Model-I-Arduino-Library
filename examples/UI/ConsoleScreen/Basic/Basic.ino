@@ -6,6 +6,7 @@
  * Features: scrolling, colors, tabs, various print methods, and memory-efficient auto-clear.
  */
 
+#include "M1Shield.h"
 #include "ConsoleScreen.h"
 
 class DebugConsole : public ConsoleScreen
@@ -18,7 +19,7 @@ public:
     DebugConsole()
     {
         // Configure the console appearance
-        _setTitle("Debug Console - Auto-Clear Demo");
+        _setTitle("Debug Console");
         setConsoleBackground(ST77XX_BLACK);
         setTextColor(ST77XX_GREEN, ST77XX_BLACK);
         setTextSize(1);
@@ -107,7 +108,7 @@ public:
             // Show how many lines until auto-clear
             if (_counter % 5 == 0)
             {
-                setTextColor(ST77XX_GRAY, ST77XX_BLACK);
+                setTextColor(0xaaaa, ST77XX_BLACK);
                 println("(Console will auto-clear soon...)");
                 setTextColor(ST77XX_WHITE, ST77XX_BLACK);
             }
@@ -167,15 +168,15 @@ public:
 };
 
 // Usage in main Arduino sketch:
-/*
-void setup() {
+void setup()
+{
     M1Shield.begin();
 
-    DebugConsole* console = new DebugConsole();
+    DebugConsole *console = new DebugConsole();
     M1Shield.setScreen(console);
 }
 
-void loop() {
+void loop()
+{
     M1Shield.loop();
 }
-*/

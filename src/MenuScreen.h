@@ -242,10 +242,10 @@ public:
     /**
      * @brief Main loop processing for menu screen updates
      *
-     * @note Inherits base functionality from ContentScreen::loop()
+     * @note Provides MenuScreen-specific loop implementation since ContentScreen::loop() is pure virtual
      * @note Override this method in derived classes for custom periodic processing
      */
-    void loop() override;
+    virtual void loop() {}
 
     /**
      * @brief Handle user input actions and navigate accordingly

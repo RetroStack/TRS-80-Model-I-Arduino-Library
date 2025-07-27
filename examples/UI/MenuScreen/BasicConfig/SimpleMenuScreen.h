@@ -32,7 +32,7 @@ private:
 protected:
     // Called when user selects a menu item
     // Return nullptr to stay on menu, or new Screen() to navigate
-    Screen *_getSelectedMenuItemScreen(int index) override;
+    Screen *_getSelectedMenuItemScreen(uint8_t index);
 
 public:
     SimpleMenuScreen();

@@ -204,17 +204,6 @@ Screen *MenuScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t off
     return nullptr;
 }
 
-/**
- * @brief Main processing loop for menu screen updates
- *
- * Delegates to the base ContentScreen loop implementation for standard
- * screen processing including input handling and display updates.
- */
-void MenuScreen::loop()
-{
-    ContentScreen::loop();
-}
-
 // Menu Content Rendering
 
 /**

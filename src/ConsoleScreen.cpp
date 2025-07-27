@@ -108,8 +108,7 @@ void ConsoleScreen::loop()
         _hasExecutedOnce = true;
     }
 
-    // Call parent loop for standard processing
-    ContentScreen::loop();
+    // Call parent loop is not necessary since nothing is defined there
 }
 
 /**

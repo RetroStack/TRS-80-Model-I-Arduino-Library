@@ -26,6 +26,7 @@
  * - Press joystick to restart and see _executeOnce() run again
  */
 
+#include "M1Shield.h"
 #include "ConsoleScreen.h"
 
 class OneTimeExecutionDemo : public ConsoleScreen
@@ -78,7 +79,7 @@ protected:
 public:
     OneTimeExecutionDemo() : ConsoleScreen()
     {
-        _setTitle("Console One-Time Exec");
+        _setTitle("One-Time Exec");
 
         // Set initial colors and state
         setTextColor(ST77XX_WHITE, ST77XX_BLACK);
@@ -154,7 +155,7 @@ public:
             // Add separator every 10 messages
             if (_messageCounter % 10 == 0)
             {
-                setTextColor(ST77XX_GRAY, ST77XX_BLACK);
+                setTextColor(0xaaa, ST77XX_BLACK);
                 println("--- Console will auto-clear when full ---");
             }
         }
@@ -162,7 +163,7 @@ public:
 
     Screen *actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override
     {
-        if (action & BUTTON_BACK)
+        if (action & BUTTON_MENU)
         {
             Serial.println("Returning to previous screen...");
             return nullptr; // Will not actually do anything
