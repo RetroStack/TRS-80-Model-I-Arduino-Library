@@ -36,7 +36,15 @@ This Arduino library enables interfacing a TRS-80 Model I mainboard directly wit
 ### M1Shield Framework (Arduino Shield Support)
 
 - **M1Shield Framework** – Complete hardware abstraction and UI framework for TRS-80 Model I Arduino Shield
-  - **M1Shield** – Hardware abstraction layer for display, input (buttons/joystick), LED control, and screen management with multi-display support (ST7789, ST7735, ILI9341, ILI9488, HX8357, ILI9325).
+  - **M1Shield** – Hardware abstraction layer for display, input (buttons/joystick), LED control, and screen management with multi-display support via DisplayProvider system.
+  - **DisplayProvider System** – Flexible, type-safe display support with optimized providers for different controller types:
+    - **Display_ST7789** – ST7789 240x320 displays (most common, landscape oriented)
+    - **Display_ST7789_240x240** – Square ST7789 240x240 displays
+    - **Display_ST7735** – Smaller ST7735 128x160 displays
+    - **Display_ILI9341** – ILI9341 240x320 displays (alternative common type)
+    - **Display_ST7796** – Large ST7796 320x480 displays (landscape oriented)
+    - **Display_HX8357** – Large HX8357 320x480 displays
+    - **Display_ILI9325** – Parallel interface ILI9325 240x320 displays
 
 ### UI Framework
 
@@ -51,17 +59,51 @@ This Arduino library enables interfacing a TRS-80 Model I mainboard directly wit
 
 ### For M1Shield Users (Recommended)
 
-1. Install this library in Arduino IDE
-2. Connect TRS-80 Model I Arduino Shield to your Arduino Mega 2560
-3. Try the **M1Shield → HardwareTest** example to verify everything works
-4. Explore **Screen** examples to learn the UI framework
+1. **Install this library** in Arduino IDE
+2. **Connect TRS-80 Model I Arduino Shield** to your Arduino Mega 2560
+3. **Select your display provider** by modifying the M1Shield example:
+   ```cpp
+   #include <Display_ST7789.h>    // Choose your display type
+   #include "M1Shield.h"
+   
+   Display_ST7789 displayProvider;  // Create provider instance
+   
+   void setup() {
+       M1Shield.begin(displayProvider);  // Initialize with provider
+   }
+   ```
+4. **Try the M1Shield → HardwareTest example** to verify everything works
+5. **Explore Screen examples** to learn the UI framework
 
 ### For Direct Connection Users
 
-1. Install this library in Arduino IDE
-2. Wire Arduino Mega 2560 to TRS-80 edge connector (see [pin mapping docs](/docs))
-3. Try the **Model1** example to test basic bus access
-4. Use **ROM** or **Video** examples to explore TRS-80 hardware
+1. **Install this library** in Arduino IDE
+2. **Wire Arduino Mega 2560** to TRS-80 edge connector (see [pin mapping docs](/docs))
+3. **Try the Model1 example** to test basic bus access
+4. **Use ROM or Video examples** to explore TRS-80 hardware
+
+### Display Provider Selection Guide
+
+Choose the display provider that matches your hardware:
+
+```cpp
+// Most common displays (240x320, landscape orientation)
+#include <Display_ST7789.h>      // ST7789 controller
+#include <Display_ILI9341.h>     // ILI9341 controller
+
+// Square displays
+#include <Display_ST7789_240x240.h>  // 240x240 square
+
+// Large displays (320x480)
+#include <Display_ST7796.h>      // ST7796 controller (landscape)
+#include <Display_HX8357.h>      // HX8357 controller (portrait)
+
+// Smaller displays
+#include <Display_ST7735.h>      // ST7735 128x160
+
+// Parallel interface
+#include <Display_ILI9325.h>     // ILI9325 parallel
+```
 
 ## Documentation
 
@@ -78,8 +120,10 @@ You can find detailed documentation of all features [here](/docs).
 **Option 1: TRS-80 Model I Arduino Shield (Recommended)**
 
 - Clean, reliable connection with built-in display and controls
-- Multiple display options: ST7789, ST7735, ILI9341, ILI9488, HX8357, ILI9325
+- DisplayProvider system supports multiple display types: ST7789, ST7789_240x240, ST7735, ILI9341, ST7796, HX8357, ILI9325
+- Each display provider includes optimized initialization, rotation, and color settings
 - Integrated buttons, joystick, and LED for user interface
+- Type-safe display selection at compile time
 - Reduces wiring complexity and connection errors
 
 **Option 2: Direct Wiring**

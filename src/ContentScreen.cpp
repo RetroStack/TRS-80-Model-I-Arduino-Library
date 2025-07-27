@@ -22,23 +22,23 @@ constexpr uint8_t TEXT_SIZE_3_WIDTH = 18;      // Width of size-3 text character
 constexpr uint8_t TEXT_SIZE_3_HALF_HEIGHT = 8; // Half-height of size-3 text for centering
 
 // Color scheme constants for consistent theming
-constexpr uint16_t SCREEN_COLOR_BG = ST77XX_BLACK; // Background color for content area
-constexpr uint16_t SCREEN_COLOR_FG = ST77XX_WHITE; // Foreground color for borders and text
+constexpr uint16_t SCREEN_COLOR_BG = 0x0000; // Background color for content area
+constexpr uint16_t SCREEN_COLOR_FG = 0xFFFF; // Foreground color for borders and text
 
 // Header region styling
-constexpr uint16_t HEADER_HEIGHT = 40;             // Height of header region in pixels
-constexpr uint16_t HEADER_COLOR_BG = 0x07E0;       // Header background (bright green)
-constexpr uint16_t HEADER_COLOR_FG = ST77XX_BLACK; // Header text color (black on green)
+constexpr uint16_t HEADER_HEIGHT = 40;       // Height of header region in pixels
+constexpr uint16_t HEADER_COLOR_BG = 0x07E0; // Header background (bright green)
+constexpr uint16_t HEADER_COLOR_FG = 0x0000; // Header text color (black on green)
 
 // Footer region styling
-constexpr uint16_t FOOTER_HEIGHT = 23;             // Height of footer region in pixels
-constexpr uint16_t FOOTER_COLOR_BG = ST77XX_BLACK; // Footer background color
-constexpr uint16_t FOOTER_COLOR_FG = ST77XX_WHITE; // Footer text color
+constexpr uint16_t FOOTER_HEIGHT = 23;       // Height of footer region in pixels
+constexpr uint16_t FOOTER_COLOR_BG = 0x0000; // Footer background color
+constexpr uint16_t FOOTER_COLOR_FG = 0xFFFF; // Footer text color
 
 // Progress bar styling
-constexpr uint16_t PROGRESSBAR_HEIGHT = 10;             // Height of progress bar in pixels
-constexpr uint16_t PROGRESSBAR_COLOR_BG = ST77XX_BLACK; // Progress bar background
-constexpr uint16_t PROGRESSBAR_COLOR_FG = 0x001F;       // Progress bar foreground (blue)
+constexpr uint16_t PROGRESSBAR_HEIGHT = 10;       // Height of progress bar in pixels
+constexpr uint16_t PROGRESSBAR_COLOR_BG = 0x0000; // Progress bar background
+constexpr uint16_t PROGRESSBAR_COLOR_FG = 0x001F; // Progress bar foreground (blue)
 
 /**
  * @brief Constructor initializes ContentScreen with default values
@@ -456,7 +456,7 @@ void ContentScreen::_clearContentArea()
     uint16_t height = _getContentHeight();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
-    gfx.fillRect(x, y, width, height, ST77XX_BLACK);
+    gfx.fillRect(x, y, width, height, 0x0000);
 }
 
 /**

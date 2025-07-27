@@ -14,8 +14,8 @@
 
 constexpr uint16_t NO_DATA_COLOR_BG = 0x001F;
 constexpr uint16_t NO_DATA_COLOR_FG = 0xFFE0;
-constexpr uint16_t TERMINAL_COLOR_BG = ST77XX_BLACK;
-constexpr uint16_t TERMINAL_COLOR_FG = ST77XX_WHITE;
+constexpr uint16_t TERMINAL_COLOR_BG = 0x0000;
+constexpr uint16_t TERMINAL_COLOR_FG = 0xFFFF;
 
 constexpr uint16_t TERMINAL_PADDING = 3;
 

@@ -13,9 +13,9 @@ constexpr uint8_t CHAR_HEIGHT_SIZE_3 = 24; // Height of size-3 characters
 // Default console settings
 constexpr uint8_t DEFAULT_TEXT_SIZE = 1;
 constexpr uint8_t DEFAULT_TAB_SIZE = 4;
-constexpr uint16_t DEFAULT_TEXT_COLOR = ST77XX_WHITE;
-constexpr uint16_t DEFAULT_TEXT_BG_COLOR = ST77XX_BLACK;
-constexpr uint16_t DEFAULT_CONSOLE_BG_COLOR = ST77XX_BLACK;
+constexpr uint16_t DEFAULT_TEXT_COLOR = 0xFFFF;
+constexpr uint16_t DEFAULT_TEXT_BG_COLOR = 0x0000;
+constexpr uint16_t DEFAULT_CONSOLE_BG_COLOR = 0x0000;
 
 /**
  * @brief Constructor - initialize console with default settings

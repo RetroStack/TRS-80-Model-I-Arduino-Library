@@ -6,6 +6,28 @@
  * Features: scrolling, colors, tabs, various print methods, and memory-efficient auto-clear.
  */
 
+// First, tell the system which display you have
+#include <Display_ST7789.h>
+Display_ST7789 displayProvider;
+
+// #include <Display_ST7789_240x240.h>
+// Display_ST7789_240x240 displayProvider;
+
+// #include <Display_ST7735.h>
+// Display_ST7735 displayProvider;
+
+// #include <Display_ST7796.h>
+// Display_ST7796 displayProvider;
+
+// #include <Display_ILI9325.h>
+// Display_ILI9325 displayProvider;
+
+// #include <Display_ILI9341.h>
+// Display_ILI9341 displayProvider;
+
+// #include <Display_HX8357.h>
+// Display_HX8357 displayProvider;
+
 #include "M1Shield.h"
 #include "ConsoleScreen.h"
 
@@ -20,8 +42,8 @@ public:
     {
         // Configure the console appearance
         _setTitle("Debug Console");
-        setConsoleBackground(ST77XX_BLACK);
-        setTextColor(ST77XX_GREEN, ST77XX_BLACK);
+        setConsoleBackground(0x0000);
+        setTextColor(0x07E0, 0x0000);
         setTextSize(1);
         setTabSize(8);
 
@@ -29,14 +51,14 @@ public:
         cls();
 
         // Explain the auto-clear behavior
-        setTextColor(ST77XX_YELLOW, ST77XX_BLACK);
+        setTextColor(0xFFE0, 0x0000);
         println("=== CONSOLE AUTO-CLEAR DEMO ===");
-        setTextColor(ST77XX_CYAN, ST77XX_BLACK);
+        setTextColor(0x07FF, 0x0000);
         println("Console automatically clears when");
         println("text reaches the bottom of screen.");
         println("This saves memory and provides");
         println("continuous scrolling effect.");
-        setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+        setTextColor(0xFFFF, 0x0000);
         println();
 
         // Demonstrate tab formatting
@@ -45,9 +67,9 @@ public:
         println("Info1\tInfo2\tInfo3");
         println();
 
-        setTextColor(ST77XX_MAGENTA, ST77XX_BLACK);
+        setTextColor(0xF81F, 0x0000);
         println("Watch console auto-clear when full!");
-        setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+        setTextColor(0xFFFF, 0x0000);
         println();
 
         // Initialize timing
@@ -64,13 +86,13 @@ public:
             _counter++;
 
             // Add timestamp
-            setTextColor(ST77XX_CYAN, ST77XX_BLACK);
+            setTextColor(0x07FF, 0x0000);
             print("[");
             print(millis() / 1000);
             print("s] ");
 
             // Add counter and status
-            setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+            setTextColor(0xFFFF, 0x0000);
             print("Line #");
             print(_counter);
             print("\tStatus: ");
@@ -78,27 +100,27 @@ public:
             // Alternate between different status messages
             if (_counter % 4 == 0)
             {
-                setTextColor(ST77XX_GREEN, ST77XX_BLACK);
+                setTextColor(0x07E0, 0x0000);
                 println("RUNNING");
             }
             else if (_counter % 4 == 1)
             {
-                setTextColor(ST77XX_YELLOW, ST77XX_BLACK);
+                setTextColor(0xFFE0, 0x0000);
                 println("WARNING");
             }
             else if (_counter % 4 == 2)
             {
-                setTextColor(ST77XX_RED, ST77XX_BLACK);
+                setTextColor(0xF800, 0x0000);
                 println("ERROR");
             }
             else
             {
-                setTextColor(ST77XX_BLUE, ST77XX_BLACK);
+                setTextColor(0x001F, 0x0000);
                 println("IDLE");
             }
 
             // Add some sample data
-            setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+            setTextColor(0xFFFF, 0x0000);
             print("Temp: ");
             print(20.0 + (_counter % 15), 1);
             print("°C\tMem: ");
@@ -108,9 +130,9 @@ public:
             // Show how many lines until auto-clear
             if (_counter % 5 == 0)
             {
-                setTextColor(0xaaaa, ST77XX_BLACK);
+                setTextColor(0xaaaa, 0x0000);
                 println("(Console will auto-clear soon...)");
-                setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+                setTextColor(0xFFFF, 0x0000);
             }
 
             println(); // Empty line for spacing
@@ -128,13 +150,13 @@ public:
         // Handle manual clear on joystick press
         if (action & BUTTON_JOYSTICK)
         {
-            setTextColor(ST77XX_CYAN, ST77XX_BLACK);
+            setTextColor(0x07FF, 0x0000);
             println(">> Manual clear requested by user");
             delay(500);
             cls();
-            setTextColor(ST77XX_YELLOW, ST77XX_BLACK);
+            setTextColor(0xFFE0, 0x0000);
             println("=== MANUAL CLEAR (same as auto-clear) ===");
-            setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+            setTextColor(0xFFFF, 0x0000);
             println("Console cleared! Will auto-clear again");
             println("when it reaches the bottom.");
             println();
@@ -144,21 +166,21 @@ public:
         // Demonstrate different text sizes on UP/DOWN
         if (action & BUTTON_UP)
         {
-            setTextColor(ST77XX_MAGENTA, ST77XX_BLACK);
+            setTextColor(0xF81F, 0x0000);
             println(">> Switching to large text size");
             setTextSize(2);
             println("BIG TEXT!");
             setTextSize(1); // Back to normal
-            setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+            setTextColor(0xFFFF, 0x0000);
             return nullptr;
         }
 
         if (action & BUTTON_DOWN)
         {
-            setTextColor(ST77XX_ORANGE, ST77XX_BLACK);
+            setTextColor(0xFC00, 0x0000);
             println(">> Adding separator line");
             println("--------------------------------");
-            setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+            setTextColor(0xFFFF, 0x0000);
             return nullptr;
         }
 
@@ -170,7 +192,7 @@ public:
 // Usage in main Arduino sketch:
 void setup()
 {
-    M1Shield.begin();
+    M1Shield.begin(displayProvider);
 
     DebugConsole *console = new DebugConsole();
     M1Shield.setScreen(console);

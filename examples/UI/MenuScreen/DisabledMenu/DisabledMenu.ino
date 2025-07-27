@@ -83,7 +83,28 @@
  */
 
 // STEP 1: Configure your display type
-// #define USE_ST7789 // Change to USE_ST7735 or USE_ILI9341 for your display
+#include <Display_ST7789.h>
+Display_ST7789 displayProvider;
+
+// #include <Display_ST7789_240x240.h>
+// Display_ST7789_240x240 displayProvider;
+
+// #include <Display_ST7735.h>
+// Display_ST7735 displayProvider;
+
+// #include <Display_ST7796.h>
+// Display_ST7796 displayProvider;
+
+// #include <Display_ILI9325.h>
+// Display_ILI9325 displayProvider;
+
+// #include <Display_ILI9341.h>
+// Display_ILI9341 displayProvider;
+
+// #include <Display_HX8357.h>
+// Display_HX8357 displayProvider;
+
+// ----------------------------------
 
 // STEP 2: Include required libraries
 #include "ConfigMenuExample.h" // Our configuration menu implementation
@@ -108,7 +129,7 @@ void setup()
     Serial.println("");
 
     // Initialize the M1Shield hardware
-    M1Shield.begin();
+    M1Shield.begin(displayProvider);
 
     // Create and display our configuration menu
     M1Shield.setScreen(new ConfigMenuExample());

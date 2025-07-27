@@ -7,20 +7,22 @@
  * Tests all hardware components with clear feedback.
  *
  * WHAT YOU'LL LEARN:
- * - How to initialize M1Shield hardware
+ * - How to initialize M1Shield hardware with DisplayProvider system
+ * - How to select and configure different display types
  * - How to read buttons and joystick input
  * - How to control the LED with different colors
  * - How to draw basic graphics on the display
  * - How to use Serial Monitor for debugging
- * - How to handle different display types
+ * - How to use the new display provider architecture
  *
  * WHAT THIS EXAMPLE DOES:
- * - Tests display initialization and draws test pattern
+ * - Tests display initialization using DisplayProvider system
+ * - Demonstrates proper display provider selection and configuration
  * - Monitors all button presses (Menu, Up, Down, Left, Right)
  * - Tracks joystick movement and button press
  * - Changes LED color based on current input
  * - Prints detailed feedback to Serial Monitor
- * - Works with multiple display types (ST7789, ST7735, ILI9341, ILI9488, HX8357, ILI9325)
+ * - Shows display information from the provider
  *
  * CONTROLS & FEEDBACK:
  * - Menu Button: LED turns CYAN, Serial shows "Menu button: PRESSED"
@@ -31,20 +33,38 @@
  *
  * WHAT YOU NEED:
  * - M1Shield with working display
+ * - Knowledge of your display type (see DISPLAY PROVIDERS section below)
  *
- * DISPLAY SUPPORT:
- * This example works with multiple display types:
- * - ST7789 (320x240) - Default, most common
- * - ST7735 (128x160) - Smaller TFT display
- * - ILI9341 (240x320) - Alternative TFT display
- * - ILI9488 (320x480) - Larger TFT display
- * - HX8357 (320x480) - Larger TFT display
- * - ILI9325 (240x320) - Alternative TFT display
+ * DISPLAY PROVIDERS - NEW SYSTEM:
+ * This example uses the new DisplayProvider system for better display support.
+ * Each display type has its own provider class with optimized settings:
+ *
+ * - Display_ST7789: Most common 240x320 TFT (landscape: 320x240)
+ * - Display_ST7789_240x240: Square 240x240 TFT displays
+ * - Display_ST7735: Smaller 128x160 TFT displays
+ * - Display_ILI9341: Popular 240x320 TFT (landscape: 320x240)
+ * - Display_ST7796: Large 320x480 TFT (landscape: 480x320)
+ * - Display_HX8357: Large 320x480 TFT displays
+ * - Display_ILI9325: Parallel interface 240x320 displays
+ *
+ * Each provider automatically handles:
+ * - Proper initialization sequence
+ * - Optimal rotation settings
+ * - Color space configuration
+ * - Display-specific features
+ *
+ * HOW TO SELECT YOUR DISPLAY:
+ * 1. Identify your display controller chip (usually printed on display)
+ * 2. Uncomment the matching #include and provider declaration below
+ * 3. Comment out all other display providers
+ * 4. Upload and test - display should work perfectly
  *
  * TROUBLESHOOTING FOR BEGINNERS:
- * - Blank screen? Check display type settings below
+ * - Blank screen? Wrong display provider selected
+ * - Wrong colors? Try different provider for same size display
+ * - Upside down? Provider handles rotation automatically
  * - No Serial output? Open Serial Monitor (Tools → Serial Monitor)
- * - Display wrong colors? Check display type selection
+ * - Still issues? Check wiring and power connections
  *
  * TRY THIS STEP BY STEP:
  * 1. Upload this code
@@ -60,19 +80,40 @@
  */
 
 // ===================================================================
-// STEP 1: Select your display type
+// STEP 1: Select your display provider
 // ===================================================================
-// Uncomment ONE of these lines to match your display:
+// IMPORTANT: Uncomment ONLY ONE display provider that matches your hardware!
+// Each provider is optimized for specific display controllers.
 
-// #define USE_ST7735    // For 128x160 TFT displays
-// #define USE_ILI9341   // For 240x320 TFT displays
-// #define USE_ILI9488   // For 320x480 TFT displays
-// #define USE_HX8357    // For 320x480 TFT displays
-// #define USE_ILI9325   // For 240x320 TFT displays
-// #define USE_ST7789    // For 320x240 TFT displays (Default)
+// For ST7789 240x320 displays (most common, landscape becomes 320x240)
+#include <Display_ST7789.h>
+Display_ST7789 displayProvider;
 
-// If you don't uncomment anything, it defaults to ST7789 (320x240)
-// which is the most common display type for M1Shield
+// For ST7789 240x240 square displays
+// #include <Display_ST7789_240x240.h>
+// Display_ST7789_240x240 displayProvider;
+
+// For smaller ST7735 128x160 displays
+// #include <Display_ST7735.h>
+// Display_ST7735 displayProvider;
+
+// For large ST7796 320x480 displays (landscape becomes 480x320)
+// #include <Display_ST7796.h>
+// Display_ST7796 displayProvider;
+
+// For parallel ILI9325 240x320 displays (landscape becomes 320x240)
+// #include <Display_ILI9325.h>
+// Display_ILI9325 displayProvider;
+
+// For ILI9341 240x320 displays (landscape becomes 320x240)
+// #include <Display_ILI9341.h>
+// Display_ILI9341 displayProvider;
+
+// For large HX8357 320x480 displays
+// #include <Display_HX8357.h>
+// Display_HX8357 displayProvider;
+
+// ===================================================================
 
 #include "M1Shield.h"
 
@@ -94,19 +135,19 @@ void setup()
     Serial.println("- LED color control");
     Serial.println("");
 
-    // Show what display type we're using
-    Serial.print("Display Type: ");
-    Serial.println(DISPLAY_NAME);
+    // Show what display type we're using from the provider
+    Serial.print("Display Provider: ");
+    Serial.println(displayProvider.name());
     Serial.print("Resolution: ");
-    Serial.print(DISPLAY_WIDTH);
+    Serial.print(displayProvider.width());
     Serial.print("x");
-    Serial.println(DISPLAY_HEIGHT);
+    Serial.println(displayProvider.height());
     Serial.println("");
 
     // Initialize the M1Shield hardware
     // This sets up display, buttons, joystick, LED, and everything else
     Serial.println("Initializing M1Shield hardware...");
-    M1Shield.begin();
+    M1Shield.begin(displayProvider);
     Serial.println("Hardware initialization complete!");
 
     // Verify that everything initialized correctly
@@ -163,34 +204,34 @@ void drawTestPattern()
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
     // Clear screen to black background
-    gfx.fillScreen(ST77XX_BLACK);
+    gfx.fillScreen(0x0000);
 
     // Draw white border around entire screen
-    gfx.drawRect(0, 0, M1Shield.getScreenWidth(), M1Shield.getScreenHeight(), ST77XX_WHITE);
+    gfx.drawRect(0, 0, M1Shield.getScreenWidth(), M1Shield.getScreenHeight(), 0xFFFF);
 
     // Draw title in large text
-    gfx.setTextColor(ST77XX_WHITE);
+    gfx.setTextColor(0xFFFF);
     gfx.setTextSize(2);
     gfx.setCursor(10, 10);
     gfx.print("M1Shield Test");
 
-    // Show which display type was detected
+    // Show which display provider was used
     gfx.setTextSize(1);
     gfx.setCursor(10, 40);
-    gfx.print("Display: ");
-    gfx.print(DISPLAY_NAME);
+    gfx.print("Provider: ");
+    gfx.print(displayProvider.name());
 
-    // Show screen resolution
+    // Show screen resolution from provider
     gfx.setCursor(10, 60);
     gfx.print("Resolution: ");
-    gfx.print(DISPLAY_WIDTH);
+    gfx.print(displayProvider.width());
     gfx.print("x");
-    gfx.print(DISPLAY_HEIGHT);
+    gfx.print(displayProvider.height());
 
     // Draw colored squares to test RGB display capability
-    gfx.fillRect(10, 80, 20, 20, ST77XX_RED);   // Red square
-    gfx.fillRect(35, 80, 20, 20, ST77XX_GREEN); // Green square
-    gfx.fillRect(60, 80, 20, 20, ST77XX_BLUE);  // Blue square
+    gfx.fillRect(10, 80, 20, 20, 0xF800); // Red square
+    gfx.fillRect(35, 80, 20, 20, 0x07E0); // Green square
+    gfx.fillRect(60, 80, 20, 20, 0x001F); // Blue square
 
     // Instructions for user
     gfx.setCursor(10, 110);

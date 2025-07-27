@@ -49,7 +49,28 @@
  */
 
 // STEP 1: Tell the system what display you have
-// #define USE_ST7789 // If you have SSD1306 display, change this to: #define USE_SSD1306
+#include <Display_ST7789.h>
+Display_ST7789 displayProvider;
+
+// #include <Display_ST7789_240x240.h>
+// Display_ST7789_240x240 displayProvider;
+
+// #include <Display_ST7735.h>
+// Display_ST7735 displayProvider;
+
+// #include <Display_ST7796.h>
+// Display_ST7796 displayProvider;
+
+// #include <Display_ILI9325.h>
+// Display_ILI9325 displayProvider;
+
+// #include <Display_ILI9341.h>
+// Display_ILI9341 displayProvider;
+
+// #include <Display_HX8357.h>
+// Display_HX8357 displayProvider;
+
+// ----------------------------------
 
 // STEP 2: Include the libraries we need
 #include "M1Shield.h"            // Main M1Shield functions
@@ -75,7 +96,7 @@ void setup()
 
     // Initialize the M1Shield hardware
     // This sets up display, buttons, joystick, LED, etc.
-    M1Shield.begin();
+    M1Shield.begin(displayProvider);
     Serial.println("Hardware initialized!");
 
     // Create our content screen

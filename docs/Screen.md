@@ -427,8 +427,8 @@ protected:
     void _drawScreen() override {
         // Initial screen setup
         Adafruit_GFX& gfx = M1Shield.getGFX();
-        gfx.fillScreen(ST77XX_BLACK);
-        gfx.setTextColor(ST77XX_WHITE);
+        gfx.fillScreen(0x0000);
+        gfx.setTextColor(0xFFFF);
         gfx.setTextSize(2);
 
         // Draw static elements
@@ -491,11 +491,11 @@ private:
         Adafruit_GFX& gfx = M1Shield.getGFX();
 
         // Clear counter area
-        gfx.fillRect(10, 50, 200, 30, ST77XX_BLACK);
+        gfx.fillRect(10, 50, 200, 30, 0x0000);
 
         // Draw new counter value
         gfx.setCursor(10, 50);
-        gfx.setTextColor(ST77XX_YELLOW);
+        gfx.setTextColor(0xFFE0);
         gfx.setTextSize(3);
         gfx.print("Count: ");
         gfx.print(_counter);

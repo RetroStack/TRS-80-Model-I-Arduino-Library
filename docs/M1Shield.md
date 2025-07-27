@@ -1,11 +1,12 @@
 # M1Shield Class
 
-The `M1Shield` class provides a comprehensive hardware abstraction layer for the TRS-80 Model I Arduino Shield. It manages multi-display support, input handling (buttons and joystick), LED control, and screen management with a unified API that simplifies shield hardware interaction.
+The `M1Shield` class provides a comprehensive hardware abstraction layer for the TRS-80 Model I Arduino Shield. It manages multi-display support through the DisplayProvider system, input handling (buttons and joystick), LED control, and screen management with a unified API that simplifies shield hardware interaction.
 
 ## Table of Contents
 
 - [Constructor](#constructor)
 - [Initialization](#initialization)
+- [Display Provider System](#display-provider-system)
 - [Display Management](#display-management)
 - [Input Handling](#input-handling)
   - [Button Input](#button-input)
@@ -23,24 +24,69 @@ The `M1Shield` class provides a comprehensive hardware abstraction layer for the
 M1Shield()
 ```
 
-Creates a new `M1Shield` instance. The shield is not initialized until `begin()` is called.
+Creates a new `M1Shield` instance. The shield is not initialized until `begin()` is called with a DisplayProvider.
 
 ## Initialization
 
-### `void begin()`
+### `void begin(DisplayProvider &provider)`
 
-Initializes all M1Shield hardware components:
+Initializes all M1Shield hardware components using the specified display provider:
 
-- Display subsystem (ST7789, ST7735, ILI9341, ILI9488, HX8357, ILI9325)
+- Display subsystem (via DisplayProvider architecture)
 - Button input pins with internal pull-ups
 - Analog joystick pins
 - RGB LED control pins
 - Hardware abstraction layer setup
 
 ```cpp
+#include <Display_ST7789.h>
+
 void setup() {
-    M1Shield.begin();
+    Display_ST7789 displayProvider;
+    M1Shield.begin(displayProvider);
     // Hardware is now ready for use
+}
+```
+
+## Display Provider System
+
+The M1Shield uses a DisplayProvider architecture for flexible display support. Each display type has an optimized provider class:
+
+### Available Display Providers
+
+- **`Display_ST7789`** - ST7789 240x320 displays (landscape: 320x240)
+- **`Display_ST7789_240x240`** - Square ST7789 240x240 displays
+- **`Display_ST7735`** - Smaller ST7735 128x160 displays
+- **`Display_ILI9341`** - ILI9341 240x320 displays (landscape: 320x240)
+- **`Display_ST7796`** - Large ST7796 320x480 displays (landscape: 480x320)
+- **`Display_HX8357`** - Large HX8357 320x480 displays
+- **`Display_ILI9325`** - Parallel ILI9325 240x320 displays
+
+### Display Provider Benefits
+
+- **Automatic Configuration**: Each provider handles optimal initialization, rotation, and color settings
+- **Type Safety**: Compile-time verification of display compatibility
+- **Performance**: Display-specific optimizations
+- **Extensibility**: Easy to add new display types
+
+### Example Display Provider Usage
+
+```cpp
+// Select your display provider
+#include <Display_ST7789.h>
+Display_ST7789 displayProvider;
+
+void setup() {
+    // Initialize with provider
+    M1Shield.begin(displayProvider);
+    
+    // Get display information
+    Serial.print("Display: ");
+    Serial.println(displayProvider.name());        // "ST7789 240x320"
+    Serial.print("Size: ");
+    Serial.print(displayProvider.width());         // 320 (after rotation)
+    Serial.print("x");
+    Serial.println(displayProvider.height());      // 240 (after rotation)
 }
 ```
 
@@ -63,7 +109,6 @@ The library automatically detects and supports multiple display types:
 | ST7789  | 320×240    | `USE_ST7789` (default) |
 | ST7735  | 128×160    | `USE_ST7735`           |
 | ILI9341 | 240×320    | `USE_ILI9341`          |
-| ILI9488 | 320×480    | `USE_ILI9488`          |
 | HX8357  | 320×480    | `USE_HX8357`           |
 | ILI9325 | 240×320    | `USE_ILI9325`          |
 
@@ -273,32 +318,67 @@ void setup() {
 
 ## Display Support
 
-### Multi-Display Compatibility
+### DisplayProvider Architecture
 
-The M1Shield library automatically detects and configures the correct display driver:
+The M1Shield uses a modern DisplayProvider system for flexible display support. Instead of compile-time defines, you select display providers at runtime:
 
 ```cpp
-// Display configuration examples:
-
-// ST7789 (320×240) - Default, most common
+// Example: Using ST7789 display
+#include <Display_ST7789.h>
 #include "M1Shield.h"
 
-// ST7735 (128×160) - Smaller TFT
-#define USE_ST7735
-#include "M1Shield.h"
+Display_ST7789 displayProvider;
 
-// ILI9341 (240×320) - Alternative TFT
-#define USE_ILI9341
-#include "M1Shield.h"
+void setup() {
+    M1Shield.begin(displayProvider);
+}
 ```
 
-### Display Constants
+### Supported Display Types
 
-Available at compile time after display type selection:
+| Provider Class | Display Controller | Resolution | Notes |
+|---|---|---|---|
+| `Display_ST7789` | ST7789 | 240x320 → 320x240 | Most common, landscape oriented |
+| `Display_ST7789_240x240` | ST7789 | 240x240 | Square displays |
+| `Display_ST7735` | ST7735 | 128x160 | Smaller displays |
+| `Display_ILI9341` | ILI9341 | 240x320 → 320x240 | Alternative common display |
+| `Display_ST7796` | ST7796 | 320x480 → 480x320 | Large displays, landscape |
+| `Display_HX8357` | HX8357 | 320x480 | Large displays, portrait |
+| `Display_ILI9325` | ILI9325 | 240x320 → 320x240 | Parallel interface |
 
-- `DISPLAY_WIDTH` - Width in pixels
-- `DISPLAY_HEIGHT` - Height in pixels
-- `DISPLAY_NAME` - Human-readable display type name
+### Migration from Legacy System
+
+**Old way (deprecated):**
+```cpp
+#define USE_ST7789  // Compile-time selection
+#include "M1Shield.h"
+M1Shield.begin();
+```
+
+**New way (recommended):**
+```cpp
+#include <Display_ST7789.h>  // Runtime selection
+Display_ST7789 displayProvider;
+M1Shield.begin(displayProvider);
+```
+
+### Display Information Access
+
+Get display information from the provider:
+
+```cpp
+Display_ST7789 displayProvider;
+M1Shield.begin(displayProvider);
+
+// Access display info
+const char* name = displayProvider.name();      // "ST7789 240x320"
+uint16_t width = displayProvider.width();       // 320 (after rotation)
+uint16_t height = displayProvider.height();     // 240 (after rotation)
+
+// Also available from M1Shield
+uint16_t w = M1Shield.getScreenWidth();         // Same as provider.width()
+uint16_t h = M1Shield.getScreenHeight();        // Same as provider.height()
+```
 
 ## Notes
 
@@ -312,25 +392,40 @@ Available at compile time after display type selection:
 ## Example
 
 ```cpp
+#include <Display_ST7789.h>  // Select your display provider
 #include "M1Shield.h"
+
+// Create display provider instance
+Display_ST7789 displayProvider;
 
 void setup() {
     Serial.begin(115200);
 
-    // Initialize M1Shield hardware
-    M1Shield.begin();
+    // Initialize M1Shield hardware with display provider
+    M1Shield.begin(displayProvider);
 
     // Verify initialization
     if (M1Shield.isDisplayInitialized()) {
-        Serial.println("Display ready!");
+        Serial.print("Display ready: ");
+        Serial.println(displayProvider.name());
+        Serial.print("Resolution: ");
+        Serial.print(displayProvider.width());
+        Serial.print("x");
+        Serial.println(displayProvider.height());
 
         // Draw welcome message
         Adafruit_GFX& gfx = M1Shield.getGFX();
-        gfx.fillScreen(ST77XX_BLACK);
-        gfx.setTextColor(ST77XX_WHITE);
+        gfx.fillScreen(0x0000);
+        gfx.setTextColor(0xFFFF);
         gfx.setTextSize(2);
         gfx.setCursor(10, 10);
         gfx.print("M1Shield Ready!");
+
+        // Show display provider info on screen
+        gfx.setTextSize(1);
+        gfx.setCursor(10, 40);
+        gfx.print("Provider: ");
+        gfx.print(displayProvider.name());
 
         M1Shield.setLEDColor(COLOR_GREEN);
     } else {

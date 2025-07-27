@@ -176,22 +176,22 @@ void setConsoleBgColor(uint16_t color);
 
 ```cpp
 // Set text color only
-console.setTextColor(ST77XX_GREEN);
+console.setTextColor(0x07E0);
 console.println("SUCCESS: Operation completed");
 
 // Set both foreground and background
-console.setTextColor(ST77XX_WHITE, ST77XX_RED);
+console.setTextColor(0xFFFF, 0xF800);
 console.println("ERROR: Critical failure");
 
 // Set console background color
-console.setConsoleBgColor(ST77XX_BLACK);
+console.setConsoleBgColor(0x0000);
 ```
 
 ### Available Colors
 
 ```cpp
-ST77XX_BLACK    ST77XX_WHITE    ST77XX_RED      ST77XX_GREEN
-ST77XX_BLUE     ST77XX_CYAN     ST77XX_MAGENTA  ST77XX_YELLOW
+0x0000    0xFFFF    0xF800      0x07E0
+0x001F     0x07FF     0xF81F  0xFFE0
 ```
 
 ### Tab Configuration
@@ -253,9 +253,9 @@ class StatusConsole : public ConsoleScreen {
 protected:
     void _executeOnce() override {
         cls();
-        setTextColor(ST77XX_CYAN);
+        setTextColor(0x07FF);
         println("=== STATUS CONSOLE ===");
-        setTextColor(ST77XX_WHITE);
+        setTextColor(0xFFFF);
         println("System initialized");
         println("Ready for operation!");
     }
@@ -331,9 +331,9 @@ private:
 protected:
     void _executeOnce() override {
         cls();
-        setTextColor(ST77XX_GREEN, ST77XX_BLACK);
+        setTextColor(0x07E0, 0x0000);
         println("=== DEBUG CONSOLE ===");
-        setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+        setTextColor(0xFFFF, 0x0000);
         println("Logging system ready");
         println("------------------------");
     }
@@ -341,39 +341,39 @@ protected:
 public:
     DebugConsole() {
         _setTitle("Debug Output");
-        setConsoleBgColor(ST77XX_BLACK);
+        setConsoleBgColor(0x0000);
     }
 
     void logInfo(const char* message) {
-        setTextColor(ST77XX_CYAN);
+        setTextColor(0x07FF);
         print("[INFO] ");
-        setTextColor(ST77XX_WHITE);
+        setTextColor(0xFFFF);
         println(message);
         _messageCount++;
     }
 
     void logWarning(const char* message) {
-        setTextColor(ST77XX_YELLOW);
+        setTextColor(0xFFE0);
         print("[WARN] ");
-        setTextColor(ST77XX_WHITE);
+        setTextColor(0xFFFF);
         println(message);
         _messageCount++;
     }
 
     void logError(const char* message) {
-        setTextColor(ST77XX_RED);
+        setTextColor(0xF800);
         print("[ERROR] ");
-        setTextColor(ST77XX_WHITE);
+        setTextColor(0xFFFF);
         println(message);
         _messageCount++;
     }
 
     void showStats() {
         println();
-        setTextColor(ST77XX_MAGENTA);
+        setTextColor(0xF81F);
         print("Messages logged: ");
         println(_messageCount);
-        setTextColor(ST77XX_WHITE);
+        setTextColor(0xFFFF);
     }
 };
 ```
@@ -385,9 +385,9 @@ class SerialConsole : public ConsoleScreen {
 protected:
     void _executeOnce() override {
         cls();
-        setTextColor(ST77XX_WHITE, ST77XX_BLUE);
+        setTextColor(0xFFFF, 0x001F);
         println(" SERIAL MONITOR ");
-        setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+        setTextColor(0xFFFF, 0x0000);
         println();
     }
 
@@ -434,11 +434,11 @@ public:
         cls();
 
         // Header
-        setTextColor(ST77XX_GREEN);
+        setTextColor(0x07E0);
         println("================================");
         println("       SYSTEM STATUS");
         println("================================");
-        setTextColor(ST77XX_WHITE);
+        setTextColor(0xFFFF);
         println();
 
         // System info
@@ -459,12 +459,12 @@ public:
         println();
 
         // Status indicators
-        setTextColor(ST77XX_GREEN);
+        setTextColor(0x07E0);
         println("✓ System operational");
         println("✓ Sensors active");
-        setTextColor(ST77XX_YELLOW);
+        setTextColor(0xFFE0);
         println("⚠ Low memory warning");
-        setTextColor(ST77XX_WHITE);
+        setTextColor(0xFFFF);
     }
 };
 ```

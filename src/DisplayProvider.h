@@ -1,0 +1,24 @@
+/*
+ * DisplayProvider.h - Factory for creating display instances
+ * Authors: Marcel Erz (RetroStack)
+ * Released under the MIT License.
+ */
+
+#ifndef DISPLAY_PROVIDER_H
+#define DISPLAY_PROVIDER_H
+
+#include <Adafruit_GFX.h>
+
+class DisplayProvider
+{
+public:
+    virtual Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) = 0;
+    virtual void destroy(Adafruit_GFX *display) = 0;
+    virtual const char *name() const = 0;
+    virtual uint16_t width() const = 0;
+    virtual uint16_t height() const = 0;
+
+    virtual ~DisplayProvider() = default;
+};
+
+#endif // DISPLAY_PROVIDER_H

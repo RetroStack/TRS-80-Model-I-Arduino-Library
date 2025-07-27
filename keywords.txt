@@ -12,6 +12,14 @@ ContentScreen   KEYWORD1
 MenuScreen  KEYWORD1
 M1TerminalScreen    KEYWORD1
 ConsoleScreen   KEYWORD1
+DisplayProvider KEYWORD1
+Display_ST7789  KEYWORD1
+Display_ST7789_240x240  KEYWORD1
+Display_ST7735  KEYWORD1
+Display_ILI9341 KEYWORD1
+Display_HX8357  KEYWORD1
+Display_ILI9325 KEYWORD1
+Display_ST7796  KEYWORD1
 ViewPort    KEYWORD3
 ActionTaken KEYWORD3
 LEDColor    KEYWORD3
@@ -177,6 +185,11 @@ getJoystickX    KEYWORD2
 getJoystickY    KEYWORD2
 loop    KEYWORD2
 isDisplayInitialized    KEYWORD2
+create  KEYWORD2
+destroy KEYWORD2
+name    KEYWORD2
+width   KEYWORD2
+height  KEYWORD2
 isActive    KEYWORD2
 refresh KEYWORD2
 open    KEYWORD2

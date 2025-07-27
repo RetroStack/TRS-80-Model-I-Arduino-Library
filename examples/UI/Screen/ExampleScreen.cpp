@@ -23,10 +23,10 @@ void ExampleScreen::_drawScreen()
     Adafruit_GFX &display = M1Shield.getGFX();
 
     // Clear the screen (make it black)
-    display.fillScreen(ST77XX_BLACK);
+    display.fillScreen(0x0000);
 
     // Set text color to white and size
-    display.setTextColor(ST77XX_WHITE);
+    display.setTextColor(0xFFFF);
     display.setTextSize(2);
 
     // Show a title at the top

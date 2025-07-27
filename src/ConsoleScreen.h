@@ -45,7 +45,7 @@
  *     void _executeOnce() override {
  *         // One-time initialization after 1 second
  *         cls();
- *         setTextColor(ST77XX_GREEN, ST77XX_BLACK);
+ *         setTextColor(0x07E0, 0x0000);
  *         println("=== DEBUG CONSOLE READY ===");
  *         println("System initialized successfully");
  *         println("Status: ONLINE");
@@ -295,7 +295,7 @@ public:
      *
      * @example
      * @code
-     * setTextColor(ST77XX_GREEN, ST77XX_BLACK);
+     * setTextColor(0x07E0, 0x0000);
      * println("This text is green on black");
      * @endcode
      */

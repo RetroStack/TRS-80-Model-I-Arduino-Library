@@ -57,12 +57,12 @@ void SimpleContentScreen::_drawContent()
     int contentHeight = _getContentHeight(); // Height of content area
 
     // Clear the content area (make it black)
-    display.fillRect(contentLeft, contentTop, contentWidth, contentHeight, ST77XX_BLACK);
+    display.fillRect(contentLeft, contentTop, contentWidth, contentHeight, 0x0000);
 
     // If we have no menu items, show a message
     if (!_menuItems || _totalItems == 0)
     {
-        display.setTextColor(ST77XX_WHITE);
+        display.setTextColor(0xFFFF);
         display.setTextSize(1);
         display.setCursor(contentLeft + 10, contentTop + 20);
         display.print("No menu items!");
@@ -82,13 +82,13 @@ void SimpleContentScreen::_drawContent()
         if (i == _selectedItem)
         {
             // YES - Draw a white background to highlight it
-            display.fillRect(itemX - 5, itemY - 3, contentWidth - 10, 22, ST77XX_WHITE);
-            display.setTextColor(ST77XX_BLACK, ST77XX_WHITE); // Black text on white background
+            display.fillRect(itemX - 5, itemY - 3, contentWidth - 10, 22, 0xFFFF);
+            display.setTextColor(0x0000, 0xFFFF); // Black text on white background
         }
         else
         {
             // NO - Draw normal white text on black background
-            display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+            display.setTextColor(0xFFFF, 0x0000);
         }
 
         // Draw the menu item text

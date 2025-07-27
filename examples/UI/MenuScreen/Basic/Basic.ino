@@ -80,7 +80,28 @@
  */
 
 // STEP 1: Configure your display type
-// #define USE_ST7789 // Change to USE_SSD1306 if you have that display type
+#include <Display_ST7789.h>
+Display_ST7789 displayProvider;
+
+// #include <Display_ST7789_240x240.h>
+// Display_ST7789_240x240 displayProvider;
+
+// #include <Display_ST7735.h>
+// Display_ST7735 displayProvider;
+
+// #include <Display_ST7796.h>
+// Display_ST7796 displayProvider;
+
+// #include <Display_ILI9325.h>
+// Display_ILI9325 displayProvider;
+
+// #include <Display_ILI9341.h>
+// Display_ILI9341 displayProvider;
+
+// #include <Display_HX8357.h>
+// Display_HX8357 displayProvider;
+
+// ----------------------------------
 
 // STEP 2: Include the required libraries
 #include "SimpleMenuScreen.h" // Our menu screen implementation
@@ -102,7 +123,7 @@ void setup()
 
     // Initialize the M1Shield hardware
     // This sets up display, buttons, joystick, LED, and all other components
-    M1Shield.begin();
+    M1Shield.begin(displayProvider);
     Serial.println("M1Shield hardware initialized");
 
     // Create and attach screen instance

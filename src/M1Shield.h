@@ -7,46 +7,10 @@
 #ifndef M1SHIELD_H
 #define M1SHIELD_H
 
-#include "display_config.h"
 #include <Arduino.h>
 #include <Adafruit_GFX.h>
-
-// TFT Display Support - Define ONE of these before including this header
-#if defined(USE_ST7789)
-// ST7789 (240x320 SPI) – very common, vibrant display
-#include <Adafruit_ST7789.h>
-typedef Adafruit_ST7789 TFT_Display;
-#elif defined(USE_ST7789_240x240)
-// ST7789 (240x240 SPI) – very common, vibrant display
-#include <Adafruit_ST7789.h>
-typedef Adafruit_ST7789 TFT_Display;
-#elif defined(USE_ST7735)
-// ST7735 (128x160 SPI) – older/smaller displays
-#include <Adafruit_ST7735.h>
-typedef Adafruit_ST7735 TFT_Display;
-#elif defined(USE_ILI9341)
-// ILI9341 (240x320 SPI) – widely used 2.4–2.8" displays
-#include <Adafruit_ILI9341.h>
-typedef Adafruit_ILI9341 TFT_Display;
-#elif defined(USE_ILI9488)
-// ILI9488 (320x480 SPI, 3-byte RGB888) – newer 3.5" displays
-#include <Arduino_GFX_Library.h>
-typedef Arduino_ILI9488 TFT_Display;
-#elif defined(USE_HX8357)
-// HX8357D (320x480 SPI) – 3.5" displays, older than ILI9488
-#include <Adafruit_HX8357.h>
-typedef Adafruit_HX8357 TFT_Display;
-#elif defined(USE_ILI9325)
-// ILI9325 (240x320, usually parallel interface) – for some shield-based displays
-#include <Adafruit_TFTLCD.h> // Adafruit's legacy parallel TFT library
-typedef Adafruit_TFTLCD TFT_Display;
-#elif defined(USE_ST7796)
-// ST7796 (320x480 SPI) – newer displays, often used in larger shields
-#include <Adafruit_ST7796S.h>
-typedef Adafruit_ST7796S TFT_Display;
-#endif
-
 #include "Screen.h"
+#include "DisplayProvider.h"
 
 /**
  * @brief RGB LED color enumeration for status indication
@@ -108,7 +72,6 @@ enum JoystickDirection
  * #define USE_ST7789_240x240   // For ST7789 displays (240x240 resolution)
  * #define USE_ST7735   // For ST7735 displays
  * #define USE_ILI9341  // For ILI9341 displays
- * #define USE_ILI9488  // For ILI9488 displays
  * #define USE_HX8357  // For HX8357 displays
  * #define USE_ILI9325  // For ILI9325 displays
  * #define USE_ST7796  // For ST7796 displays
@@ -153,13 +116,9 @@ enum JoystickDirection
 class M1ShieldClass
 {
 private:
-#if defined(USE_ILI9488)
-    TFT_Display *_tft;     // Pointer for Arduino_GFX displays
-    Arduino_DataBus *_bus; // DataBus for ILI9488
-#else
-    TFT_Display _tft; // Object for Adafruit_GFX displays
-#endif
-    Screen *_screen; // Currently active screen
+    Adafruit_GFX *_tft;                // Pointer to Adafruit_GFX display instance
+    Screen *_screen;                   // Currently active screen
+    DisplayProvider *_displayProvider; // Display provider instance
 
     // Button debouncing state tracking
     unsigned long _menuPressed;     // Last menu button press timestamp
@@ -214,7 +173,7 @@ public:
      * @note Must be called before any other shield operations
      * @note Safe to call multiple times - subsequent calls return cached result
      */
-    void begin();
+    void begin(DisplayProvider &provider);
 
     /**
      * @brief Check if display hardware was successfully initialized

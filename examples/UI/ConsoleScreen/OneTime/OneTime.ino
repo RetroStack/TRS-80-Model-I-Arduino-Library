@@ -26,6 +26,28 @@
  * - Press joystick to restart and see _executeOnce() run again
  */
 
+// First, tell the system which display you have
+#include <Display_ST7789.h>
+Display_ST7789 displayProvider;
+
+// #include <Display_ST7789_240x240.h>
+// Display_ST7789_240x240 displayProvider;
+
+// #include <Display_ST7735.h>
+// Display_ST7735 displayProvider;
+
+// #include <Display_ST7796.h>
+// Display_ST7796 displayProvider;
+
+// #include <Display_ILI9325.h>
+// Display_ILI9325 displayProvider;
+
+// #include <Display_ILI9341.h>
+// Display_ILI9341 displayProvider;
+
+// #include <Display_HX8357.h>
+// Display_HX8357 displayProvider;
+
 #include "M1Shield.h"
 #include "ConsoleScreen.h"
 
@@ -47,11 +69,11 @@ protected:
         cls();
 
         // Show initialization process
-        setTextColor(ST77XX_YELLOW, ST77XX_BLACK);
+        setTextColor(0xFFE0, 0x0000);
         println(">>> SYSTEM INITIALIZATION <<<");
         println();
 
-        setTextColor(ST77XX_CYAN, ST77XX_BLACK);
+        setTextColor(0x07FF, 0x0000);
         println("Loading configuration...");
         delay(200); // Simulate work
 
@@ -62,11 +84,11 @@ protected:
         delay(200); // Simulate work
 
         // Show completion
-        setTextColor(ST77XX_GREEN, ST77XX_BLACK);
+        setTextColor(0x07E0, 0x0000);
         println("*** INITIALIZATION COMPLETE ***");
         println();
 
-        setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+        setTextColor(0xFFFF, 0x0000);
         println("Console ready for operation!");
         println("Watch continuous updates below:");
         println("--------------------------------");
@@ -82,8 +104,8 @@ public:
         _setTitle("One-Time Exec");
 
         // Set initial colors and state
-        setTextColor(ST77XX_WHITE, ST77XX_BLACK);
-        setConsoleBackground(ST77XX_BLACK);
+        setTextColor(0xFFFF, 0x0000);
+        setConsoleBackground(0x0000);
         setTextSize(1);
 
         _systemInitialized = false;
@@ -111,7 +133,7 @@ public:
             _messageCounter++;
 
             // Show timestamp
-            setTextColor(ST77XX_CYAN, ST77XX_BLACK);
+            setTextColor(0x07FF, 0x0000);
             print("[");
             print(millis() / 1000);
             print("s] ");
@@ -120,33 +142,33 @@ public:
             switch (_messageCounter % 4)
             {
             case 0:
-                setTextColor(ST77XX_GREEN, ST77XX_BLACK);
+                setTextColor(0x07E0, 0x0000);
                 print("STATUS: ");
-                setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+                setTextColor(0xFFFF, 0x0000);
                 println("System operational");
                 break;
 
             case 1:
-                setTextColor(ST77XX_YELLOW, ST77XX_BLACK);
+                setTextColor(0xFFE0, 0x0000);
                 print("TEMP: ");
-                setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+                setTextColor(0xFFFF, 0x0000);
                 print(20.0 + (_messageCounter % 10), 1);
                 println("°C");
                 break;
 
             case 2:
-                setTextColor(ST77XX_MAGENTA, ST77XX_BLACK);
+                setTextColor(0xF81F, 0x0000);
                 print("MSG #");
                 print(_messageCounter);
                 print(": ");
-                setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+                setTextColor(0xFFFF, 0x0000);
                 println("Auto-clear demo running");
                 break;
 
             case 3:
-                setTextColor(ST77XX_BLUE, ST77XX_BLACK);
+                setTextColor(0x001F, 0x0000);
                 print("MEM: ");
-                setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+                setTextColor(0xFFFF, 0x0000);
                 print(2048 - (_messageCounter * 16));
                 println(" bytes free");
                 break;
@@ -155,7 +177,7 @@ public:
             // Add separator every 10 messages
             if (_messageCounter % 10 == 0)
             {
-                setTextColor(0xaaa, ST77XX_BLACK);
+                setTextColor(0xaaa, 0x0000);
                 println("--- Console will auto-clear when full ---");
             }
         }
@@ -177,7 +199,7 @@ public:
             _systemInitialized = false;
             _messageCounter = 0;
 
-            setTextColor(ST77XX_CYAN, ST77XX_BLACK);
+            setTextColor(0x07FF, 0x0000);
             cls();
             println("Restarting console...");
             println("_executeOnce() will run again!");
@@ -196,7 +218,7 @@ public:
 void setup()
 {
     Serial.begin(115200);
-    M1Shield.begin();
+    M1Shield.begin(displayProvider);
 
     Serial.println("=== ConsoleScreen One-Time Execution Demo ===");
     Serial.println("Watch the console for initialization sequence!");

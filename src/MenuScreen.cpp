@@ -13,19 +13,19 @@ constexpr uint8_t TEXT_SIZE_3_WIDTH = 18;      // Width of size-3 text character
 constexpr uint8_t TEXT_SIZE_3_HALF_HEIGHT = 8; // Half-height of size-3 text for centering
 
 // Menu Layout Constants
-constexpr uint16_t ROW_HEIGHT = 26;                             // Height of each menu row in pixels
-constexpr uint16_t ROW_COLOR_BG1 = 0x4208;                      // Background color for odd rows (dark blue)
-constexpr uint16_t ROW_COLOR_FG1 = ST77XX_WHITE;                // Foreground color for odd rows
-constexpr uint16_t ROW_COLOR_BG2 = 0x39C7;                      // Background color for even rows (darker blue)
-constexpr uint16_t ROW_COLOR_FG2 = ST77XX_WHITE;                // Foreground color for even rows
-constexpr uint16_t SELECTED_ROW_COLOR_BG = 0xFFE0;              // Background color for selected row (bright yellow)
-constexpr uint16_t SELECTED_ROW_COLOR_FG = ST77XX_BLACK;        // Foreground color for selected row
-constexpr uint16_t DISABLED_ROW_COLOR_BG1 = 0x2104;             // Background color for disabled odd rows (darker)
-constexpr uint16_t DISABLED_ROW_COLOR_FG1 = 0x7BEF;             // Foreground color for disabled odd rows (gray)
-constexpr uint16_t DISABLED_ROW_COLOR_BG2 = 0x18E3;             // Background color for disabled even rows (darker)
-constexpr uint16_t DISABLED_ROW_COLOR_FG2 = 0x7BEF;             // Foreground color for disabled even rows (gray)
-constexpr uint16_t NEXT_PAGE_INDICATOR_COLOR_FG = ST77XX_WHITE; // Color for next page indicator text
-constexpr uint16_t TABLE_COLOR_BG = ST77XX_BLACK;               // Color for table background
+constexpr uint16_t ROW_HEIGHT = 26;                       // Height of each menu row in pixels
+constexpr uint16_t ROW_COLOR_BG1 = 0x4208;                // Background color for odd rows (dark blue)
+constexpr uint16_t ROW_COLOR_FG1 = 0xFFFF;                // Foreground color for odd rows
+constexpr uint16_t ROW_COLOR_BG2 = 0x39C7;                // Background color for even rows (darker blue)
+constexpr uint16_t ROW_COLOR_FG2 = 0xFFFF;                // Foreground color for even rows
+constexpr uint16_t SELECTED_ROW_COLOR_BG = 0xFFE0;        // Background color for selected row (bright yellow)
+constexpr uint16_t SELECTED_ROW_COLOR_FG = 0x0000;        // Foreground color for selected row
+constexpr uint16_t DISABLED_ROW_COLOR_BG1 = 0x2104;       // Background color for disabled odd rows (darker)
+constexpr uint16_t DISABLED_ROW_COLOR_FG1 = 0x7BEF;       // Foreground color for disabled odd rows (gray)
+constexpr uint16_t DISABLED_ROW_COLOR_BG2 = 0x18E3;       // Background color for disabled even rows (darker)
+constexpr uint16_t DISABLED_ROW_COLOR_FG2 = 0x7BEF;       // Foreground color for disabled even rows (gray)
+constexpr uint16_t NEXT_PAGE_INDICATOR_COLOR_FG = 0xFFFF; // Color for next page indicator text
+constexpr uint16_t TABLE_COLOR_BG = 0x0000;               // Color for table background
 
 /**
  * @brief Initialize menu screen with default configuration

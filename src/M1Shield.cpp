@@ -13,32 +13,6 @@
 #include <Arduino.h>
 #include "Model1.h"
 
-#if defined(USE_ST7789)
-// ST7789 (240x320 SPI) – very common, vibrant display
-#include <Adafruit_ST7789.h>
-#elif defined(USE_ST7789_240x240)
-// ST7789 (240x240 SPI) – very common, vibrant display
-#include <Adafruit_ST7789.h>
-#elif defined(USE_ST7735)
-// ST7735 (128x160 SPI) – older/smaller displays
-#include <Adafruit_ST7735.h>
-#elif defined(USE_ILI9341)
-// ILI9341 (240x320 SPI) – widely used 2.4–2.8" displays
-#include <Adafruit_ILI9341.h>
-#elif defined(USE_ILI9488)
-// ILI9488 (320x480 SPI, 3-byte RGB888) – newer 3.5" displays
-#include <Arduino_GFX_Library.h>
-#elif defined(USE_HX8357)
-// HX8357D (320x480 SPI) – 3.5" displays, older than ILI9488
-#include <Adafruit_HX8357.h>
-#elif defined(USE_ILI9325)
-// ILI9325 (240x320, usually parallel interface) – for some shield-based displays
-#include <Adafruit_TFTLCD.h> // Adafruit's legacy parallel TFT library
-#elif defined(USE_ST7796)
-// ST7796 (320x480 SPI) – newer displays, often used in larger shields
-#include <Adafruit_ST7796S.h>
-#endif
-
 // Hardware timing constants
 constexpr unsigned long DEBOUNCE_TIME = 250; // Button debounce time in milliseconds
 
@@ -63,29 +37,18 @@ constexpr uint8_t PIN_JOYSTICK_Y = A13;
 constexpr uint8_t JOYSTICK_CENTER_MIN = 100;
 constexpr uint8_t JOYSTICK_CENTER_MAX = 155;
 
+// Display pin definitions
+constexpr int8_t PIN_TFT_CS = 9;   // Chip Select
+constexpr int8_t PIN_TFT_DC = 8;   // Data/Command
+constexpr int8_t PIN_TFT_RST = -1; // Reset pin (-1 if not used)
+
 // Define global instance
 M1ShieldClass M1Shield;
 
 /**
  * Constructor: Initializes internal state.
  */
-M1ShieldClass::M1ShieldClass() :
-#if defined(USE_ILI9488)
-                                 _tft(nullptr), // Will be created in begin()
-                                 _bus(nullptr), // Will be created in begin()
-#elif defined(USE_ST7789) || defined(USE_ST7789_240x240)
-                                 _tft(TFT_CS, TFT_DC, TFT_RST),
-#elif defined(USE_ST7735)
-                                 _tft(TFT_CS, TFT_DC, TFT_RST),
-#elif defined(USE_ILI9341)
-                                 _tft(TFT_CS, TFT_DC, TFT_RST),
-#elif defined(USE_HX8357)
-                                 _tft(TFT_CS, TFT_DC, TFT_RST),
-#elif defined(USE_ILI9325)
-                                 _tft(TFT_CS, TFT_DC, TFT_RST),
-#elif defined(USE_ST7796)
-                                 _tft(TFT_CS, TFT_DC, TFT_RST),
-#endif
+M1ShieldClass::M1ShieldClass() : _tft(nullptr),
                                  _menuPressed(0),
                                  _upPressed(0),
                                  _downPressed(0),
@@ -94,7 +57,8 @@ M1ShieldClass::M1ShieldClass() :
                                  _joystickPressed(0),
                                  _screenWidth(0),
                                  _screenHeight(0),
-                                 _screen(nullptr)
+                                 _screen(nullptr),
+                                 _displayProvider(nullptr)
 {
 }
 
@@ -111,26 +75,28 @@ M1ShieldClass::~M1ShieldClass()
         _screen = nullptr;
     }
 
-#if defined(USE_ILI9488)
-    // Clean up ILI9488 resources
+    // Clean up display instance if it exists
     if (_tft)
     {
-        delete _tft;
+        if (_displayProvider)
+        {
+            _displayProvider->destroy(_tft);
+        }
+        else
+        {
+            delete _tft; // Fallback if no provider
+        }
         _tft = nullptr;
     }
-    if (_bus)
-    {
-        delete _bus;
-        _bus = nullptr;
-    }
-#endif
 }
 
 /**
  * Initializes hardware: pins, display, LED, and input modes.
  */
-void M1ShieldClass::begin()
+void M1ShieldClass::begin(DisplayProvider &provider)
 {
+    _displayProvider = &provider;
+
     pinMode(PIN_ACTIVE_LED, OUTPUT);
     _inactive();
 
@@ -151,53 +117,20 @@ void M1ShieldClass::begin()
 
     // Initialize display with error handling
     // Manual Reset Sequence
-    if (TFT_RST >= 0)
+    if (PIN_TFT_RST >= 0)
     {
-        pinMode(TFT_RST, OUTPUT);
-        digitalWrite(TFT_RST, LOW);
+        pinMode(PIN_TFT_RST, OUTPUT);
+        digitalWrite(PIN_TFT_RST, LOW);
         delay(50);
-        digitalWrite(TFT_RST, HIGH);
+        digitalWrite(PIN_TFT_RST, HIGH);
         delay(50);
     }
 
-    // Initialize display based on the selected type
-    // This is swapped because we rotate the screen by 90 degrees
-    _screenWidth = DISPLAY_HEIGHT; // DO NOT CHANGE THIS
-    _screenHeight = DISPLAY_WIDTH; // DO NOT CHANGE THIS
+    _tft = provider.create(PIN_TFT_CS, PIN_TFT_DC, PIN_TFT_RST);
 
-#if defined(USE_ST7789)
-    _tft.init(_screenHeight, _screenWidth, SPI_MODE0);
-    _tft.enableTearing(true);
-    _tft.setRotation(3);
-#elif defined(USE_ST7789_240x240)
-    _tft.init(_screenHeight, _screenWidth, SPI_MODE0);
-    _tft.enableTearing(true);
-    _tft.setRotation(3);
-#elif defined(USE_ST7735)
-    _tft.initR(INITR_BLACKTAB);
-    _tft.setRotation(3);
-#elif defined(USE_ILI9341)
-    _tft.begin();
-    _tft.setRotation(3);
-#elif defined(USE_ILI9488)
-    // ILI9488 requires special initialization with Arduino_GFX
-    // Create the DataBus first, then the display object
-    _bus = new Arduino_HWSPI(TFT_DC, TFT_CS, TFT_RST); // Hardware SPI for Arduino
-    _tft = new Arduino_ILI9488(_bus, 320, 480);
-    _tft->begin();
-    _tft->setRotation(0);
-#elif defined(USE_HX8357)
-    _tft.begin(HX8357D);
-    _tft.setRotation(0);
-    _tft.invertDisplay(false);
-#elif defined(USE_ILI9325)
-    _tft.begin();
-    _tft.setRotation(3);
-#elif defined(USE_ST7796)
-    _tft.init(_screenHeight, _screenWidth, 0, 0, ST7796S_BGR);
-    _tft.setRotation(1);
-    _tft.invertDisplay(true);
-#endif
+    // Initialize display based on the selected type
+    _screenWidth = provider.width();
+    _screenHeight = provider.height();
 }
 
 /**
@@ -205,7 +138,7 @@ void M1ShieldClass::begin()
  */
 bool M1ShieldClass::isDisplayInitialized() const
 {
-    return (_screenWidth > 0 && _screenHeight > 0);
+    return (_tft != nullptr && _screenWidth > 0 && _screenHeight > 0);
 }
 
 /**
@@ -214,11 +147,7 @@ bool M1ShieldClass::isDisplayInitialized() const
  */
 Adafruit_GFX &M1ShieldClass::getGFX()
 {
-#if defined(USE_ILI9488)
-    return *_tft; // Dereference pointer for ILI9488
-#else
-    return _tft; // Direct reference for Adafruit displays
-#endif
+    return *_tft; // Dereference pointer to get reference
 }
 
 /**
