@@ -1,519 +1,540 @@
 # ConsoleScreen Class
 
+The `ConsoleScreen` class provides a scrollable terminal-like interface for text output on the M1Shield Arduino library. It extends the `ContentScreen` class and implements Arduino's `Print` interface to create a simple console that automatically clears when full, making it ideal for logging, debugging, and continuous text output applications.
+
+**Print Interface Implementation**: ConsoleScreen fully implements Arduino's `Print` interface, providing all standard Arduino print functionality including automatic support for various data types, formatting options, and base conversions. This ensures full compatibility with the Arduino ecosystem.
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Class Hierarchy](#class-hierarchy)
+3. [Core Features](#core-features)
+4. [Constructor](#constructor)
+5. [Text Output Methods](#text-output-methods)
+6. [Color and Formatting](#color-and-formatting)
+7. [Screen Management](#screen-management)
+8. [One-Time Execution](#one-time-execution)
+9. [Examples](#examples)
+10. [Technical Details](#technical-details)
+11. [Best Practices](#best-practices)
+
 ## Overview
 
-The `ConsoleScreen` class is a M1TerminalScreen-based implementation that provides a system console for capturing, storing, and displaying log messages. It implements the `ILogger` interface to serve as a centralized logging destination while providing a terminal-style interface for viewing recent logs.
+`ConsoleScreen` creates a simple scrollable terminal interface that displays text output sequentially. When the text reaches the bottom of the screen, the entire console is automatically cleared and text continues from the top (wrap-around behavior). This makes it memory efficient and ideal for continuous logging or debugging output.
 
-## Key Features
+**Key characteristics:**
 
-- **Memory Efficient**: Fixed 2KB circular buffer for log storage
-- **ILogger Interface**: Direct integration with existing logging infrastructure
-- **Print Stream Compatible**: Works with Arduino Serial/Stream operations
-- **Real-time Display**: Live log updates with automatic scrolling
-- **Filtering**: Show all logs, warnings+errors, or errors only
-- **Navigation**: Scroll through log history with up/down controls
-- **Statistics**: Track error/warning counts and buffer usage
+- Inherits from `ContentScreen` for structured layout
+- Sequential text output only (no coordinate positioning)
+- Automatic screen clearing when content reaches bottom
+- Memory efficient - doesn't store written content
+- Color support for text foreground and background
+- Tab and newline character support
+- One-time execution capability for initialization
+- **Full Arduino Print Interface**: Inherits all standard Arduino print methods
 
-## Architecture
+### Arduino Print Interface Support
+
+- Inherits from `Print` class for full Arduino ecosystem compatibility
+- Automatic support for all data types: int, long, float, double, char, String
+- Base conversion support: print(value, HEX), print(value, BIN), print(value, OCT)
+- Precision control for floating point: print(3.14159, 2) → "3.14"
+- Can be used anywhere a Print stream is expected
+- Compatible with stream operators and printf-style libraries
+
+## Class Hierarchy
 
 ```
-Screen (abstract base)
+Screen
     ↓
-ContentScreen (structured layout)
+ContentScreen
     ↓
-M1TerminalScreen (terminal rendering)
-    ↓
-ConsoleScreen (log capture & display) ← ILogger interface
-    ↓
-YourConsoleScreen (specific logging behavior)
+ConsoleScreen (implements Print interface)
 ```
 
-## Memory Usage
+**Print Interface**: ConsoleScreen inherits from Arduino's `Print` class, providing full compatibility with Arduino's print ecosystem and all standard print methods automatically.
 
-### Log Buffer Structure
+## Core Features
 
-```cpp
-struct LogEntry {
-    uint32_t timestamp;    // 4 bytes - millis() when logged
-    uint8_t level;         // 1 byte - 0=info, 1=warn, 2=error
-    char message[59];      // 59 bytes - message text
-    // Total: 64 bytes per entry
-};
-```
+### Automatic Screen Clearing
 
-### Total Memory Footprint
+- Text automatically wraps to top when reaching screen bottom
+- Entire console clears and starts fresh (memory efficient)
+- No coordinate positioning - sequential output only
+- Content is not stored in memory once rendered
 
-- **Log Buffer**: 32 entries × 64 bytes = 2,048 bytes
-- **Terminal Video Memory**: 1,024 bytes (inherited from M1TerminalScreen)
-- **Working Buffers**: ~128 bytes for formatting and print buffering
-- **Total**: ~3.2KB RAM usage
+### Simple Text Output
 
-## Implementation Guide
+- `print()` and `println()` methods for text output
+- Support for String, char\*, int, and float data types
+- Newline character (\n) support
+- Tab character support with configurable tab stops
 
-### 1. Basic Console Usage
+### Color Support
 
-```cpp
-class SystemConsole : public ConsoleScreen
-{
-public:
-    SystemConsole() : ConsoleScreen() {
-        _setTitle("System Debug Console");
-        setFilterLevel(1); // Show warnings and errors only
-    }
-
-    bool initialize() override {
-        if (!ConsoleScreen::initialize()) {
-            return false;
-        }
-
-        info("System console initialized");
-        return true;
-    }
-};
-```
-
-### 2. Global Logger Setup
-
-```cpp
-// Global console instance
-SystemConsole g_console;
-
-// Make it available as ILogger interface
-ILogger* getSystemLogger() {
-    return &g_console;
-}
-
-void setup() {
-    // Initialize console
-    g_console.initialize();
-    g_console.open();
-
-    // Now any component can log
-    getSystemLogger()->info("System started");
-}
-```
-
-### 3. Integration with Existing Code
-
-```cpp
-void someSystemFunction() {
-    ILogger* logger = getSystemLogger();
-
-    if (initializeHardware()) {
-        logger->info("Hardware init successful");
-    } else {
-        logger->err("Hardware init failed!");
-    }
-}
-```
-
-## Display Layout
-
-The ConsoleScreen uses the M1TerminalScreen layout structure:
-
-```
-┌─────────────────────────────┐
-│ Header: System Console      │
-├─────────────────────────────┤
-│ 12:34 [INFO] System ready   │
-│ 12:34 [WARN] Temp high: 75C │
-│ 12:35 [ERR!] SPI timeout    │
-│ 12:35 [INFO] Recovery OK    │
-│ 12:36 [WARN] Memory low     │
-│ ...more log entries...      │
-│ (scroll with UP/DOWN)       │
-├─────────────────────────────┤
-│ [M] Menu [F] Filter [C] Clr │
-├─────────────────────────────┤
-│ Progress: ████░░░░ 50%      │
-└─────────────────────────────┘
-```
-
-## Log Entry Format
-
-Each log line follows this format:
-
-```
-HH:MM [LEVEL] message text (up to 45 chars)
-```
-
-- **HH:MM**: Hours and minutes from millis() timestamp
-- **[LEVEL]**: `[INFO]`, `[WARN]`, or `[ERR!]`
-- **message**: Log message text, truncated to fit terminal width
-
-## Input Controls
-
-### Console-Specific Controls
-
-| Input         | Action                                         |
-| ------------- | ---------------------------------------------- |
-| RIGHT Button  | Cycle filter level (ALL → WARN+ERR → ERR ONLY) |
-| UP Button     | Clear all logs                                 |
-| DOWN Button   | Toggle auto-scroll mode                        |
-| Joystick UP   | Scroll up through log history                  |
-| Joystick DOWN | Scroll down through log history                |
-
-### Inherited Terminal Controls
-
-| Input       | Action                   |
-| ----------- | ------------------------ |
-| LEFT Button | Toggle view (left/right) |
-| MENU Button | Exit console             |
-
-## ILogger Interface Implementation
-
-### Formatted Logging Methods
-
-```cpp
-// Log with formatted strings
-console.info("Temperature: %d°C", temperature);
-console.warn("Battery low: %d%%", batteryLevel);
-console.err("Error code: 0x%04X", errorCode);
-```
-
-### Print Stream Compatibility
-
-```cpp
-// Works with Serial-style operations
-console.print("Value: ");
-console.println(42);
-
-// Redirect other streams
-Serial.setLogger(&console);  // If supported
-```
-
-### Log Levels
-
-```cpp
-// Three log levels available
-LOG_LEVEL_INFO  = 0  // General information
-LOG_LEVEL_WARN  = 1  // Warnings and alerts
-LOG_LEVEL_ERROR = 2  // Errors and critical issues
-```
-
-## Filtering and Navigation
-
-### Filter Levels
-
-```cpp
-// Set filter programmatically
-console.setFilterLevel(0);  // Show all logs
-console.setFilterLevel(1);  // Show warnings and errors only
-console.setFilterLevel(2);  // Show errors only
-
-// Check current filter
-uint8_t level = console.getFilterLevel();
-```
-
-### Auto-scroll Control
-
-```cpp
-// Enable/disable auto-scroll to newest entries
-console.setAutoScroll(true);   // Default: scroll to new logs
-console.setAutoScroll(false);  // Manual navigation only
-
-bool autoScroll = console.getAutoScroll();
-```
-
-### Manual Navigation
-
-```cpp
-// Programmatic scrolling (if needed)
-// Note: These are internal methods, use joystick for user control
-_scrollUp();    // Scroll toward older entries
-_scrollDown();  // Scroll toward newer entries
-_scrollToNewest(); // Jump to newest entries
-```
-
-## Statistics and Monitoring
-
-### Buffer Usage
-
-```cpp
-// Check log buffer status
-uint8_t totalLogs = console.getLogCount();      // Total logs stored
-uint8_t maxLogs = 32;                           // Maximum capacity
-uint8_t usage = (totalLogs * 100) / maxLogs;   // Percentage full
-```
-
-### Error Tracking
-
-```cpp
-// Count specific log types
-uint8_t errorCount = console.getErrorCount();
-uint8_t warningCount = console.getWarningCount();
-
-// Monitor system health
-if (errorCount > 10) {
-    // Take corrective action
-}
-```
-
-## Advanced Usage
-
-### Custom Log Processing
-
-```cpp
-class DiagnosticConsole : public ConsoleScreen
-{
-private:
-    uint8_t _criticalErrors;
-
-public:
-    void err(const char* fmt, ...) override {
-        // Call parent implementation
-        ConsoleScreen::err(fmt, ...);
-
-        // Custom error handling
-        _criticalErrors++;
-        if (_criticalErrors >= 5) {
-            // Trigger system reset or safe mode
-            triggerSafeMode();
-        }
-    }
-};
-```
-
-### Integration with System Monitoring
-
-```cpp
-class SystemMonitor {
-private:
-    ILogger* _logger;
-
-public:
-    SystemMonitor(ILogger* logger) : _logger(logger) {}
-
-    void checkSystemHealth() {
-        float temperature = readTemperature();
-        if (temperature > 80.0) {
-            _logger->warn("High temperature: %.1f°C", temperature);
-        }
-
-        int freeMemory = getFreeMemory();
-        if (freeMemory < 500) {
-            _logger->err("Low memory: %d bytes", freeMemory);
-        }
-    }
-};
-```
-
-### Persistent Logging
-
-```cpp
-class PersistentConsole : public ConsoleScreen
-{
-private:
-    File _logFile;
-
-public:
-    void info(const char* fmt, ...) override {
-        // Log to console display
-        ConsoleScreen::info(fmt, ...);
-
-        // Also save to SD card or EEPROM
-        if (_logFile) {
-            va_list args;
-            va_start(args, fmt);
-            _logFile.vprintf(fmt, args);
-            _logFile.println();
-            va_end(args);
-        }
-    }
-};
-```
-
-## Performance Considerations
+- Foreground and background color settings
+- Color applies to subsequently printed text
+- Standard ST77XX color constants supported
 
 ### Memory Efficiency
 
-- **Circular Buffer**: Oldest logs automatically overwritten
-- **Fixed Size**: No dynamic allocation or memory fragmentation
-- **Compact Format**: 64 bytes per log entry including timestamp
-- **Efficient Rendering**: Only visible logs are drawn to terminal
+- No internal text buffer storage
+- Auto-clear behavior prevents memory buildup
+- Ideal for continuous logging applications
 
-### Real-time Performance
+## Constructor
 
 ```cpp
-// Minimal impact on system performance
-void criticalSystemFunction() {
-    // Logging is fast - just buffer copy and pointer increment
-    logger->info("Critical operation started");
+ConsoleScreen();
+```
 
-    performCriticalWork();
+Creates a new console screen instance with default settings:
 
-    logger->info("Critical operation completed");
+- Inherits content area management from ContentScreen
+- Initializes text positioning at top-left of content area
+- Sets default colors (white text on black background)
+- Configures standard tab size (4 characters)
+
+## Text Output Methods
+
+### Print Methods (No Newline)
+
+```cpp
+void print(const String& text);
+void print(const char* text);
+void print(int value);
+void print(float value, int decimals = 2);
+```
+
+**Usage:**
+
+```cpp
+ConsoleScreen console;
+
+console.print("Temperature: ");
+console.print(25.6, 1);
+console.print("°C");
+// Output: "Temperature: 25.6°C"
+```
+
+### Println Methods (With Newline)
+
+```cpp
+void println(const String& text);
+void println(const char* text);
+void println(int value);
+void println(float value, int decimals = 2);
+void println();  // Print newline only
+```
+
+**Usage:**
+
+```cpp
+console.println("=== SYSTEM STATUS ===");
+console.println("CPU Temp: 45°C");
+console.println("Memory: 75% used");
+console.println();  // Blank line
+```
+
+### Arduino Print Interface Methods
+
+Since ConsoleScreen implements the Print interface, all standard Arduino print methods are automatically available:
+
+```cpp
+console.print(42);                    // Integer: "42"
+console.print(3.14159, 2);           // Float with 2 decimals: "3.14"
+console.print(255, HEX);             // Hexadecimal: "FF"
+console.print(255, BIN);             // Binary: "11111111"
+console.print('A');                  // Single character: "A"
+console.print("Hello");              // C-string: "Hello"
+console.print(String("World"));      // String object: "World"
+
+// All data types work with println() too
+console.println(millis());           // Current time in milliseconds
+console.println(analogRead(A0));     // Sensor reading
+console.println(42.0f);              // Float value
+
+// Can be used as a Print stream
+void logMessage(Print& output, const char* msg) {
+    output.print("[LOG] ");
+    output.println(msg);
+}
+logMessage(console, "System ready");  // Works seamlessly
+```
+
+## Color and Formatting
+
+### Text Color Settings
+
+```cpp
+void setTextColor(uint16_t color);
+void setTextColor(uint16_t foreground, uint16_t background);
+void setConsoleBgColor(uint16_t color);
+```
+
+**Example:**
+
+```cpp
+// Set text color only
+console.setTextColor(ST77XX_GREEN);
+console.println("SUCCESS: Operation completed");
+
+// Set both foreground and background
+console.setTextColor(ST77XX_WHITE, ST77XX_RED);
+console.println("ERROR: Critical failure");
+
+// Set console background color
+console.setConsoleBgColor(ST77XX_BLACK);
+```
+
+### Available Colors
+
+```cpp
+ST77XX_BLACK    ST77XX_WHITE    ST77XX_RED      ST77XX_GREEN
+ST77XX_BLUE     ST77XX_CYAN     ST77XX_MAGENTA  ST77XX_YELLOW
+```
+
+### Tab Configuration
+
+```cpp
+void setTabSize(uint8_t size);
+uint8_t getTabSize();
+```
+
+**Usage:**
+
+```cpp
+console.setTabSize(8);        // Set 8-character tab stops
+console.print("Name:\tValue\n");
+console.print("Temp:\t25.6°C\n");
+```
+
+## Screen Management
+
+### Clear Operations
+
+```cpp
+void cls();           // Clear screen and reset cursor to top
+void refresh();       // Redraw screen (clears and resets)
+```
+
+**Usage:**
+
+```cpp
+console.cls();        // Clear all text and start fresh
+console.refresh();    // Same as cls() - redraw screen
+```
+
+### Screen State
+
+```cpp
+bool hasWrapped();    // Check if screen has wrapped around
+```
+
+The console automatically wraps when text reaches the bottom, clearing the entire screen and continuing from the top.
+
+## One-Time Execution
+
+The `ConsoleScreen` supports one-time execution for initialization tasks that should only run once after the screen is opened.
+
+### Protected Method Override
+
+```cpp
+protected:
+    virtual void _executeOnce();
+```
+
+This method is automatically called once, approximately 1 second after the screen is first opened. Override it in your derived class for initialization tasks.
+
+**Example:**
+
+```cpp
+class StatusConsole : public ConsoleScreen {
+protected:
+    void _executeOnce() override {
+        cls();
+        setTextColor(ST77XX_CYAN);
+        println("=== STATUS CONSOLE ===");
+        setTextColor(ST77XX_WHITE);
+        println("System initialized");
+        println("Ready for operation!");
+    }
+
+public:
+    StatusConsole() {
+        _setTitle("System Status");
+        // _executeOnce() will be called automatically after ~1 second
+    }
+};
+```
+
+## Examples
+
+### Basic Console Usage with Print Interface
+
+```cpp
+ConsoleScreen console;
+
+void setup() {
+    // Console will automatically initialize
+}
+
+void loop() {
+    static unsigned long lastUpdate = 0;
+
+    if (millis() - lastUpdate > 2000) {  // Every 2 seconds
+        lastUpdate = millis();
+
+        // Using Print interface methods automatically
+        console.print("Uptime: ");
+        console.print(millis() / 1000);    // Print automatically handles unsigned long
+        console.println(" seconds");
+
+        console.print("Free RAM: ");
+        console.println(freeMemory());      // Print automatically handles int
+
+        // Show sensor data with formatting
+        float temperature = 23.456;
+        console.print("Temp: ");
+        console.print(temperature, 1);      // 1 decimal place: "23.5"
+        console.println("°C");
+
+        // Show hex values
+        console.print("Status: 0x");
+        console.println(getStatusRegister(), HEX);  // Print in hexadecimal
+    }
+
+    console.loop();  // Required for screen updates
+}
+
+// Function that accepts any Print stream - console works seamlessly
+void logToAnyStream(Print& stream, const char* message) {
+    stream.print("[");
+    stream.print(millis());
+    stream.print("] ");
+    stream.println(message);
+}
+
+void somewhereInCode() {
+    logToAnyStream(console, "This works!");  // ConsoleScreen is a Print stream
+    logToAnyStream(Serial, "This also works!");  // Same function works with Serial
 }
 ```
 
-### Buffer Management
+### Debug Console with Colors
 
 ```cpp
-// Monitor and manage buffer usage
-void manageLogBuffer() {
-    if (console.getLogCount() >= 30) {
-        // Near capacity - increase log filtering
-        console.setFilterLevel(LOG_LEVEL_ERROR);
-        console.warn("Log buffer nearly full - filtering errors only");
+class DebugConsole : public ConsoleScreen {
+private:
+    unsigned long _messageCount = 0;
+
+protected:
+    void _executeOnce() override {
+        cls();
+        setTextColor(ST77XX_GREEN, ST77XX_BLACK);
+        println("=== DEBUG CONSOLE ===");
+        setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+        println("Logging system ready");
+        println("------------------------");
     }
-}
+
+public:
+    DebugConsole() {
+        _setTitle("Debug Output");
+        setConsoleBgColor(ST77XX_BLACK);
+    }
+
+    void logInfo(const char* message) {
+        setTextColor(ST77XX_CYAN);
+        print("[INFO] ");
+        setTextColor(ST77XX_WHITE);
+        println(message);
+        _messageCount++;
+    }
+
+    void logWarning(const char* message) {
+        setTextColor(ST77XX_YELLOW);
+        print("[WARN] ");
+        setTextColor(ST77XX_WHITE);
+        println(message);
+        _messageCount++;
+    }
+
+    void logError(const char* message) {
+        setTextColor(ST77XX_RED);
+        print("[ERROR] ");
+        setTextColor(ST77XX_WHITE);
+        println(message);
+        _messageCount++;
+    }
+
+    void showStats() {
+        println();
+        setTextColor(ST77XX_MAGENTA);
+        print("Messages logged: ");
+        println(_messageCount);
+        setTextColor(ST77XX_WHITE);
+    }
+};
 ```
 
-## Integration Examples
-
-### With MenuScreen
+### Serial Monitor Style Console
 
 ```cpp
-Screen* MenuScreen::_getSelectedMenuItemScreen(int index) {
-    switch (index) {
-        case 0:  // Console option
-            return &g_systemConsole;
-        case 1:  // Diagnostics
-            g_systemConsole.info("Diagnostics menu selected");
-            return new DiagnosticsScreen();
-        // ... other options
+class SerialConsole : public ConsoleScreen {
+protected:
+    void _executeOnce() override {
+        cls();
+        setTextColor(ST77XX_WHITE, ST77XX_BLUE);
+        println(" SERIAL MONITOR ");
+        setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+        println();
     }
-}
+
+public:
+    SerialConsole() {
+        _setTitle("Serial Monitor");
+        setTabSize(4);
+    }
+
+    void loop() override {
+        // Check for serial data
+        if (Serial.available()) {
+            String data = Serial.readString();
+            data.trim();
+
+            if (data.length() > 0) {
+                print(">> ");
+                println(data);
+            }
+        }
+
+        ConsoleScreen::loop();
+    }
+
+    void echo(const char* text) {
+        print("<< ");
+        println(text);
+    }
+};
 ```
 
-### Global Error Handler
+### Multi-Line Output Example
 
 ```cpp
-void globalErrorHandler(const char* component, int errorCode) {
-    ILogger* logger = getSystemLogger();
-    logger->err("%s error: code %d", component, errorCode);
-
-    // Take appropriate action based on error severity
-    if (errorCode >= 1000) {
-        logger->err("Critical error - system halt required");
-        systemHalt();
-    }
-}
-```
-
-### Debugging Integration
-
-```cpp
-#ifdef DEBUG
-    #define DEBUG_LOG(fmt, ...) getSystemLogger()->info(fmt, ##__VA_ARGS__)
-    #define DEBUG_WARN(fmt, ...) getSystemLogger()->warn(fmt, ##__VA_ARGS__)
-    #define DEBUG_ERR(fmt, ...) getSystemLogger()->err(fmt, ##__VA_ARGS__)
-#else
-    #define DEBUG_LOG(fmt, ...)
-    #define DEBUG_WARN(fmt, ...)
-    #define DEBUG_ERR(fmt, ...)
-#endif
-
-void debuggableFunction() {
-    DEBUG_LOG("Function entry");
-
-    if (someCondition) {
-        DEBUG_WARN("Unusual condition detected");
+class SystemStatus : public ConsoleScreen {
+protected:
+    void _executeOnce() override {
+        cls();
+        displaySystemInfo();
     }
 
-    DEBUG_LOG("Function exit");
-}
-```
+public:
+    void displaySystemInfo() {
+        cls();
 
-## Error Handling
+        // Header
+        setTextColor(ST77XX_GREEN);
+        println("================================");
+        println("       SYSTEM STATUS");
+        println("================================");
+        setTextColor(ST77XX_WHITE);
+        println();
 
-### Initialization Errors
+        // System info
+        print("Arduino:\t");
+        println("Nano");
 
-```cpp
-bool SystemConsole::initialize() {
-    if (!ConsoleScreen::initialize()) {
-        Serial.println("FATAL: Console initialization failed");
-        return false;
+        print("Clock:\t\t");
+        println("16 MHz");
+
+        print("RAM:\t\t");
+        print(freeMemory());
+        println(" bytes free");
+
+        print("Uptime:\t\t");
+        print(millis() / 1000);
+        println(" seconds");
+
+        println();
+
+        // Status indicators
+        setTextColor(ST77XX_GREEN);
+        println("✓ System operational");
+        println("✓ Sensors active");
+        setTextColor(ST77XX_YELLOW);
+        println("⚠ Low memory warning");
+        setTextColor(ST77XX_WHITE);
     }
-
-    // Verify buffer allocation
-    if (!_logBuffer) {
-        Serial.println("FATAL: Log buffer allocation failed");
-        return false;
-    }
-
-    info("Console system ready - %d entries available", MAX_LOG_ENTRIES);
-    return true;
-}
+};
 ```
 
-### Buffer Overflow Protection
+## Technical Details
 
-```cpp
-// Buffer overflow is handled automatically by circular buffer
-// Oldest entries are overwritten when buffer is full
-// Progress bar shows buffer utilization percentage
-```
+### Print Interface Implementation
 
-## Complete Example
+- Implements Arduino's `Print` class through `write(uint8_t)` method
+- All Print methods automatically use the `write()` implementation
+- Optimized `write(buffer, size)` method for bulk character output
+- Full compatibility with Arduino ecosystem and third-party libraries
+- Can be passed to any function expecting a `Print&` parameter
 
-See `/examples/SimpleConsoleScreen/` for a complete working implementation that demonstrates:
+### Memory Management
 
-- Real-time log capture and display
-- Demo mode with simulated system events
-- Filter cycling and manual navigation
-- Integration with global logging system
-- Statistics tracking and buffer management
-- External logging from other system components
+- No internal text buffer - text is rendered directly to display
+- Automatic screen clearing prevents memory accumulation
+- Minimal RAM footprint regardless of output volume
+
+### Text Positioning
+
+- Uses pixel-based positioning internally
+- Character width and height calculated based on text size
+- Automatic line wrapping at content area boundaries
+
+### Auto-Clear Behavior
+
+- Triggers when next line would exceed content area bottom
+- Clears entire console and resets cursor to top-left
+- No partial scrolling - complete refresh for memory efficiency
+
+### Performance Characteristics
+
+- Very low memory usage
+- Fast rendering with direct display writes
+- No string storage or manipulation overhead
 
 ## Best Practices
 
-### 1. Global Logger Pattern
+### Print Interface Usage
 
-```cpp
-// Singleton pattern for system-wide logging
-class LoggerManager {
-private:
-    static ILogger* _instance;
+- Leverage inherited Print methods for automatic data type handling
+- Use base conversion for debugging: `console.print(value, HEX)`
+- Take advantage of precision control: `console.print(3.14159, 2)`
+- Pass console to functions expecting Print streams for code reuse
+- Use `write()` method directly for single characters when performance matters
 
-public:
-    static void setLogger(ILogger* logger) { _instance = logger; }
-    static ILogger* getLogger() { return _instance; }
-};
+### Efficient Output
 
-// Usage throughout system
-LoggerManager::getLogger()->info("System event");
-```
+- Use `print()` for building lines, `println()` to complete them
+- Minimize color changes for better performance
+- Clear screen periodically in long-running applications
 
-### 2. Structured Logging
+### Memory Management
 
-```cpp
-// Use consistent format for easier parsing
-logger->info("TEMP: sensor=%d value=%d status=%s", sensorId, temp, status);
-logger->warn("MEM: free=%d used=%d fragmentation=%d%%", free, used, frag);
-logger->err("I2C: addr=0x%02X error=%d retry=%d", addr, err, retry);
-```
+- Let auto-clear handle memory - don't manually clear unless needed
+- Avoid storing console content in variables
+- Use for streaming output, not persistent display
 
-### 3. Performance Monitoring
+### Color Usage
 
-```cpp
-void monitorPerformance() {
-    uint32_t startTime = micros();
+- Set colors before text output
+- Use consistent color schemes for message types
+- Reset to default colors after special formatting
 
-    performCriticalTask();
+### One-Time Initialization
 
-    uint32_t duration = micros() - startTime;
-    if (duration > 1000) {
-        logger->warn("PERF: task took %d μs (threshold: 1000)", duration);
-    }
-}
-```
+- Use `_executeOnce()` for setup that should happen only once
+- Keep initialization fast to avoid blocking
+- Set title and initial state in constructor
 
-### 4. Resource Management
-
-```cpp
-void ConsoleScreen::cleanup() {
-    // Log shutdown sequence
-    info("Console shutdown initiated");
-
-    // Flush any pending logs
-    _flushPrintBuffer();
-
-    // Clear sensitive data
-    memset(_logBuffer, 0, sizeof(_logBuffer));
-
-    ConsoleScreen::cleanup();
-
-    Serial.println("Console shutdown complete");
-}
-```
+The `ConsoleScreen` class provides a simple, efficient solution for scrolling text output with automatic memory management and full Arduino Print interface compatibility. This makes it ideal for debugging interfaces, logging systems, and any application requiring continuous text display while maintaining seamless integration with the Arduino ecosystem.

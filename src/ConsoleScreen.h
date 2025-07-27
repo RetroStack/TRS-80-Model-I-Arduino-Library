@@ -18,7 +18,12 @@
  * cleared and text continues from the top (wrap-around behavior).
  * Text can be added using print() and println() methods with color support.
  *
+ * Implements Arduino's Print interface for full compatibility with Arduino ecosystem.
+ * All standard Print methods (print various data types, formatting) are automatically
+ * available through inheritance.
+ *
  * Key Features:
+ * - Implements Arduino Print interface for full ecosystem compatibility
  * - Automatic screen clearing when content reaches bottom (memory efficient)
  * - Color support for text foreground and background
  * - Tab support with predefined tab stops
@@ -65,7 +70,7 @@
  * };
  * @endcode
  */
-class ConsoleScreen : public ContentScreen
+class ConsoleScreen : public ContentScreen, public Print
 {
 private:
     // Text positioning and rendering state
@@ -184,6 +189,36 @@ public:
      */
     void open() override;
 
+    // Print Interface Implementation (required for Arduino Print class)
+
+    /**
+     * @brief Write a single character to the console (Print interface)
+     *
+     * This method implements the Arduino Print interface requirement.
+     * It processes and renders a single character to the console, handling
+     * special characters like newline and tab appropriately.
+     *
+     * @param c Character to write to console
+     * @return size_t Number of bytes written (1 if successful, 0 if failed)
+     *
+     * @note This method enables all Print class functionality automatically
+     * @note Handles special characters: \n (newline), \t (tab), \r (carriage return)
+     * @note All other Print methods (print/println variants) use this internally
+     */
+    size_t write(uint8_t c) override;
+
+    /**
+     * @brief Write buffer of characters to console (Print interface optimization)
+     *
+     * Optimized bulk write method for better performance when writing
+     * multiple characters at once.
+     *
+     * @param buffer Pointer to character buffer
+     * @param size Number of characters to write
+     * @return size_t Number of bytes successfully written
+     */
+    size_t write(const uint8_t *buffer, size_t size) override;
+
     // Screen Interface Implementation
 
     /**
@@ -208,89 +243,17 @@ public:
     Screen *actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override;
 
     // Console Text Output Methods
-
-    /**
-     * @brief Print text to console without newline
-     *
-     * Outputs the provided string to the console at the current cursor
-     * position using current color settings. Cursor advances after text.
-     *
-     * @param text String to print to console
-     *
-     * @example
-     * @code
-     * print("Temperature: ");
-     * print("25.6°C");
-     * @endcode
-     */
-    void print(const String &text);
-
-    /**
-     * @brief Print text to console without newline (C-string version)
-     *
-     * @param text Null-terminated string to print to console
-     */
-    void print(const char *text);
-
-    /**
-     * @brief Print integer to console without newline
-     *
-     * @param value Integer value to print
-     */
-    void print(int value);
-
-    /**
-     * @brief Print float to console without newline
-     *
-     * @param value Float value to print
-     * @param decimals Number of decimal places (default: 2)
-     */
-    void print(float value, int decimals = 2);
-
-    /**
-     * @brief Print text to console with newline
-     *
-     * Outputs the provided string followed by a newline character.
-     * Cursor moves to the beginning of the next line.
-     *
-     * @param text String to print to console
-     *
-     * @example
-     * @code
-     * println("System initialized");
-     * println("Ready for input");
-     * @endcode
-     */
-    void println(const String &text);
-
-    /**
-     * @brief Print text to console with newline (C-string version)
-     *
-     * @param text Null-terminated string to print to console
-     */
-    void println(const char *text);
-
-    /**
-     * @brief Print integer to console with newline
-     *
-     * @param value Integer value to print
-     */
-    void println(int value);
-
-    /**
-     * @brief Print float to console with newline
-     *
-     * @param value Float value to print
-     * @param decimals Number of decimal places (default: 2)
-     */
-    void println(float value, int decimals = 2);
-
-    /**
-     * @brief Print newline only
-     *
-     * Moves cursor to the beginning of the next line.
-     */
-    void println();
+    //
+    // Note: ConsoleScreen inherits from Arduino's Print class, which automatically
+    // provides all standard print() and println() methods for various data types:
+    // - print(int), print(long), print(float), print(double)
+    // - print(char), print(unsigned char), print(const char*)
+    // - print(String), print(const String&)
+    // - println() variants of all above
+    // - print with base conversion: print(value, HEX), print(value, BIN), etc.
+    //
+    // All of these methods are automatically available and work through the
+    // write() method implementation - no additional methods needed!
 
     // Console Control Methods
 

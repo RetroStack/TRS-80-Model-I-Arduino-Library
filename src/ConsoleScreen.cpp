@@ -62,7 +62,7 @@ ConsoleScreen::ConsoleScreen() : ContentScreen()
     _contentTop = 0;
     _contentWidth = 0;
     _contentHeight = 0;
-    
+
     // Initialize one-time execution tracking
     _screenOpenTime = 0;
     _hasExecutedOnce = false;
@@ -106,7 +106,7 @@ void ConsoleScreen::loop()
         _executeOnce();
         _hasExecutedOnce = true;
     }
-    
+
     // Call parent loop for standard processing
     ContentScreen::loop();
 }
@@ -217,118 +217,55 @@ void ConsoleScreen::open()
 {
     // Call parent implementation first
     ContentScreen::open();
-    
+
     // Reset one-time execution tracking
     _screenOpenTime = millis();
     _hasExecutedOnce = false;
 }
 
-// Text Output Methods
+// Print Interface Implementation
 
 /**
- * @brief Print text to console without newline
+ * @brief Write a single character to the console (Print interface)
  *
- * @param text String to print to console
+ * This method implements the required Print interface method, enabling
+ * all Arduino Print functionality automatically. It processes and renders
+ * a single character to the console.
+ *
+ * @param c Character to write to console
+ * @return size_t Number of bytes written (1 if successful, 0 if failed)
  */
-void ConsoleScreen::print(const String &text)
+size_t ConsoleScreen::write(uint8_t c)
 {
-    for (unsigned int i = 0; i < text.length(); i++)
+    _processChar((char)c);
+    return 1; // Always successful since _processChar handles all characters
+}
+
+/**
+ * @brief Write buffer of characters to console (Print interface optimization)
+ *
+ * Optimized bulk write method for better performance when writing
+ * multiple characters at once.
+ *
+ * @param buffer Pointer to character buffer
+ * @param size Number of characters to write
+ * @return size_t Number of bytes successfully written
+ */
+size_t ConsoleScreen::write(const uint8_t *buffer, size_t size)
+{
+    size_t n = 0;
+    while (size--)
     {
-        _processChar(text.charAt(i));
+        if (write(*buffer++))
+        {
+            n++;
+        }
+        else
+        {
+            break;
+        }
     }
-}
-
-/**
- * @brief Print text to console without newline (C-string version)
- *
- * @param text Null-terminated string to print to console
- */
-void ConsoleScreen::print(const char *text)
-{
-    if (text == nullptr)
-        return;
-
-    while (*text)
-    {
-        _processChar(*text);
-        text++;
-    }
-}
-
-/**
- * @brief Print integer to console without newline
- *
- * @param value Integer value to print
- */
-void ConsoleScreen::print(int value)
-{
-    print(String(value));
-}
-
-/**
- * @brief Print float to console without newline
- *
- * @param value Float value to print
- * @param decimals Number of decimal places (default: 2)
- */
-void ConsoleScreen::print(float value, int decimals)
-{
-    print(String(value, decimals));
-}
-
-/**
- * @brief Print text to console with newline
- *
- * @param text String to print to console
- */
-void ConsoleScreen::println(const String &text)
-{
-    print(text);
-    _processChar('\n');
-}
-
-/**
- * @brief Print text to console with newline (C-string version)
- *
- * @param text Null-terminated string to print to console
- */
-void ConsoleScreen::println(const char *text)
-{
-    print(text);
-    _processChar('\n');
-}
-
-/**
- * @brief Print integer to console with newline
- *
- * @param value Integer value to print
- */
-void ConsoleScreen::println(int value)
-{
-    print(value);
-    _processChar('\n');
-}
-
-/**
- * @brief Print float to console with newline
- *
- * @param value Float value to print
- * @param decimals Number of decimal places (default: 2)
- */
-void ConsoleScreen::println(float value, int decimals)
-{
-    print(value, decimals);
-    _processChar('\n');
-}
-
-/**
- * @brief Print newline only
- *
- * Moves cursor to the beginning of the next line.
- */
-void ConsoleScreen::println()
-{
-    _processChar('\n');
+    return n;
 }
 
 // Console Control Methods
