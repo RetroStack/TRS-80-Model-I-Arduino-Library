@@ -469,6 +469,12 @@ M1TerminalScreen::M1TerminalScreen() : ContentScreen()
     _model1VideoLoaded = false; // Model1 content not yet loaded
     _redrawIndex = -1;          // No redraw in progress
 
+    // Set initial content area (uninitialized)
+    _contentLeft = 0;
+    _contentTop = 0;
+    _contentWidth = 0;
+    _contentHeight = 0;
+
     // Configure ContentScreen interface
     _setTitle("TRS-80 Terminal");
     _setProgressValue(0);
@@ -645,22 +651,16 @@ void M1TerminalScreen::_updateXY(uint16_t terminalX, uint16_t terminalY, uint8_t
  */
 void M1TerminalScreen::_updatePixelLine(Adafruit_GFX &gfx, uint8_t currentPixelLine, uint8_t previousPixelLine, int16_t terminalX, int16_t terminalY, uint16_t y)
 {
-    // Calculate content area boundaries
-    uint16_t contentLeft = _getContentLeft();
-    uint16_t contentTop = _getContentTop();
-    uint16_t contentWidth = _getContentWidth();
-    uint16_t contentHeight = _getContentHeight();
-
     // Calculate absolute screen coordinates
-    int16_t xCoord = contentLeft + terminalX;
-    int16_t yCoord = contentTop + terminalY + y;
+    int16_t xCoord = _contentLeft + terminalX;
+    int16_t yCoord = _contentTop + terminalY + y;
 
     // Process all 6 pixels in this scanline
     for (int16_t x = 0; x < CHAR_WIDTH; x++)
     {
         // Verify pixel is within content area bounds
-        if (terminalX >= 0 && terminalX + x <= contentWidth &&
-            terminalY >= 0 && terminalY + y <= contentHeight)
+        if (terminalX >= 0 && terminalX + x <= _contentWidth &&
+            terminalY >= 0 && terminalY + y <= _contentHeight)
         {
             // Extract current and previous pixel states (MSB = leftmost)
             bool hasPixel = (currentPixelLine & 0x80);
@@ -729,13 +729,9 @@ void M1TerminalScreen::_updateNext()
         int16_t terminalX = (_xCoordinate - _horizontalScrollOffset) * CHAR_WIDTH;     // Apply horizontal scroll
         int16_t terminalY = (_yCoordinate - _verticalScrollOffset) * CHAR_FULL_HEIGHT; // Apply vertical scroll
 
-        // Get content area dimensions for viewport culling
-        uint16_t contentWidth = _getContentWidth();
-        uint16_t contentHeight = _getContentHeight();
-
         // Only render if character is within the visible viewport
-        if (terminalX >= -CHAR_WIDTH && terminalX < (int16_t)contentWidth &&
-            terminalY >= -CHAR_FULL_HEIGHT && terminalY < (int16_t)contentHeight)
+        if (terminalX >= -CHAR_WIDTH && terminalX < (int16_t)_contentWidth &&
+            terminalY >= -CHAR_FULL_HEIGHT && terminalY < (int16_t)_contentHeight)
         {
             _updateXY(terminalX, terminalY, _bufferedVidMem[_currentUpdateIndex], _writtenVidMem[_currentUpdateIndex]);
         }
@@ -798,14 +794,14 @@ void M1TerminalScreen::_redraw()
 }
 
 /**
- * @brief Scroll the viewport left by up to 5 characters with dynamic bounds checking
+ * @brief Scroll the viewport left by up to 15 characters with dynamic bounds checking
  *
  * Moves the viewport left within the 64-column terminal display, adapting to
  * the available content area width. The scroll amount is clamped to maintain
  * viewport boundaries and provide smooth scrolling experience.
  *
  * ## Scroll Behavior
- * - Maximum step: 5 characters per call
+ * - Maximum step: 15 characters per call
  * - Minimum offset: 0 (leftmost position)
  * - Triggers redraw to update display with new viewport
  *
@@ -814,15 +810,15 @@ void M1TerminalScreen::_redraw()
  * - Visible columns = contentWidth / CHAR_WIDTH
  * - Scroll range: 0 to max(0, 64 - visibleColumns)
  *
- * @note Scroll amount is limited to 5 characters maximum
+ * @note Scroll amount is limited to 15 characters maximum
  * @note Triggers full redraw to update display with new viewport
  */
 void M1TerminalScreen::_scrollLeft()
 {
-    // Scroll left by up to 5 characters, but not below 0
-    if (_horizontalScrollOffset >= 5)
+    // Scroll left by up to 15 characters, but not below 0
+    if (_horizontalScrollOffset >= 15)
     {
-        _horizontalScrollOffset -= 5;
+        _horizontalScrollOffset -= 15;
     }
     else
     {
@@ -832,14 +828,14 @@ void M1TerminalScreen::_scrollLeft()
 }
 
 /**
- * @brief Scroll the viewport right by up to 5 characters with dynamic bounds checking
+ * @brief Scroll the viewport right by up to 15 characters with dynamic bounds checking
  *
  * Moves the viewport right within the 64-column terminal display, adapting to
  * the available content area width. The scroll amount is clamped to maintain
  * viewport boundaries and provide smooth scrolling experience.
  *
  * ## Scroll Behavior
- * - Maximum step: 5 characters per call
+ * - Maximum step: 15 characters per call
  * - Maximum offset: Dynamically calculated from content area width
  * - Triggers redraw to update display with new viewport
  *
@@ -848,20 +844,19 @@ void M1TerminalScreen::_scrollLeft()
  * - Visible columns = contentWidth / CHAR_WIDTH
  * - Maximum scroll = max(0, 64 - visibleColumns)
  *
- * @note Scroll amount is limited to 5 characters maximum
+ * @note Scroll amount is limited to 15 characters maximum
  * @note Triggers full redraw to update display with new viewport
  */
 void M1TerminalScreen::_scrollRight()
 {
     // Calculate maximum scroll offset based on content area width
-    uint16_t contentWidth = _getContentWidth();
-    uint8_t visibleColumns = contentWidth / CHAR_WIDTH;
+    uint8_t visibleColumns = _contentWidth / CHAR_WIDTH;
     uint8_t maxScrollOffset = (TERM_COLS > visibleColumns) ? (TERM_COLS - visibleColumns) : 0;
 
-    // Scroll right by up to 5 characters, but not beyond maximum
-    if (maxScrollOffset >= 5 && _horizontalScrollOffset <= maxScrollOffset - 5)
+    // Scroll right by up to 15 characters, but not beyond maximum
+    if (maxScrollOffset >= 15 && _horizontalScrollOffset <= maxScrollOffset - 15)
     {
-        _horizontalScrollOffset += 5;
+        _horizontalScrollOffset += 15;
     }
     else
     {
@@ -878,7 +873,7 @@ void M1TerminalScreen::_scrollRight()
  * to maintain viewport boundaries.
  *
  * ## Scroll Behavior
- * - Maximum step: 3 rows per call
+ * - Maximum step: 10 rows per call
  * - Minimum offset: 0 (topmost position)
  * - Triggers redraw to update display with new viewport
  *
@@ -888,15 +883,15 @@ void M1TerminalScreen::_scrollRight()
  * - If all 16 rows fit, no scrolling is needed
  * - Otherwise, scroll to show different sections of the 16-row grid
  *
- * @note Scroll amount is limited to 3 rows maximum
+ * @note Scroll amount is limited to 10 rows maximum
  * @note Triggers full redraw to update display with new viewport
  */
 void M1TerminalScreen::_scrollUp()
 {
-    // Scroll up by up to 3 rows, but not below 0
-    if (_verticalScrollOffset >= 3)
+    // Scroll up by up to 10 rows, but not below 0
+    if (_verticalScrollOffset >= 10)
     {
-        _verticalScrollOffset -= 3;
+        _verticalScrollOffset -= 10;
     }
     else
     {
@@ -906,14 +901,14 @@ void M1TerminalScreen::_scrollUp()
 }
 
 /**
- * @brief Scroll the viewport down by up to 3 rows with dynamic bounds checking
+ * @brief Scroll the viewport down by up to 10 rows with dynamic bounds checking
  *
  * Moves the viewport down within the 16-row terminal display based on available
  * content area height. The scroll amount is calculated dynamically and limited
  * to maintain viewport boundaries.
  *
  * ## Scroll Behavior
- * - Maximum step: 3 rows per call
+ * - Maximum step: 10 rows per call
  * - Maximum offset: Calculated based on content area height
  * - Triggers redraw to update display with new viewport
  *
@@ -923,20 +918,19 @@ void M1TerminalScreen::_scrollUp()
  * - Maximum offset = max(0, 16 - available rows)
  * - Ensures all displayable content remains accessible
  *
- * @note Scroll amount is limited to 3 rows maximum
+ * @note Scroll amount is limited to 10 rows maximum
  * @note Triggers full redraw to update display with new viewport
  */
 void M1TerminalScreen::_scrollDown()
 {
     // Calculate maximum scroll based on content area height
-    uint16_t contentHeight = _getContentHeight();
-    uint8_t visibleRows = contentHeight / CHAR_FULL_HEIGHT;
+    uint8_t visibleRows = _contentHeight / CHAR_FULL_HEIGHT;
     uint8_t maxVerticalScroll = (TERM_ROWS > visibleRows) ? (TERM_ROWS - visibleRows) : 0;
 
-    // Scroll down by up to 3 rows, but not beyond maximum
-    if (_verticalScrollOffset + 3 <= maxVerticalScroll)
+    // Scroll down by up to 10 rows, but not beyond maximum
+    if (_verticalScrollOffset + 10 <= maxVerticalScroll)
     {
-        _verticalScrollOffset += 3;
+        _verticalScrollOffset += 10;
     }
     else
     {
@@ -994,13 +988,16 @@ void M1TerminalScreen::_nextFont()
 void M1TerminalScreen::_loadFromModel1()
 {
     // Check if Model1 test signal is active
-    if (!Model1.hasActiveTestSignal())
-    {
-        return; // Model1 not available or test signal inactive
-    }
+    // if (!Model1.hasActiveTestSignal())
+    // {
+    //     return; // Model1 not available or test signal inactive
+    // }
 
     // Read video memory from Model1 system (0x3C00-0x3FFF = 1024 bytes)
+    Model1.activateTestSignal();
     uint8_t *videoData = Model1.readMemory(0x3C00, 1024);
+    Model1.deactivateTestSignal();
+
     if (videoData != nullptr)
     {
         // Copy Model1 video memory to local buffer
@@ -1047,17 +1044,32 @@ void M1TerminalScreen::_loadFromModel1()
  */
 void M1TerminalScreen::loop()
 {
-    // Handle base screen functionality (input, navigation, etc.)
-    ContentScreen::loop();
-
     // Process incremental character rendering when terminal is active
     if (isActive())
     {
         if (!_model1VideoLoaded || _currentUpdateIndex == 1)
         {
             _loadFromModel1();
+
+            // First time setting content area dimensions
+            if (_contentHeight == 0 || _contentWidth == 0)
+            {
+                _contentLeft = _getContentLeft() + 2;
+                _contentTop = _getContentTop() + 2;
+                _contentWidth = _getContentWidth() - 4;
+                _contentHeight = _getContentHeight() - 4;
+
+                refresh();
+            }
+            else
+            {
+                _updateNext(); // Update one character position per frame
+            }
         }
-        _updateNext(); // Update one character position per frame
+        else
+        {
+            _updateNext(); // Update one character position per frame
+        }
     }
 }
 
@@ -1166,14 +1178,28 @@ Screen *M1TerminalScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8
     // Scroll left (Left button / ← key)
     if (action & BUTTON_LEFT)
     {
-        _scrollLeft();
+        if (_horizontalScrollOffset == 0)
+        {
+            _nextFont();
+        }
+        else
+        {
+            _scrollLeft();
+        }
         return nullptr;
     }
 
     // Scroll up (Up button / ↑ key)
     if (action & BUTTON_UP)
     {
-        _scrollUp();
+        if (_verticalScrollOffset == 0)
+        {
+            _nextFont();
+        }
+        else
+        {
+            _scrollUp();
+        }
         return nullptr;
     }
 

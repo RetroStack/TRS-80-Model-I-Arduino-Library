@@ -105,6 +105,11 @@ private:
 
     int _redrawIndex; // Index for full screen redraw operations
 
+    uint16_t _contentLeft;
+    uint16_t _contentTop;
+    uint16_t _contentWidth;
+    uint16_t _contentHeight;
+
 protected:
     /**
      * @brief Extract a specific pixel line from a character's bitmap data
