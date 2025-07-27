@@ -85,7 +85,7 @@ You can find detailed documentation of all features [here](/docs).
 **Option 2: Direct Wiring**
 
 - Arduino Mega 2560 connected via jumper wires to TRS-80 40-pin edge connector
-- Requires careful wiring to avoid shorts (see [pin mapping docs](/docs))
+- Requires careful wiring to avoid shorts (see [pin mapping docs](/docs/PinMapping.md))
 - More complex but allows custom configurations
 
 ### TRS-80 Arduino Shield (Recommended)
@@ -116,6 +116,9 @@ _(Link will be updated once the repository is public.)_
 
 **⚠️ WARNING:**  
 When connecting to hardware, you often need to connect everything, turn the Model I on, and ensure it is in a good state **before** powering the Arduino. Many scripts assert the `TEST*` signal to take over execution. This is safe if the Model I has fully booted but can corrupt memory or cause instability if asserted immediately on startup.
+
+**⚠️ IMPORTANT - TRS-80 Hardware Flaw:**  
+The TRS-80 Model I contains a design flaw in the TEST signal implementation that can cause intermittent memory corruption or crashes when external devices take control of the bus. See the [TEST Signal Modification Guide](/docs/TESTMod.md) for details on this issue and an optional hardware fix that improves reliability.
 
 ## Main TRS-80 Model 1 Repository
 

@@ -2,7 +2,7 @@
 
 This library allows an Arduino to control the TRS-80 Model I mainboard through its edge connector.
 
-![Overview](..//Images/Overview.png)
+![Overview](../Images/Overview.png)
 
 ## Model 1 Classes
 
@@ -15,6 +15,7 @@ This library allows an Arduino to control the TRS-80 Model I mainboard through i
 ## Hardware Connection
 
 - [**Pin Mapping**](PinMapping.md) — Complete pin mapping between TRS-80 edge connector and Arduino Mega 2560 for direct wiring connections.
+- [**TEST Signal Modification**](TESTMod.md) — Critical hardware fix for TRS-80 Model I bus request design flaw to prevent memory corruption and crashes.
 
 ## Logging Classes
 
@@ -23,7 +24,7 @@ This library allows an Arduino to control the TRS-80 Model I mainboard through i
 
 ## Shield Access
 
-![M1Shield](..//Images/M1Shield.png)
+![M1Shield](../Images/M1Shield.png)
 
 - [**M1Shield**](M1Shield.md) — Hardware abstraction layer for display, input, LED control, and screen management.
 
