@@ -1,6 +1,6 @@
 # 🛠 TRS-80 Model I Bus Request Design Flaw (and Hardware Fix)
 
-NOTE: This mod is only needed if you care about the state you leave the system in after giving back control to the Model 1.
+Note: This modification is only necessary if preserving the system state before and after returning control to the Model I is important for your use case.
 
 ## Background
 
