@@ -13,17 +13,19 @@ constexpr uint8_t TEXT_SIZE_3_WIDTH = 18;      // Width of size-3 text character
 constexpr uint8_t TEXT_SIZE_3_HALF_HEIGHT = 8; // Half-height of size-3 text for centering
 
 // Menu Layout Constants
-constexpr uint16_t ROW_HEIGHT = 26;                      // Height of each menu row in pixels
-constexpr uint16_t ROW_COLOR_BG1 = 0x4208;               // Background color for odd rows (dark blue)
-constexpr uint16_t ROW_COLOR_FG1 = ST77XX_WHITE;         // Foreground color for odd rows
-constexpr uint16_t ROW_COLOR_BG2 = 0x39C7;               // Background color for even rows (darker blue)
-constexpr uint16_t ROW_COLOR_FG2 = ST77XX_WHITE;         // Foreground color for even rows
-constexpr uint16_t SELECTED_ROW_COLOR_BG = 0xFFE0;       // Background color for selected row (bright yellow)
-constexpr uint16_t SELECTED_ROW_COLOR_FG = ST77XX_BLACK; // Foreground color for selected row
-constexpr uint16_t DISABLED_ROW_COLOR_BG1 = 0x2104;      // Background color for disabled odd rows (darker)
-constexpr uint16_t DISABLED_ROW_COLOR_FG1 = 0x7BEF;      // Foreground color for disabled odd rows (gray)
-constexpr uint16_t DISABLED_ROW_COLOR_BG2 = 0x18E3;      // Background color for disabled even rows (darker)
-constexpr uint16_t DISABLED_ROW_COLOR_FG2 = 0x7BEF;      // Foreground color for disabled even rows (gray)
+constexpr uint16_t ROW_HEIGHT = 26;                             // Height of each menu row in pixels
+constexpr uint16_t ROW_COLOR_BG1 = 0x4208;                      // Background color for odd rows (dark blue)
+constexpr uint16_t ROW_COLOR_FG1 = ST77XX_WHITE;                // Foreground color for odd rows
+constexpr uint16_t ROW_COLOR_BG2 = 0x39C7;                      // Background color for even rows (darker blue)
+constexpr uint16_t ROW_COLOR_FG2 = ST77XX_WHITE;                // Foreground color for even rows
+constexpr uint16_t SELECTED_ROW_COLOR_BG = 0xFFE0;              // Background color for selected row (bright yellow)
+constexpr uint16_t SELECTED_ROW_COLOR_FG = ST77XX_BLACK;        // Foreground color for selected row
+constexpr uint16_t DISABLED_ROW_COLOR_BG1 = 0x2104;             // Background color for disabled odd rows (darker)
+constexpr uint16_t DISABLED_ROW_COLOR_FG1 = 0x7BEF;             // Foreground color for disabled odd rows (gray)
+constexpr uint16_t DISABLED_ROW_COLOR_BG2 = 0x18E3;             // Background color for disabled even rows (darker)
+constexpr uint16_t DISABLED_ROW_COLOR_FG2 = 0x7BEF;             // Foreground color for disabled even rows (gray)
+constexpr uint16_t NEXT_PAGE_INDICATOR_COLOR_FG = ST77XX_WHITE; // Color for next page indicator text
+constexpr uint16_t TABLE_COLOR_BG = ST77XX_BLACK;               // Color for table background
 
 /**
  * @brief Initialize menu screen with default configuration
@@ -327,16 +329,25 @@ void MenuScreen::_drawContent()
     uint8_t totalPages = (_menuItemCount + itemsPerPage - 1) / itemsPerPage;
 
     // Show simple three-dot indicator if there are more pages and we have minimal space
-    if (remainingHeight >= 5 && totalPages > 1 && _currentPage < totalPages - 1)
+    if (remainingHeight >= 5)
     {
         // Position dots below the last menu item with small gap
         uint16_t dotY = top + usedHeight + 1;
         uint16_t centerX = left + (width / 2);
 
-        // Draw three small filled rectangles as dots (3x3 pixels each, spaced 6 pixels apart)
-        gfx.fillRect(centerX - 9, dotY, 3, 3, ST77XX_YELLOW); // Left dot
-        gfx.fillRect(centerX - 1, dotY, 3, 3, ST77XX_YELLOW); // Center dot
-        gfx.fillRect(centerX + 7, dotY, 3, 3, ST77XX_YELLOW); // Right dot
+        if (totalPages > 1 && _currentPage < totalPages - 1)
+        {
+            // Draw three small filled rectangles as dots (3x3 pixels each, spaced 6 pixels apart)
+            gfx.fillRect(centerX - 9, dotY, 3, 3, NEXT_PAGE_INDICATOR_COLOR_FG); // Left dot
+            gfx.fillRect(centerX - 1, dotY, 3, 3, NEXT_PAGE_INDICATOR_COLOR_FG); // Center dot
+            gfx.fillRect(centerX + 7, dotY, 3, 3, NEXT_PAGE_INDICATOR_COLOR_FG); // Right dot
+        }
+        else
+        {
+            gfx.fillRect(centerX - 9, dotY, 3, 3, TABLE_COLOR_BG); // Left dot
+            gfx.fillRect(centerX - 1, dotY, 3, 3, TABLE_COLOR_BG); // Center dot
+            gfx.fillRect(centerX + 7, dotY, 3, 3, TABLE_COLOR_BG); // Right dot
+        }
     }
 }
 

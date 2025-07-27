@@ -10,7 +10,7 @@
 #include <Arduino.h>
 
 // Define the static constexpr members
-constexpr const char *SimpleMenuScreen::MAIN_MENU_ITEMS[12];
+constexpr const char *SimpleMenuScreen::MAIN_MENU_ITEMS[11];
 constexpr uint8_t SimpleMenuScreen::MAIN_MENU_COUNT;
 
 // Constructor: Set up the menu title, items, and initial progress
@@ -22,7 +22,7 @@ SimpleMenuScreen::SimpleMenuScreen() : MenuScreen()
 
 // Handle menu item selection
 // Return nullptr to stay on menu, or new Screen() to navigate to different screen
-Screen *SimpleMenuScreen::_getSelectedMenuItemScreen(uint8_t index)
+Screen *SimpleMenuScreen::_getSelectedMenuItemScreen(int index)
 {
     // Handle exit request
     if (index == -1)
@@ -101,20 +101,13 @@ Screen *SimpleMenuScreen::_getSelectedMenuItemScreen(uint8_t index)
             // TODO: return new HelpScreen();
             break;
 
-        case 10: // Debug Mode
-            Serial.println("  Toggling debug mode...");
-            M1Shield.setLEDColor(LEDColor::COLOR_MAGENTA);
-            // TODO: Toggle debug flag or return new DebugScreen();
-            break;
-
-        case 11: // Exit
+        case 10: // Exit
             Serial.println("  Exiting application...");
-            M1Shield.setLEDColor(LEDColor::COLOR_RED);
+            M1Shield.setLEDColor(LEDColor::COLOR_MAGENTA);
             break;
 
         default:
             Serial.println("  Unknown menu item");
-            M1Shield.setLEDColor(LEDColor::COLOR_RED);
             break;
         }
     }

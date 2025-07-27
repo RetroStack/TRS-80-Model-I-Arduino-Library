@@ -27,7 +27,7 @@
  * - MenuScreen: Adds menu navigation on top of ContentScreen features
  *
  * WHAT THIS EXAMPLE DOES:
- * - Shows a "TRS-80 Main Menu" with 12 menu options
+ * - Shows a "TRS-80 Main Menu" with 11 menu options
  * - Up/Down buttons navigate through menu items
  * - Selected item is highlighted automatically
  * - Menu button selects the current item

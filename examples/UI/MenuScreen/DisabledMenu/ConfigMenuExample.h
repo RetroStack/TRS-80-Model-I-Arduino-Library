@@ -43,7 +43,7 @@ private:
 
 protected:
     // Handle menu item selection
-    Screen *_getSelectedMenuItemScreen(uint8_t index) override;
+    Screen *_getSelectedMenuItemScreen(int index) override;
 
     // Return configuration values for each menu item
     const char *_getMenuItemConfigValue(uint8_t index) override;

@@ -121,7 +121,7 @@ bool ConfigMenuExample::_isMenuItemEnabled(uint8_t index)
 }
 
 // Handle menu item selection
-Screen *ConfigMenuExample::_getSelectedMenuItemScreen(uint8_t index)
+Screen *ConfigMenuExample::_getSelectedMenuItemScreen(int index)
 {
     // Handle exit request
     if (index == -1)

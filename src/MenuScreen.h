@@ -151,7 +151,7 @@ protected:
      *
      * @example
      * @code
-     * Screen* MyMenu::_getSelectedMenuItemScreen(uint8_t index) {
+     * Screen* MyMenu::_getSelectedMenuItemScreen(int index) {
      *     switch(index) {
      *         case 0: return new GameScreen();
      *         case 1: return new SettingsScreen();
@@ -160,7 +160,7 @@ protected:
      * }
      * @endcode
      */
-    virtual Screen *_getSelectedMenuItemScreen(uint8_t index) = 0;
+    virtual Screen *_getSelectedMenuItemScreen(int index) = 0;
 
     /**
      * @brief Get configuration value string for a menu item (optional override)
