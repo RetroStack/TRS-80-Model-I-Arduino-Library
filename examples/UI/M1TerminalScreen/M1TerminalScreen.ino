@@ -51,6 +51,8 @@
  * Released under the MIT License.
  */
 
+// #define USE_ST7789
+
 #include "Model1.h"
 #include "M1Shield.h"
 #include "M1TerminalScreen.h"

@@ -34,11 +34,9 @@
 #elif defined(USE_ILI9325)
 // ILI9325 (240x320, usually parallel interface) – for some shield-based displays
 #include <Adafruit_TFTLCD.h> // Adafruit's legacy parallel TFT library
-#else
-// Default to ST7789 if no display type is specified
-// You can change this default to another screen if needed
-#include <Adafruit_ST7789.h>
-typedef Adafruit_ST7789 TFT_Display;
+#elif defined(USE_ST7796)
+// ST7796 (320x480 SPI) – newer displays, often used in larger shields
+#include <Adafruit_ST7796S.h>
 #endif
 
 // Hardware timing constants
@@ -85,7 +83,7 @@ M1ShieldClass::M1ShieldClass() :
                                  _tft(TFT_CS, TFT_DC, TFT_RST),
 #elif defined(USE_ILI9325)
                                  _tft(TFT_CS, TFT_DC, TFT_RST),
-#else
+#elif defined(USE_ST7796)
                                  _tft(TFT_CS, TFT_DC, TFT_RST),
 #endif
                                  _menuPressed(0),
@@ -163,8 +161,9 @@ void M1ShieldClass::begin()
     }
 
     // Initialize display based on the selected type
-    _screenWidth = DISPLAY_HEIGHT;
-    _screenHeight = DISPLAY_WIDTH;
+    // This is swapped because we rotate the screen by 90 degrees
+    _screenWidth = DISPLAY_HEIGHT; // DO NOT CHANGE THIS
+    _screenHeight = DISPLAY_WIDTH; // DO NOT CHANGE THIS
 
 #if defined(USE_ST7789)
     _tft.init(_screenHeight, _screenWidth, SPI_MODE0);
@@ -186,18 +185,18 @@ void M1ShieldClass::begin()
     _bus = new Arduino_HWSPI(TFT_DC, TFT_CS, TFT_RST); // Hardware SPI for Arduino
     _tft = new Arduino_ILI9488(_bus, 320, 480);
     _tft->begin();
-    _tft->setRotation(3);
+    _tft->setRotation(0);
 #elif defined(USE_HX8357)
-    _tft.begin();
-    _tft.setRotation(3);
+    _tft.begin(HX8357D);
+    _tft.setRotation(0);
+    _tft.invertDisplay(false);
 #elif defined(USE_ILI9325)
     _tft.begin();
     _tft.setRotation(3);
-#else
-    // Default to ST7789
-    _tft.init(_screenHeight, _screenWidth, SPI_MODE0);
-    _tft.enableTearing(true);
-    _tft.setRotation(3);
+#elif defined(USE_ST7796)
+    _tft.init(_screenHeight, _screenWidth, 0, 0, ST7796S_BGR);
+    _tft.setRotation(1);
+    _tft.invertDisplay(true);
 #endif
 }
 

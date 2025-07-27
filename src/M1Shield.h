@@ -7,9 +7,9 @@
 #ifndef M1SHIELD_H
 #define M1SHIELD_H
 
+#include "display_config.h"
 #include <Arduino.h>
 #include <Adafruit_GFX.h>
-#include "display_config.h"
 
 // TFT Display Support - Define ONE of these before including this header
 #if defined(USE_ST7789)
@@ -40,11 +40,10 @@ typedef Adafruit_HX8357 TFT_Display;
 // ILI9325 (240x320, usually parallel interface) – for some shield-based displays
 #include <Adafruit_TFTLCD.h> // Adafruit's legacy parallel TFT library
 typedef Adafruit_TFTLCD TFT_Display;
-#else
-// Default to ST7789 if no display type is specified
-// You can change this default to another screen if needed
-#include <Adafruit_ST7789.h>
-typedef Adafruit_ST7789 TFT_Display;
+#elif defined(USE_ST7796)
+// ST7796 (320x480 SPI) – newer displays, often used in larger shields
+#include <Adafruit_ST7796S.h>
+typedef Adafruit_ST7796S TFT_Display;
 #endif
 
 #include "Screen.h"
@@ -96,7 +95,7 @@ enum JoystickDirection
  *
  * ## Hardware Components
  *
- * - **TFT Display**: Configurable support for ST7789, ST7735, ILI9341, ILI9488, HX8357, ILI9325
+ * - **TFT Display**: Configurable support for ST7789, ST7735, ILI9341, ILI9488, HX8357, ILI9325, ST7796
  * - **Input Controls**: 5 digital buttons + analog joystick with center press
  * - **RGB Status LED**: Full-color status indication
  * - **Screen Management**: Automatic screen lifecycle and navigation
@@ -112,6 +111,7 @@ enum JoystickDirection
  * #define USE_ILI9488  // For ILI9488 displays
  * #define USE_HX8357  // For HX8357 displays
  * #define USE_ILI9325  // For ILI9325 displays
+ * #define USE_ST7796  // For ST7796 displays
  * ```
  *
  * ## Input System
