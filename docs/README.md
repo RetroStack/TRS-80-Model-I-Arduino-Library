@@ -12,6 +12,10 @@ This library allows an Arduino to control the TRS-80 Model I mainboard through i
 - [**Video**](Video.md) — Video memory management and text display.
 - [**ROM**](ROM.md) — ROM reading, checksumming, and identification.
 
+## Hardware Connection
+
+- [**Pin Mapping**](PinMapping.md) — Complete pin mapping between TRS-80 edge connector and Arduino Mega 2560 for direct wiring connections.
+
 ## Logging Classes
 
 - [**ILogger**](ILogger.md) — Logging interface.
