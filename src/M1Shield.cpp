@@ -135,15 +135,15 @@ void M1ShieldClass::begin()
     }
 
     // Initialize display based on the selected type
-    _screenWidth = DISPLAY_WIDTH;
-    _screenHeight = DISPLAY_HEIGHT;
+    _screenWidth = DISPLAY_HEIGHT;
+    _screenHeight = DISPLAY_WIDTH;
 
 #if defined(USE_ST7789)
-    _tft.init(_screenWidth, _screenHeight, SPI_MODE0);
+    _tft.init(_screenHeight, _screenWidth, SPI_MODE0);
     _tft.enableTearing(true);
     _tft.setRotation(3);
 #elif defined(USE_ST7789_240x240)
-    _tft.init(_screenWidth, _screenHeight, SPI_MODE0);
+    _tft.init(_screenHeight, _screenWidth, SPI_MODE0);
     _tft.enableTearing(true);
     _tft.setRotation(3);
 #elif defined(USE_ST7735)
@@ -167,7 +167,7 @@ void M1ShieldClass::begin()
     _tft.setRotation(3);
 #else
     // Default to ST7789
-    _tft.init(_screenWidth, _screenHeight, SPI_MODE0);
+    _tft.init(_screenHeight, _screenWidth, SPI_MODE0);
     _tft.enableTearing(true);
     _tft.setRotation(3);
 #endif
