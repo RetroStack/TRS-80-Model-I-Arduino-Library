@@ -6,6 +6,7 @@
 
 #include "M1TerminalScreen.h"
 #include "Model1.h"
+#include "M1Shield.h"
 
 // ============================================================================
 // Colors
@@ -1078,10 +1079,10 @@ void M1TerminalScreen::loop()
  */
 void M1TerminalScreen::_drawContent()
 {
-    uint16_t top = getContentY();
-    uint16_t left = getContentX();
-    uint16_t width = getContentWidth();
-    uint16_t height = getContentHeight();
+    uint16_t top = _getContentTop();
+    uint16_t left = _getContentLeft();
+    uint16_t width = _getContentWidth();
+    uint16_t height = _getContentHeight();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
@@ -1101,7 +1102,7 @@ void M1TerminalScreen::_drawContent()
         // Show that there is no data available
         gfx.setTextColor(NO_DATA_COLOR_FG);
         gfx.setTextSize(2);
-        gfx.setCursor((width - 130) / 2, (height - 5) / 2));
+        gfx.setCursor((width - 130) / 2, (height - 5) / 2);
         gfx.print("No Content");
     }
 }

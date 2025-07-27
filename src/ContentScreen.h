@@ -63,10 +63,10 @@
  * protected:
  *     void _drawContent() override {
  *         // Draw within content area bounds
- *         uint16_t x = getContentX();
- *         uint16_t y = getContentY();
- *         uint16_t w = getContentWidth();
- *         uint16_t h = getContentHeight();
+ *         uint16_t x = _getContentLeft();
+ *         uint16_t y = _getContentTop();
+ *         uint16_t w = _getContentWidth();
+ *         uint16_t h = _getContentHeight();
  *
  *         // Your content rendering here
  *         _drawText(x, y, "Hello World!");
@@ -134,7 +134,7 @@ protected:
      * to determine the available drawing area.
      *
      * @note Called automatically by _drawScreen() layout management
-     * @see getContentX(), getContentY(), getContentWidth(), getContentHeight()
+     * @see _getContentLeft(), _getContentTop(), _getContentWidth(), _getContentHeight()
      */
     virtual void _drawContent() = 0;
 
@@ -144,43 +144,43 @@ protected:
      * @brief Get Y coordinate of content area top edge
      * @return Pixel position of content area start
      */
-    uint16_t getContentY() const;
+    uint16_t _getContentTop() const;
 
     /**
      * @brief Get X coordinate of content area left edge
      * @return Pixel position of content area start
      */
-    uint16_t getContentX() const;
+    uint16_t _getContentLeft() const;
 
     /**
      * @brief Get available height of content area
      * @return Height in pixels available for content
      */
-    uint16_t getContentHeight() const;
+    uint16_t _getContentHeight() const;
 
     /**
      * @brief Get available width of content area
      * @return Width in pixels available for content
      */
-    uint16_t getContentWidth() const;
+    uint16_t _getContentWidth() const;
 
     /**
      * @brief Get Y coordinate of header region
      * @return Pixel position of header area
      */
-    uint16_t getHeaderY() const;
+    uint16_t _getHeaderY() const;
 
     /**
      * @brief Get Y coordinate of footer region
      * @return Pixel position of footer area
      */
-    uint16_t getFooterY() const;
+    uint16_t _getFooterY() const;
 
     /**
      * @brief Get Y coordinate of progress bar region
      * @return Pixel position of progress bar area
      */
-    uint16_t getProgressBarY() const;
+    uint16_t _getProgressBarY() const;
 
     // Content management methods
 

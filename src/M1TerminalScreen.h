@@ -9,6 +9,7 @@
 
 #include <Arduino.h>
 #include "ContentScreen.h"
+#include <Adafruit_GFX.h>
 
 /**
  * @brief TRS-80 Model I terminal screen with character grid rendering and dual display support

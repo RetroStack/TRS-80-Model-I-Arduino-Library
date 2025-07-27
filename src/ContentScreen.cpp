@@ -9,6 +9,7 @@
 
 #include "ContentScreen.h"
 #include "M1Shield.h"
+#include <Adafruit_GFX.h>
 
 // Text sizing constants for layout calculations
 constexpr uint8_t TEXT_SIZE_1_WIDTH = 7;       // Width of size-1 text characters in pixels
@@ -94,12 +95,12 @@ void ContentScreen::_drawScreen()
     _drawProgressBar();
 
     // Add decorative borders for visual separation
-    uint16_t contentTop = getContentY();
-    uint16_t contentHeight = getContentHeight();
+    uint16_t contentTop = _getContentTop();
+    uint16_t contentHeight = _getContentHeight();
     gfx.drawRect(0, contentTop - 1, screenWidth, contentHeight + 2, SCREEN_COLOR_FG);
 
     // Draw separator line above progress bar
-    uint16_t progressTop = getProgressBarY();
+    uint16_t progressTop = _getProgressBarY();
     gfx.drawFastHLine(0, progressTop - 1, screenWidth, SCREEN_COLOR_FG);
 }
 
@@ -107,7 +108,7 @@ void ContentScreen::_drawScreen()
  * @brief Get Y coordinate of header region start
  * @return Always 0 (header starts at top of screen)
  */
-uint16_t ContentScreen::getHeaderY() const
+uint16_t ContentScreen::_getHeaderY() const
 {
     return 0;
 }
@@ -125,7 +126,7 @@ uint16_t ContentScreen::getHeaderY() const
 void ContentScreen::_drawHeader()
 {
     uint16_t screenWidth = M1Shield.getScreenWidth();
-    uint16_t top = getHeaderY();
+    uint16_t top = _getHeaderY();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
@@ -149,7 +150,7 @@ void ContentScreen::_drawHeader()
  * @brief Get Y coordinate of content area start
  * @return Pixel position
  */
-uint16_t ContentScreen::getContentY() const
+uint16_t ContentScreen::_getContentTop() const
 {
     return HEADER_HEIGHT + 2;
 }
@@ -158,7 +159,7 @@ uint16_t ContentScreen::getContentY() const
  * @brief Get X coordinate of content area start
  * @return Pixel position
  */
-uint16_t ContentScreen::getContentX() const
+uint16_t ContentScreen::_getContentLeft() const
 {
     return 1;
 }
@@ -167,7 +168,7 @@ uint16_t ContentScreen::getContentX() const
  * @brief Calculate available height for content area
  * @return Height in pixels
  */
-uint16_t ContentScreen::getContentHeight() const
+uint16_t ContentScreen::_getContentHeight() const
 {
     return M1Shield.getScreenHeight() - HEADER_HEIGHT - FOOTER_HEIGHT - PROGRESSBAR_HEIGHT - 6; // Always 2px padding
 }
@@ -176,7 +177,7 @@ uint16_t ContentScreen::getContentHeight() const
  * @brief Get available width for content area
  * @return Width in pixels
  */
-uint16_t ContentScreen::getContentWidth() const
+uint16_t ContentScreen::_getContentWidth() const
 {
     return M1Shield.getScreenWidth() - 2;
 }
@@ -185,7 +186,7 @@ uint16_t ContentScreen::getContentWidth() const
  * @brief Calculate Y coordinate of footer region start
  * @return Pixel position of footer, accounting for progress bar below
  */
-uint16_t ContentScreen::getFooterY() const
+uint16_t ContentScreen::_getFooterY() const
 {
     uint16_t screenHeight = M1Shield.getScreenHeight();
     uint16_t bottom = screenHeight - PROGRESSBAR_HEIGHT - 2; // 2px padding above progress bar
@@ -203,7 +204,7 @@ uint16_t ContentScreen::getFooterY() const
 void ContentScreen::_drawFooter()
 {
     uint16_t screenWidth = M1Shield.getScreenWidth();
-    uint16_t top = getFooterY();
+    uint16_t top = _getFooterY();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
@@ -238,7 +239,7 @@ void ContentScreen::_drawFooter()
  * @brief Calculate Y coordinate of progress bar region start
  * @return Pixel position
  */
-uint16_t ContentScreen::getProgressBarY() const
+uint16_t ContentScreen::_getProgressBarY() const
 {
     uint16_t screenHeight = M1Shield.getScreenHeight();
     return screenHeight - PROGRESSBAR_HEIGHT;
@@ -250,7 +251,7 @@ uint16_t ContentScreen::getProgressBarY() const
 void ContentScreen::_drawProgressBar()
 {
     uint16_t screenWidth = M1Shield.getScreenWidth();
-    uint16_t top = getProgressBarY();
+    uint16_t top = _getProgressBarY();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
@@ -449,10 +450,10 @@ uint8_t ContentScreen::_getProgressValue() const
  */
 void ContentScreen::_clearContentArea()
 {
-    uint16_t x = getContentX();
-    uint16_t y = getContentY();
-    uint16_t width = getContentWidth();
-    uint16_t height = getContentHeight();
+    uint16_t x = _getContentLeft();
+    uint16_t y = _getContentTop();
+    uint16_t width = _getContentWidth();
+    uint16_t height = _getContentHeight();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
     gfx.fillRect(x, y, width, height, ST77XX_BLACK);
@@ -483,12 +484,12 @@ void ContentScreen::_drawText(uint16_t x, uint16_t y, const char *text, uint16_t
     }
 
     // Convert relative coordinates to absolute screen coordinates
-    uint16_t absoluteX = getContentX() + x;
-    uint16_t absoluteY = getContentY() + y;
+    uint16_t absoluteX = _getContentLeft() + x;
+    uint16_t absoluteY = _getContentTop() + y;
 
     // Get content area bounds for clipping
-    uint16_t contentRight = getContentX() + getContentWidth();
-    uint16_t contentBottom = getContentY() + getContentHeight();
+    uint16_t contentRight = _getContentLeft() + _getContentWidth();
+    uint16_t contentBottom = _getContentTop() + _getContentHeight();
 
     // Skip drawing if text position is outside content area
     if (absoluteX >= contentRight || absoluteY >= contentBottom)

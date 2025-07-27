@@ -64,10 +64,10 @@ ContentScreen organizes the display into four distinct regions:
 class MyContentScreen : public ContentScreen {
 protected:
     void _drawContent() override {
-        uint16_t x = getContentX();
-        uint16_t y = getContentY();
-        uint16_t w = getContentWidth();
-        uint16_t h = getContentHeight();
+        uint16_t x = _getContentLeft();
+        uint16_t y = _getContentTop();
+        uint16_t w = _getContentWidth();
+        uint16_t h = _getContentHeight();
 
         // Your content rendering here
         _drawText(x, y, "Custom content");
@@ -79,10 +79,10 @@ protected:
 
 Access content area boundaries for positioning:
 
-- `uint16_t getContentX()`: Returns X coordinate of content area left edge
-- `uint16_t getContentY()`: Returns Y coordinate of content area top edge
-- `uint16_t getContentWidth()`: Returns content area width in pixels
-- `uint16_t getContentHeight()`: Returns content area height in pixels
+- `uint16_t _getContentLeft()`: Returns X coordinate of content area left edge
+- `uint16_t _getContentTop()`: Returns Y coordinate of content area top edge
+- `uint16_t _getContentWidth()`: Returns content area width in pixels
+- `uint16_t _getContentHeight()`: Returns content area height in pixels
 
 ### Content Management
 
@@ -168,10 +168,10 @@ private:
 protected:
     void _drawContent() override {
         // Get content area bounds
-        uint16_t x = getContentX();
-        uint16_t y = getContentY();
-        uint16_t w = getContentWidth();
-        uint16_t h = getContentHeight();
+        uint16_t x = _getContentLeft();
+        uint16_t y = _getContentTop();
+        uint16_t w = _getContentWidth();
+        uint16_t h = _getContentHeight();
 
         // Render content within bounds
         _drawText(x + 10, y + 10, "Current Value:");
@@ -224,8 +224,8 @@ private:
 
 protected:
     void _drawContent() override {
-        uint16_t x = getContentX();
-        uint16_t y = getContentY();
+        uint16_t x = _getContentLeft();
+        uint16_t y = _getContentTop();
 
         // Draw status information
         _drawText(x + 10, y + 10, "System Status");

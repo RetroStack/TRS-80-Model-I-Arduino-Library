@@ -172,7 +172,8 @@ void loop() {
 RGB LED with predefined color constants:
 
 ```cpp
-void setLEDColor(LEDColor color)
+void setLEDColor(LEDColor color, uint8_t intensity = 255)
+void setLEDColor(uint8_t r, uint8_t g, uint8_t b)
 ```
 
 **LEDColor Constants:**

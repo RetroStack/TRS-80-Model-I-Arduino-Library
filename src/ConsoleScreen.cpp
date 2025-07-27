@@ -1,5 +1,6 @@
 #include "ConsoleScreen.h"
 #include "M1Shield.h"
+#include <Adafruit_GFX.h>
 
 // Text size constants for different sizes
 constexpr uint8_t CHAR_WIDTH_SIZE_1 = 6;   // Width of size-1 characters
@@ -85,10 +86,10 @@ ConsoleScreen::~ConsoleScreen()
  */
 void ConsoleScreen::_updateDimensions()
 {
-    _contentLeft = getContentX();
-    _contentTop = getContentY();
-    _contentWidth = getContentWidth();
-    _contentHeight = getContentHeight();
+    _contentLeft = _getContentLeft();
+    _contentTop = _getContentTop();
+    _contentWidth = _getContentWidth();
+    _contentHeight = _getContentHeight();
 }
 
 /**
@@ -213,14 +214,16 @@ void ConsoleScreen::_processTab()
  * This ensures _executeOnce() will be called 1 second after opening,
  * even if the console was previously opened and closed.
  */
-void ConsoleScreen::open()
+bool ConsoleScreen::open()
 {
     // Call parent implementation first
-    ContentScreen::open();
+    bool result = ContentScreen::open();
 
     // Reset one-time execution tracking
     _screenOpenTime = millis();
     _hasExecutedOnce = false;
+
+    return result;
 }
 
 // Print Interface Implementation

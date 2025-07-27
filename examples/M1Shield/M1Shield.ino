@@ -268,8 +268,7 @@ void testJoystick()
     if (direction != lastDirection)
     {
         Serial.print("Joystick: ");
-        Serial.print(M1Shield.joystickDirectionToString(direction));
-        Serial.print(" (X: ");
+        Serial.print("(X: ");
         Serial.print(M1Shield.getJoystickX()); // Raw X value (0-1023)
         Serial.print(", Y: ");
         Serial.print(M1Shield.getJoystickY()); // Raw Y value (0-1023)

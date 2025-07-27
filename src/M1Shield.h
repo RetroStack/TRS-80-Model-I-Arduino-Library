@@ -202,7 +202,7 @@ public:
      * @return Reference to Adafruit_GFX instance
      * @note Direct graphics operations may interfere with active screens
      */
-    Adafruit_GFX &getGFX() const;
+    Adafruit_GFX &getGFX();
 
     /**
      * @brief Get display width in pixels
@@ -245,7 +245,7 @@ public:
      * @param color Predefined color from LEDColor enumeration
      * @see LEDColor For available color options
      */
-    void setLEDColor(LEDColor color) const;
+    void setLEDColor(LEDColor color, uint8_t intensity = 255) const;
 
     // Button state detection methods
 

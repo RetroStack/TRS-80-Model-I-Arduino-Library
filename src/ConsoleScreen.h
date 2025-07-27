@@ -187,7 +187,7 @@ public:
      * @brief Override Screen::open() to initialize timing for one-time execution
      * @note Resets the one-time execution timer when console becomes active
      */
-    void open() override;
+    bool open() override;
 
     // Print Interface Implementation (required for Arduino Print class)
 

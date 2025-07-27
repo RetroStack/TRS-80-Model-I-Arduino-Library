@@ -1,5 +1,6 @@
 #include "MenuScreen.h"
 #include "M1Shield.h"
+#include <Adafruit_GFX.h>
 
 // Display Configuration Constants
 constexpr uint8_t TEXT_SIZE_1_WIDTH = 7;       // Width of size-1 text characters
@@ -69,7 +70,7 @@ MenuScreen::~MenuScreen()
  */
 uint8_t MenuScreen::_getItemsPerPage() const
 {
-    uint16_t contentHeight = getContentHeight();
+    uint16_t contentHeight = _getContentHeight();
     uint8_t itemsPerPage = contentHeight / ROW_HEIGHT;
 
     // Ensure at least 1 item per page, even with very small screens
@@ -230,10 +231,10 @@ void MenuScreen::loop()
  */
 void MenuScreen::_drawContent()
 {
-    uint16_t top = getContentY();
-    uint16_t left = getContentX();
-    uint16_t width = getContentWidth();
-    uint16_t height = getContentHeight();
+    uint16_t top = _getContentTop();
+    uint16_t left = _getContentLeft();
+    uint16_t width = _getContentWidth();
+    uint16_t height = _getContentHeight();
     uint8_t itemsPerPage = _getItemsPerPage();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();

@@ -7,6 +7,7 @@
  */
 
 #include "Screen.h"
+#include <Adafruit_GFX.h>
 
 /**
  * @brief Default constructor - initializes screen in inactive state

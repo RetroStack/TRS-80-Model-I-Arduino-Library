@@ -182,10 +182,10 @@ refresh KEYWORD2
 open    KEYWORD2
 close   KEYWORD2
 actionTaken KEYWORD2
-getContentX KEYWORD2
-getContentY KEYWORD2
-getContentWidth KEYWORD2
-getContentHeight    KEYWORD2
+_getContentLeft KEYWORD2
+_getContentTop KEYWORD2
+_getContentWidth KEYWORD2
+_getContentHeight    KEYWORD2
 getHeaderY  KEYWORD2
 getFooterY  KEYWORD2
 getProgressBarY KEYWORD2

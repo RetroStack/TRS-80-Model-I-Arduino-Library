@@ -34,7 +34,7 @@ constexpr uint8_t PIN_LED_GREEN = A10; // Green channel of RGB LED
 constexpr uint8_t PIN_LED_RED = A11;   // Red channel of RGB LED
 
 // Button pins
-constexpr uint8_t PIN_MENU = 13;
+constexpr uint8_t PIN_MENU = 10;
 constexpr uint8_t PIN_LEFT = 7;
 constexpr uint8_t PIN_RIGHT = 6;
 constexpr uint8_t PIN_DOWN = 5;
@@ -55,6 +55,15 @@ M1ShieldClass M1Shield;
  * Constructor: Initializes internal state.
  */
 M1ShieldClass::M1ShieldClass()
+#if defined(USE_ST7789)
+    : _tft(TFT_CS, TFT_DC, TFT_RST)
+#elif defined(USE_ST7735)
+    : _tft(TFT_CS, TFT_DC, TFT_RST)
+#elif defined(USE_ILI9341)
+    : _tft(TFT_CS, TFT_DC, TFT_RST)
+#else
+    : _tft(TFT_CS, TFT_DC, TFT_RST)
+#endif
 {
     _menuPressed = 0;
     _upPressed = 0;
@@ -121,21 +130,17 @@ void M1ShieldClass::begin()
     _screenHeight = DISPLAY_HEIGHT;
 
 #if defined(USE_ST7789)
-    _tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
     _tft.init(_screenHeight, _screenWidth, SPI_MODE0);
     _tft.enableTearing(true);
     _tft.setRotation(3);
 #elif defined(USE_ST7735)
-    _tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
     _tft.initR(INITR_BLACKTAB);
     _tft.setRotation(3);
 #elif defined(USE_ILI9341)
-    _tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
     _tft.begin();
     _tft.setRotation(3);
 #else
     // Default to ST7789
-    _tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
     _tft.init(_screenHeight, _screenWidth, SPI_MODE0);
     _tft.enableTearing(true);
     _tft.setRotation(3);
@@ -154,7 +159,7 @@ bool M1ShieldClass::isDisplayInitialized() const
  * Returns a reference to the display's Adafruit_GFX interface.
  * Allows drawing to the TFT display.
  */
-Adafruit_GFX &M1ShieldClass::getGFX() const
+Adafruit_GFX &M1ShieldClass::getGFX()
 {
     return _tft;
 }
@@ -223,45 +228,45 @@ void M1ShieldClass::_inactive() const
 }
 
 /**
- * Sets the RGB LED to the given red, green, blue state (inverted logic).
+ * Sets the RGB LED to the given red, green, blue state.
  */
 void M1ShieldClass::setLEDColor(uint8_t r, uint8_t g, uint8_t b) const
 {
-    analogWrite(PIN_LED_RED, r);
-    analogWrite(PIN_LED_GREEN, g);
-    analogWrite(PIN_LED_BLUE, b);
+    analogWrite(PIN_LED_RED, 255 - r);
+    analogWrite(PIN_LED_GREEN, 255 - g);
+    analogWrite(PIN_LED_BLUE, 255 - b);
 }
 
 /**
  * Sets the RGB LED to a predefined color.
  */
-void M1ShieldClass::setLEDColor(LEDColor color) const
+void M1ShieldClass::setLEDColor(LEDColor color, uint8_t intensity) const
 {
     switch (color)
     {
     case LEDColor::COLOR_OFF:
-        setLEDColor(false, false, false);
+        setLEDColor(0, 0, 0);
         break;
     case LEDColor::COLOR_RED:
-        setLEDColor(true, false, false);
+        setLEDColor(255, 0, 0);
         break;
     case LEDColor::COLOR_GREEN:
-        setLEDColor(false, true, false);
+        setLEDColor(0, 255, 0);
         break;
     case LEDColor::COLOR_BLUE:
-        setLEDColor(false, false, true);
+        setLEDColor(0, 0, 255);
         break;
     case LEDColor::COLOR_YELLOW:
-        setLEDColor(true, true, false);
+        setLEDColor(255, 255, 0);
         break;
     case LEDColor::COLOR_MAGENTA:
-        setLEDColor(true, false, true);
+        setLEDColor(255, 0, 255);
         break;
     case LEDColor::COLOR_CYAN:
-        setLEDColor(false, true, true);
+        setLEDColor(0, 255, 255);
         break;
     case LEDColor::COLOR_WHITE:
-        setLEDColor(true, true, true);
+        setLEDColor(255, 255, 255);
         break;
     }
 }
@@ -297,7 +302,7 @@ unsigned long M1ShieldClass::_getDebouncedState(int pin, unsigned long previousS
  */
 bool M1ShieldClass::isMenuPressed() const
 {
-    return _menuPressed != 0;
+    return (digitalRead(PIN_MENU) == LOW);
 }
 
 /**
@@ -316,7 +321,7 @@ bool M1ShieldClass::wasMenuPressed()
  */
 bool M1ShieldClass::isLeftPressed() const
 {
-    return _leftPressed != 0;
+    return (digitalRead(PIN_LEFT) == LOW);
 }
 
 /**
@@ -335,7 +340,7 @@ bool M1ShieldClass::wasLeftPressed()
  */
 bool M1ShieldClass::isRightPressed() const
 {
-    return _rightPressed != 0;
+    return (digitalRead(PIN_RIGHT) == LOW);
 }
 
 /**
@@ -354,7 +359,7 @@ bool M1ShieldClass::wasRightPressed()
  */
 bool M1ShieldClass::isUpPressed() const
 {
-    return _upPressed != 0;
+    return (digitalRead(PIN_UP) == LOW);
 }
 
 /**
@@ -373,7 +378,7 @@ bool M1ShieldClass::wasUpPressed()
  */
 bool M1ShieldClass::isDownPressed() const
 {
-    return _downPressed != 0;
+    return (digitalRead(PIN_DOWN) == LOW);
 }
 
 /**
@@ -394,7 +399,7 @@ bool M1ShieldClass::wasDownPressed()
  */
 bool M1ShieldClass::isJoystickPressed() const
 {
-    return _joystickPressed != 0;
+    return (digitalRead(PIN_JOYSTICK_BUTTON) == LOW);
 }
 
 /**
