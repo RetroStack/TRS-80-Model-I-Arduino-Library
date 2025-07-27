@@ -235,9 +235,6 @@ void MenuScreen::_drawContent()
     // Render up to itemsPerPage items for current page
     for (uint8_t i = 0; i < itemsPerPage; i++, itemIndex++)
     {
-        if (itemIndex >= _menuItemCount)
-            break;
-
         int y = top + (i * ROW_HEIGHT);
         bool isEnabled = _isMenuItemEnabled(itemIndex);
 
@@ -266,56 +263,59 @@ void MenuScreen::_drawContent()
             gfx.setTextColor(fgColor);
         }
 
-        // Calculate available space for menu text and config value
-        const char *configValue = _getMenuItemConfigValue(itemIndex);
-        uint16_t configWidth = 0;
-        uint16_t configX = 0;
-
-        if (configValue != nullptr)
+        if (itemIndex < _menuItemCount)
         {
-            uint16_t configLen = strlen(configValue);
-            configWidth = configLen * TEXT_SIZE_2_WIDTH;
-            configX = left + width - configWidth - 5; // 5px right margin
-        }
+            // Calculate available space for menu text and config value
+            const char *configValue = _getMenuItemConfigValue(itemIndex);
+            uint16_t configWidth = 0;
+            uint16_t configX = 0;
 
-        // Calculate available space for menu text
-        uint16_t menuTextStartX = left + 15;
-        uint16_t selectorWidth = 2 * TEXT_SIZE_2_WIDTH; // "> " or "  "
-        uint16_t menuTextX = menuTextStartX + selectorWidth;
-        uint16_t availableWidth = width - (menuTextX - left) - configWidth - 10; // 10px gap between text and config
-
-        // Truncate menu text if it would collide with config value
-        String menuText = String(_menuItems[itemIndex]);
-        uint16_t menuTextWidth = menuText.length() * TEXT_SIZE_2_WIDTH;
-
-        if (configValue != nullptr && menuTextWidth > availableWidth)
-        {
-            // Calculate how many characters fit with "..." (3 characters)
-            uint16_t ellipsisWidth = 3 * TEXT_SIZE_2_WIDTH;
-            uint16_t maxCharsWidth = availableWidth - ellipsisWidth;
-            uint8_t maxChars = maxCharsWidth / TEXT_SIZE_2_WIDTH;
-
-            if (maxChars > 0)
+            if (configValue != nullptr)
             {
-                menuText = menuText.substring(0, maxChars) + "...";
+                uint16_t configLen = strlen(configValue);
+                configWidth = configLen * TEXT_SIZE_2_WIDTH;
+                configX = left + width - configWidth - 5; // 5px right margin
             }
-            else
+
+            // Calculate available space for menu text
+            uint16_t menuTextStartX = left + 15;
+            uint16_t selectorWidth = 2 * TEXT_SIZE_2_WIDTH; // "> " or "  "
+            uint16_t menuTextX = menuTextStartX + selectorWidth;
+            uint16_t availableWidth = width - (menuTextX - left) - configWidth - 10; // 10px gap between text and config
+
+            // Truncate menu text if it would collide with config value
+            String menuText = String(_menuItems[itemIndex]);
+            uint16_t menuTextWidth = menuText.length() * TEXT_SIZE_2_WIDTH;
+
+            if (configValue != nullptr && menuTextWidth > availableWidth)
             {
-                menuText = "..."; // Fallback if space is extremely limited
+                // Calculate how many characters fit with "..." (3 characters)
+                uint16_t ellipsisWidth = 3 * TEXT_SIZE_2_WIDTH;
+                uint16_t maxCharsWidth = availableWidth - ellipsisWidth;
+                uint8_t maxChars = maxCharsWidth / TEXT_SIZE_2_WIDTH;
+
+                if (maxChars > 0)
+                {
+                    menuText = menuText.substring(0, maxChars) + "...";
+                }
+                else
+                {
+                    menuText = "..."; // Fallback if space is extremely limited
+                }
             }
-        }
 
-        // Draw selection indicator and menu item text
-        gfx.setTextSize(2);
-        gfx.setCursor(menuTextStartX, y + TEXT_SIZE_2_HALF_HEIGHT);
-        gfx.print(itemIndex == _selectedMenuItemIndex ? "> " : "  ");
-        gfx.print(menuText);
+            // Draw selection indicator and menu item text
+            gfx.setTextSize(2);
+            gfx.setCursor(menuTextStartX, y + TEXT_SIZE_2_HALF_HEIGHT);
+            gfx.print(itemIndex == _selectedMenuItemIndex ? "> " : "  ");
+            gfx.print(menuText);
 
-        // Draw configuration value if available (right-aligned)
-        if (configValue != nullptr)
-        {
-            gfx.setCursor(configX, y + TEXT_SIZE_2_HALF_HEIGHT);
-            gfx.print(configValue);
+            // Draw configuration value if available (right-aligned)
+            if (configValue != nullptr)
+            {
+                gfx.setCursor(configX, y + TEXT_SIZE_2_HALF_HEIGHT);
+                gfx.print(configValue);
+            }
         }
 
         itemsDrawn++;
