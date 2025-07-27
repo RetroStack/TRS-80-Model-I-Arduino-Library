@@ -14,7 +14,7 @@ The DisplayProvider system provides a flexible, type-safe way to support multipl
 
 ## Overview
 
-The DisplayProvider architecture replaces the old compile-time `#define` system with runtime provider selection. This provides:
+The DisplayProvider architecture uses a compile-time provider selection. This provides:
 
 - **Type Safety**: Compile-time verification of display compatibility
 - **Flexibility**: Easy switching between display types
@@ -103,53 +103,6 @@ public:
 - **`width()`**: Returns effective width (after rotation)
 - **`height()`**: Returns effective height (after rotation)
 
-## Migration Guide
-
-### From Legacy System
-
-**Old way (deprecated):**
-
-```cpp
-#define USE_ST7789
-#include <M1Shield.h>
-
-void setup() {
-    M1Shield.begin();
-
-    // Access via global constants
-    Serial.print("Size: ");
-    Serial.print(DISPLAY_WIDTH);
-    Serial.print("x");
-    Serial.println(DISPLAY_HEIGHT);
-}
-```
-
-**New way (recommended):**
-
-```cpp
-#include <Display_ST7789.h>
-#include <M1Shield.h>
-
-Display_ST7789 displayProvider;
-
-void setup() {
-    M1Shield.begin(displayProvider);
-
-    // Access via provider
-    Serial.print("Size: ");
-    Serial.print(displayProvider.width());
-    Serial.print("x");
-    Serial.println(displayProvider.height());
-}
-```
-
-### Benefits of Migration
-
-- **Compile-time safety**: No more undefined behavior from wrong defines
-- **Runtime flexibility**: Easy to switch display types for testing
-- **Better diagnostics**: Clear error messages for display issues
-- **Future-proof**: New displays can be added without library changes
-
 ## Adding New Displays
 
 To add support for a new display controller:
@@ -189,7 +142,9 @@ public:
 };
 ```
 
-### 2. Add to Keywords
+### 2. Add to Keywords (optional)
+
+> Only for library additions!
 
 Update `keywords.txt`:
 
@@ -197,7 +152,9 @@ Update `keywords.txt`:
 Display_NEWTYPE    KEYWORD1
 ```
 
-### 3. Add to Library
+### 3. Add to Library (optional)
+
+> Only for library additions!
 
 Update `library.properties`:
 
@@ -217,6 +174,8 @@ includes=...,Display_NEWTYPE.h,...
    ```
 
 2. **Verify Wiring**
+
+> This is the default for the Shield.
 
    - CS (Chip Select): Pin 9
    - DC (Data/Command): Pin 8
@@ -258,10 +217,6 @@ includes=...,Display_NEWTYPE.h,...
 
    - Make sure you included the correct provider header
    - Check that the library is properly installed
-
-3. **Multiple definition errors**
-   - Only include one display provider per sketch
-   - Comment out unused provider includes
 
 ### Performance Issues
 
