@@ -83,7 +83,7 @@
  */
 
 // STEP 1: Configure your display type
-#define USE_ST7789 // Change to USE_ST7735 or USE_ILI9341 for your display
+// #define USE_ST7789 // Change to USE_ST7735 or USE_ILI9341 for your display
 
 // STEP 2: Include required libraries
 #include "ConfigMenuExample.h" // Our configuration menu implementation

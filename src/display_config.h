@@ -14,6 +14,9 @@
  * - USE_ST7789    (240x320 TFT - Default)
  * - USE_ST7735    (128x160 TFT)
  * - USE_ILI9341   (240x320 TFT)
+ * - USE_ILI9488   (320x480 TFT)
+ * - USE_HX8357    (320x480 TFT)
+ * - USE_ILI9325   (240x320 TFT)
  *
  * Example usage in your sketch:
  * #define USE_ST7789
@@ -37,10 +40,18 @@ constexpr int8_t TFT_RST_DEFAULT = -1; // Reset pin (-1 if not used)
 #endif
 
 // Display-specific configurations
+// Configure display dimensions and name string at compile time
+// based on which display driver is enabled
+
 #if defined(USE_ST7789)
-constexpr uint16_t DISPLAY_WIDTH = 320;
-constexpr uint16_t DISPLAY_HEIGHT = 240;
+constexpr uint16_t DISPLAY_WIDTH = 240;
+constexpr uint16_t DISPLAY_HEIGHT = 320;
 constexpr const char *DISPLAY_NAME = "ST7789";
+
+#elif defined(USE_ST7789_240x240)
+constexpr uint16_t DISPLAY_WIDTH = 240;
+constexpr uint16_t DISPLAY_HEIGHT = 240;
+constexpr const char *DISPLAY_NAME = "ST7789 (240x240)";
 
 #elif defined(USE_ST7735)
 constexpr uint16_t DISPLAY_WIDTH = 128;
@@ -52,13 +63,27 @@ constexpr uint16_t DISPLAY_WIDTH = 240;
 constexpr uint16_t DISPLAY_HEIGHT = 320;
 constexpr const char *DISPLAY_NAME = "ILI9341";
 
+#elif defined(USE_ILI9488)
+constexpr uint16_t DISPLAY_WIDTH = 320;
+constexpr uint16_t DISPLAY_HEIGHT = 480;
+constexpr const char *DISPLAY_NAME = "ILI9488";
+
+#elif defined(USE_HX8357)
+constexpr uint16_t DISPLAY_WIDTH = 320;
+constexpr uint16_t DISPLAY_HEIGHT = 480;
+constexpr const char *DISPLAY_NAME = "HX8357";
+
+#elif defined(USE_ILI9325)
+constexpr uint16_t DISPLAY_WIDTH = 240;
+constexpr uint16_t DISPLAY_HEIGHT = 320;
+constexpr const char *DISPLAY_NAME = "ILI9325";
+
 #else
-// Default to ST7789 if nothing is defined
+// Fallback to ST7789 if no display type was defined
 #define USE_ST7789
 constexpr uint16_t DISPLAY_WIDTH = 320;
 constexpr uint16_t DISPLAY_HEIGHT = 240;
 constexpr const char *DISPLAY_NAME = "ST7789 (Default)";
-
 #endif
 
 #endif /* DISPLAY_CONFIG_H */

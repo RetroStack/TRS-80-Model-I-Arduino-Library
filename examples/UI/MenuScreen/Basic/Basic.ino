@@ -55,7 +55,7 @@
  * - Open Serial Monitor to see selection messages
  *
  * WHAT YOU NEED:
- * - M1Shield with working display (ST7789 or SSD1306)
+ * - M1Shield with working display (ST7789, ST7735, ILI9341, ILI9488, HX8357, ILI9325)
  * - Arduino IDE with Serial Monitor (to see selection messages)
  *
  * TROUBLESHOOTING:
@@ -80,7 +80,7 @@
  */
 
 // STEP 1: Configure your display type
-#define USE_ST7789 // Change to USE_SSD1306 if you have that display type
+// #define USE_ST7789 // Change to USE_SSD1306 if you have that display type
 
 // STEP 2: Include the required libraries
 #include "SimpleMenuScreen.h" // Our menu screen implementation

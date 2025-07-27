@@ -31,7 +31,7 @@ Creates a new `M1Shield` instance. The shield is not initialized until `begin()`
 
 Initializes all M1Shield hardware components:
 
-- Display subsystem (ST7789, ST7735, or ILI9341)
+- Display subsystem (ST7789, ST7735, ILI9341, ILI9488, HX8357, ILI9325)
 - Button input pins with internal pull-ups
 - Analog joystick pins
 - RGB LED control pins
@@ -59,9 +59,13 @@ The library automatically detects and supports multiple display types:
 
 | Display | Resolution | Define                 |
 | ------- | ---------- | ---------------------- |
+| ST7789  | 240×240    | `USE_ST7789_240x240`   |
 | ST7789  | 320×240    | `USE_ST7789` (default) |
 | ST7735  | 128×160    | `USE_ST7735`           |
 | ILI9341 | 240×320    | `USE_ILI9341`          |
+| ILI9488 | 320×480    | `USE_ILI9488`          |
+| HX8357  | 320×480    | `USE_HX8357`           |
+| ILI9325 | 240×320    | `USE_ILI9325`          |
 
 ```cpp
 // Select display type before including M1Shield.h

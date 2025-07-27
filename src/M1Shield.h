@@ -13,18 +13,37 @@
 
 // TFT Display Support - Define ONE of these before including this header
 #if defined(USE_ST7789)
+// ST7789 (240x320 SPI) – very common, vibrant display
+#include <Adafruit_ST7789.h>
+typedef Adafruit_ST7789 TFT_Display;
+#elif defined(USE_ST7789_240x240)
+// ST7789 (240x240 SPI) – very common, vibrant display
 #include <Adafruit_ST7789.h>
 typedef Adafruit_ST7789 TFT_Display;
 #elif defined(USE_ST7735)
+// ST7735 (128x160 SPI) – older/smaller displays
 #include <Adafruit_ST7735.h>
 typedef Adafruit_ST7735 TFT_Display;
 #elif defined(USE_ILI9341)
+// ILI9341 (240x320 SPI) – widely used 2.4–2.8" displays
 #include <Adafruit_ILI9341.h>
 typedef Adafruit_ILI9341 TFT_Display;
+#elif defined(USE_ILI9488)
+// ILI9488 (320x480 SPI, 3-byte RGB888) – newer 3.5" displays
+#include <Arduino_GFX_Library.h>
+typedef Arduino_ILI9488 TFT_Display;
+#elif defined(USE_HX8357)
+// HX8357D (320x480 SPI) – 3.5" displays, older than ILI9488
+#include <Adafruit_HX8357.h>
+typedef Adafruit_HX8357 TFT_Display;
+#elif defined(USE_ILI9325)
+// ILI9325 (240x320, usually parallel interface) – for some shield-based displays
+#include <Adafruit_TFTLCD.h> // Adafruit's legacy parallel TFT library
+typedef Adafruit_TFTLCD TFT_Display;
 #else
-#define USE_ST7789 // Default to ST7789 if nothing is defined
+// Default to ST7789 if no display type is specified
+// You can change this default to another screen if needed
 #include <Adafruit_ST7789.h>
-typedef Adafruit_ST7789 TFT_Display;
 #endif
 
 #include "Screen.h"
@@ -76,7 +95,7 @@ enum JoystickDirection
  *
  * ## Hardware Components
  *
- * - **TFT Display**: Configurable support for ST7789, ST7735, or ILI9341
+ * - **TFT Display**: Configurable support for ST7789, ST7735, ILI9341, ILI9488, HX8357, ILI9325
  * - **Input Controls**: 5 digital buttons + analog joystick with center press
  * - **RGB Status LED**: Full-color status indication
  * - **Screen Management**: Automatic screen lifecycle and navigation
@@ -86,8 +105,12 @@ enum JoystickDirection
  * The shield supports multiple TFT display types through compile-time configuration:
  * ```cpp
  * #define USE_ST7789   // For ST7789 displays (default)
+ * #define USE_ST7789_240x240   // For ST7789 displays (240x240 resolution)
  * #define USE_ST7735   // For ST7735 displays
  * #define USE_ILI9341  // For ILI9341 displays
+ * #define USE_ILI9488  // For ILI9488 displays
+ * #define USE_HX8357  // For HX8357 displays
+ * #define USE_ILI9325  // For ILI9325 displays
  * ```
  *
  * ## Input System

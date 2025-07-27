@@ -44,7 +44,7 @@
  */
 
 // First, tell the system which display you have
-#define USE_ST7789 // If you have SSD1306 display, change this to: #define USE_SSD1306
+// #define USE_ST7789 // If you have SSD1306 display, change this to: #define USE_SSD1306
 
 // Include the libraries we need
 #include "M1Shield.h"      // Main M1Shield functions

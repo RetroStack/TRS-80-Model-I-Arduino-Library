@@ -20,7 +20,7 @@
  * - Tracks joystick movement and button press
  * - Changes LED color based on current input
  * - Prints detailed feedback to Serial Monitor
- * - Works with multiple display types (ST7789, ST7735, ILI9341)
+ * - Works with multiple display types (ST7789, ST7735, ILI9341, ILI9488, HX8357, ILI9325)
  *
  * CONTROLS & FEEDBACK:
  * - Menu Button: LED turns CYAN, Serial shows "Menu button: PRESSED"
@@ -37,6 +37,9 @@
  * - ST7789 (320x240) - Default, most common
  * - ST7735 (128x160) - Smaller TFT display
  * - ILI9341 (240x320) - Alternative TFT display
+ * - ILI9488 (320x480) - Larger TFT display
+ * - HX8357 (320x480) - Larger TFT display
+ * - ILI9325 (240x320) - Alternative TFT display
  *
  * TROUBLESHOOTING FOR BEGINNERS:
  * - Blank screen? Check display type settings below
@@ -63,6 +66,10 @@
 
 // #define USE_ST7735    // For 128x160 TFT displays
 // #define USE_ILI9341   // For 240x320 TFT displays
+// #define USE_ILI9488   // For 320x480 TFT displays
+// #define USE_HX8357    // For 320x480 TFT displays
+// #define USE_ILI9325   // For 240x320 TFT displays
+// #define USE_ST7789    // For 320x240 TFT displays (Default)
 
 // If you don't uncomment anything, it defaults to ST7789 (320x240)
 // which is the most common display type for M1Shield

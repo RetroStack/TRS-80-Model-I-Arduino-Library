@@ -28,7 +28,7 @@
  * - Watch the LED change colors!
  *
  * WHAT YOU NEED:
- * - M1Shield with working display (ST7789 or SSD1306)
+ * - M1Shield with working display (ST7789, ST7735, ILI9341, ILI9488, HX8357, ILI9325)
  * - Working buttons and joystick
  * - LED indicator
  *
@@ -49,7 +49,7 @@
  */
 
 // STEP 1: Tell the system what display you have
-#define USE_ST7789 // If you have SSD1306 display, change this to: #define USE_SSD1306
+// #define USE_ST7789 // If you have SSD1306 display, change this to: #define USE_SSD1306
 
 // STEP 2: Include the libraries we need
 #include "M1Shield.h"            // Main M1Shield functions

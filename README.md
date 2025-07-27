@@ -36,7 +36,7 @@ This Arduino library enables interfacing a TRS-80 Model I mainboard directly wit
 ### M1Shield Framework (Arduino Shield Support)
 
 - **M1Shield Framework** – Complete hardware abstraction and UI framework for TRS-80 Model I Arduino Shield
-  - **M1Shield** – Hardware abstraction layer for display, input (buttons/joystick), LED control, and screen management with multi-display support (ST7789, ST7735, ILI9341).
+  - **M1Shield** – Hardware abstraction layer for display, input (buttons/joystick), LED control, and screen management with multi-display support (ST7789, ST7735, ILI9341, ILI9488, HX8357, ILI9325).
 
 ### UI Framework
 
@@ -78,7 +78,7 @@ You can find detailed documentation of all features [here](/docs).
 **Option 1: TRS-80 Model I Arduino Shield (Recommended)**
 
 - Clean, reliable connection with built-in display and controls
-- Multiple display options: ST7789, ST7735, ILI9341
+- Multiple display options: ST7789, ST7735, ILI9341, ILI9488, HX8357, ILI9325
 - Integrated buttons, joystick, and LED for user interface
 - Reduces wiring complexity and connection errors
 

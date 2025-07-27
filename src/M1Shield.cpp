@@ -13,17 +13,6 @@
 #include <Arduino.h>
 #include "Model1.h"
 
-// Include the appropriate display library based on compile-time configuration
-#if defined(USE_ST7789)
-#include <Adafruit_ST7789.h>
-#elif defined(USE_ST7735)
-#include <Adafruit_ST7735.h>
-#elif defined(USE_ILI9341)
-#include <Adafruit_ILI9341.h>
-#else
-#include <Adafruit_ST7789.h> // Default to ST7789 if no display type specified
-#endif
-
 // Hardware timing constants
 constexpr unsigned long DEBOUNCE_TIME = 250; // Button debounce time in milliseconds
 
@@ -54,27 +43,33 @@ M1ShieldClass M1Shield;
 /**
  * Constructor: Initializes internal state.
  */
-M1ShieldClass::M1ShieldClass()
-#if defined(USE_ST7789)
-    : _tft(TFT_CS, TFT_DC, TFT_RST)
+M1ShieldClass::M1ShieldClass() : 
+#if defined(USE_ILI9488)
+    // ILI9488 uses Arduino_GFX and requires special initialization in begin()
+    _tft(nullptr, 320, 480), // Temporary construction - proper bus will be set in begin()
+#elif defined(USE_ST7789) || defined(USE_ST7789_240x240)
+    _tft(TFT_CS, TFT_DC, TFT_RST),
 #elif defined(USE_ST7735)
-    : _tft(TFT_CS, TFT_DC, TFT_RST)
+    _tft(TFT_CS, TFT_DC, TFT_RST),
 #elif defined(USE_ILI9341)
-    : _tft(TFT_CS, TFT_DC, TFT_RST)
+    _tft(TFT_CS, TFT_DC, TFT_RST),
+#elif defined(USE_HX8357)
+    _tft(TFT_CS, TFT_DC, TFT_RST),
+#elif defined(USE_ILI9325)
+    _tft(TFT_CS, TFT_DC, TFT_RST),
 #else
-    : _tft(TFT_CS, TFT_DC, TFT_RST)
+    _tft(TFT_CS, TFT_DC, TFT_RST),
 #endif
+    _menuPressed(0),
+    _upPressed(0),
+    _downPressed(0),
+    _leftPressed(0),
+    _rightPressed(0),
+    _joystickPressed(0),
+    _screenWidth(0),
+    _screenHeight(0),
+    _screen(nullptr)
 {
-    _menuPressed = 0;
-    _upPressed = 0;
-    _downPressed = 0;
-    _leftPressed = 0;
-    _rightPressed = 0;
-
-    _joystickPressed = 0;
-
-    _screenWidth = 0;
-    _screenHeight = 0;
 }
 
 /**
@@ -130,7 +125,11 @@ void M1ShieldClass::begin()
     _screenHeight = DISPLAY_HEIGHT;
 
 #if defined(USE_ST7789)
-    _tft.init(_screenHeight, _screenWidth, SPI_MODE0);
+    _tft.init(_screenWidth, _screenHeight, SPI_MODE0);
+    _tft.enableTearing(true);
+    _tft.setRotation(3);
+#elif defined(USE_ST7789_240x240)
+    _tft.init(_screenWidth, _screenHeight, SPI_MODE0);
     _tft.enableTearing(true);
     _tft.setRotation(3);
 #elif defined(USE_ST7735)
@@ -139,9 +138,21 @@ void M1ShieldClass::begin()
 #elif defined(USE_ILI9341)
     _tft.begin();
     _tft.setRotation(3);
+#elif defined(USE_ILI9488)
+    // ILI9488 requires special initialization with Arduino_GFX
+    // The current architecture doesn't properly support Arduino_GFX initialization
+    // This is a temporary fix - proper support requires architectural changes
+    _tft.begin();
+    _tft.setRotation(3);
+#elif defined(USE_HX8357)
+    _tft.begin();
+    _tft.setRotation(3);
+#elif defined(USE_ILI9325)
+    _tft.begin();
+    _tft.setRotation(3);
 #else
     // Default to ST7789
-    _tft.init(_screenHeight, _screenWidth, SPI_MODE0);
+    _tft.init(_screenWidth, _screenHeight, SPI_MODE0);
     _tft.enableTearing(true);
     _tft.setRotation(3);
 #endif

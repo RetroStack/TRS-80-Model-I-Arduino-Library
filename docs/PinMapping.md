@@ -201,7 +201,7 @@ void loop() {
 
 - **Pre-verified connections** - No wiring errors
 - **Built-in protection** - Overcurrent and ESD protection
-- **Integrated display** - ST7789/ST7735/ILI9341 support
+- **Integrated display** - ST7789, ST7735, ILI9341, ILI9488, HX8357, ILI9325 support
 - **User interface** - Buttons, joystick, LED
 - **Professional reliability** - PCB quality connections
 - **Easier debugging** - Known-good hardware
