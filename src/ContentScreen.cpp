@@ -478,6 +478,9 @@ void ContentScreen::_clearContentArea()
  */
 void ContentScreen::_drawText(uint16_t x, uint16_t y, const char *text, uint16_t color, uint8_t size)
 {
+    if (!isActive())
+        return;
+
     if (text == nullptr || text[0] == '\0')
     {
         return; // Nothing to draw

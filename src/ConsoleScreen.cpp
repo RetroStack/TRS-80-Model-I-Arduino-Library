@@ -282,6 +282,9 @@ void ConsoleScreen::cls()
 {
     _updateDimensions();
 
+    if (!isActive())
+        return;
+
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
     // Clear console area
@@ -415,6 +418,9 @@ void ConsoleScreen::_processChar(char c)
 void ConsoleScreen::_renderChar(char c)
 {
     _updateDimensions();
+
+    if (!isActive())
+        return;
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
