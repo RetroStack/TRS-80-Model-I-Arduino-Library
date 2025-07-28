@@ -13,6 +13,7 @@ ContentScreen   KEYWORD1
 MenuScreen  KEYWORD1
 M1TerminalScreen    KEYWORD1
 ConsoleScreen   KEYWORD1
+LoggerScreen    KEYWORD1
 DisplayProvider KEYWORD1
 Display_ST7789  KEYWORD1
 Display_ST7789_240x240  KEYWORD1
