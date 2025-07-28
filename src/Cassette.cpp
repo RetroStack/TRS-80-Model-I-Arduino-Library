@@ -248,3 +248,11 @@ void Cassette::set64CharacterMode()
     bitClear(_state, CASSETTE_BIT_MODESEL_INV);
     _write(_state);
 }
+
+/**
+ * Sets a logger being used.
+ */
+void Cassette::setLogger(ILogger &logger)
+{
+  _logger = &logger;
+}
