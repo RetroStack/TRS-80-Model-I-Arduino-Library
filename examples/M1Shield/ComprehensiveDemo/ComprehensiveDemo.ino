@@ -49,6 +49,10 @@ void setup()
     Serial.begin(115200);
     M1Shield.begin(displayProvider);
 
+    // Enable joystick input for demo navigation
+    // Uncomment to allow joystick control of menus and screens
+    // M1Shield.activateJoystick();
+
     Serial.println("=== M1Shield Comprehensive Demo ===");
     Serial.println("Starting complete feature showcase...");
 

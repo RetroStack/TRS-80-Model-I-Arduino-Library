@@ -58,7 +58,8 @@ M1ShieldClass::M1ShieldClass() : _tft(nullptr),
                                  _screenWidth(0),
                                  _screenHeight(0),
                                  _screen(nullptr),
-                                 _displayProvider(nullptr)
+                                 _displayProvider(nullptr),
+                                 _activeJoystick(false)
 {
 }
 
@@ -131,6 +132,26 @@ void M1ShieldClass::begin(DisplayProvider &provider)
     // Initialize display based on the selected type
     _screenWidth = provider.width();
     _screenHeight = provider.height();
+}
+
+/**
+ * @brief Activate joystick input
+ *
+ * Enables joystick input handling for screen navigation and actions.
+ */
+void M1ShieldClass::activateJoystick()
+{
+    _activeJoystick = true;
+}
+
+/**
+ * @brief Deactivate joystick input
+ *
+ * Disables joystick input handling for screen navigation and actions.
+ */
+void M1ShieldClass::deactivateJoystick()
+{
+    _activeJoystick = false;
 }
 
 /**
@@ -478,56 +499,64 @@ void M1ShieldClass::loop()
     uint8_t offsetX = 0;
     uint8_t offsetY = 0;
 
-    // Get joystick coordinates
-    uint8_t x = getJoystickX();
-    uint8_t y = getJoystickY();
+    if (_activeJoystick)
+    {
+        // Get joystick coordinates
+        uint8_t x = getJoystickX();
+        uint8_t y = getJoystickY();
 
-    // Diagonal directions for Joystick
-    if (x < JOYSTICK_CENTER_MIN && y < JOYSTICK_CENTER_MIN)
-    {
-        offsetX = JOYSTICK_CENTER_MIN - x;
-        offsetY = JOYSTICK_CENTER_MIN - y;
-        action |= JOYSTICK_UP_LEFT;
-    }
-    else if (x > JOYSTICK_CENTER_MAX && y < JOYSTICK_CENTER_MIN)
-    {
-        offsetX = x - JOYSTICK_CENTER_MIN;
-        offsetY = JOYSTICK_CENTER_MIN - y;
-        action |= JOYSTICK_UP_RIGHT;
-    }
-    else if (x < JOYSTICK_CENTER_MIN && y > JOYSTICK_CENTER_MAX)
-    {
-        offsetX = JOYSTICK_CENTER_MIN - x;
-        offsetY = y - JOYSTICK_CENTER_MIN;
-        action |= JOYSTICK_DOWN_LEFT;
-    }
-    else if (x > JOYSTICK_CENTER_MAX && y > JOYSTICK_CENTER_MAX)
-    {
-        offsetX = x - JOYSTICK_CENTER_MIN;
-        offsetY = y - JOYSTICK_CENTER_MIN;
-        action |= JOYSTICK_DOWN_RIGHT;
-    }
+        // Diagonal directions for Joystick
+        if (x < JOYSTICK_CENTER_MIN && y < JOYSTICK_CENTER_MIN)
+        {
+            offsetX = JOYSTICK_CENTER_MIN - x;
+            offsetY = JOYSTICK_CENTER_MIN - y;
+            action |= JOYSTICK_UP_LEFT;
+        }
+        else if (x > JOYSTICK_CENTER_MAX && y < JOYSTICK_CENTER_MIN)
+        {
+            offsetX = x - JOYSTICK_CENTER_MIN;
+            offsetY = JOYSTICK_CENTER_MIN - y;
+            action |= JOYSTICK_UP_RIGHT;
+        }
+        else if (x < JOYSTICK_CENTER_MIN && y > JOYSTICK_CENTER_MAX)
+        {
+            offsetX = JOYSTICK_CENTER_MIN - x;
+            offsetY = y - JOYSTICK_CENTER_MIN;
+            action |= JOYSTICK_DOWN_LEFT;
+        }
+        else if (x > JOYSTICK_CENTER_MAX && y > JOYSTICK_CENTER_MAX)
+        {
+            offsetX = x - JOYSTICK_CENTER_MIN;
+            offsetY = y - JOYSTICK_CENTER_MIN;
+            action |= JOYSTICK_DOWN_RIGHT;
+        }
 
-    // Cardinal directions for Joystick
-    else if (x < JOYSTICK_CENTER_MIN)
-    {
-        offsetX = JOYSTICK_CENTER_MIN - x;
-        action |= JOYSTICK_LEFT;
-    }
-    else if (x > JOYSTICK_CENTER_MAX)
-    {
-        offsetX = x - JOYSTICK_CENTER_MIN;
-        action |= JOYSTICK_RIGHT;
-    }
-    else if (y < JOYSTICK_CENTER_MIN)
-    {
-        offsetY = JOYSTICK_CENTER_MIN - y;
-        action |= JOYSTICK_UP;
-    }
-    else if (y > JOYSTICK_CENTER_MAX)
-    {
-        offsetY = y - JOYSTICK_CENTER_MIN;
-        action |= JOYSTICK_DOWN;
+        // Cardinal directions for Joystick
+        else if (x < JOYSTICK_CENTER_MIN)
+        {
+            offsetX = JOYSTICK_CENTER_MIN - x;
+            action |= JOYSTICK_LEFT;
+        }
+        else if (x > JOYSTICK_CENTER_MAX)
+        {
+            offsetX = x - JOYSTICK_CENTER_MIN;
+            action |= JOYSTICK_RIGHT;
+        }
+        else if (y < JOYSTICK_CENTER_MIN)
+        {
+            offsetY = JOYSTICK_CENTER_MIN - y;
+            action |= JOYSTICK_UP;
+        }
+        else if (y > JOYSTICK_CENTER_MAX)
+        {
+            offsetY = y - JOYSTICK_CENTER_MIN;
+            action |= JOYSTICK_DOWN;
+        }
+
+        if (wasJoystickPressed())
+        {
+            action |= BUTTON_JOYSTICK;
+        }
     }
 
     // Get button states
@@ -550,10 +579,6 @@ void M1ShieldClass::loop()
     if (wasDownPressed())
     {
         action |= BUTTON_DOWN;
-    }
-    if (wasJoystickPressed())
-    {
-        action |= BUTTON_JOYSTICK;
     }
 
     // Was any action taken?

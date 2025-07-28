@@ -97,6 +97,11 @@ void setup()
     // Initialize the M1Shield hardware
     // This sets up display, buttons, joystick, LED, etc.
     M1Shield.begin(displayProvider);
+    
+    // Optional: Enable joystick input for menu navigation
+    // Uncomment the next line to allow joystick control of menus
+    // M1Shield.activateJoystick();
+    
     Serial.println("Hardware initialized!");
 
     // Create our content screen

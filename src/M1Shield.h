@@ -132,6 +132,8 @@ private:
     uint16_t _screenWidth;  // Display width in pixels
     uint16_t _screenHeight; // Display height in pixels
 
+    bool _activeJoystick; // True if joystick is currently active
+
     /**
      * @brief Internal debouncing helper for button state detection
      * @param pin GPIO pin number to read
@@ -174,6 +176,20 @@ public:
      * @note Safe to call multiple times - subsequent calls return cached result
      */
     void begin(DisplayProvider &provider);
+
+    /**
+     * @brief Activate joystick input
+     *
+     * Enables joystick input handling for the shield.
+     */
+    void activateJoystick();
+
+    /**
+     * @brief Deactivate joystick input
+     *
+     * Disables joystick input handling for the shield.
+     */
+    void deactivateJoystick();
 
     /**
      * @brief Check if display hardware was successfully initialized

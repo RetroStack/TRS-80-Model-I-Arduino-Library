@@ -130,6 +130,10 @@ void setup()
 
     // Initialize the M1Shield hardware
     M1Shield.begin(displayProvider);
+    
+    // Optional: Enable joystick input for menu navigation
+    // Uncomment the next line to allow joystick control of menus
+    // M1Shield.activateJoystick();
 
     // Create and display our configuration menu
     M1Shield.setScreen(new ConfigMenuExample());

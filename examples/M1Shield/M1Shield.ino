@@ -148,6 +148,12 @@ void setup()
     // This sets up display, buttons, joystick, LED, and everything else
     Serial.println("Initializing M1Shield hardware...");
     M1Shield.begin(displayProvider);
+    
+    // Optional: Enable joystick input for screen actions
+    // Uncomment the next line if you want joystick to control screens
+    // M1Shield.activateJoystick();
+    // Note: Joystick reading (getJoystickX/Y, isJoystickPressed) works regardless
+    
     Serial.println("Hardware initialization complete!");
 
     // Verify that everything initialized correctly

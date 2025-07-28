@@ -55,6 +55,10 @@ void setup()
 {
     Serial.begin(115200);
     M1Shield.begin(displayProvider);
+    
+    // Optional: Enable joystick input for console navigation
+    // Uncomment the next line to allow joystick control
+    // M1Shield.activateJoystick();
 
     Serial.println("=== ConsoleScreen One-Time Execution Demo ===");
     Serial.println("Watch the console for initialization sequence!");

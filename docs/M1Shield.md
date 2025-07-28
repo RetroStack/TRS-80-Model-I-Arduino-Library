@@ -148,14 +148,35 @@ void loop() {
 
 ### Joystick Input
 
-Analog joystick with direction detection and raw value access:
+Analog joystick with direction detection, activation control, and raw value access:
 
 ```cpp
+void activateJoystick()                     // Enable joystick for screen actions
+void deactivateJoystick()                   // Disable joystick for screen actions
 JoystickDirection getJoystickDirection()    // Get current direction
 bool isJoystickCentered()                   // Check if joystick is centered
 uint8_t getJoystickX()                      // Raw X value (0-255, 128 = center)
 uint8_t getJoystickY()                      // Raw Y value (0-255, 128 = center)
+bool isJoystickPressed()                    // Check if joystick button is currently pressed
+bool wasJoystickPressed()                   // Check if joystick button was just pressed (debounced)
 ```
+
+**Joystick Activation:**
+
+By default, joystick input is **disabled** for screen actions. You can still read joystick values and button states, but they won't be sent to screens via `actionTaken()`. To enable joystick for screen navigation:
+
+```cpp
+void setup() {
+    M1Shield.begin(displayProvider);
+    
+    // Enable joystick for screen actions (optional)
+    M1Shield.activateJoystick();
+    
+    M1Shield.setScreen(new MyScreen());
+}
+```
+
+When activated, joystick movements and button presses are sent to the current screen as `ActionTaken` flags.
 
 **JoystickDirection Enum:**
 
@@ -236,6 +257,15 @@ void updateLEDStatus() {
         M1Shield.setLEDColor(COLOR_OFF);
     }
 }
+
+void setup() {
+    M1Shield.begin(displayProvider);
+    
+    // Optional: Enable joystick for screen actions
+    // M1Shield.activateJoystick();
+    
+    M1Shield.setScreen(new MyScreen());
+}
 ```
 
 ## Screen Management
@@ -271,6 +301,10 @@ GameScreen* game = new GameScreen();
 
 void setup() {
     M1Shield.begin(displayProvider);
+    
+    // Optional: Enable joystick input for screen actions
+    // M1Shield.activateJoystick();
+    
     M1Shield.setScreen(mainMenu);  // Start with main menu
 }
 
@@ -398,6 +432,9 @@ void setup() {
 
     // Initialize M1Shield hardware with display provider
     M1Shield.begin(displayProvider);
+
+    // Optional: Enable joystick input for screen actions
+    // M1Shield.activateJoystick();
 
     // Verify initialization
     if (M1Shield.isDisplayInitialized()) {

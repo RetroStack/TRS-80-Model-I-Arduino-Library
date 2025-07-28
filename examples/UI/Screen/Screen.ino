@@ -78,6 +78,11 @@ void setup()
     // Initialize the M1Shield hardware
     // This sets up display, buttons, joystick, LED, etc.
     M1Shield.begin(displayProvider);
+    
+    // Optional: Enable joystick input for screen control
+    // Uncomment the next line to allow joystick interaction
+    // M1Shield.activateJoystick();
+    
     Serial.println("✓ M1Shield initialized!");
 
     // Create our simple screen and tell M1Shield to use it

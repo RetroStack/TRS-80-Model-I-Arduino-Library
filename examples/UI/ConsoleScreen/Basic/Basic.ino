@@ -35,6 +35,10 @@ Display_ST7789 displayProvider;
 void setup()
 {
     M1Shield.begin(displayProvider);
+    
+    // Optional: Enable joystick input for console navigation
+    // Uncomment the next line to allow joystick control
+    // M1Shield.activateJoystick();
 
     DebugConsole *console = new DebugConsole();
     M1Shield.setScreen(console);
