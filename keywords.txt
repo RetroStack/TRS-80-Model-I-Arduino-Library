@@ -5,6 +5,7 @@ Keyboard    KEYWORD1
 KeyboardChangeIterator    KEYWORD1
 ILogger KEYWORD1
 SerialLogger    KEYWORD1
+CompositeLogger KEYWORD1
 Cassette    KEYWORD1
 M1Shield    KEYWORD1
 Screen  KEYWORD1

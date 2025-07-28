@@ -75,3 +75,45 @@ lcd.begin(16, 2);
 LCDLogger logger(&lcd);
 Model1.setLogger(logger);
 ```
+
+## Built-in Logger Implementations
+
+The library provides several ready-to-use logger implementations:
+
+### SerialLogger
+Outputs log messages to the Arduino Serial interface with formatted prefixes.
+
+```cpp
+#include <SerialLogger.h>
+
+SerialLogger logger;
+logger.info("System initialized");  // Output: [INFO] System initialized
+logger.warn("Low memory");          // Output: [WARN] Low memory  
+logger.err("Connection failed");    // Output: [ERR ] Connection failed
+```
+
+### CompositeLogger
+Forwards log messages to multiple registered loggers simultaneously, enabling multi-destination logging.
+
+```cpp
+#include <CompositeLogger.h>
+#include <SerialLogger.h>
+
+SerialLogger serialLogger;
+// FileLogger fileLogger;  // Hypothetical file logger
+
+CompositeLogger multiLogger;
+multiLogger.addLogger(&serialLogger);
+// multiLogger.addLogger(&fileLogger);
+
+// Now logs go to both Serial and file
+multiLogger.info("Message sent to all registered loggers");
+```
+
+The CompositeLogger is particularly useful for:
+- **Development vs Production**: Log to Serial during development, add file/network logging for production
+- **Redundancy**: Ensure critical logs reach multiple destinations
+- **Debugging**: Temporarily add debug loggers without changing existing code
+- **Performance Monitoring**: Send logs to both local storage and remote monitoring systems
+
+See [CompositeLogger.md](CompositeLogger.md) for detailed usage examples and API reference.

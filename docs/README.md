@@ -21,6 +21,7 @@ This library allows an Arduino to control the TRS-80 Model I mainboard through i
 
 - [**ILogger**](ILogger.md) — Logging interface.
 - [**SerialLogger**](SerialLogger.md) — Logging implementation to Serial output.
+- [**CompositeLogger**](CompositeLogger.md) — Multi-destination logger that forwards events to multiple registered loggers.
 
 ## Shield Access
 
