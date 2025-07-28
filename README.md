@@ -30,8 +30,12 @@ This Arduino library enables interfacing a TRS-80 Model I mainboard directly wit
 - **Keyboard** – Class to read keyboard state, including press and release events.
 - **ROM** – Access to ROM content and checksum comparison.
 - **Video** – Provides direct access to video reading/writing, including viewports with scrolling support.
+
+### Logging Abstraction Classes
+
 - **ILogger** - Standard interface for all logging events.
 - **SerialLogger** - Specific implementation of an ILogger for Serial logging.
+- **CompositeLogger** - Multi-destination logger that forwards events to multiple registered ILogger instances simultaneously.
 
 ### M1Shield Framework (Arduino Shield Support)
 
@@ -62,16 +66,18 @@ This Arduino library enables interfacing a TRS-80 Model I mainboard directly wit
 1. **Install this library** in Arduino IDE
 2. **Connect TRS-80 Model I Arduino Shield** to your Arduino Mega 2560
 3. **Select your display provider** by modifying the M1Shield example:
+
    ```cpp
    #include <Display_ST7789.h>    // Choose your display type
    #include <M1Shield.h>
-   
+
    Display_ST7789 displayProvider;  // Create provider instance
-   
+
    void setup() {
        M1Shield.begin(displayProvider);  // Initialize with provider
    }
    ```
+
 4. **Try the M1Shield → HardwareTest example** to verify everything works
 5. **Explore Screen examples** to learn the UI framework
 
