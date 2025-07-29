@@ -220,6 +220,16 @@ public:
     uint16_t getScreenHeight() const;
 
     /**
+     * @brief Get reference to the display provider
+     *
+     * Provides access to the DisplayProvider instance managing the display hardware.
+     * Use this to access display-specific features or configuration.
+     *
+     * @return Reference to DisplayProvider instance
+     */
+    DisplayProvider& getDisplayProvider() const;
+
+    /**
      * @brief Set the active screen and perform transition
      *
      * Changes the currently active screen, handling proper lifecycle:

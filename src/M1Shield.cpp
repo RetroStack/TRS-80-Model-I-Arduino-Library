@@ -179,6 +179,14 @@ uint16_t M1ShieldClass::getScreenHeight() const
 }
 
 /**
+ * Returns a reference to the display provider instance.
+ */
+DisplayProvider& M1ShieldClass::getDisplayProvider() const
+{
+    return *_displayProvider;
+}
+
+/**
  * Sets the screen used to display items on the screen.
  *
  * NOTE: After assigning it to the shield, it completely owns the value and potentially

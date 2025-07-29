@@ -96,6 +96,7 @@ void setup() {
 ### Display Access
 
 - `Adafruit_GFX& getGFX()`: Returns reference to graphics library for direct drawing
+- `DisplayProvider& getDisplayProvider()`: Returns reference to the display provider instance
 - `uint16_t getScreenWidth()`: Returns display width in pixels
 - `uint16_t getScreenHeight()`: Returns display height in pixels
 - `bool isDisplayInitialized()`: Returns true if display initialization was successful
@@ -168,10 +169,10 @@ By default, joystick input is **disabled** for screen actions. You can still rea
 ```cpp
 void setup() {
     M1Shield.begin(displayProvider);
-    
+
     // Enable joystick for screen actions (optional)
     M1Shield.activateJoystick();
-    
+
     M1Shield.setScreen(new MyScreen());
 }
 ```
@@ -260,10 +261,10 @@ void updateLEDStatus() {
 
 void setup() {
     M1Shield.begin(displayProvider);
-    
+
     // Optional: Enable joystick for screen actions
     // M1Shield.activateJoystick();
-    
+
     M1Shield.setScreen(new MyScreen());
 }
 ```
@@ -301,10 +302,10 @@ GameScreen* game = new GameScreen();
 
 void setup() {
     M1Shield.begin(displayProvider);
-    
+
     // Optional: Enable joystick input for screen actions
     // M1Shield.activateJoystick();
-    
+
     M1Shield.setScreen(mainMenu);  // Start with main menu
 }
 
@@ -463,6 +464,25 @@ void setup() {
     } else {
         Serial.println("Display initialization failed!");
         M1Shield.setLEDColor(COLOR_RED);
+    }
+}
+
+// Alternative way to access display provider later in your code
+void displayInfo() {
+    if (M1Shield.isDisplayInitialized()) {
+        // Access display provider through M1Shield
+        DisplayProvider& provider = M1Shield.getDisplayProvider();
+
+        Serial.print("Current display: ");
+        Serial.println(provider.name());
+        Serial.print("Dimensions: ");
+        Serial.print(provider.width());
+        Serial.print("x");
+        Serial.println(provider.height());
+
+        // You can also access the graphics context through the provider
+        Adafruit_GFX& gfx = provider.getGFX();
+        // ... use gfx for drawing ...
     }
 }
 
