@@ -18,7 +18,7 @@ private:
 public:
     Display_ILI9325() : _display(nullptr) {}
 
-    Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) override
+    bool create(int8_t cs, int8_t dc, int8_t rst) override
     {
         if (_display)
         {
@@ -28,7 +28,12 @@ public:
         _display = new Adafruit_TFTLCD(cs, dc, rst);
         _display->begin(0x9325); // ILI9325 identifier
         _display->setRotation(3);
-        return _display;
+        return _display != nullptr;
+    }
+
+    Adafruit_GFX &getGFX() override
+    {
+        return *_display;
     }
 
     void destroy() override

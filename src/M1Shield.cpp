@@ -48,8 +48,7 @@ M1ShieldClass M1Shield;
 /**
  * Constructor: Initializes internal state.
  */
-M1ShieldClass::M1ShieldClass() : _tft(nullptr),
-                                 _menuPressed(0),
+M1ShieldClass::M1ShieldClass() : _menuPressed(0),
                                  _upPressed(0),
                                  _downPressed(0),
                                  _leftPressed(0),
@@ -76,18 +75,10 @@ M1ShieldClass::~M1ShieldClass()
         _screen = nullptr;
     }
 
-    // Clean up display instance if it exists
-    if (_tft)
+    // Clean up display instance if it exists through the provider
+    if (_displayProvider)
     {
-        if (_displayProvider)
-        {
-            _displayProvider->destroy();
-        }
-        else
-        {
-            delete _tft; // Fallback if no provider
-        }
-        _tft = nullptr;
+        _displayProvider->destroy();
     }
 }
 
@@ -127,7 +118,7 @@ void M1ShieldClass::begin(DisplayProvider &provider)
         delay(50);
     }
 
-    _tft = provider.create(PIN_TFT_CS, PIN_TFT_DC, PIN_TFT_RST);
+    bool success = provider.create(PIN_TFT_CS, PIN_TFT_DC, PIN_TFT_RST);
 
     // Initialize display based on the selected type
     _screenWidth = provider.width();
@@ -159,7 +150,7 @@ void M1ShieldClass::deactivateJoystick()
  */
 bool M1ShieldClass::isDisplayInitialized() const
 {
-    return (_tft != nullptr && _screenWidth > 0 && _screenHeight > 0);
+    return (_displayProvider != nullptr && _screenWidth > 0 && _screenHeight > 0);
 }
 
 /**
@@ -168,7 +159,7 @@ bool M1ShieldClass::isDisplayInitialized() const
  */
 Adafruit_GFX &M1ShieldClass::getGFX()
 {
-    return *_tft; // Dereference pointer to get reference
+    return _displayProvider->getGFX();
 }
 
 /**

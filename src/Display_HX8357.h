@@ -18,7 +18,7 @@ private:
 public:
     Display_HX8357() : _display(nullptr) {}
 
-    Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) override
+    bool create(int8_t cs, int8_t dc, int8_t rst) override
     {
         if (_display)
         {
@@ -28,7 +28,12 @@ public:
         _display->begin(HX8357D);
         _display->setRotation(0);
         _display->invertDisplay(false);
-        return _display;
+        return _display != nullptr;
+    }
+
+    Adafruit_GFX &getGFX() override
+    {
+        return *_display;
     }
 
     void destroy() override

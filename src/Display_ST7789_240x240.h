@@ -18,7 +18,7 @@ private:
 public:
     Display_ST7789_240x240() : _display(nullptr) {}
 
-    Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) override
+    bool create(int8_t cs, int8_t dc, int8_t rst) override
     {
         if (_display)
         {
@@ -27,7 +27,12 @@ public:
         _display = new Adafruit_ST7789(cs, dc, rst);
         _display->init(240, 240, SPI_MODE0);
         _display->setRotation(0);
-        return _display;
+        return _display != nullptr;
+    }
+
+    Adafruit_GFX &getGFX() override
+    {
+        return *_display;
     }
 
     void destroy() override

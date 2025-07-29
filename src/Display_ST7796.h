@@ -18,7 +18,7 @@ private:
 public:
     Display_ST7796() : _display(nullptr) {}
 
-    Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) override
+    bool create(int8_t cs, int8_t dc, int8_t rst) override
     {
         if (_display)
         {
@@ -28,7 +28,12 @@ public:
         _display->init(320, 480, 0, 0, ST7796S_BGR);
         _display->setRotation(1);
         _display->invertDisplay(true);
-        return _display;
+        return _display != nullptr;
+    }
+
+    Adafruit_GFX &getGFX() override
+    {
+        return *_display;
     }
 
     void destroy() override

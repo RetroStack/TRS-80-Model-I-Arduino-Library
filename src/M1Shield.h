@@ -116,7 +116,6 @@ enum JoystickDirection
 class M1ShieldClass
 {
 private:
-    Adafruit_GFX *_tft;                // Pointer to Adafruit_GFX display instance
     Screen *_screen;                   // Currently active screen
     DisplayProvider *_displayProvider; // Display provider instance
 

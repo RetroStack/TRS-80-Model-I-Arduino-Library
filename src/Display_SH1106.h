@@ -19,7 +19,7 @@ private:
 public:
     Display_SH1106() : _display(nullptr) {}
 
-    Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) override
+    bool create(int8_t cs, int8_t dc, int8_t rst) override
     {
         if (_display)
         {
@@ -29,7 +29,12 @@ public:
         delay(1000);
         _display->begin(0x3C, true); // Default I2C address for SH1106
         _display->clearDisplay();
-        return _display;
+        return _display != nullptr;
+    }
+
+    Adafruit_GFX &getGFX() override
+    {
+        return *_display;
     }
 
     void destroy() override
