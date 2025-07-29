@@ -75,7 +75,7 @@ LoggerScreen* logger = new LoggerScreen("Custom Logger");
 logger->setTimestampEnabled(false);      // Disable timestamps
 logger->setColorCodingEnabled(false);    // Use monochrome output
 logger->setTextSize(2);                  // Larger text
-logger->setConsoleBackground(0x0010);    // Dark blue background
+logger->setConsoleBackground(M1Shield.convertColor(0x0010));    // Dark blue background
 
 // Reset timestamp counter
 logger->resetTimestamp();

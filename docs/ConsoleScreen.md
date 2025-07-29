@@ -331,9 +331,9 @@ private:
 protected:
     void _executeOnce() override {
         cls();
-        setTextColor(0x07E0, 0x0000);
+        setTextColor(M1Shield.convertColor(0x07E0), M1Shield.convertColor(0x0000));
         println("=== DEBUG CONSOLE ===");
-        setTextColor(0xFFFF, 0x0000);
+        setTextColor(M1Shield.convertColor(0xFFFF), M1Shield.convertColor(0x0000));
         println("Logging system ready");
         println("------------------------");
     }
@@ -341,13 +341,13 @@ protected:
 public:
     DebugConsole() {
         _setTitle("Debug Output");
-        setConsoleBgColor(0x0000);
+        setConsoleBgColor(M1Shield.convertColor(0x0000));
     }
 
     void logInfo(const char* message) {
-        setTextColor(0x07FF);
+        setTextColor(M1Shield.convertColor(0x07FF));
         print("[INFO] ");
-        setTextColor(0xFFFF);
+        setTextColor(M1Shield.convertColor(0xFFFF));
         println(message);
         _messageCount++;
     }
