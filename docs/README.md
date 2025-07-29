@@ -35,6 +35,6 @@ This library allows an Arduino to control the TRS-80 Model I mainboard through i
 - [**Screen**](Screen.md) — Abstract base class for all user interface screens with lifecycle and input handling.
 - [**ContentScreen**](ContentScreen.md) — Structured layout template with header, content, footer, and progress regions.
 - [**ConsoleScreen**](ConsoleScreen.md) — Terminal-like scrollable text output with auto-clear behavior for debugging and logging interfaces.
-- [**LoggerScreen**](LoggerScreen.md) — Visual logging destination that implements ILogger interface with color-coded output and timestamps.
+- [**LoggerScreen**](LoggerScreen.md) — Visual logging destination compatible with ILogger interface with color-coded output and timestamps.
 - [**MenuScreen**](MenuScreen.md) — Paginated menu framework with automatic navigation and selection handling.
 - [**M1TerminalScreen**](M1TerminalScreen.md) — TRS-80 Model I terminal emulation with 64×16 character grid and Model1 integration.

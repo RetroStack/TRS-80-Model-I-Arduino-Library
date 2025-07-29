@@ -83,7 +83,7 @@ void setup()
         Serial.println("Serial logger registered");
     }
 
-    if (multiLogger.addLogger(screenLogger))
+    if (multiLogger.addLogger(screenLogger->asLogger()))
     {
         Serial.println("Screen logger registered");
     }

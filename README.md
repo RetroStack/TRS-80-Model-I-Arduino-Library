@@ -58,7 +58,7 @@ This Arduino library enables interfacing a TRS-80 Model I mainboard directly wit
   - **MenuScreen** – Paginated menu framework with automatic navigation, selection handling, and memory management for building interactive menus.
   - **M1TerminalScreen** – TRS-80 Model I terminal emulation with 64×16 character grid, incremental rendering, and direct Model1 system integration.
   - **ConsoleScreen** – Scrollable terminal-like interface implementing Arduino's Print interface for debugging, logging, and continuous text output with automatic screen clearing.
-  - **LoggerScreen** – Visual logging destination implementing ILogger interface with color-coded output, timestamps, and integration with CompositeLogger for multi-destination logging.
+  - **LoggerScreen** – Visual logging destination compatible with ILogger interface through adapter pattern, featuring color-coded output, timestamps, and integration with CompositeLogger for multi-destination logging.
 
 ## Quick Start
 

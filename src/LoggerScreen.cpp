@@ -3,26 +3,75 @@
 #include <Arduino.h>
 
 /**
+ * @brief Internal adapter class that implements ILogger and forwards to LoggerScreen
+ */
+class LoggerScreen::LoggerAdapter : public ILogger
+{
+private:
+    LoggerScreen *_parent;
+
+public:
+    LoggerAdapter(LoggerScreen *parent) : _parent(parent) {}
+
+    void info(const char *fmt, ...) override
+    {
+        va_list args;
+        va_start(args, fmt);
+        _parent->_logMessage("INFO", _parent->COLOR_INFO, fmt, args);
+        va_end(args);
+    }
+
+    void warn(const char *fmt, ...) override
+    {
+        va_list args;
+        va_start(args, fmt);
+        _parent->_logMessage("WARN", _parent->COLOR_WARN, fmt, args);
+        va_end(args);
+    }
+
+    void err(const char *fmt, ...) override
+    {
+        va_list args;
+        va_start(args, fmt);
+        _parent->_logMessage("ERR ", _parent->COLOR_ERROR, fmt, args);
+        va_end(args);
+    }
+
+    size_t write(uint8_t ch) override
+    {
+        return _parent->write(ch);
+    }
+
+    size_t write(const uint8_t *buffer, size_t size) override
+    {
+        return _parent->write(buffer, size);
+    }
+};
+
+/**
  * @brief Constructor - create logger screen with optional title
  */
-LoggerScreen::LoggerScreen(const char* title) : ConsoleScreen()
+LoggerScreen::LoggerScreen(const char *title) : ConsoleScreen(), _loggerAdapter(nullptr)
 {
     // Set the screen title
     _setTitle(title);
-    
+
     // Initialize logger settings
     _showTimestamps = true;
     _useColorCoding = true;
     _startTime = millis();
-    
+
     // Set up console appearance for logging
     setTextColor(COLOR_INFO);
     setConsoleBackground(0x0000); // Black background
-    setTextSize(1); // Small text for more lines
-    
+    setTextSize(1);               // Small text for more lines
+
     // Update button labels for logger screen
     const char *buttonItems[1] = {"[M] Close Log"};
     _setButtonItems(buttonItems, 1);
+
+    // Create the logger adapter
+    _loggerAdapter = new LoggerAdapter(this);
 }
 
 /**
@@ -30,7 +79,16 @@ LoggerScreen::LoggerScreen(const char* title) : ConsoleScreen()
  */
 LoggerScreen::~LoggerScreen()
 {
+    delete _loggerAdapter;
     // Base class handles cleanup
+}
+
+/**
+ * @brief Get an ILogger adapter for this LoggerScreen
+ */
+ILogger *LoggerScreen::asLogger()
+{
+    return _loggerAdapter;
 }
 
 /**
@@ -109,7 +167,7 @@ void LoggerScreen::err(const char *fmt, ...)
 /**
  * @brief Internal helper to format and display log messages
  */
-void LoggerScreen::_logMessage(const char* level, uint16_t color, const char* fmt, va_list args)
+void LoggerScreen::_logMessage(const char *level, uint16_t color, const char *fmt, va_list args)
 {
     if (!isActive())
         return;
@@ -122,12 +180,12 @@ void LoggerScreen::_logMessage(const char* level, uint16_t color, const char* fm
     // Build complete log line
     const int LINE_LEN = 256;
     char logLine[LINE_LEN];
-    
+
     if (_showTimestamps)
     {
         char timestamp[16];
         _getTimestamp(timestamp, sizeof(timestamp));
-        
+
         if (_useColorCoding)
         {
             // We'll handle color in the display code
@@ -146,39 +204,33 @@ void LoggerScreen::_logMessage(const char* level, uint16_t color, const char* fm
     // Display the log line with appropriate color
     if (_useColorCoding)
     {
-        // Save current color settings
-        uint16_t originalColor = _textColor;
-        
         // Set color for this log level
         setTextColor(color);
-        
-        // Print the log line
-        println(logLine);
-        
-        // Restore original color
-        setTextColor(originalColor);
+
+        // Print the log line using ConsoleScreen's println
+        ConsoleScreen::println(logLine);
     }
     else
     {
         // Simple monochrome output
-        println(logLine);
+        ConsoleScreen::println(logLine);
     }
 }
 
 /**
  * @brief Get current timestamp string for logging
  */
-void LoggerScreen::_getTimestamp(char* buffer, size_t bufferSize)
+void LoggerScreen::_getTimestamp(char *buffer, size_t bufferSize)
 {
     unsigned long elapsed = millis() - _startTime;
     unsigned long seconds = elapsed / 1000;
     unsigned long minutes = seconds / 60;
     unsigned long hours = minutes / 60;
-    
+
     seconds %= 60;
     minutes %= 60;
     hours %= 24; // Roll over after 24 hours
-    
+
     if (hours > 0)
     {
         snprintf(buffer, bufferSize, "%02lu:%02lu:%02lu", hours, minutes, seconds);

@@ -1,11 +1,11 @@
 # LoggerScreen
 
-The `LoggerScreen` is a visual logging destination that combines the functionality of `ConsoleScreen` with the `ILogger` interface. It provides real-time, on-screen logging with formatted output, color coding, and timestamps - perfect for debugging and monitoring applications on the M1Shield display.
+The `LoggerScreen` is a visual logging destination that extends `ConsoleScreen` with logging functionality compatible with the `ILogger` interface. It provides real-time, on-screen logging with formatted output, color coding, and timestamps - perfect for debugging and monitoring applications on the M1Shield display.
 
 ## Features
 
 - **Visual Logging**: Display log messages directly on the M1Shield screen
-- **ILogger Interface**: Full compatibility with the logging system and CompositeLogger
+- **ILogger Compatibility**: Works with CompositeLogger through adapter pattern
 - **Color-Coded Levels**: Different colors for INFO (white), WARN (yellow), and ERR (red)
 - **Timestamps**: Optional relative timestamps showing elapsed time
 - **Auto-Scrolling**: Automatic screen clearing when full for continuous logging
@@ -55,8 +55,8 @@ void setup() {
     M1Shield.begin(displayProvider);
     
     // Set up multi-destination logging
-    multiLogger.addLogger(&serialLogger);    // Log to Serial
-    multiLogger.addLogger(screenLogger);     // Log to screen
+    multiLogger.addLogger(&serialLogger);           // Log to Serial
+    multiLogger.addLogger(screenLogger->asLogger()); // Log to screen (use asLogger())
     
     M1Shield.setScreen(screenLogger);
     
@@ -109,7 +109,20 @@ void resetTimestamp()
 ```
 Reset the timestamp reference point to the current time.
 
-### ILogger Interface
+### ILogger Compatibility
+
+```cpp
+ILogger* asLogger()
+```
+Get an ILogger adapter for this LoggerScreen. Use this method to add the LoggerScreen to a CompositeLogger:
+
+```cpp
+LoggerScreen* screen = new LoggerScreen("Debug");
+CompositeLogger composite;
+composite.addLogger(screen->asLogger());  // Use asLogger()
+```
+
+### Logging Interface
 
 ```cpp
 void info(const char *fmt, ...)
@@ -242,7 +255,7 @@ void setupLogging() {
     #ifdef DEBUG_BUILD
     // In debug builds, also show on screen
     LoggerScreen* screenLogger = new LoggerScreen("Debug Log");
-    logger.addLogger(screenLogger);
+    logger.addLogger(screenLogger->asLogger());  // Use asLogger()
     M1Shield.setScreen(screenLogger);
     #endif
     

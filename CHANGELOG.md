@@ -31,3 +31,10 @@ This is the initial version written by Ven Reddy
   - MenuScreen
   - M1TerminalScreen
 - Adding the ability to request TEST signal state
+
+## 28th July 2025 - Updated Release (1.2.1)
+
+- Added LoggerScreen with ILogger compatibility through adapter pattern
+- Added CompositeLogger for multi-destination logging  
+- Added SerialLogger for Serial Monitor integration
+- **BREAKING CHANGE**: LoggerScreen now requires `screen->asLogger()` when used with CompositeLogger instead of passing the screen directly
