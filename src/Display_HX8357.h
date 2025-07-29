@@ -12,19 +12,32 @@
 
 class Display_HX8357 : public DisplayProvider
 {
+private:
+    Adafruit_HX8357 *_display;
+
 public:
+    Display_HX8357() : _display(nullptr) {}
+
     Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) override
     {
-        Adafruit_HX8357 *tft = new Adafruit_HX8357(cs, dc, rst);
-        tft->begin(HX8357D);
-        tft->setRotation(0);
-        tft->invertDisplay(false);
-        return tft;
+        if (_display)
+        {
+            delete _display;
+        }
+        _display = new Adafruit_HX8357(cs, dc, rst);
+        _display->begin(HX8357D);
+        _display->setRotation(0);
+        _display->invertDisplay(false);
+        return _display;
     }
 
-    void destroy(Adafruit_GFX *display) override
+    void destroy() override
     {
-        delete display;
+        if (_display)
+        {
+            delete _display;
+            _display = nullptr;
+        }
     }
 
     const char *name() const override
@@ -40,6 +53,11 @@ public:
     uint16_t height() const override
     {
         return 480;
+    }
+
+    ~Display_HX8357() override
+    {
+        destroy();
     }
 };
 

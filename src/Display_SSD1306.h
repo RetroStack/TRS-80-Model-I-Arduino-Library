@@ -12,18 +12,31 @@
 
 class Display_SSD1306 : public DisplayProvider
 {
+private:
+    Adafruit_SSD1306 *_display;
+
 public:
+    Display_SSD1306() : _display(nullptr) {}
+
     Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) override
     {
-        Adafruit_SSD1306 *display = new Adafruit_SSD1306(cs, dc, rst);
-        display->begin(SSD1306_SWITCHCAPVCC, 0x3C);
-        display->clearDisplay();
-        return display;
+        if (_display)
+        {
+            delete _display;
+        }
+        _display = new Adafruit_SSD1306(cs, dc, rst);
+        _display->begin(SSD1306_SWITCHCAPVCC, 0x3C);
+        _display->clearDisplay();
+        return _display;
     }
 
-    void destroy(Adafruit_GFX *display) override
+    void destroy() override
     {
-        delete display;
+        if (_display)
+        {
+            delete _display;
+            _display = nullptr;
+        }
     }
 
     const char *name() const override
@@ -39,6 +52,11 @@ public:
     uint16_t height() const override
     {
         return 64;
+    }
+
+    ~Display_SSD1306() override
+    {
+        destroy();
     }
 };
 

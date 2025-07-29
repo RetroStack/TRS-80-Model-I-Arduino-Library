@@ -12,18 +12,31 @@
 
 class Display_ST7735 : public DisplayProvider
 {
+private:
+    Adafruit_ST7735 *_display;
+
 public:
+    Display_ST7735() : _display(nullptr) {}
+
     Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) override
     {
-        Adafruit_ST7735 *tft = new Adafruit_ST7735(cs, dc, rst);
-        tft->initR(INITR_BLACKTAB);
-        tft->setRotation(3);
-        return tft;
+        if (_display)
+        {
+            delete _display;
+        }
+        _display = new Adafruit_ST7735(cs, dc, rst);
+        _display->initR(INITR_BLACKTAB);
+        _display->setRotation(3);
+        return _display;
     }
 
-    void destroy(Adafruit_GFX *display) override
+    void destroy() override
     {
-        delete display;
+        if (_display)
+        {
+            delete _display;
+            _display = nullptr;
+        }
     }
 
     const char *name() const override
@@ -39,6 +52,11 @@ public:
     uint16_t height() const override
     {
         return 160;
+    }
+
+    ~Display_ST7735() override
+    {
+        destroy();
     }
 };
 

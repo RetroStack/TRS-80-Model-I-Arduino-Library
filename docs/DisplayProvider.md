@@ -92,7 +92,7 @@ All display providers implement the `DisplayProvider` interface:
 class DisplayProvider {
 public:
     virtual Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) = 0;
-    virtual void destroy(Adafruit_GFX *display) = 0;
+    virtual void destroy() = 0;
     virtual const char *name() const = 0;
     virtual uint16_t width() const = 0;
     virtual uint16_t height() const = 0;
@@ -101,8 +101,8 @@ public:
 
 ### Methods
 
-- **`create()`**: Creates and initializes the display instance
-- **`destroy()`**: Cleans up display resources
+- **`create()`**: Creates and initializes the display instance, stores it internally
+- **`destroy()`**: Cleans up the internally stored display resources
 - **`name()`**: Returns human-readable display name
 - **`width()`**: Returns effective width (after rotation)
 - **`height()`**: Returns effective height (after rotation)
@@ -119,17 +119,28 @@ To add support for a new display controller:
 #include <DisplayProvider.h>
 
 class Display_NEWTYPE : public DisplayProvider {
+private:
+    Adafruit_NEWTYPE *_display;
+
 public:
+    Display_NEWTYPE() : _display(nullptr) {}
+
     Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) override {
-        Adafruit_NEWTYPE *tft = new Adafruit_NEWTYPE(cs, dc, rst);
-        tft->begin();                    // Initialize display
-        tft->setRotation(1);            // Set optimal rotation
-        tft->invertDisplay(false);      // Configure as needed
-        return tft;
+        if (_display) {
+            delete _display;
+        }
+        _display = new Adafruit_NEWTYPE(cs, dc, rst);
+        _display->begin();                    // Initialize display
+        _display->setRotation(1);            // Set optimal rotation
+        _display->invertDisplay(false);      // Configure as needed
+        return _display;
     }
 
-    void destroy(Adafruit_GFX *display) override {
-        delete display;
+    void destroy() override {
+        if (_display) {
+            delete _display;
+            _display = nullptr;
+        }
     }
 
     const char *name() const override {
@@ -142,6 +153,10 @@ public:
 
     uint16_t height() const override {
         return 240;  // After rotation
+    }
+
+    ~Display_NEWTYPE() override {
+        destroy();
     }
 };
 ```

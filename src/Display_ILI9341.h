@@ -12,18 +12,31 @@
 
 class Display_ILI9341 : public DisplayProvider
 {
+private:
+    Adafruit_ILI9341 *_display;
+
 public:
+    Display_ILI9341() : _display(nullptr) {}
+
     Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) override
     {
-        Adafruit_ILI9341 *tft = new Adafruit_ILI9341(cs, dc, rst);
-        tft->begin();
-        tft->setRotation(3);
-        return tft;
+        if (_display)
+        {
+            delete _display;
+        }
+        _display = new Adafruit_ILI9341(cs, dc, rst);
+        _display->begin();
+        _display->setRotation(3);
+        return _display;
     }
 
-    void destroy(Adafruit_GFX *display) override
+    void destroy() override
     {
-        delete display;
+        if (_display)
+        {
+            delete _display;
+            _display = nullptr;
+        }
     }
 
     const char *name() const override
@@ -39,6 +52,11 @@ public:
     uint16_t height() const override
     {
         return 240; // After rotation 3
+    }
+
+    ~Display_ILI9341() override
+    {
+        destroy();
     }
 };
 

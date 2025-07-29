@@ -12,18 +12,31 @@
 
 class Display_ST7789_320x170 : public DisplayProvider
 {
+private:
+    Adafruit_ST7789 *_display;
+
 public:
+    Display_ST7789_320x170() : _display(nullptr) {}
+
     Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) override
     {
-        Adafruit_ST7789 *tft = new Adafruit_ST7789(cs, dc, rst);
-        tft->init(170, 320, SPI_MODE0);
-        tft->setRotation(3);
-        return tft;
+        if (_display)
+        {
+            delete _display;
+        }
+        _display = new Adafruit_ST7789(cs, dc, rst);
+        _display->init(170, 320, SPI_MODE0);
+        _display->setRotation(3);
+        return _display;
     }
 
-    void destroy(Adafruit_GFX *display) override
+    void destroy() override
     {
-        delete display;
+        if (_display)
+        {
+            delete _display;
+            _display = nullptr;
+        }
     }
 
     const char *name() const override
@@ -39,6 +52,11 @@ public:
     uint16_t height() const override
     {
         return 170;
+    }
+
+    ~Display_ST7789_320x170() override
+    {
+        destroy();
     }
 };
 

@@ -12,19 +12,32 @@
 
 class Display_ST7796 : public DisplayProvider
 {
+private:
+    Adafruit_ST7796S *_display;
+
 public:
+    Display_ST7796() : _display(nullptr) {}
+
     Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) override
     {
-        Adafruit_ST7796S *tft = new Adafruit_ST7796S(cs, dc, rst);
-        tft->init(320, 480, 0, 0, ST7796S_BGR);
-        tft->setRotation(1);
-        tft->invertDisplay(true);
-        return tft;
+        if (_display)
+        {
+            delete _display;
+        }
+        _display = new Adafruit_ST7796S(cs, dc, rst);
+        _display->init(320, 480, 0, 0, ST7796S_BGR);
+        _display->setRotation(1);
+        _display->invertDisplay(true);
+        return _display;
     }
 
-    void destroy(Adafruit_GFX *display) override
+    void destroy() override
     {
-        delete display;
+        if (_display)
+        {
+            delete _display;
+            _display = nullptr;
+        }
     }
 
     const char *name() const override
@@ -40,6 +53,11 @@ public:
     uint16_t height() const override
     {
         return 320; // After rotation 1
+    }
+
+    ~Display_ST7796() override
+    {
+        destroy();
     }
 };
 

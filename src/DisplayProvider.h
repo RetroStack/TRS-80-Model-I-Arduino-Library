@@ -13,7 +13,7 @@ class DisplayProvider
 {
 public:
     virtual Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) = 0;
-    virtual void destroy(Adafruit_GFX *display) = 0;
+    virtual void destroy() = 0;
     virtual const char *name() const = 0;
     virtual uint16_t width() const = 0;
     virtual uint16_t height() const = 0;

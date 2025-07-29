@@ -81,7 +81,7 @@ M1ShieldClass::~M1ShieldClass()
     {
         if (_displayProvider)
         {
-            _displayProvider->destroy(_tft);
+            _displayProvider->destroy();
         }
         else
         {
