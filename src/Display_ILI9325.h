@@ -42,6 +42,12 @@ public:
         return (_display != nullptr);
     }
 
+    uint16_t convertColor(uint16_t color) override
+    {
+        // ILI9325 uses 16-bit RGB565 format directly
+        return color;
+    }
+
     void destroy() override
     {
         if (_display)

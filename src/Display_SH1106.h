@@ -47,6 +47,26 @@ public:
         return false;
     }
 
+    uint16_t convertColor(uint16_t color) override
+    {
+        // SH1106 is monochrome: convert to black (0) or white (1)
+        // Extract RGB components from RGB565 format
+        uint8_t r = (color >> 11) & 0x1F; // 5 bits red
+        uint8_t g = (color >> 5) & 0x3F;  // 6 bits green
+        uint8_t b = color & 0x1F;         // 5 bits blue
+
+        // Scale to 8-bit values
+        r = (r * 255) / 31;
+        g = (g * 255) / 63;
+        b = (b * 255) / 31;
+
+        // Calculate luminance using standard weights (ITU-R BT.709)
+        uint16_t luminance = (uint16_t)(0.2126 * r + 0.7152 * g + 0.0722 * b);
+
+        // Use 50% threshold (127.5, rounded to 128)
+        return (luminance >= 128) ? SH110X_WHITE : SH110X_BLACK;
+    }
+
     void destroy() override
     {
         if (_display)

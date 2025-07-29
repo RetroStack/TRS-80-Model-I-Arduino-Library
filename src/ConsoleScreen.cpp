@@ -28,9 +28,9 @@ ConsoleScreen::ConsoleScreen() : ContentScreen()
 {
     // Initialize text settings
     _textSize = DEFAULT_TEXT_SIZE;
-    _textColor = DEFAULT_TEXT_COLOR;
-    _textBgColor = DEFAULT_TEXT_BG_COLOR;
-    _consoleBgColor = DEFAULT_CONSOLE_BG_COLOR;
+    _textColor = M1Shield.convertColor(DEFAULT_TEXT_COLOR);
+    _textBgColor = M1Shield.convertColor(DEFAULT_TEXT_BG_COLOR);
+    _consoleBgColor = M1Shield.convertColor(DEFAULT_CONSOLE_BG_COLOR);
     _tabSize = DEFAULT_TAB_SIZE;
 
     // Calculate character dimensions based on text size
@@ -152,7 +152,7 @@ void ConsoleScreen::_drawContent()
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
     // Fill console background
-    gfx.fillRect(_contentLeft, _contentTop, _contentWidth, _contentHeight, _consoleBgColor);
+    gfx.fillRect(_contentLeft, _contentTop, _contentWidth, _contentHeight, M1Shield.convertColor(_consoleBgColor));
 }
 
 /**
@@ -292,7 +292,7 @@ void ConsoleScreen::cls()
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
     // Clear console area
-    gfx.fillRect(_contentLeft, _contentTop, _contentWidth, _contentHeight, _consoleBgColor);
+    gfx.fillRect(_contentLeft, _contentTop, _contentWidth, _contentHeight, M1Shield.convertColor(_consoleBgColor));
 
     // Reset cursor to top-left
     _currentX = 0;
@@ -322,8 +322,8 @@ void ConsoleScreen::refresh()
  */
 void ConsoleScreen::setTextColor(uint16_t foreground, uint16_t background)
 {
-    _textColor = foreground;
-    _textBgColor = background;
+    _textColor = M1Shield.convertColor(foreground);
+    _textBgColor = M1Shield.convertColor(background);
 }
 
 /**
@@ -336,7 +336,7 @@ void ConsoleScreen::setTextColor(uint16_t foreground, uint16_t background)
  */
 void ConsoleScreen::setConsoleBackground(uint16_t color)
 {
-    _consoleBgColor = color;
+    _consoleBgColor = M1Shield.convertColor(color);
 }
 
 /**

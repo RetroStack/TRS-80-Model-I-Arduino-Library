@@ -249,14 +249,14 @@ void MenuScreen::_drawContent()
             uint16_t bgColor = (i % 2 == 0) ? DISABLED_ROW_COLOR_BG1 : DISABLED_ROW_COLOR_BG2;
             uint16_t fgColor = (i % 2 == 0) ? DISABLED_ROW_COLOR_FG1 : DISABLED_ROW_COLOR_FG2;
 
-            gfx.fillRect(left, y, width, ROW_HEIGHT, bgColor);
-            gfx.setTextColor(fgColor);
+            gfx.fillRect(left, y, width, ROW_HEIGHT, M1Shield.convertColor(bgColor));
+            gfx.setTextColor(M1Shield.convertColor(fgColor));
         }
         // Render disabled items with grayed out colors
         else if (itemIndex == _selectedMenuItemIndex && isEnabled)
         {
-            gfx.fillRect(left, y, width, ROW_HEIGHT, SELECTED_ROW_COLOR_BG);
-            gfx.setTextColor(SELECTED_ROW_COLOR_FG);
+            gfx.fillRect(left, y, width, ROW_HEIGHT, M1Shield.convertColor(SELECTED_ROW_COLOR_BG));
+            gfx.setTextColor(M1Shield.convertColor(SELECTED_ROW_COLOR_FG));
         }
         // Render normal enabled items with alternating row colors
         else
@@ -264,8 +264,8 @@ void MenuScreen::_drawContent()
             uint16_t bgColor = (i % 2 == 0) ? ROW_COLOR_BG1 : ROW_COLOR_BG2;
             uint16_t fgColor = (i % 2 == 0) ? ROW_COLOR_FG1 : ROW_COLOR_FG2;
 
-            gfx.fillRect(left, y, width, ROW_HEIGHT, bgColor);
-            gfx.setTextColor(fgColor);
+            gfx.fillRect(left, y, width, ROW_HEIGHT, M1Shield.convertColor(bgColor));
+            gfx.setTextColor(M1Shield.convertColor(fgColor));
         }
 
         if (itemIndex < _menuItemCount)
@@ -341,15 +341,15 @@ void MenuScreen::_drawContent()
         if (totalPages > 1 && _currentPage < totalPages - 1)
         {
             // Draw three small filled rectangles as dots (3x3 pixels each, spaced 6 pixels apart)
-            gfx.fillRect(centerX - 9, dotY, 3, 3, NEXT_PAGE_INDICATOR_COLOR_FG); // Left dot
-            gfx.fillRect(centerX - 1, dotY, 3, 3, NEXT_PAGE_INDICATOR_COLOR_FG); // Center dot
-            gfx.fillRect(centerX + 7, dotY, 3, 3, NEXT_PAGE_INDICATOR_COLOR_FG); // Right dot
+            gfx.fillRect(centerX - 9, dotY, 3, 3, M1Shield.convertColor(NEXT_PAGE_INDICATOR_COLOR_FG)); // Left dot
+            gfx.fillRect(centerX - 1, dotY, 3, 3, M1Shield.convertColor(NEXT_PAGE_INDICATOR_COLOR_FG)); // Center dot
+            gfx.fillRect(centerX + 7, dotY, 3, 3, M1Shield.convertColor(NEXT_PAGE_INDICATOR_COLOR_FG)); // Right dot
         }
         else
         {
-            gfx.fillRect(centerX - 9, dotY, 3, 3, TABLE_COLOR_BG); // Left dot
-            gfx.fillRect(centerX - 1, dotY, 3, 3, TABLE_COLOR_BG); // Center dot
-            gfx.fillRect(centerX + 7, dotY, 3, 3, TABLE_COLOR_BG); // Right dot
+            gfx.fillRect(centerX - 9, dotY, 3, 3, M1Shield.convertColor(TABLE_COLOR_BG)); // Left dot
+            gfx.fillRect(centerX - 1, dotY, 3, 3, M1Shield.convertColor(TABLE_COLOR_BG)); // Center dot
+            gfx.fillRect(centerX + 7, dotY, 3, 3, M1Shield.convertColor(TABLE_COLOR_BG)); // Right dot
         }
     }
 }

@@ -241,6 +241,18 @@ public:
     bool display();
 
     /**
+     * @brief Convert a color value for the current display type
+     *
+     * Converts a 16-bit RGB565 color value to the appropriate format for the current display.
+     * For TFT displays, this returns the color unchanged.
+     * For OLED displays, this converts to monochrome (black/white).
+     *
+     * @param color 16-bit RGB565 color value to convert
+     * @return Converted color value appropriate for the current display
+     */
+    uint16_t convertColor(uint16_t color);
+
+    /**
      * @brief Set the active screen and perform transition
      *
      * Changes the currently active screen, handling proper lifecycle:

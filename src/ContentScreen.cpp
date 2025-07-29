@@ -89,7 +89,7 @@ void ContentScreen::_drawScreen()
     uint16_t screenHeight = M1Shield.getScreenHeight();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
-    gfx.fillScreen(SCREEN_COLOR_BG);
+    gfx.fillScreen(M1Shield.convertColor(SCREEN_COLOR_BG));
 
     // Render all layout regions in order
     _drawHeader();
@@ -100,11 +100,11 @@ void ContentScreen::_drawScreen()
     // Add decorative borders for visual separation
     uint16_t contentTop = _getContentTop();
     uint16_t contentHeight = _getContentHeight();
-    gfx.drawRect(0, contentTop - 1, screenWidth, contentHeight + 2, SCREEN_COLOR_FG);
+    gfx.drawRect(0, contentTop - 1, screenWidth, contentHeight + 2, M1Shield.convertColor(SCREEN_COLOR_FG));
 
     // Draw separator line above progress bar
     uint16_t progressTop = _getProgressBarY();
-    gfx.drawFastHLine(0, progressTop - 1, screenWidth, SCREEN_COLOR_FG);
+    gfx.drawFastHLine(0, progressTop - 1, screenWidth, M1Shield.convertColor(SCREEN_COLOR_FG));
 }
 
 /**
@@ -137,7 +137,7 @@ void ContentScreen::_drawHeader()
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
     // Draw header background and centered title
-    gfx.fillRect(0, top, screenWidth, HEADER_HEIGHT, HEADER_COLOR_BG);
+    gfx.fillRect(0, top, screenWidth, HEADER_HEIGHT, M1Shield.convertColor(HEADER_COLOR_BG));
 
     // Check whether title is set
     if (_title != nullptr && _title[0] != '\0')
@@ -145,7 +145,7 @@ void ContentScreen::_drawHeader()
         // Calculate centered position for title text
         uint16_t textWidth = TEXT_SIZE_3_WIDTH * strlen(_title);
 
-        gfx.setTextColor(HEADER_COLOR_FG);
+        gfx.setTextColor(M1Shield.convertColor(HEADER_COLOR_FG));
         gfx.setTextSize(3);
         gfx.setCursor((screenWidth - textWidth) / 2, top + TEXT_SIZE_3_HALF_HEIGHT);
         gfx.print(_title);
@@ -218,12 +218,12 @@ void ContentScreen::_drawFooter()
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
     // Draw footer background
-    gfx.fillRect(0, top, screenWidth, FOOTER_HEIGHT, FOOTER_COLOR_BG);
+    gfx.fillRect(0, top, screenWidth, FOOTER_HEIGHT, M1Shield.convertColor(FOOTER_COLOR_BG));
 
     // Render button labels if configured
     if (_buttonItems != nullptr && _buttonItemCount > 0)
     {
-        gfx.setTextColor(FOOTER_COLOR_FG);
+        gfx.setTextColor(M1Shield.convertColor(FOOTER_COLOR_FG));
         gfx.setTextSize(1);
 
         // Distribute buttons evenly across footer width
@@ -273,13 +273,13 @@ void ContentScreen::_drawProgressBar()
     // Draw filled (progress) portion in blue
     if (progressWidth > 0)
     {
-        gfx.fillRect(0, top, progressWidth, PROGRESSBAR_HEIGHT, PROGRESSBAR_COLOR_FG);
+        gfx.fillRect(0, top, progressWidth, PROGRESSBAR_HEIGHT, M1Shield.convertColor(PROGRESSBAR_COLOR_FG));
     }
 
     // Draw remaining (empty) portion in black
     if (progressWidth < screenWidth)
     {
-        gfx.fillRect(progressWidth, top, screenWidth - progressWidth, PROGRESSBAR_HEIGHT, PROGRESSBAR_COLOR_BG);
+        gfx.fillRect(progressWidth, top, screenWidth - progressWidth, PROGRESSBAR_HEIGHT, M1Shield.convertColor(PROGRESSBAR_COLOR_BG));
     }
 }
 
@@ -494,7 +494,7 @@ void ContentScreen::_clearContentArea()
     uint16_t height = _getContentHeight();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
-    gfx.fillRect(x, y, width, height, 0x0000);
+    gfx.fillRect(x, y, width, height, M1Shield.convertColor(SCREEN_COLOR_BG));
 
     M1Shield.display(); // Push changes to display
 }
@@ -543,7 +543,7 @@ void ContentScreen::_drawText(uint16_t x, uint16_t y, const char *text, uint16_t
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
     // Set text properties and draw
-    gfx.setTextColor(color);
+    gfx.setTextColor(M1Shield.convertColor(color));
     gfx.setTextSize(size);
     gfx.setCursor(absoluteX, absoluteY);
     gfx.print(text);

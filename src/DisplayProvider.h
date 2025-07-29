@@ -16,6 +16,7 @@ public:
     virtual void destroy() = 0;
     virtual Adafruit_GFX &getGFX() = 0;
     virtual bool display() = 0;
+    virtual uint16_t convertColor(uint16_t color) = 0;
     virtual const char *name() const = 0;
     virtual uint16_t width() const = 0;
     virtual uint16_t height() const = 0;

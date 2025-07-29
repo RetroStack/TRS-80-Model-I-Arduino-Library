@@ -199,6 +199,18 @@ bool M1ShieldClass::display()
 }
 
 /**
+ * Converts a color value for the current display type.
+ */
+uint16_t M1ShieldClass::convertColor(uint16_t color)
+{
+    if (_displayProvider)
+    {
+        return _displayProvider->convertColor(color);
+    }
+    return color; // Return original color if no display provider
+}
+
+/**
  * Sets the screen used to display items on the screen.
  *
  * NOTE: After assigning it to the shield, it completely owns the value and potentially

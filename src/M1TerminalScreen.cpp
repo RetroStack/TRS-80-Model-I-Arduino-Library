@@ -657,6 +657,9 @@ void M1TerminalScreen::_updatePixelLine(Adafruit_GFX &gfx, uint8_t currentPixelL
     int16_t xCoord = _contentLeft + terminalX;
     int16_t yCoord = _contentTop + terminalY + y;
 
+    uint16_t fgColor = M1Shield.convertColor(TERMINAL_COLOR_FG);
+    uint16_t bgColor = M1Shield.convertColor(TERMINAL_COLOR_BG);
+
     // Process all 6 pixels in this scanline
     for (int16_t x = 0; x < CHAR_WIDTH; x++)
     {
@@ -671,7 +674,7 @@ void M1TerminalScreen::_updatePixelLine(Adafruit_GFX &gfx, uint8_t currentPixelL
             // Update pixel only if it changed or during forced redraw
             if (_redrawIndex != -1 || (hasPixel != wasPixel))
             {
-                gfx.writePixel(xCoord + x, yCoord, hasPixel ? TERMINAL_COLOR_FG : TERMINAL_COLOR_BG);
+                gfx.writePixel(xCoord + x, yCoord, hasPixel ? fgColor : bgColor);
             }
 
             // Shift to next pixel bit (left to right processing)
@@ -1115,7 +1118,7 @@ void M1TerminalScreen::_drawContent()
     if (_model1VideoLoadTime > 0)
     {
         // Clear with normal background color
-        gfx.fillRect(left, top, width, height, TERMINAL_COLOR_BG);
+        gfx.fillRect(left, top, width, height, M1Shield.convertColor(TERMINAL_COLOR_BG));
 
         // Schedule complete terminal redraw
         _redraw();
@@ -1123,10 +1126,10 @@ void M1TerminalScreen::_drawContent()
     else
     {
         // Clear with normal background color
-        gfx.fillRect(left, top, width, height, NO_DATA_COLOR_BG);
+        gfx.fillRect(left, top, width, height, M1Shield.convertColor(NO_DATA_COLOR_BG));
 
         // Show that there is no data available
-        gfx.setTextColor(NO_DATA_COLOR_FG);
+        gfx.setTextColor(M1Shield.convertColor(NO_DATA_COLOR_FG));
         gfx.setTextSize(2);
         gfx.setCursor((width - 130) / 2, (height - 5) / 2);
         gfx.print("No Content");
