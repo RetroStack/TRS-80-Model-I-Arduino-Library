@@ -97,6 +97,7 @@ void setup() {
 
 - `Adafruit_GFX& getGFX()`: Returns reference to graphics library for direct drawing
 - `DisplayProvider& getDisplayProvider()`: Returns reference to the display provider instance
+- `bool display()`: Updates the display (pushes framebuffer for OLED, validates for TFT)
 - `uint16_t getScreenWidth()`: Returns display width in pixels
 - `uint16_t getScreenHeight()`: Returns display height in pixels
 - `bool isDisplayInitialized()`: Returns true if display initialization was successful
@@ -482,11 +483,19 @@ void displayInfo() {
 
         // You can also access the graphics context through the provider
         Adafruit_GFX& gfx = provider.getGFX();
-        // ... use gfx for drawing ...
-    }
-}
+        gfx.fillScreen(0x0000);
+        gfx.setTextColor(0xFFFF);
+        gfx.setCursor(10, 10);
+        gfx.print("Display: ");
+        gfx.println(provider.name());
 
-void loop() {
+        // Update the display (important for OLED displays)
+        if (provider.display()) {
+            Serial.println("Display updated successfully");
+        }
+        // Alternative: M1Shield.display();
+    }
+}void loop() {
     // Test all inputs with LED feedback
     if (M1Shield.isJoystickPressed()) {
         M1Shield.setLEDColor(COLOR_WHITE);

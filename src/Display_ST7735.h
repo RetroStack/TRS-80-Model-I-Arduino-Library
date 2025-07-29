@@ -35,6 +35,12 @@ public:
         return *_display;
     }
 
+    bool display() override
+    {
+        // TFT displays update immediately, no explicit display() call needed
+        return (_display != nullptr);
+    }
+
     void destroy() override
     {
         if (_display)

@@ -187,6 +187,18 @@ DisplayProvider& M1ShieldClass::getDisplayProvider() const
 }
 
 /**
+ * Updates the display by calling the display provider's display method.
+ */
+bool M1ShieldClass::display()
+{
+    if (_displayProvider)
+    {
+        return _displayProvider->display();
+    }
+    return false;
+}
+
+/**
  * Sets the screen used to display items on the screen.
  *
  * NOTE: After assigning it to the shield, it completely owns the value and potentially

@@ -24,19 +24,18 @@ The DisplayProvider architecture uses a compile-time provider selection. This pr
 
 ## Available Providers
 
-| Provider Class           | Controller | Physical Size | Rotated Size | Library Used     | Notes                  |
-| ------------------------ | ---------- | ------------- | ------------ | ---------------- | ---------------------- |
-| `Display_ST7789`         | ST7789     | 240x320       | 320x240      | Adafruit_ST7789  | Most common, landscape |
-| `Display_ST7789_240x240` | ST7789     | 240x240       | 240x240      | Adafruit_ST7789  | Square displays        |
-| `Display_ST7789_320x170` | ST7789     | 170x320       | 320x170      | Adafruit_ST7789  | Wide landscape format  |
-| `Display_ST7789_320x240` | ST7789     | 240x320       | 320x240      | Adafruit_ST7789  | Alternative landscape  |
-| `Display_ST7735`         | ST7735     | 128x160       | 160x128      | Adafruit_ST7735  | Smaller displays       |
-| `Display_ILI9341`        | ILI9341    | 240x320       | 320x240      | Adafruit_ILI9341 | Alternative common     |
-| `Display_ST7796`         | ST7796     | 320x480       | 480x320      | Adafruit_ST7796S | Large, landscape       |
-| `Display_HX8357`         | HX8357     | 320x480       | 480x320      | Adafruit_HX8357  | Large, portrait        |
-| `Display_ILI9325`        | ILI9325    | 240x320       | 320x240      | Adafruit_TFTLCD  | Parallel interface     |
-| `Display_SSD1306`        | SSD1306    | 128x64        | 128x64       | Adafruit_SSD1306 | Monochrome OLED        |
-| `Display_SH1106`         | SH1106     | 128x64        | 128x64       | Adafruit_SH110X  | Monochrome OLED        |
+| Provider Class           | Controller | Physical Size | Rotated Size | Library Used     | Notes                 |
+| ------------------------ | ---------- | ------------- | ------------ | ---------------- | --------------------- |
+| `Display_ST7789_240x240` | ST7789     | 240x240       | 240x240      | Adafruit_ST7789  | Square displays       |
+| `Display_ST7789_320x170` | ST7789     | 170x320       | 320x170      | Adafruit_ST7789  | Wide landscape format |
+| `Display_ST7789_320x240` | ST7789     | 240x320       | 320x240      | Adafruit_ST7789  | Alternative landscape |
+| `Display_ST7735`         | ST7735     | 128x160       | 160x128      | Adafruit_ST7735  | Smaller displays      |
+| `Display_ILI9341`        | ILI9341    | 240x320       | 320x240      | Adafruit_ILI9341 | Alternative common    |
+| `Display_ST7796`         | ST7796     | 320x480       | 480x320      | Adafruit_ST7796S | Large, landscape      |
+| `Display_HX8357`         | HX8357     | 320x480       | 480x320      | Adafruit_HX8357  | Large, portrait       |
+| `Display_ILI9325`        | ILI9325    | 240x320       | 320x240      | Adafruit_TFTLCD  | Parallel interface    |
+| `Display_SSD1306`        | SSD1306    | 128x64        | 128x64       | Adafruit_SSD1306 | Monochrome OLED       |
+| `Display_SH1106`         | SH1106     | 128x64        | 128x64       | Adafruit_SH110X  | Monochrome OLED       |
 
 ## Basic Usage
 
@@ -84,6 +83,55 @@ uint16_t w = M1Shield.getScreenWidth();
 uint16_t h = M1Shield.getScreenHeight();
 ```
 
+### 5. Drawing and Display Updates
+
+```cpp
+void loop() {
+    // Get graphics context for drawing
+    Adafruit_GFX& gfx = displayProvider.getGFX();
+    // Alternative: Adafruit_GFX& gfx = M1Shield.getGFX();
+
+    // Draw something
+    gfx.fillScreen(0x0000);
+    gfx.setTextColor(0xFFFF);
+    gfx.setCursor(10, 10);
+    gfx.println("Hello World!");
+
+    // Update display (important for OLED displays)
+    if (displayProvider.display()) {
+        Serial.println("Display updated successfully");
+    }
+    // Alternative: M1Shield.display();
+
+    delay(1000);
+}
+```
+
+### 6. Advanced Provider Access
+
+```cpp
+void displayStatus() {
+    // Access provider through M1Shield (useful when provider instance not available)
+    DisplayProvider& provider = M1Shield.getDisplayProvider();
+
+    Serial.print("Display: ");
+    Serial.println(provider.name());
+    Serial.print("Size: ");
+    Serial.print(provider.width());
+    Serial.print("x");
+    Serial.println(provider.height());
+
+    // Direct graphics access
+    Adafruit_GFX& gfx = provider.getGFX();
+    gfx.setTextSize(1);
+    gfx.setCursor(0, 0);
+    gfx.print(provider.name());
+
+    // Update display
+    provider.display();
+}
+```
+
 ## Provider Interface
 
 All display providers implement the `DisplayProvider` interface:
@@ -91,13 +139,48 @@ All display providers implement the `DisplayProvider` interface:
 ```cpp
 class DisplayProvider {
 public:
-    virtual Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) = 0;
+    virtual bool create(int8_t cs, int8_t dc, int8_t rst) = 0;
     virtual void destroy() = 0;
+    virtual Adafruit_GFX &getGFX() = 0;
+    virtual bool display() = 0;
     virtual const char *name() const = 0;
     virtual uint16_t width() const = 0;
     virtual uint16_t height() const = 0;
 };
 ```
+
+### Method Details
+
+- **`create(cs, dc, rst)`**: Initialize the display hardware
+
+  - Returns `true` if successful, `false` on failure
+  - Handles display-specific configuration and rotation
+  - Previous versions returned `Adafruit_GFX*` pointer
+
+- **`destroy()`**: Clean up display resources
+
+  - Safe to call multiple times
+  - Automatically called by destructor
+
+- **`getGFX()`**: Get reference to Adafruit_GFX for drawing
+
+  - Returns reference to the underlying graphics context
+  - Use for all drawing operations
+
+- **`display()`**: Update the display (NEW)
+
+  - For OLED displays: Pushes framebuffer to screen
+  - For TFT displays: Returns `true` (updates immediately)
+  - Returns `true` on success, `false` on failure
+
+- **`name()`**: Get human-readable display name
+
+  - Returns string like "ST7789 240x320"
+  - Useful for debugging and user interfaces
+
+- **`width()` / `height()`**: Get display dimensions
+  - Returns dimensions after rotation is applied
+  - Matches what you'll use for drawing coordinates
 
 ### Methods
 
@@ -125,7 +208,7 @@ private:
 public:
     Display_NEWTYPE() : _display(nullptr) {}
 
-    Adafruit_GFX *create(int8_t cs, int8_t dc, int8_t rst) override {
+    bool create(int8_t cs, int8_t dc, int8_t rst) override {
         if (_display) {
             delete _display;
         }
@@ -133,7 +216,7 @@ public:
         _display->begin();                    // Initialize display
         _display->setRotation(1);            // Set optimal rotation
         _display->invertDisplay(false);      // Configure as needed
-        return _display;
+        return _display != nullptr;          // Return success status
     }
 
     void destroy() override {
@@ -141,6 +224,20 @@ public:
             delete _display;
             _display = nullptr;
         }
+    }
+
+    Adafruit_GFX &getGFX() override {
+        return *_display;
+    }
+
+    bool display() override {
+        // For OLED displays, call _display->display()
+        // For TFT displays, return (_display != nullptr)
+        if (_display) {
+            _display->display();  // Only if display has this method
+            return true;
+        }
+        return false;
     }
 
     const char *name() const override {

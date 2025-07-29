@@ -167,6 +167,8 @@ getVersionMinor KEYWORD2
 getVersionRevision  KEYWORD2
 getVersion  KEYWORD2
 printMemoryContents  KEYWORD2
+display KEYWORD2
+getDisplayProvider  KEYWORD2
 getGFX  KEYWORD2
 getScreenWidth  KEYWORD2
 getScreenHeight KEYWORD2

@@ -35,6 +35,16 @@ public:
         return *_display;
     }
 
+    bool display() override
+    {
+        if (_display)
+        {
+            _display->display();
+            return true;
+        }
+        return false;
+    }
+
     void destroy() override
     {
         if (_display)

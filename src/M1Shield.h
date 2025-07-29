@@ -230,6 +230,17 @@ public:
     DisplayProvider& getDisplayProvider() const;
 
     /**
+     * @brief Update the display
+     *
+     * Calls the display provider's display() method to refresh the screen.
+     * For OLED displays, this pushes the framebuffer to the screen.
+     * For TFT displays, this typically returns true immediately since they update in real-time.
+     *
+     * @return true if display update was successful, false otherwise
+     */
+    bool display();
+
+    /**
      * @brief Set the active screen and perform transition
      *
      * Changes the currently active screen, handling proper lifecycle:
