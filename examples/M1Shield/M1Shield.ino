@@ -39,13 +39,16 @@
  * This example uses the new DisplayProvider system for better display support.
  * Each display type has its own provider class with optimized settings:
  *
- * - Display_ST7789: Most common 240x320 TFT (landscape: 320x240)
  * - Display_ST7789_240x240: Square 240x240 TFT displays
+ * - Display_ST7789_320x170: Wide 320x170 TFT displays (landscape)
+ * - Display_ST7789_320x240: Alternative 320x240 TFT displays (landscape)
  * - Display_ST7735: Smaller 128x160 TFT displays
  * - Display_ILI9341: Popular 240x320 TFT (landscape: 320x240)
  * - Display_ST7796: Large 320x480 TFT (landscape: 480x320)
  * - Display_HX8357: Large 320x480 TFT displays
  * - Display_ILI9325: Parallel interface 240x320 displays
+ * - Display_SSD1306: Monochrome OLED 128x64 displays
+ * - Display_SH1106: Monochrome OLED 128x64 displays
  *
  * Each provider automatically handles:
  * - Proper initialization sequence
@@ -86,12 +89,20 @@
 // Each provider is optimized for specific display controllers.
 
 // For ST7789 240x320 displays (most common, landscape becomes 320x240)
-#include <Display_ST7789.h>
-Display_ST7789 displayProvider;
+#include <Display_ST7789_320x240.h>
+Display_ST7789_320x240 displayProvider;
 
 // For ST7789 240x240 square displays
 // #include <Display_ST7789_240x240.h>
 // Display_ST7789_240x240 displayProvider;
+
+// For ST7789 320x170 wide displays (landscape)
+// #include <Display_ST7789_320x170.h>
+// Display_ST7789_320x170 displayProvider;
+
+// For ST7789 320x240 alternative displays (landscape)
+// #include <Display_ST7789_320x240.h>
+// Display_ST7789_320x240 displayProvider;
 
 // For smaller ST7735 128x160 displays
 // #include <Display_ST7735.h>
@@ -112,6 +123,14 @@ Display_ST7789 displayProvider;
 // For large HX8357 320x480 displays
 // #include <Display_HX8357.h>
 // Display_HX8357 displayProvider;
+
+// For monochrome SSD1306 OLED displays (128x64)
+// #include <Display_SSD1306.h>
+// Display_SSD1306 displayProvider;
+
+// For monochrome SH1106 OLED displays (128x64)
+// #include <Display_SH1106.h>
+// Display_SH1106 displayProvider;
 
 // ===================================================================
 
@@ -148,12 +167,12 @@ void setup()
     // This sets up display, buttons, joystick, LED, and everything else
     Serial.println("Initializing M1Shield hardware...");
     M1Shield.begin(displayProvider);
-    
+
     // Optional: Enable joystick input for screen actions
     // Uncomment the next line if you want joystick to control screens
     // M1Shield.activateJoystick();
     // Note: Joystick reading (getJoystickX/Y, isJoystickPressed) works regardless
-    
+
     Serial.println("Hardware initialization complete!");
 
     // Verify that everything initialized correctly

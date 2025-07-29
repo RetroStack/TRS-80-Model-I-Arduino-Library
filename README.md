@@ -42,13 +42,16 @@ This Arduino library enables interfacing a TRS-80 Model I mainboard directly wit
 - **M1Shield Framework** – Complete hardware abstraction and UI framework for TRS-80 Model I Arduino Shield
   - **M1Shield** – Hardware abstraction layer for display, input (buttons/joystick), LED control, and screen management with multi-display support via DisplayProvider system.
   - **DisplayProvider System** – Flexible, type-safe display support with optimized providers for different controller types:
-    - **Display_ST7789** – ST7789 240x320 displays (most common, landscape oriented)
     - **Display_ST7789_240x240** – Square ST7789 240x240 displays
+    - **Display_ST7789_320x170** – Wide ST7789 320x170 displays (landscape format)
+    - **Display_ST7789_320x240** – Alternative ST7789 320x240 displays (landscape format)
     - **Display_ST7735** – Smaller ST7735 128x160 displays
     - **Display_ILI9341** – ILI9341 240x320 displays (alternative common type)
     - **Display_ST7796** – Large ST7796 320x480 displays (landscape oriented)
     - **Display_HX8357** – Large HX8357 320x480 displays
     - **Display_ILI9325** – Parallel interface ILI9325 240x320 displays
+    - **Display_SSD1306** – Monochrome SSD1306 OLED displays (128x64)
+    - **Display_SH1106** – Monochrome SH1106 OLED displays (128x64)
 
 ### UI Framework
 
@@ -94,12 +97,15 @@ This Arduino library enables interfacing a TRS-80 Model I mainboard directly wit
 Choose the display provider that matches your hardware:
 
 ```cpp
-// Most common displays (240x320, landscape orientation)
-#include <Display_ST7789.h>      // ST7789 controller
+// Display (240x320, landscape orientation)
 #include <Display_ILI9341.h>     // ILI9341 controller
 
 // Square displays
 #include <Display_ST7789_240x240.h>  // 240x240 square
+
+// Wide landscape displays
+#include <Display_ST7789_320x170.h>  // 320x170 wide format
+#include <Display_ST7789_320x240.h>  // 320x240 alternative format
 
 // Large displays (320x480)
 #include <Display_ST7796.h>      // ST7796 controller (landscape)
@@ -110,6 +116,10 @@ Choose the display provider that matches your hardware:
 
 // Parallel interface
 #include <Display_ILI9325.h>     // ILI9325 parallel
+
+// Monochrome OLED displays
+#include <Display_SSD1306.h>     // SSD1306 128x64 OLED
+#include <Display_SH1106.h>      // SH1106 128x64 OLED
 ```
 
 ## Documentation

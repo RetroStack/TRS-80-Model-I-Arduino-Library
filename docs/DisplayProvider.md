@@ -28,11 +28,15 @@ The DisplayProvider architecture uses a compile-time provider selection. This pr
 | ------------------------ | ---------- | ------------- | ------------ | ---------------- | ---------------------- |
 | `Display_ST7789`         | ST7789     | 240x320       | 320x240      | Adafruit_ST7789  | Most common, landscape |
 | `Display_ST7789_240x240` | ST7789     | 240x240       | 240x240      | Adafruit_ST7789  | Square displays        |
-| `Display_ST7735`         | ST7735     | 128x160       | 128x160      | Adafruit_ST7735  | Smaller displays       |
+| `Display_ST7789_320x170` | ST7789     | 170x320       | 320x170      | Adafruit_ST7789  | Wide landscape format  |
+| `Display_ST7789_320x240` | ST7789     | 240x320       | 320x240      | Adafruit_ST7789  | Alternative landscape  |
+| `Display_ST7735`         | ST7735     | 128x160       | 160x128      | Adafruit_ST7735  | Smaller displays       |
 | `Display_ILI9341`        | ILI9341    | 240x320       | 320x240      | Adafruit_ILI9341 | Alternative common     |
 | `Display_ST7796`         | ST7796     | 320x480       | 480x320      | Adafruit_ST7796S | Large, landscape       |
-| `Display_HX8357`         | HX8357     | 320x480       | 320x480      | Adafruit_HX8357  | Large, portrait        |
+| `Display_HX8357`         | HX8357     | 320x480       | 480x320      | Adafruit_HX8357  | Large, portrait        |
 | `Display_ILI9325`        | ILI9325    | 240x320       | 320x240      | Adafruit_TFTLCD  | Parallel interface     |
+| `Display_SSD1306`        | SSD1306    | 128x64        | 128x64       | Adafruit_SSD1306 | Monochrome OLED        |
+| `Display_SH1106`         | SH1106     | 128x64        | 128x64       | Adafruit_SH110X  | Monochrome OLED        |
 
 ## Basic Usage
 
@@ -177,10 +181,10 @@ includes=...,Display_NEWTYPE.h,...
 
 > This is the default for the Shield.
 
-   - CS (Chip Select): Pin 9
-   - DC (Data/Command): Pin 8
-   - RST (Reset): Pin -1 (not used)
-   - Power and SPI connections
+- CS (Chip Select): Pin 9
+- DC (Data/Command): Pin 8
+- RST (Reset): Pin -1 (not used)
+- Power and SPI connections
 
 3. **Test with Simple Code**
 
