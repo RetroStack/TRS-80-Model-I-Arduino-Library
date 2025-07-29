@@ -240,6 +240,10 @@ bool ConsoleScreen::open()
 size_t ConsoleScreen::write(uint8_t c)
 {
     _processChar((char)c);
+    if (isActive())
+    {
+        M1Shield.display(); // Push changes to display
+    }
     return 1; // Always successful since _processChar handles all characters
 }
 
@@ -258,14 +262,14 @@ size_t ConsoleScreen::write(const uint8_t *buffer, size_t size)
     size_t n = 0;
     while (size--)
     {
-        if (write(*buffer++))
-        {
-            n++;
-        }
-        else
-        {
-            break;
-        }
+        // Process character without display update
+        _processChar((char)*buffer++);
+        n++;
+    }
+    // Single display update after processing entire buffer
+    if (n > 0 && isActive())
+    {
+        M1Shield.display();
     }
     return n;
 }
@@ -293,6 +297,8 @@ void ConsoleScreen::cls()
     // Reset cursor to top-left
     _currentX = 0;
     _currentY = 0;
+
+    M1Shield.display(); // Push changes to display
 }
 
 /**

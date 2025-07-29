@@ -225,8 +225,73 @@ virtual Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY
 ### Method Responsibilities
 
 - **`_drawScreen()`**: Handle initial setup and full screen rendering
-- **`loop()`**: Process ongoing updates, animations, and time-based logic
+- **`loop()`**: Process ongoing updates, animations, and time-based logic  
 - **`actionTaken()`**: Process input and return navigation result
+
+### Display Updates for OLED Compatibility
+
+**IMPORTANT**: When implementing custom drawing operations in your screen classes, you must call `M1Shield.display()` after drawing operations to ensure OLED displays (SSD1306, SH1106) update properly.
+
+The base `Screen` class automatically calls `M1Shield.display()` in:
+- `open()`: After calling `_drawScreen()`
+- `refresh()`: After calling `_drawScreen()`
+
+**Your screen implementations should call `M1Shield.display()` after:**
+- Drawing operations in `_drawScreen()`
+- Custom drawing in `loop()` 
+- Drawing operations in response to input in `actionTaken()`
+
+```cpp
+// Example: Custom screen with proper display updates
+class CustomScreen : public Screen {
+protected:
+    void _drawScreen() override {
+        Adafruit_GFX& gfx = M1Shield.getGFX();
+        
+        // Perform drawing operations
+        gfx.fillScreen(0x0000);
+        gfx.setTextColor(0xFFFF);
+        gfx.setCursor(10, 10);
+        gfx.print("Custom Screen");
+        
+        // Not needed here - base Screen::open() calls M1Shield.display()
+        // But required if you call _drawScreen() manually
+    }
+    
+public:
+    void loop() override {
+        // Check for updates that require redrawing
+        if (dataChanged) {
+            Adafruit_GFX& gfx = M1Shield.getGFX();
+            gfx.fillRect(10, 50, 200, 20, 0x0000);
+            gfx.setCursor(10, 50);
+            gfx.print("Updated data");
+            
+            // REQUIRED: Push changes to OLED displays
+            M1Shield.display();
+            
+            dataChanged = false;
+        }
+    }
+    
+    Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override {
+        if (action & BUTTON_RIGHT) {
+            // Update display in response to input
+            Adafruit_GFX& gfx = M1Shield.getGFX();
+            gfx.fillRect(10, 100, 100, 20, 0xFFE0);
+            gfx.setTextColor(0x0000);
+            gfx.setCursor(10, 100);
+            gfx.print("Button pressed");
+            
+            // REQUIRED: Push changes to OLED displays
+            M1Shield.display();
+        }
+        return nullptr;
+    }
+};
+```
+
+**Note**: TFT displays update immediately during drawing operations, so `M1Shield.display()` has no effect but is safe to call.
 
 ## State Management
 

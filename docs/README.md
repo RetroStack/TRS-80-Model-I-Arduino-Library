@@ -28,7 +28,7 @@ This library allows an Arduino to control the TRS-80 Model I mainboard through i
 ![M1Shield](../Images/M1Shield.png)
 
 - [**M1Shield**](M1Shield.md) — Hardware abstraction layer for display, input, LED control, and screen management.
-- [**DisplayProvider**](DisplayProvider.md) — Flexible display support system with optimized providers for different controller types (ST7789, ST7735, ILI9341, ST7796, HX8357, ILI9325).
+- [**DisplayProvider**](DisplayProvider.md) — Flexible display support system with optimized providers for different controller types (ST7789, ST7735, ILI9341, ST7796, HX8357, ILI9325, SSD1306, SH1106).
 
 ## Screen Management
 

@@ -7,6 +7,7 @@
  */
 
 #include "Screen.h"
+#include "M1Shield.h"
 #include <Adafruit_GFX.h>
 
 /**
@@ -70,6 +71,7 @@ bool Screen::open()
 
     _active = true;
     _drawScreen(); // Trigger initial rendering
+    M1Shield.display(); // Push changes to display
 
     return true;
 }
@@ -138,5 +140,6 @@ void Screen::refresh()
     if (_active)
     {
         _drawScreen(); // Redraw the screen content
+        M1Shield.display(); // Push changes to display
     }
 }

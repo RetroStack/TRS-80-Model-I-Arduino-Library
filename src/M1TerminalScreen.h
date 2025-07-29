@@ -110,7 +110,6 @@ private:
     uint16_t _contentWidth;
     uint16_t _contentHeight;
 
-protected:
     /**
      * @brief Extract a specific pixel line from a character's bitmap data
      *
@@ -165,6 +164,7 @@ protected:
      */
     void _updatePixelLine(Adafruit_GFX &gfx, uint8_t currentPixelLine, uint8_t previousPixelLine, int16_t screenX, int16_t screenY, uint16_t y);
 
+protected:
     /**
      * @brief Process the next character in the incremental update cycle
      *

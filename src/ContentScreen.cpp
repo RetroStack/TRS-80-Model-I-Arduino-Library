@@ -82,6 +82,9 @@ ContentScreen::~ContentScreen()
  */
 void ContentScreen::_drawScreen()
 {
+    if (!isActive())
+        return;
+
     uint16_t screenWidth = M1Shield.getScreenWidth();
     uint16_t screenHeight = M1Shield.getScreenHeight();
 
@@ -125,6 +128,9 @@ uint16_t ContentScreen::_getHeaderY() const
  */
 void ContentScreen::_drawHeader()
 {
+    if (!isActive())
+        return;
+
     uint16_t screenWidth = M1Shield.getScreenWidth();
     uint16_t top = _getHeaderY();
 
@@ -203,6 +209,9 @@ uint16_t ContentScreen::_getFooterY() const
  */
 void ContentScreen::_drawFooter()
 {
+    if (!isActive())
+        return;
+
     uint16_t screenWidth = M1Shield.getScreenWidth();
     uint16_t top = _getFooterY();
 
@@ -250,6 +259,9 @@ uint16_t ContentScreen::_getProgressBarY() const
  */
 void ContentScreen::_drawProgressBar()
 {
+    if (!isActive())
+        return;
+
     uint16_t screenWidth = M1Shield.getScreenWidth();
     uint16_t top = _getProgressBarY();
 
@@ -322,7 +334,10 @@ void ContentScreen::_setButtonItems(const char **buttonItems, uint8_t buttonItem
 
     // Update footer immediately if screen is active
     if (isActive())
+    {
         _drawFooter();
+        M1Shield.display(); // Push changes to display
+    }
 }
 
 /**
@@ -347,6 +362,13 @@ void ContentScreen::_clearButtonItems()
         _buttonItems = nullptr;
     }
     _buttonItemCount = 0;
+
+    // Update footer immediately if screen is active
+    if (isActive())
+    {
+        _drawFooter();
+        M1Shield.display(); // Push changes to display
+    }
 }
 
 /**
@@ -379,7 +401,10 @@ void ContentScreen::_setTitle(const char *title)
 
     // Update header immediately if screen is active
     if (isActive())
+    {
         _drawHeader();
+        M1Shield.display(); // Push changes to display
+    }
 }
 
 /**
@@ -394,6 +419,13 @@ void ContentScreen::_clearTitle()
     {
         free(_title);
         _title = nullptr;
+    }
+
+    // Update footer immediately if screen is active
+    if (isActive())
+    {
+        _drawFooter();
+        M1Shield.display(); // Push changes to display
     }
 }
 
@@ -430,7 +462,10 @@ void ContentScreen::_setProgressValue(int value)
 
     // Update progress bar immediately if screen is active
     if (isActive())
+    {
         _drawProgressBar();
+        M1Shield.display(); // Push changes to display
+    }
 }
 
 /**
@@ -450,6 +485,9 @@ uint8_t ContentScreen::_getProgressValue() const
  */
 void ContentScreen::_clearContentArea()
 {
+    if (!isActive())
+        return;
+
     uint16_t x = _getContentLeft();
     uint16_t y = _getContentTop();
     uint16_t width = _getContentWidth();
@@ -457,6 +495,8 @@ void ContentScreen::_clearContentArea()
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
     gfx.fillRect(x, y, width, height, 0x0000);
+
+    M1Shield.display(); // Push changes to display
 }
 
 /**

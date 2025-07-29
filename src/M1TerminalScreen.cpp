@@ -724,6 +724,9 @@ void M1TerminalScreen::_updatePixelLine(Adafruit_GFX &gfx, uint8_t currentPixelL
  */
 void M1TerminalScreen::_updateNext()
 {
+    if (!isActive())
+        return;
+
     // Check if character needs updating (changed or during redraw)
     if (_redrawIndex != -1 || _bufferedVidMem[_currentUpdateIndex] != _writtenVidMem[_currentUpdateIndex])
     {
@@ -1071,11 +1074,13 @@ void M1TerminalScreen::loop()
         else
         {
             _updateNext(); // Update one character position per frame
+            M1Shield.display();
         }
     }
     else
     {
         _updateNext(); // Update one character position per frame
+        M1Shield.display();
     }
 }
 
@@ -1097,6 +1102,9 @@ void M1TerminalScreen::loop()
  */
 void M1TerminalScreen::_drawContent()
 {
+    if (!isActive())
+        return;
+
     uint16_t top = _getContentTop();
     uint16_t left = _getContentLeft();
     uint16_t width = _getContentWidth();

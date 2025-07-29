@@ -102,6 +102,38 @@ void setup() {
 - `uint16_t getScreenHeight()`: Returns display height in pixels
 - `bool isDisplayInitialized()`: Returns true if display initialization was successful
 
+### Display Updates and OLED Compatibility
+
+The `display()` method is **REQUIRED** for OLED displays (SSD1306, SH1106) and optional for TFT displays:
+
+- **OLED Displays**: Use a framebuffer architecture where drawing operations update RAM, and `display()` transfers the framebuffer to the physical screen
+- **TFT Displays**: Drawing operations update the screen immediately, so `display()` simply returns `true`
+
+**When display() is called automatically:**
+- Screen opening (`Screen::open()`)
+- Screen refreshing (`Screen::refresh()`)
+- After drawing operations in built-in screen classes
+- After text output in console/terminal/logger screens
+- After menu navigation changes
+
+**When you must call display() manually:**
+- Custom drawing operations outside of screen classes
+- Direct GFX operations in your application code
+
+```cpp
+// Example: Manual display update required
+Adafruit_GFX& gfx = M1Shield.getGFX();
+
+// Draw operations only update OLED framebuffer
+gfx.fillRect(10, 10, 100, 50, 0xFFFF);
+gfx.setTextColor(0x0000);
+gfx.setCursor(15, 25);
+gfx.print("Hello OLED");
+
+// REQUIRED: Push framebuffer to OLED display
+M1Shield.display();
+```
+
 ### Display Types
 
 ## Input Handling

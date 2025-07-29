@@ -97,7 +97,7 @@ void loop() {
     gfx.setCursor(10, 10);
     gfx.println("Hello World!");
 
-    // Update display (important for OLED displays)
+    // Update display (REQUIRED for OLED displays)
     if (displayProvider.display()) {
         Serial.println("Display updated successfully");
     }
@@ -105,6 +105,67 @@ void loop() {
 
     delay(1000);
 }
+```
+
+## OLED Display Requirements
+
+**IMPORTANT**: OLED displays (SSD1306, SH1106) use a framebuffer architecture that requires explicit display updates to push changes from memory to the physical screen.
+
+### Why Display Updates Are Required
+
+- **TFT Displays**: Changes appear immediately when drawing operations are performed
+- **OLED Displays**: Drawing operations only update a RAM framebuffer; `display()` must be called to transfer the framebuffer to the physical screen
+
+### When to Call display()
+
+The library automatically calls `M1Shield.display()` in the following scenarios:
+- When screens open (`Screen::open()`)
+- When screens refresh (`Screen::refresh()`) 
+- After individual drawing operations in screen implementations
+- After text output in console/terminal screens
+- After menu navigation changes
+
+### Manual Display Updates
+
+If you're performing custom drawing operations outside of the built-in screen classes, you must call `display()` after your drawing:
+
+```cpp
+// Custom drawing example
+Adafruit_GFX& gfx = M1Shield.getGFX();
+
+// Perform drawing operations
+gfx.fillRect(10, 10, 50, 30, 0xFFFF);
+gfx.setTextColor(0x0000);
+gfx.setCursor(15, 20);
+gfx.print("Custom");
+
+// REQUIRED: Push changes to OLED displays
+M1Shield.display();
+```
+
+### Performance Considerations
+
+- **Batch Operations**: Group multiple drawing operations before calling `display()` for better performance
+- **TFT Displays**: Calling `display()` has no effect (returns `true` immediately)
+- **OLED Displays**: Each `display()` call transfers the entire framebuffer over I2C/SPI
+
+```cpp
+// Good: Batched drawing with single display update
+gfx.fillRect(0, 0, 100, 50, 0x0000);
+gfx.setTextColor(0xFFFF);
+gfx.setCursor(10, 10);
+gfx.print("Line 1");
+gfx.setCursor(10, 25);
+gfx.print("Line 2");
+M1Shield.display(); // Single update for all changes
+
+// Avoid: Multiple display calls for performance
+gfx.fillRect(0, 0, 100, 50, 0x0000);
+M1Shield.display(); // Unnecessary for this operation
+gfx.setTextColor(0xFFFF);
+M1Shield.display(); // Unnecessary for this operation
+gfx.print("Text");
+M1Shield.display(); // Only this one is needed
 ```
 
 ### 6. Advanced Provider Access

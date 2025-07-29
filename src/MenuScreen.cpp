@@ -222,6 +222,9 @@ Screen *MenuScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t off
  */
 void MenuScreen::_drawContent()
 {
+    if (!isActive())
+        return;
+
     uint16_t top = _getContentTop();
     uint16_t left = _getContentLeft();
     uint16_t width = _getContentWidth();
@@ -421,6 +424,7 @@ void MenuScreen::_setMenuItems(const char **menuItems, uint8_t menuItemCount)
     if (isActive())
     {
         _drawContent();
+        M1Shield.display();
     }
 }
 
@@ -456,7 +460,10 @@ void MenuScreen::_setSelectedMenuItemIndex(uint8_t index)
     _currentPage = index / itemsPerPage;
 
     if (isActive())
+    {
         _drawContent();
+        M1Shield.display();
+    }
 }
 
 /**
@@ -508,5 +515,6 @@ void MenuScreen::_clearMenuItems()
     if (isActive())
     {
         _drawContent();
+        M1Shield.display();
     }
 }
