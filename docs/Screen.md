@@ -228,6 +228,59 @@ virtual Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY
 - **`loop()`**: Process ongoing updates, animations, and time-based logic  
 - **`actionTaken()`**: Process input and return navigation result
 
+## Display Adaptation
+
+### Adaptive Screen Layouts
+
+The Screen class provides the `_isSmallDisplay()` method to help create adaptive layouts that work well on both large TFT displays and smaller OLED displays.
+
+```cpp
+bool _isSmallDisplay() const
+```
+
+**Returns**: `true` if display height ≤ 128 pixels (typically OLED), `false` for larger displays
+
+### Usage Examples
+
+```cpp
+class AdaptiveScreen : public Screen {
+protected:
+    void _drawScreen() override {
+        Adafruit_GFX& gfx = M1Shield.getGFX();
+        
+        if (_isSmallDisplay()) {
+            // Compact layout for OLED displays (128x64)
+            gfx.setTextSize(1);
+            gfx.setCursor(0, 0);
+            gfx.print("Compact Title");
+            
+            gfx.setCursor(0, 20);
+            gfx.print("Brief info");
+        } else {
+            // Full layout for larger TFT displays (320x240+)
+            gfx.setTextSize(3);
+            gfx.setCursor(10, 10);
+            gfx.print("Full Title");
+            
+            gfx.setTextSize(2);
+            gfx.setCursor(10, 50);
+            gfx.print("Detailed information");
+            gfx.setCursor(10, 80);
+            gfx.print("Additional content");
+        }
+    }
+};
+```
+
+### Recommended Adaptations
+
+| Display Type | Size | Text Size | Layout Style |
+|--------------|------|-----------|--------------|
+| OLED | 128x64 | 1 | Minimal, essential info only |
+| Small TFT | 160x128 | 1-2 | Compact but readable |
+| Medium TFT | 320x240 | 2-3 | Standard layout |
+| Large TFT | 480x320+ | 2-4 | Rich, detailed layout |
+
 ### Display Updates for OLED Compatibility
 
 **IMPORTANT**: When implementing custom drawing operations in your screen classes, you must call `M1Shield.display()` after drawing operations to ensure OLED displays (SSD1306, SH1106) update properly.
@@ -249,8 +302,8 @@ protected:
         Adafruit_GFX& gfx = M1Shield.getGFX();
         
         // Perform drawing operations
-        gfx.fillScreen(0x0000);
-        gfx.setTextColor(0xFFFF);
+        gfx.fillScreen(M1Shield.convertColor(0x0000));
+        gfx.setTextColor(M1Shield.convertColor(0xFFFF));
         gfx.setCursor(10, 10);
         gfx.print("Custom Screen");
         
@@ -263,7 +316,7 @@ public:
         // Check for updates that require redrawing
         if (dataChanged) {
             Adafruit_GFX& gfx = M1Shield.getGFX();
-            gfx.fillRect(10, 50, 200, 20, 0x0000);
+            gfx.fillRect(10, 50, 200, 20, M1Shield.convertColor(0x0000));
             gfx.setCursor(10, 50);
             gfx.print("Updated data");
             
@@ -278,8 +331,8 @@ public:
         if (action & BUTTON_RIGHT) {
             // Update display in response to input
             Adafruit_GFX& gfx = M1Shield.getGFX();
-            gfx.fillRect(10, 100, 100, 20, 0xFFE0);
-            gfx.setTextColor(0x0000);
+            gfx.fillRect(10, 100, 100, 20, M1Shield.convertColor(0xFFE0));
+            gfx.setTextColor(M1Shield.convertColor(0x0000));
             gfx.setCursor(10, 100);
             gfx.print("Button pressed");
             
@@ -492,8 +545,8 @@ protected:
     void _drawScreen() override {
         // Initial screen setup
         Adafruit_GFX& gfx = M1Shield.getGFX();
-        gfx.fillScreen(0x0000);
-        gfx.setTextColor(0xFFFF);
+        gfx.fillScreen(M1Shield.convertColor(0x0000));
+        gfx.setTextColor(M1Shield.convertColor(0xFFFF));
         gfx.setTextSize(2);
 
         // Draw static elements
@@ -556,11 +609,11 @@ private:
         Adafruit_GFX& gfx = M1Shield.getGFX();
 
         // Clear counter area
-        gfx.fillRect(10, 50, 200, 30, 0x0000);
+        gfx.fillRect(10, 50, 200, 30, M1Shield.convertColor(0x0000));
 
         // Draw new counter value
         gfx.setCursor(10, 50);
-        gfx.setTextColor(0xFFE0);
+        gfx.setTextColor(M1Shield.convertColor(0xFFE0));
         gfx.setTextSize(3);
         gfx.print("Count: ");
         gfx.print(_counter);

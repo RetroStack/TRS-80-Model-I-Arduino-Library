@@ -38,7 +38,6 @@
  */
 
 // First, select your display provider
-#include <Display_ST7789_320x240.h>
 // For ST7789 240x320 displays (most common, landscape becomes 320x240)
 #include <Display_ST7789_320x240.h>
 Display_ST7789_320x240 displayProvider;
@@ -120,7 +119,7 @@ void setup()
     systemLogger = new LoggerScreen("System Monitor");
 
     // Configure logger options
-    systemLogger->setTimestampEnabled(true);   // Show timestamps
+    // systemLogger->setTimestampEnabled(true);   // Show timestamps
     systemLogger->setColorCodingEnabled(true); // Use color coding
     systemLogger->setTextSize(1);              // Small text for more lines
 

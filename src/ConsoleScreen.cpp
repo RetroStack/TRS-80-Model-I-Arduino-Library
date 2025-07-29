@@ -11,7 +11,6 @@ constexpr uint8_t CHAR_WIDTH_SIZE_3 = 18;  // Width of size-3 characters
 constexpr uint8_t CHAR_HEIGHT_SIZE_3 = 24; // Height of size-3 characters
 
 // Default console settings
-constexpr uint8_t DEFAULT_TEXT_SIZE = 1;
 constexpr uint8_t DEFAULT_TAB_SIZE = 4;
 constexpr uint16_t DEFAULT_TEXT_COLOR = 0xFFFF;
 constexpr uint16_t DEFAULT_TEXT_BG_COLOR = 0x0000;
@@ -27,32 +26,14 @@ constexpr uint16_t DEFAULT_CONSOLE_BG_COLOR = 0x0000;
 ConsoleScreen::ConsoleScreen() : ContentScreen()
 {
     // Initialize text settings
-    _textSize = DEFAULT_TEXT_SIZE;
+    _textSize = 1;
+    _charWidth = CHAR_WIDTH_SIZE_1;
+    _lineHeight = CHAR_HEIGHT_SIZE_1;
+
     _textColor = M1Shield.convertColor(DEFAULT_TEXT_COLOR);
     _textBgColor = M1Shield.convertColor(DEFAULT_TEXT_BG_COLOR);
     _consoleBgColor = M1Shield.convertColor(DEFAULT_CONSOLE_BG_COLOR);
     _tabSize = DEFAULT_TAB_SIZE;
-
-    // Calculate character dimensions based on text size
-    switch (_textSize)
-    {
-    case 1:
-        _charWidth = CHAR_WIDTH_SIZE_1;
-        _lineHeight = CHAR_HEIGHT_SIZE_1;
-        break;
-    case 2:
-        _charWidth = CHAR_WIDTH_SIZE_2;
-        _lineHeight = CHAR_HEIGHT_SIZE_2;
-        break;
-    case 3:
-        _charWidth = CHAR_WIDTH_SIZE_3;
-        _lineHeight = CHAR_HEIGHT_SIZE_3;
-        break;
-    default:
-        _charWidth = CHAR_WIDTH_SIZE_1 * _textSize;
-        _lineHeight = CHAR_HEIGHT_SIZE_1 * _textSize;
-        break;
-    }
 
     // Initialize cursor position
     _currentX = 0;
@@ -349,6 +330,10 @@ void ConsoleScreen::setConsoleBackground(uint16_t color)
  */
 void ConsoleScreen::setTextSize(uint8_t size)
 {
+    // Only allow small text on very small displays
+    if (_isSmallDisplay())
+        return;
+
     if (size < 1)
         size = 1;
 

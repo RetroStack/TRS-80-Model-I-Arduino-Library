@@ -8,6 +8,7 @@ The `M1Shield` class provides a comprehensive hardware abstraction layer for the
 - [Initialization](#initialization)
 - [Display Provider System](#display-provider-system)
 - [Display Management](#display-management)
+  - [Color Conversion System](#color-conversion-system)
 - [Input Handling](#input-handling)
   - [Button Input](#button-input)
   - [Joystick Input](#joystick-input)
@@ -125,14 +126,53 @@ The `display()` method is **REQUIRED** for OLED displays (SSD1306, SH1106) and o
 Adafruit_GFX& gfx = M1Shield.getGFX();
 
 // Draw operations only update OLED framebuffer
-gfx.fillRect(10, 10, 100, 50, 0xFFFF);
-gfx.setTextColor(0x0000);
+gfx.fillRect(10, 10, 100, 50, M1Shield.convertColor(0xFFFF));
+gfx.setTextColor(M1Shield.convertColor(0x0000));
 gfx.setCursor(15, 25);
 gfx.print("Hello OLED");
 
 // REQUIRED: Push framebuffer to OLED display
 M1Shield.display();
 ```
+
+### Color Conversion System
+
+The M1Shield provides automatic color conversion to ensure compatibility across different display types and color depths:
+
+- `uint16_t convertColor(uint16_t color)`: Converts 16-bit RGB565 color values to the optimal format for the current display
+
+**Why use convertColor():**
+- **Display Compatibility**: Automatically handles different color depths (16-bit TFT vs 1-bit OLED)
+- **Monochrome Support**: Converts RGB colors to appropriate monochrome values for OLED displays
+- **Future Compatibility**: Ensures your code works with different display providers
+- **Performance**: Optimized conversions per display type
+
+**Color Conversion Examples:**
+
+```cpp
+Adafruit_GFX& gfx = M1Shield.getGFX();
+
+// Always use convertColor() for cross-display compatibility
+gfx.fillScreen(M1Shield.convertColor(0x0000));        // Black background
+gfx.setTextColor(M1Shield.convertColor(0xFFFF));      // White text
+gfx.fillRect(10, 10, 50, 30, M1Shield.convertColor(0xF800));  // Red rectangle
+gfx.fillRect(70, 10, 50, 30, M1Shield.convertColor(0x07E0));  // Green rectangle
+gfx.fillRect(130, 10, 50, 30, M1Shield.convertColor(0x001F)); // Blue rectangle
+
+// Color conversion works with any RGB565 color
+gfx.setTextColor(M1Shield.convertColor(0xFFE0));      // Yellow text
+gfx.fillCircle(50, 100, 20, M1Shield.convertColor(0x07FF));   // Cyan circle
+```
+
+**Common RGB565 Color Values:**
+- `0x0000` - Black
+- `0xFFFF` - White  
+- `0xF800` - Red
+- `0x07E0` - Green
+- `0x001F` - Blue
+- `0xFFE0` - Yellow
+- `0xF81F` - Magenta
+- `0x07FF` - Cyan
 
 ### Display Types
 
@@ -481,8 +521,8 @@ void setup() {
 
         // Draw welcome message
         Adafruit_GFX& gfx = M1Shield.getGFX();
-        gfx.fillScreen(0x0000);
-        gfx.setTextColor(0xFFFF);
+        gfx.fillScreen(M1Shield.convertColor(0x0000));
+        gfx.setTextColor(M1Shield.convertColor(0xFFFF));
         gfx.setTextSize(2);
         gfx.setCursor(10, 10);
         gfx.print("M1Shield Ready!");
@@ -515,8 +555,8 @@ void displayInfo() {
 
         // You can also access the graphics context through the provider
         Adafruit_GFX& gfx = provider.getGFX();
-        gfx.fillScreen(0x0000);
-        gfx.setTextColor(0xFFFF);
+        gfx.fillScreen(M1Shield.convertColor(0x0000));
+        gfx.setTextColor(M1Shield.convertColor(0xFFFF));
         gfx.setCursor(10, 10);
         gfx.print("Display: ");
         gfx.println(provider.name());

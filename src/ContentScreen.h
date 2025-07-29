@@ -50,12 +50,14 @@
  * - **Maintainability**: Layout logic centralized in one class
  * - **Usability**: Users learn one interface pattern
  * - **Flexibility**: Content area can be customized per screen
+ * - **Adaptive**: Automatically adjusts layout for small displays (OLED)
  *
  * ## Implementation Pattern
  *
  * Derived classes only need to implement `_drawContent()` to render
  * their specific content within the designated area. The base class
- * handles all layout management and decoration.
+ * handles all layout management and decoration. Use `_isSmallDisplay()`
+ * (inherited from Screen) to adapt content for different display sizes.
  *
  * @example Basic ContentScreen Implementation
  * ```cpp
@@ -68,8 +70,12 @@
  *         uint16_t w = _getContentWidth();
  *         uint16_t h = _getContentHeight();
  *
- *         // Your content rendering here
- *         _drawText(x, y, "Hello World!");
+ *         // Adapt layout for display size (inherited from Screen)
+ *         if (_isSmallDisplay()) {
+ *             _drawText(x, y, "Compact View", 0xFFFF, 1);
+ *         } else {
+ *             _drawText(x, y, "Full Detail View", 0xFFFF, 2);
+ *         }
  *     }
  *
  * public:
@@ -113,6 +119,12 @@ private:
      * @brief Draw the progress bar region
      */
     void _drawProgressBar();
+
+    /**
+     * @brief Gets the padding between areas
+     * @return Padding in pixels
+     */
+    uint8_t _getPadding() const;
 
 protected:
     /**
@@ -171,16 +183,34 @@ protected:
     uint16_t _getHeaderY() const;
 
     /**
+     * @brief Get height of header region
+     * @return Height in pixels of header area
+     */
+    uint16_t _getHeaderHeight() const;
+
+    /**
      * @brief Get Y coordinate of footer region
      * @return Pixel position of footer area
      */
     uint16_t _getFooterY() const;
 
     /**
+     * @brief Get height of footer region
+     * @return Height in pixels of footer area
+     */
+    uint16_t _getFooterHeight() const;
+
+    /**
      * @brief Get Y coordinate of progress bar region
      * @return Pixel position of progress bar area
      */
     uint16_t _getProgressBarY() const;
+
+    /**
+     * @brief Get height of progress bar region
+     * @return Height in pixels of progress bar area
+     */
+    uint16_t _getProgressBarHeight() const;
 
     // Content management methods
 

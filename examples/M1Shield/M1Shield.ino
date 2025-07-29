@@ -229,13 +229,13 @@ void drawTestPattern()
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
     // Clear screen to black background
-    gfx.fillScreen(0x0000);
+    gfx.fillScreen(M1Shield.convertColor(0x0000));
 
     // Draw white border around entire screen
-    gfx.drawRect(0, 0, M1Shield.getScreenWidth(), M1Shield.getScreenHeight(), 0xFFFF);
+    gfx.drawRect(0, 0, M1Shield.getScreenWidth(), M1Shield.getScreenHeight(), M1Shield.convertColor(0xFFFF));
 
     // Draw title in large text
-    gfx.setTextColor(0xFFFF);
+    gfx.setTextColor(M1Shield.convertColor(0xFFFF));
     gfx.setTextSize(2);
     gfx.setCursor(10, 10);
     gfx.print("M1Shield Test");
@@ -254,9 +254,9 @@ void drawTestPattern()
     gfx.print(displayProvider.height());
 
     // Draw colored squares to test RGB display capability
-    gfx.fillRect(10, 80, 20, 20, 0xF800); // Red square
-    gfx.fillRect(35, 80, 20, 20, 0x07E0); // Green square
-    gfx.fillRect(60, 80, 20, 20, 0x001F); // Blue square
+    gfx.fillRect(10, 80, 20, 20, M1Shield.convertColor(0xF800)); // Red square
+    gfx.fillRect(35, 80, 20, 20, M1Shield.convertColor(0x07E0)); // Green square
+    gfx.fillRect(60, 80, 20, 20, M1Shield.convertColor(0x001F)); // Blue square
 
     // Instructions for user
     gfx.setCursor(10, 110);

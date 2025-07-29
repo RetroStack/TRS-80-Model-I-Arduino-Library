@@ -92,8 +92,8 @@ void loop() {
     // Alternative: Adafruit_GFX& gfx = M1Shield.getGFX();
 
     // Draw something
-    gfx.fillScreen(0x0000);
-    gfx.setTextColor(0xFFFF);
+    gfx.fillScreen(M1Shield.convertColor(0x0000));
+    gfx.setTextColor(M1Shield.convertColor(0xFFFF));
     gfx.setCursor(10, 10);
     gfx.println("Hello World!");
 
@@ -134,8 +134,8 @@ If you're performing custom drawing operations outside of the built-in screen cl
 Adafruit_GFX& gfx = M1Shield.getGFX();
 
 // Perform drawing operations
-gfx.fillRect(10, 10, 50, 30, 0xFFFF);
-gfx.setTextColor(0x0000);
+gfx.fillRect(10, 10, 50, 30, M1Shield.convertColor(0xFFFF));
+gfx.setTextColor(M1Shield.convertColor(0x0000));
 gfx.setCursor(15, 20);
 gfx.print("Custom");
 
@@ -151,8 +151,8 @@ M1Shield.display();
 
 ```cpp
 // Good: Batched drawing with single display update
-gfx.fillRect(0, 0, 100, 50, 0x0000);
-gfx.setTextColor(0xFFFF);
+gfx.fillRect(0, 0, 100, 50, M1Shield.convertColor(0x0000));
+gfx.setTextColor(M1Shield.convertColor(0xFFFF));
 gfx.setCursor(10, 10);
 gfx.print("Line 1");
 gfx.setCursor(10, 25);
@@ -160,9 +160,9 @@ gfx.print("Line 2");
 M1Shield.display(); // Single update for all changes
 
 // Avoid: Multiple display calls for performance
-gfx.fillRect(0, 0, 100, 50, 0x0000);
+gfx.fillRect(0, 0, 100, 50, M1Shield.convertColor(0x0000));
 M1Shield.display(); // Unnecessary for this operation
-gfx.setTextColor(0xFFFF);
+gfx.setTextColor(M1Shield.convertColor(0xFFFF));
 M1Shield.display(); // Unnecessary for this operation
 gfx.print("Text");
 M1Shield.display(); // Only this one is needed
@@ -374,7 +374,7 @@ includes=...,Display_NEWTYPE.h,...
        if (M1Shield.isDisplayInitialized()) {
            Serial.println("Display OK!");
            Adafruit_GFX& gfx = M1Shield.getGFX();
-           gfx.fillScreen(0xF800);  // Red screen
+           gfx.fillScreen(M1Shield.convertColor(0xF800));  // Red screen
        } else {
            Serial.println("Display failed!");
        }

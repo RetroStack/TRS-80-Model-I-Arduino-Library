@@ -23,11 +23,14 @@ void ExampleScreen::_drawScreen()
     Adafruit_GFX &display = M1Shield.getGFX();
 
     // Clear the screen (make it black)
-    display.fillScreen(0x0000);
+    display.fillScreen(M1Shield.convertColor(0x0000));
 
     // Set text color to white and size
-    display.setTextColor(0xFFFF);
-    display.setTextSize(2);
+    display.setTextColor(M1Shield.convertColor(0xFFFF));
+    if (_isSmallDisplay())
+        display.setTextSize(1); // Use smaller text on small displays
+    else
+        display.setTextSize(2); // Use larger text on bigger displays
 
     // Show a title at the top
     display.setCursor(10, 10);

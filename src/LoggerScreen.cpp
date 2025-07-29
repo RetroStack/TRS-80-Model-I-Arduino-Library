@@ -57,7 +57,7 @@ LoggerScreen::LoggerScreen(const char *title) : ConsoleScreen(), _loggerAdapter(
     _setTitle(title);
 
     // Initialize logger settings
-    _showTimestamps = true;
+    _showTimestamps = _isSmallDisplay() ? false : true; // Default to no timestamps on small displays
     _useColorCoding = true;
     _startTime = millis();
 
@@ -138,7 +138,7 @@ void LoggerScreen::info(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    _logMessage("INFO", COLOR_INFO, fmt, args);
+    _logMessage(_isSmallDisplay() ? "I" : "INFO", COLOR_INFO, fmt, args);
     va_end(args);
 }
 
@@ -149,7 +149,7 @@ void LoggerScreen::warn(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    _logMessage("WARN", COLOR_WARN, fmt, args);
+    _logMessage(_isSmallDisplay() ? "W" : "WARN", COLOR_WARN, fmt, args);
     va_end(args);
 }
 
@@ -160,7 +160,7 @@ void LoggerScreen::err(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    _logMessage("ERR ", COLOR_ERROR, fmt, args);
+    _logMessage(_isSmallDisplay() ? "E" : "ERR ", COLOR_ERROR, fmt, args);
     va_end(args);
 }
 

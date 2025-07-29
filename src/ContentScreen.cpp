@@ -27,18 +27,22 @@ constexpr uint16_t SCREEN_COLOR_FG = 0xFFFF; // Foreground color for borders and
 
 // Header region styling
 constexpr uint16_t HEADER_HEIGHT = 40;       // Height of header region in pixels
+constexpr uint16_t HEADER_SMALL_HEIGHT = 16; // Height of small header region in pixels
 constexpr uint16_t HEADER_COLOR_BG = 0x07E0; // Header background (bright green)
 constexpr uint16_t HEADER_COLOR_FG = 0x0000; // Header text color (black on green)
 
 // Footer region styling
 constexpr uint16_t FOOTER_HEIGHT = 23;       // Height of footer region in pixels
+constexpr uint16_t FOOTER_SMALL_HEIGHT = 0;  // Height of small footer region in pixels
 constexpr uint16_t FOOTER_COLOR_BG = 0x0000; // Footer background color
 constexpr uint16_t FOOTER_COLOR_FG = 0xFFFF; // Footer text color
 
 // Progress bar styling
-constexpr uint16_t PROGRESSBAR_HEIGHT = 10;       // Height of progress bar in pixels
-constexpr uint16_t PROGRESSBAR_COLOR_BG = 0x0000; // Progress bar background
-constexpr uint16_t PROGRESSBAR_COLOR_FG = 0x001F; // Progress bar foreground (blue)
+constexpr uint16_t PROGRESSBAR_HEIGHT = 10;             // Height of progress bar in pixels
+constexpr uint16_t PROGRESSBAR_SMALL_HEIGHT = 2;        // Height of small progress bar in pixels
+constexpr uint16_t PROGRESSBAR_COLOR_BG = 0x0000;       // Progress bar background
+constexpr uint16_t PROGRESSBAR_COLOR_FG = 0x001F;       // Progress bar foreground (blue)
+constexpr uint16_t PROGRESSBAR_SMALL_COLOR_FG = 0xFFFF; // Progress bar foreground (white)
 
 /**
  * @brief Constructor initializes ContentScreen with default values
@@ -97,14 +101,18 @@ void ContentScreen::_drawScreen()
     _drawFooter();
     _drawProgressBar();
 
-    // Add decorative borders for visual separation
-    uint16_t contentTop = _getContentTop();
-    uint16_t contentHeight = _getContentHeight();
-    gfx.drawRect(0, contentTop - 1, screenWidth, contentHeight + 2, M1Shield.convertColor(SCREEN_COLOR_FG));
+    // Add decorative borders if not a small display
+    if (!_isSmallDisplay())
+    {
+        // Add decorative borders for visual separation
+        uint16_t contentTop = _getContentTop();
+        uint16_t contentHeight = _getContentHeight();
+        gfx.drawRect(0, contentTop - 1, screenWidth, contentHeight + 2, M1Shield.convertColor(SCREEN_COLOR_FG));
 
-    // Draw separator line above progress bar
-    uint16_t progressTop = _getProgressBarY();
-    gfx.drawFastHLine(0, progressTop - 1, screenWidth, M1Shield.convertColor(SCREEN_COLOR_FG));
+        // Draw separator line above progress bar
+        uint16_t progressTop = _getProgressBarY();
+        gfx.drawFastHLine(0, progressTop - 1, screenWidth, M1Shield.convertColor(SCREEN_COLOR_FG));
+    }
 }
 
 /**
@@ -114,6 +122,18 @@ void ContentScreen::_drawScreen()
 uint16_t ContentScreen::_getHeaderY() const
 {
     return 0;
+}
+
+/**
+ * @brief Get height of header region
+ * @return Height in pixels of header area
+ *
+ * Returns the standard header height, or a smaller height for small displays.
+ */
+uint16_t ContentScreen::_getHeaderHeight() const
+{
+    // Use smaller header height for small displays
+    return _isSmallDisplay() ? HEADER_SMALL_HEIGHT : HEADER_HEIGHT;
 }
 
 /**
@@ -137,17 +157,28 @@ void ContentScreen::_drawHeader()
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
     // Draw header background and centered title
-    gfx.fillRect(0, top, screenWidth, HEADER_HEIGHT, M1Shield.convertColor(HEADER_COLOR_BG));
+    gfx.fillRect(0, top, screenWidth, _getHeaderHeight(), M1Shield.convertColor(HEADER_COLOR_BG));
 
     // Check whether title is set
     if (_title != nullptr && _title[0] != '\0')
     {
-        // Calculate centered position for title text
-        uint16_t textWidth = TEXT_SIZE_3_WIDTH * strlen(_title);
-
         gfx.setTextColor(M1Shield.convertColor(HEADER_COLOR_FG));
-        gfx.setTextSize(3);
-        gfx.setCursor((screenWidth - textWidth) / 2, top + TEXT_SIZE_3_HALF_HEIGHT);
+        if (_isSmallDisplay())
+        {
+            // Calculate centered position for title text
+            uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(_title);
+            gfx.setTextSize(1);
+
+            // Adding 2 pixels as header needs to be 16 pixel altogether
+            gfx.setCursor((screenWidth - textWidth) / 2, top + TEXT_SIZE_1_HALF_HEIGHT + 2);
+        }
+        else
+        {
+            // Calculate centered position for title text
+            uint16_t textWidth = TEXT_SIZE_3_WIDTH * strlen(_title);
+            gfx.setTextSize(3);
+            gfx.setCursor((screenWidth - textWidth) / 2, top + TEXT_SIZE_3_HALF_HEIGHT);
+        }
         gfx.print(_title);
     }
 }
@@ -158,7 +189,8 @@ void ContentScreen::_drawHeader()
  */
 uint16_t ContentScreen::_getContentTop() const
 {
-    return HEADER_HEIGHT + 2;
+    uint8_t padding = _getPadding();
+    return _getHeaderHeight() + padding;
 }
 
 /**
@@ -176,7 +208,8 @@ uint16_t ContentScreen::_getContentLeft() const
  */
 uint16_t ContentScreen::_getContentHeight() const
 {
-    return M1Shield.getScreenHeight() - HEADER_HEIGHT - FOOTER_HEIGHT - PROGRESSBAR_HEIGHT - 6; // Always 2px padding
+    uint8_t padding = _getPadding();
+    return M1Shield.getScreenHeight() - _getHeaderHeight() - padding - _getFooterHeight() - padding - _getProgressBarHeight() - padding;
 }
 
 /**
@@ -195,8 +228,21 @@ uint16_t ContentScreen::_getContentWidth() const
 uint16_t ContentScreen::_getFooterY() const
 {
     uint16_t screenHeight = M1Shield.getScreenHeight();
-    uint16_t bottom = screenHeight - PROGRESSBAR_HEIGHT - 2; // 2px padding above progress bar
-    return bottom - FOOTER_HEIGHT;
+    uint8_t padding = _getPadding();
+    uint16_t bottom = screenHeight - _getProgressBarHeight() - padding;
+    return bottom - _getFooterHeight();
+}
+
+/**
+ * @brief Get height of footer region
+ * @return Height in pixels of footer area
+ *
+ * Returns the standard footer height, or a smaller height for small displays.
+ */
+uint16_t ContentScreen::_getFooterHeight() const
+{
+    // Use smaller footer height for small displays
+    return _isSmallDisplay() ? FOOTER_SMALL_HEIGHT : FOOTER_HEIGHT;
 }
 
 /**
@@ -209,7 +255,7 @@ uint16_t ContentScreen::_getFooterY() const
  */
 void ContentScreen::_drawFooter()
 {
-    if (!isActive())
+    if (!isActive() || _isSmallDisplay())
         return;
 
     uint16_t screenWidth = M1Shield.getScreenWidth();
@@ -218,7 +264,7 @@ void ContentScreen::_drawFooter()
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
     // Draw footer background
-    gfx.fillRect(0, top, screenWidth, FOOTER_HEIGHT, M1Shield.convertColor(FOOTER_COLOR_BG));
+    gfx.fillRect(0, top, screenWidth, _getFooterHeight(), M1Shield.convertColor(FOOTER_COLOR_BG));
 
     // Render button labels if configured
     if (_buttonItems != nullptr && _buttonItemCount > 0)
@@ -251,7 +297,32 @@ void ContentScreen::_drawFooter()
 uint16_t ContentScreen::_getProgressBarY() const
 {
     uint16_t screenHeight = M1Shield.getScreenHeight();
-    return screenHeight - PROGRESSBAR_HEIGHT;
+    return screenHeight - _getProgressBarHeight();
+}
+
+/**
+ * @brief Get height of progress bar region
+ * @return Height in pixels of progress bar area
+ */
+uint16_t ContentScreen::_getProgressBarHeight() const
+{
+    // Use smaller progress bar height for small displays
+    return _isSmallDisplay() ? PROGRESSBAR_SMALL_HEIGHT : PROGRESSBAR_HEIGHT;
+}
+
+/**
+ * @brief Gets the padding between areas
+ * @return Padding in pixels
+ */
+uint8_t ContentScreen::_getPadding() const
+{
+    // Use smaller padding for small displays to maximize content area
+    if (_isSmallDisplay())
+    {
+        return 0; // 0 pixel padding for small displays
+    }
+
+    return 2; // 2 pixels padding between regions
 }
 
 /**
@@ -271,15 +342,25 @@ void ContentScreen::_drawProgressBar()
     uint16_t progressWidth = (screenWidth * _progressValue) / 100;
 
     // Draw filled (progress) portion in blue
+    uint16_t height = _getProgressBarHeight();
+
+    bool isSmallDisplay = _isSmallDisplay();
+    if (isSmallDisplay)
+    {
+        // Make it even smaller, but add a gap to content
+        height--;
+        top++;
+    }
+
     if (progressWidth > 0)
     {
-        gfx.fillRect(0, top, progressWidth, PROGRESSBAR_HEIGHT, M1Shield.convertColor(PROGRESSBAR_COLOR_FG));
+        gfx.fillRect(0, top, progressWidth, height, M1Shield.convertColor(isSmallDisplay ? PROGRESSBAR_SMALL_COLOR_FG : PROGRESSBAR_COLOR_FG));
     }
 
     // Draw remaining (empty) portion in black
     if (progressWidth < screenWidth)
     {
-        gfx.fillRect(progressWidth, top, screenWidth - progressWidth, PROGRESSBAR_HEIGHT, M1Shield.convertColor(PROGRESSBAR_COLOR_BG));
+        gfx.fillRect(progressWidth, top, screenWidth - progressWidth, height, M1Shield.convertColor(PROGRESSBAR_COLOR_BG));
     }
 }
 

@@ -14,6 +14,7 @@ constexpr uint8_t TEXT_SIZE_3_HALF_HEIGHT = 8; // Half-height of size-3 text for
 
 // Menu Layout Constants
 constexpr uint16_t ROW_HEIGHT = 26;                       // Height of each menu row in pixels
+constexpr uint16_t ROW_SMALL_HEIGHT = 10;                 // Small height of each menu row in pixels
 constexpr uint16_t ROW_COLOR_BG1 = 0x4208;                // Background color for odd rows (dark blue)
 constexpr uint16_t ROW_COLOR_FG1 = 0xFFFF;                // Foreground color for odd rows
 constexpr uint16_t ROW_COLOR_BG2 = 0x39C7;                // Background color for even rows (darker blue)
@@ -73,7 +74,7 @@ MenuScreen::~MenuScreen()
 uint8_t MenuScreen::_getItemsPerPage() const
 {
     uint16_t contentHeight = _getContentHeight();
-    uint8_t itemsPerPage = contentHeight / ROW_HEIGHT;
+    uint8_t itemsPerPage = contentHeight / (_isSmallDisplay() ? ROW_SMALL_HEIGHT : ROW_HEIGHT);
 
     // Ensure at least 1 item per page, even with very small screens
     return (itemsPerPage > 0) ? itemsPerPage : 1;
@@ -237,10 +238,39 @@ void MenuScreen::_drawContent()
     uint8_t itemIndex = _currentPage * itemsPerPage;
     uint8_t itemsDrawn = 0;
 
+    bool isSmallDisplay = _isSmallDisplay();
+    uint16_t rowHeight;
+    uint16_t textSizeWidth;
+    uint16_t textSizeHalfHeight;
+    uint16_t leftPadding;
+    uint16_t configGap;
+    uint16_t rightPadding;
+
+    if (isSmallDisplay)
+    {
+        gfx.setTextSize(1);
+        rowHeight = ROW_SMALL_HEIGHT;
+        textSizeWidth = TEXT_SIZE_1_WIDTH;
+        textSizeHalfHeight = 1;
+        leftPadding = 0;
+        configGap = 2;
+        rightPadding = 1;
+    }
+    else
+    {
+        gfx.setTextSize(2);
+        rowHeight = ROW_HEIGHT;
+        textSizeWidth = TEXT_SIZE_2_WIDTH;
+        textSizeHalfHeight = TEXT_SIZE_2_HALF_HEIGHT;
+        leftPadding = 15;
+        configGap = 10;
+        rightPadding = 5;
+    }
+
     // Render up to itemsPerPage items for current page
     for (uint8_t i = 0; i < itemsPerPage; i++, itemIndex++)
     {
-        int y = top + (i * ROW_HEIGHT);
+        int y = top + (i * rowHeight);
         bool isEnabled = _isMenuItemEnabled(itemIndex);
 
         // Render selected item with highlight colors (only if enabled)
@@ -249,13 +279,13 @@ void MenuScreen::_drawContent()
             uint16_t bgColor = (i % 2 == 0) ? DISABLED_ROW_COLOR_BG1 : DISABLED_ROW_COLOR_BG2;
             uint16_t fgColor = (i % 2 == 0) ? DISABLED_ROW_COLOR_FG1 : DISABLED_ROW_COLOR_FG2;
 
-            gfx.fillRect(left, y, width, ROW_HEIGHT, M1Shield.convertColor(bgColor));
+            gfx.fillRect(left, y, width, rowHeight, M1Shield.convertColor(bgColor));
             gfx.setTextColor(M1Shield.convertColor(fgColor));
         }
         // Render disabled items with grayed out colors
         else if (itemIndex == _selectedMenuItemIndex && isEnabled)
         {
-            gfx.fillRect(left, y, width, ROW_HEIGHT, M1Shield.convertColor(SELECTED_ROW_COLOR_BG));
+            gfx.fillRect(left, y, width, rowHeight, M1Shield.convertColor(SELECTED_ROW_COLOR_BG));
             gfx.setTextColor(M1Shield.convertColor(SELECTED_ROW_COLOR_FG));
         }
         // Render normal enabled items with alternating row colors
@@ -264,7 +294,7 @@ void MenuScreen::_drawContent()
             uint16_t bgColor = (i % 2 == 0) ? ROW_COLOR_BG1 : ROW_COLOR_BG2;
             uint16_t fgColor = (i % 2 == 0) ? ROW_COLOR_FG1 : ROW_COLOR_FG2;
 
-            gfx.fillRect(left, y, width, ROW_HEIGHT, M1Shield.convertColor(bgColor));
+            gfx.fillRect(left, y, width, rowHeight, M1Shield.convertColor(bgColor));
             gfx.setTextColor(M1Shield.convertColor(fgColor));
         }
 
@@ -278,47 +308,71 @@ void MenuScreen::_drawContent()
             if (configValue != nullptr)
             {
                 uint16_t configLen = strlen(configValue);
-                configWidth = configLen * TEXT_SIZE_2_WIDTH;
-                configX = left + width - configWidth - 5; // 5px right margin
+                configWidth = configLen * textSizeWidth;
+                configX = left + width - configWidth - rightPadding;
             }
 
             // Calculate available space for menu text
-            uint16_t menuTextStartX = left + 15;
-            uint16_t selectorWidth = 2 * TEXT_SIZE_2_WIDTH; // "> " or "  "
+            uint16_t menuTextStartX = left + leftPadding;
+            uint16_t selectorWidth = (isSmallDisplay ? 1 : 2) * textSizeWidth; // "> " or "  "
             uint16_t menuTextX = menuTextStartX + selectorWidth;
-            uint16_t availableWidth = width - (menuTextX - left) - configWidth - 10; // 10px gap between text and config
+            uint16_t availableWidth = width - (menuTextX - left) - configWidth - configGap; // gap between text and config
 
             // Truncate menu text if it would collide with config value
             String menuText = String(_menuItems[itemIndex]);
-            uint16_t menuTextWidth = menuText.length() * TEXT_SIZE_2_WIDTH;
+            uint16_t menuTextWidth = menuText.length() * textSizeWidth;
 
             if (configValue != nullptr && menuTextWidth > availableWidth)
             {
-                // Calculate how many characters fit with "..." (3 characters)
-                uint16_t ellipsisWidth = 3 * TEXT_SIZE_2_WIDTH;
-                uint16_t maxCharsWidth = availableWidth - ellipsisWidth;
-                uint8_t maxChars = maxCharsWidth / TEXT_SIZE_2_WIDTH;
-
-                if (maxChars > 0)
+                // Calculate how many characters fit with "..."
+                if (isSmallDisplay)
                 {
-                    menuText = menuText.substring(0, maxChars) + "...";
+                    uint16_t ellipsisWidth = 2 * textSizeWidth;
+                    uint16_t maxCharsWidth = availableWidth - ellipsisWidth;
+                    uint8_t maxChars = maxCharsWidth / textSizeWidth;
+
+                    if (maxChars > 0)
+                    {
+                        menuText = menuText.substring(0, maxChars) + "..";
+                    }
+                    else
+                    {
+                        menuText = ".."; // Fallback if space is extremely limited
+                    }
                 }
                 else
                 {
-                    menuText = "..."; // Fallback if space is extremely limited
+                    uint16_t ellipsisWidth = 3 * textSizeWidth;
+                    uint16_t maxCharsWidth = availableWidth - ellipsisWidth;
+                    uint8_t maxChars = maxCharsWidth / textSizeWidth;
+
+                    if (maxChars > 0)
+                    {
+                        menuText = menuText.substring(0, maxChars) + "...";
+                    }
+                    else
+                    {
+                        menuText = "..."; // Fallback if space is extremely limited
+                    }
                 }
             }
 
             // Draw selection indicator and menu item text
-            gfx.setTextSize(2);
-            gfx.setCursor(menuTextStartX, y + TEXT_SIZE_2_HALF_HEIGHT);
-            gfx.print(itemIndex == _selectedMenuItemIndex ? "> " : "  ");
+            gfx.setCursor(menuTextStartX, y + textSizeHalfHeight);
+            if (isSmallDisplay)
+            {
+                gfx.print(itemIndex == _selectedMenuItemIndex ? ">" : " ");
+            }
+            else
+            {
+                gfx.print(itemIndex == _selectedMenuItemIndex ? "> " : "  ");
+            }
             gfx.print(menuText);
 
             // Draw configuration value if available (right-aligned)
             if (configValue != nullptr)
             {
-                gfx.setCursor(configX, y + TEXT_SIZE_2_HALF_HEIGHT);
+                gfx.setCursor(configX, y + textSizeHalfHeight);
                 gfx.print(configValue);
             }
         }
@@ -327,7 +381,7 @@ void MenuScreen::_drawContent()
     }
 
     // Check if we should show a simple "..." indicator for more pages
-    uint16_t usedHeight = itemsDrawn * ROW_HEIGHT;
+    uint16_t usedHeight = itemsDrawn * rowHeight;
     uint16_t remainingHeight = height - usedHeight;
     uint8_t totalPages = (_menuItemCount + itemsPerPage - 1) / itemsPerPage;
 

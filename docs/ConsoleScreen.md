@@ -176,15 +176,15 @@ void setConsoleBgColor(uint16_t color);
 
 ```cpp
 // Set text color only
-console.setTextColor(0x07E0);
+console.setTextColor(M1Shield.convertColor(0x07E0));
 console.println("SUCCESS: Operation completed");
 
 // Set both foreground and background
-console.setTextColor(0xFFFF, 0xF800);
+console.setTextColor(M1Shield.convertColor(0xFFFF), M1Shield.convertColor(0xF800));
 console.println("ERROR: Critical failure");
 
 // Set console background color
-console.setConsoleBgColor(0x0000);
+console.setConsoleBgColor(M1Shield.convertColor(0x0000));
 ```
 
 ### Available Colors
@@ -253,9 +253,9 @@ class StatusConsole : public ConsoleScreen {
 protected:
     void _executeOnce() override {
         cls();
-        setTextColor(0x07FF);
+        setTextColor(M1Shield.convertColor(0x07FF));
         println("=== STATUS CONSOLE ===");
-        setTextColor(0xFFFF);
+        setTextColor(M1Shield.convertColor(0xFFFF));
         println("System initialized");
         println("Ready for operation!");
     }
