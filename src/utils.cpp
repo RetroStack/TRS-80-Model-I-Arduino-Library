@@ -1,4 +1,4 @@
-// Various utilties to support print, input, high precision wait, etc.
+// Various utilities to support print, input, high precision wait, etc.
 
 #include "utils.h"
 
