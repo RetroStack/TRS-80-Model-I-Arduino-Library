@@ -802,14 +802,14 @@ void M1TerminalScreen::_redraw()
 }
 
 /**
- * @brief Scroll the viewport left by up to 15 characters with dynamic bounds checking
+ * @brief Scroll the viewport left by up to N characters with dynamic bounds checking
  *
  * Moves the viewport left within the 64-column terminal display, adapting to
  * the available content area width. The scroll amount is clamped to maintain
  * viewport boundaries and provide smooth scrolling experience.
  *
  * ## Scroll Behavior
- * - Maximum step: 15 characters per call
+ * - Maximum step: N characters per call (depends on screen size)
  * - Minimum offset: 0 (leftmost position)
  * - Triggers redraw to update display with new viewport
  *
@@ -818,15 +818,19 @@ void M1TerminalScreen::_redraw()
  * - Visible columns = contentWidth / CHAR_WIDTH
  * - Scroll range: 0 to max(0, 64 - visibleColumns)
  *
- * @note Scroll amount is limited to 15 characters maximum
+ * @note Scroll amount is limited to N characters maximum
  * @note Triggers full redraw to update display with new viewport
  */
 void M1TerminalScreen::_scrollLeft()
 {
-    // Scroll left by up to 15 characters, but not below 0
-    if (_horizontalScrollOffset >= 15)
+    // Determine scroll amount based on screen size
+    uint8_t visibleColumns = _contentWidth / CHAR_WIDTH;
+    uint8_t scrollAmount = (visibleColumns >= 30) ? 15 : 10;
+
+    // Scroll left by up to scrollAmount characters, but not below 0
+    if (_horizontalScrollOffset >= scrollAmount)
     {
-        _horizontalScrollOffset -= 15;
+        _horizontalScrollOffset -= scrollAmount;
     }
     else
     {
@@ -836,14 +840,14 @@ void M1TerminalScreen::_scrollLeft()
 }
 
 /**
- * @brief Scroll the viewport right by up to 15 characters with dynamic bounds checking
+ * @brief Scroll the viewport right by up to N characters with dynamic bounds checking
  *
  * Moves the viewport right within the 64-column terminal display, adapting to
  * the available content area width. The scroll amount is clamped to maintain
  * viewport boundaries and provide smooth scrolling experience.
  *
  * ## Scroll Behavior
- * - Maximum step: 15 characters per call
+ * - Maximum step: N characters per call (depends on screen size)
  * - Maximum offset: Dynamically calculated from content area width
  * - Triggers redraw to update display with new viewport
  *
@@ -852,7 +856,7 @@ void M1TerminalScreen::_scrollLeft()
  * - Visible columns = contentWidth / CHAR_WIDTH
  * - Maximum scroll = max(0, 64 - visibleColumns)
  *
- * @note Scroll amount is limited to 15 characters maximum
+ * @note Scroll amount is limited to N characters maximum
  * @note Triggers full redraw to update display with new viewport
  */
 void M1TerminalScreen::_scrollRight()
@@ -860,11 +864,12 @@ void M1TerminalScreen::_scrollRight()
     // Calculate maximum scroll offset based on content area width
     uint8_t visibleColumns = _contentWidth / CHAR_WIDTH;
     uint8_t maxScrollOffset = (TERM_COLS > visibleColumns) ? (TERM_COLS - visibleColumns) : 0;
+    uint8_t scrollAmount = (visibleColumns >= 30) ? 15 : 10;
 
-    // Scroll right by up to 15 characters, but not beyond maximum
-    if (maxScrollOffset >= 15 && _horizontalScrollOffset <= maxScrollOffset - 15)
+    // Scroll right by up to scrollAmount characters, but not beyond maximum
+    if (maxScrollOffset >= scrollAmount && _horizontalScrollOffset <= maxScrollOffset - scrollAmount)
     {
-        _horizontalScrollOffset += 15;
+        _horizontalScrollOffset += scrollAmount;
     }
     else
     {
@@ -874,14 +879,14 @@ void M1TerminalScreen::_scrollRight()
 }
 
 /**
- * @brief Scroll the viewport up by up to 3 rows with dynamic bounds checking
+ * @brief Scroll the viewport up by up to N rows with dynamic bounds checking
  *
  * Moves the viewport up within the 16-row terminal display based on available
  * content area height. The scroll amount is calculated dynamically and limited
  * to maintain viewport boundaries.
  *
  * ## Scroll Behavior
- * - Maximum step: 10 rows per call
+ * - Maximum step: N rows per call (depends on screen size)
  * - Minimum offset: 0 (topmost position)
  * - Triggers redraw to update display with new viewport
  *
@@ -891,15 +896,19 @@ void M1TerminalScreen::_scrollRight()
  * - If all 16 rows fit, no scrolling is needed
  * - Otherwise, scroll to show different sections of the 16-row grid
  *
- * @note Scroll amount is limited to 10 rows maximum
+ * @note Scroll amount is limited to N rows maximum
  * @note Triggers full redraw to update display with new viewport
  */
 void M1TerminalScreen::_scrollUp()
 {
-    // Scroll up by up to 10 rows, but not below 0
-    if (_verticalScrollOffset >= 10)
+    // Determine scroll amount based on screen size
+    uint8_t visibleRows = _contentHeight / CHAR_FULL_HEIGHT;
+    uint8_t scrollAmount = (visibleRows >= 12) ? 10 : 3;
+
+    // Scroll up by up to scrollAmount rows, but not below 0
+    if (_verticalScrollOffset >= scrollAmount)
     {
-        _verticalScrollOffset -= 10;
+        _verticalScrollOffset -= scrollAmount;
     }
     else
     {
@@ -909,14 +918,14 @@ void M1TerminalScreen::_scrollUp()
 }
 
 /**
- * @brief Scroll the viewport down by up to 10 rows with dynamic bounds checking
+ * @brief Scroll the viewport down by up to N rows with dynamic bounds checking
  *
  * Moves the viewport down within the 16-row terminal display based on available
  * content area height. The scroll amount is calculated dynamically and limited
  * to maintain viewport boundaries.
  *
  * ## Scroll Behavior
- * - Maximum step: 10 rows per call
+ * - Maximum step: N rows per call (depends on screen size)
  * - Maximum offset: Calculated based on content area height
  * - Triggers redraw to update display with new viewport
  *
@@ -926,28 +935,23 @@ void M1TerminalScreen::_scrollUp()
  * - Maximum offset = max(0, 16 - available rows)
  * - Ensures all displayable content remains accessible
  *
- * @note Scroll amount is limited to 10 rows maximum
+ * @note Scroll amount is limited to N rows maximum
  * @note Triggers full redraw to update display with new viewport
  */
 void M1TerminalScreen::_scrollDown()
 {
     // Calculate maximum scroll based on content area height
     uint8_t visibleRows = _contentHeight / CHAR_FULL_HEIGHT;
-    Serial.print("Visible Rows: ");
-    Serial.println(visibleRows);
     uint8_t maxVerticalScroll = (TERM_ROWS > visibleRows) ? (TERM_ROWS - visibleRows) - 1 : 0;
-    Serial.print("Max Vertical Scroll: ");
-    Serial.println(maxVerticalScroll);
+    uint8_t scrollAmount = (visibleRows >= 12) ? 10 : 3;
 
-    // Scroll down by up to 10 rows, but not beyond maximum
-    if (_verticalScrollOffset + 10 <= maxVerticalScroll)
+    // Scroll down by up to scrollAmount rows, but not beyond maximum
+    if (_verticalScrollOffset + scrollAmount <= maxVerticalScroll)
     {
-        Serial.print("Scrolling Down by 10 Rows\n");
-        _verticalScrollOffset += 10;
+        _verticalScrollOffset += scrollAmount;
     }
     else
     {
-        Serial.print("Scrolling Down by Max\n");
         _verticalScrollOffset = maxVerticalScroll;
     }
     _redraw(); // Schedule full redraw with new viewport
