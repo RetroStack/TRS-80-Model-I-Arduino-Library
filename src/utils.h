@@ -1,5 +1,5 @@
 /*
- * Keyboard.h - File to manage utility functions used throughout the library
+ * utils.h - File to manage utility functions used throughout the library
  * Authors: Ven Reddy, Marcel Erz (RetroStack)
  * Released under the MIT License.
  */
