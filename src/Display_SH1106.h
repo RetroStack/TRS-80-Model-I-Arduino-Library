@@ -1,5 +1,11 @@
 /*
- * Display_SSD1306.h - Factory for creating SSD1306 display instances
+ * Display_SH1106.h - Factory for creating SH1106 display instances
+ * Supports both SPI and I2C communication protocols
+ *
+ * Usage:
+ * - SPI mode: Display_SH1106(true) - specify SPI in constructor
+ * - I2C mode: Display_SH1106(false) or Display_SH1106() - default is I2C
+ *
  * Authors: Marcel Erz (RetroStack)
  * Released under the MIT License.
  */
@@ -8,6 +14,7 @@
 #define DISPLAY_SH1106_H
 
 #include <Wire.h>
+#include <SPI.h>
 #include <Adafruit_SH110X.h>
 #include "DisplayProvider.h"
 
@@ -15,9 +22,10 @@ class Display_SH1106 : public DisplayProvider
 {
 private:
     Adafruit_SH1106G *_display;
+    bool _useSPI;
 
 public:
-    Display_SH1106() : _display(nullptr) {}
+    Display_SH1106(bool useSPI = false) : _display(nullptr), _useSPI(useSPI) {}
 
     bool create(int8_t cs, int8_t dc, int8_t rst) override
     {
@@ -25,11 +33,50 @@ public:
         {
             delete _display;
         }
-        _display = new Adafruit_SH1106G(128, 64, &Wire, -1);
+
+        if (_useSPI)
+        {
+            // SPI constructor - using hardware SPI
+            _display = new Adafruit_SH1106G(128, 64, &SPI, dc, rst, cs);
+        }
+        else
+        {
+            // I2C constructor
+            _display = new Adafruit_SH1106G(128, 64, &Wire, rst);
+
+            Wire.begin();
+
+            // Give display a *long* power-on delay
+            delay(500);
+
+            Wire.beginTransmission(0x3C);
+            Wire.write(0x00); // Control byte
+            Wire.write(0xAE); // Display OFF
+            Wire.endTransmission();
+            delay(50);
+        }
+
         delay(1000);
-        _display->begin(0x3C, true); // Default I2C address for SH1106
+
+        if (_useSPI)
+        {
+            // SPI initialization - no I2C address needed
+            if (!_display->begin())
+            {
+                return false;
+            }
+        }
+        else
+        {
+            // I2C initialization with default address
+            if (!_display->begin(0x3C, true))
+            {
+                return false;
+            }
+        }
+
         _display->clearDisplay();
-        return _display != nullptr;
+        return true;
     }
 
     Adafruit_GFX &getGFX() override
@@ -78,7 +125,7 @@ public:
 
     const char *name() const override
     {
-        return "SH1106";
+        return _useSPI ? "SH1106 (SPI)" : "SH1106 (I2C)";
     }
 
     uint16_t width() const override

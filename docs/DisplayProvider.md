@@ -7,6 +7,7 @@ The DisplayProvider system provides a flexible, type-safe way to support multipl
 - [Overview](#overview)
 - [Available Providers](#available-providers)
 - [Basic Usage](#basic-usage)
+- [SH1106 Dual Communication Support](#sh1106-dual-communication-support)
 - [Provider Interface](#provider-interface)
 - [Migration Guide](#migration-guide)
 - [Adding New Displays](#adding-new-displays)
@@ -35,7 +36,7 @@ The DisplayProvider architecture uses a compile-time provider selection. This pr
 | `Display_HX8357`         | HX8357     | 320x480       | 480x320      | Adafruit_HX8357  | Large, portrait       |
 | `Display_ILI9325`        | ILI9325    | 240x320       | 320x240      | Adafruit_TFTLCD  | Parallel interface    |
 | `Display_SSD1306`        | SSD1306    | 128x64        | 128x64       | Adafruit_SSD1306 | Monochrome OLED       |
-| `Display_SH1106`         | SH1106     | 128x64        | 128x64       | Adafruit_SH110X  | Monochrome OLED       |
+| `Display_SH1106`         | SH1106     | 128x64        | 128x64       | Adafruit_SH110X  | Monochrome OLED, SPI/I2C |
 
 ## Basic Usage
 
@@ -192,6 +193,73 @@ void displayStatus() {
     provider.display();
 }
 ```
+
+## SH1106 Dual Communication Support
+
+The `Display_SH1106` provider supports both SPI and I2C communication protocols. You specify the desired protocol when creating the provider instance.
+
+### SPI Mode
+
+```cpp
+#include <Display_SH1106.h>
+#include <M1Shield.h>
+
+// Create SH1106 provider in SPI mode
+Display_SH1106 displayProvider(true);  // true = SPI mode
+
+void setup() {
+    M1Shield.begin(displayProvider);
+    
+    // Display name will show "SH1106 (SPI)"
+    Serial.println(displayProvider.name());
+}
+```
+
+**SPI Wiring:**
+- VCC → 3.3V/5V
+- GND → GND  
+- CLK → SPI Clock (SCK)
+- MOSI → SPI Data (MOSI)
+- CS → Digital pin (specified in M1Shield.begin())
+- DC → Digital pin (specified in M1Shield.begin())
+- RST → Digital pin (optional, can be -1)
+
+### I2C Mode
+
+```cpp
+#include <Display_SH1106.h>
+#include <M1Shield.h>
+
+// Create SH1106 provider in I2C mode (default)
+Display_SH1106 displayProvider;        // Default: I2C mode
+// Display_SH1106 displayProvider(false);  // Explicit I2C mode
+
+void setup() {
+    M1Shield.begin(displayProvider);
+    
+    // Display name will show "SH1106 (I2C)"
+    Serial.println(displayProvider.name());
+}
+```
+
+**I2C Wiring:**
+- VCC → 3.3V/5V
+- GND → GND
+- SDA → I2C Data (SDA)
+- SCL → I2C Clock (SCL)
+- RST → Digital pin (optional, can be -1)
+
+### Communication Protocol Benefits
+
+**SPI Advantages:**
+- Faster data transfer rates
+- More predictable timing
+- Can use dedicated pins (doesn't interfere with I2C devices)
+
+**I2C Advantages:**
+- Uses fewer pins (only 2 data lines)
+- Can share bus with other I2C devices
+- Standard address (0x3C) - no pin configuration needed
 
 ## Provider Interface
 
