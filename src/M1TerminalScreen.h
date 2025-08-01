@@ -89,7 +89,7 @@ class M1TerminalScreen : public ContentScreen
 {
 private:
     uint8_t _bufferedVidMem[1024]; // Video memory buffer storing current character data (64x16 = 1024 bytes)
-    int16_t _writtenVidMem[1024];  // Shadow buffer tracking previously rendered characters for change detection
+    uint8_t _writtenVidMem[1024];  // Shadow buffer tracking previously rendered characters for change detection
 
     int _currentUpdateIndex; // Current index for incremental character updates (0-1023)
 

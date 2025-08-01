@@ -36,28 +36,44 @@
  */
 
 // First, tell the system which display you have
-#include <Display_ST7789.h>
-Display_ST7789 displayProvider;
+#include <Display_ST7796.h>
+Display_ST7796 displayProvider;
 
 // Include all necessary libraries
+#include <Model1.h>
 #include <M1Shield.h>
 #include "WelcomeConsole.h"
 #include "MainDemoMenu.h"
+#include "logger.h"
+
+// Define the logger instance (declared in logger.h)
+SerialLogger logger;
 
 void setup()
 {
     Serial.begin(115200);
+
+    Model1.begin(2); // Timer 2
+    Model1.setLogger(logger);
+
     M1Shield.begin(displayProvider);
 
     // Enable joystick input for demo navigation
     // Uncomment to allow joystick control of menus and screens
-    // M1Shield.activateJoystick();
+    M1Shield.activateJoystick();
 
     Serial.println("=== M1Shield Comprehensive Demo ===");
     Serial.println("Starting complete feature showcase...");
 
     // Start with the welcome console
     M1Shield.setScreen(new WelcomeConsole());
+}
+
+// Define a callback for Timer 2
+ISR(TIMER2_COMPA_vect)
+{
+    // Trigger a refresh to happen
+    Model1.nextUpdate();
 }
 
 void loop()

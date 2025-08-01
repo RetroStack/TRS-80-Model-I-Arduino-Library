@@ -177,6 +177,34 @@ void Cassette::playSong(int *melody, float *durations, size_t numNotes, int bpm)
 }
 
 /**
+ * Plays a song stored in PROGMEM using the provided melody and durations arrays.
+ * Each note is played for the duration given by the durations array multiplied
+ * by the beats per minute.
+ */
+void Cassette::playSongPGM(const int *melody, const float *durations, size_t numNotes, int bpm)
+{
+    // Compute duration of a whole note in milliseconds
+    float wholeNoteMs = (60000.0 * 4) / bpm;
+
+    for (size_t i = 0; i < numNotes; i++)
+    {
+        int note = pgm_read_word(&melody[i]);
+        float duration = pgm_read_float(&durations[i]);
+        unsigned long durationMs = wholeNoteMs * duration;
+
+        if (note == REST)
+        {
+            delay(durationMs);
+        }
+        else
+        {
+            play(note, durationMs * 0.9);
+            delay(durationMs * 0.1);
+        }
+    }
+}
+
+/**
  * Activates the remote motor
  */
 void Cassette::activateRemote()

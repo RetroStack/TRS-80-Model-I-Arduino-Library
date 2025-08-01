@@ -8,26 +8,52 @@
 #define DISPLAY_SSD1306_H
 
 #include <Adafruit_SSD1306.h>
+#include <Wire.h>
 #include "DisplayProvider.h"
 
 class Display_SSD1306 : public DisplayProvider
 {
 private:
     Adafruit_SSD1306 *_display;
+    bool _isI2C;
+    uint8_t _i2cAddress;
 
 public:
-    Display_SSD1306() : _display(nullptr) {}
+    Display_SSD1306() : _display(nullptr), _isI2C(false), _i2cAddress(0x3C) {}
 
+    // SPI constructor
     bool create(int8_t cs, int8_t dc, int8_t rst) override
     {
         if (_display)
         {
             delete _display;
         }
-        _display = new Adafruit_SSD1306(cs, dc, rst);
-        _display->begin(SSD1306_SWITCHCAPVCC, 0x3C);
-        _display->clearDisplay();
-        return _display != nullptr;
+        _display = new Adafruit_SSD1306(128, 64, &SPI, dc, rst, cs);
+        _isI2C = false;
+        if (_display->begin(SSD1306_SWITCHCAPVCC))
+        {
+            _display->clearDisplay();
+            return true;
+        }
+        return false;
+    }
+
+    // I2C constructor
+    bool createI2C(uint8_t i2cAddress = 0x3C, int8_t rst = -1)
+    {
+        if (_display)
+        {
+            delete _display;
+        }
+        _display = new Adafruit_SSD1306(128, 64, &Wire, rst);
+        _isI2C = true;
+        _i2cAddress = i2cAddress;
+        if (_display->begin(SSD1306_SWITCHCAPVCC, _i2cAddress))
+        {
+            _display->clearDisplay();
+            return true;
+        }
+        return false;
     }
 
     Adafruit_GFX &getGFX() override

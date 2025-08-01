@@ -88,6 +88,9 @@ private:
     // Tab settings
     uint8_t _tabSize; // Number of characters per tab stop
 
+    // Bulk operation optimization
+    bool _inBulkWrite; // Flag to track if we're in a bulk write operation
+
     // Screen dimensions (cached for efficiency)
     uint16_t _contentLeft;   // Left edge of content area
     uint16_t _contentTop;    // Top edge of content area

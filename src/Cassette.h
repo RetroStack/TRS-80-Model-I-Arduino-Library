@@ -123,6 +123,7 @@ public:
 
     void play(uint16_t frequency, uint32_t duration);
     void playSong(int *melody, float *durations, size_t numNotes, int bpm);
+    void playSongPGM(const int *melody, const float *durations, size_t numNotes, int bpm);
 
     void activateRemote();
     void deactivateRemote();

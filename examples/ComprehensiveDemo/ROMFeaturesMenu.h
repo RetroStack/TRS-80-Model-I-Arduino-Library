@@ -5,9 +5,11 @@
 
 class ROMFeaturesMenu : public MenuScreen
 {
+protected:
+    Screen *_getSelectedMenuItemScreen(int index) override;
+
 public:
     ROMFeaturesMenu();
-    Screen *actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override;
 };
 
 #endif

@@ -416,7 +416,10 @@ void ContentScreen::_setButtonItems(const char **buttonItems, uint8_t buttonItem
     // Update footer immediately if screen is active
     if (isActive())
     {
+        Adafruit_GFX &gfx = M1Shield.getGFX();
+        gfx.startWrite();
         _drawFooter();
+        gfx.endWrite();
         M1Shield.display(); // Push changes to display
     }
 }
@@ -447,7 +450,10 @@ void ContentScreen::_clearButtonItems()
     // Update footer immediately if screen is active
     if (isActive())
     {
+        Adafruit_GFX &gfx = M1Shield.getGFX();
+        gfx.startWrite();
         _drawFooter();
+        gfx.endWrite();
         M1Shield.display(); // Push changes to display
     }
 }
@@ -483,7 +489,10 @@ void ContentScreen::_setTitle(const char *title)
     // Update header immediately if screen is active
     if (isActive())
     {
+        Adafruit_GFX &gfx = M1Shield.getGFX();
+        gfx.startWrite();
         _drawHeader();
+        gfx.endWrite();
         M1Shield.display(); // Push changes to display
     }
 }
@@ -505,7 +514,10 @@ void ContentScreen::_clearTitle()
     // Update footer immediately if screen is active
     if (isActive())
     {
+        Adafruit_GFX &gfx = M1Shield.getGFX();
+        gfx.startWrite();
         _drawFooter();
+        gfx.endWrite();
         M1Shield.display(); // Push changes to display
     }
 }
@@ -544,7 +556,10 @@ void ContentScreen::_setProgressValue(int value)
     // Update progress bar immediately if screen is active
     if (isActive())
     {
+        Adafruit_GFX &gfx = M1Shield.getGFX();
+        gfx.startWrite();
         _drawProgressBar();
+        gfx.endWrite();
         M1Shield.display(); // Push changes to display
     }
 }
@@ -575,7 +590,9 @@ void ContentScreen::_clearContentArea()
     uint16_t height = _getContentHeight();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
+    gfx.startWrite();
     gfx.fillRect(x, y, width, height, M1Shield.convertColor(SCREEN_COLOR_BG));
+    gfx.endWrite();
 
     M1Shield.display(); // Push changes to display
 }

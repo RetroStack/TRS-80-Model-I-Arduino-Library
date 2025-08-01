@@ -13,7 +13,11 @@ WelcomeConsole::WelcomeConsole() : ConsoleScreen()
     _introComplete = false;
     _animationStep = 0;
 
-    Serial.println("Welcome Console initialized");
+    // Set button labels
+    const char *buttons[] = {"", "JB:Start", "", ""};
+    _setButtonItems(buttons, 4);
+
+    Serial.println(F("Welcome Console initialized"));
 }
 
 void WelcomeConsole::loop()
@@ -35,18 +39,18 @@ void WelcomeConsole::showWelcomeAnimation()
         cls();
         setTextColor(0x07E0, 0x0000); // Green
         setTextSize(2);
-        println("M1SHIELD");
+        println(F("M1SHIELD"));
         setTextSize(1);
         setTextColor(0xFFE0, 0x0000); // Yellow
-        println("COMPREHENSIVE DEMO");
+        println(F("COMPREHENSIVE DEMO"));
         println();
         _animationStep = 1;
     }
     else if (elapsed > 2500 && _animationStep == 1)
     {
         setTextColor(0x07FF, 0x0000); // Cyan
-        println("Welcome to the complete");
-        println("M1Shield feature showcase!");
+        println(F("Welcome to the"));
+        println(F("M1Shield feature showcase!"));
         println();
         _animationStep = 2;
     }
@@ -65,40 +69,40 @@ void WelcomeConsole::showWelcomeAnimation()
 void WelcomeConsole::showFeatureList()
 {
     setTextColor(0xF81F, 0x0000); // Magenta
-    println("FEATURES INCLUDED:");
+    println(F("FEATURES INCLUDED:"));
     setTextColor(0xFFFF, 0x0000); // White
-    println("* Model1 TEST Signal Control");
-    println("* M1TerminalScreen Demo");
-    println("* ROM Detection & Reading");
-    println("* Video Mode Switching");
-    println("* RAM Testing Suite");
-    println("* Keyboard Input Monitor");
-    println("* Cassette Song Player");
+    println(F("* Model1 TEST Signal Control"));
+    println(F("* M1TerminalScreen Demo"));
+    println(F("* ROM Detection & Reading"));
+    println(F("* Video Mode Switching"));
+    println(F("* RAM Testing Suite"));
+    println(F("* Keyboard Input Monitor"));
+    println(F("* Cassette Song Player"));
     println();
 }
 
 void WelcomeConsole::showInstructions()
 {
     setTextColor(0x07E0, 0x0000); // Green
-    println("INSTRUCTIONS:");
+    println(F("INSTRUCTIONS:"));
     setTextColor(0xFFFF, 0x0000); // White
-    println("* Use arrow buttons to navigate");
-    println("* Press joystick to select");
-    println("* Use Menu button to go back");
+    println(F("* Use arrow buttons to navigate"));
+    println(F("* Press joystick to select"));
+    println(F("* Use Menu button to go back"));
     println();
     setTextColor(0xFFE0, 0x0000); // Yellow
-    println("Press joystick to continue...");
+    println(F("Ready to start!"));
 }
 
 Screen *WelcomeConsole::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)
 {
-    if (_introComplete && (action & BUTTON_JOYSTICK))
+    if (_introComplete && ((action & BUTTON_JOYSTICK) || (action & BUTTON_RIGHT)))
     {
-        Serial.println("Moving to main demo menu");
+        Serial.println(F("Moving to main demo menu"));
         return new MainDemoMenu();
     }
 
-    // Skip animation on any button press
+    // Skip animation on any button press or joystick input
     if (!_introComplete)
     {
         _introComplete = true;

@@ -234,6 +234,9 @@ void MenuScreen::_drawContent()
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
+    // Start bulk drawing transaction for better performance
+    gfx.startWrite();
+
     // Calculate starting item index for current page
     uint8_t itemIndex = _currentPage * itemsPerPage;
     uint8_t itemsDrawn = 0;
@@ -406,6 +409,9 @@ void MenuScreen::_drawContent()
             gfx.fillRect(centerX + 7, dotY, 3, 3, M1Shield.convertColor(TABLE_COLOR_BG)); // Right dot
         }
     }
+
+    // End bulk drawing transaction
+    gfx.endWrite();
 }
 
 // Menu Configuration and State Management

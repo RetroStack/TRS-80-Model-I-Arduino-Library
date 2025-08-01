@@ -49,6 +49,9 @@ ConsoleScreen::ConsoleScreen() : ContentScreen()
     _screenOpenTime = 0;
     _hasExecutedOnce = false;
 
+    // Initialize bulk write optimization
+    _inBulkWrite = false;
+
     // Set default button labels
     const char *buttonItems[1] = {"[M] Back"};
     _setButtonItems(buttonItems, 1);
@@ -232,7 +235,8 @@ size_t ConsoleScreen::write(uint8_t c)
  * @brief Write buffer of characters to console (Print interface optimization)
  *
  * Optimized bulk write method for better performance when writing
- * multiple characters at once.
+ * multiple characters at once. Uses startWrite/endWrite for maximum
+ * performance on SPI displays.
  *
  * @param buffer Pointer to character buffer
  * @param size Number of characters to write
@@ -240,18 +244,41 @@ size_t ConsoleScreen::write(uint8_t c)
  */
 size_t ConsoleScreen::write(const uint8_t *buffer, size_t size)
 {
+    if (!isActive() || size == 0)
+        return 0;
+
+    Adafruit_GFX &gfx = M1Shield.getGFX();
+
+    // Start bulk write transaction for better SPI performance
+    gfx.startWrite();
+
+    // Set text properties once for the entire bulk operation
+    gfx.setTextColor(_textColor, _textBgColor);
+    gfx.setTextSize(_textSize);
+
+    // Flag that we're in a bulk write operation
+    _inBulkWrite = true;
+
     size_t n = 0;
     while (size--)
     {
-        // Process character without display update
+        // Process character without individual display updates
         _processChar((char)*buffer++);
         n++;
     }
+
+    // Clear bulk write flag
+    _inBulkWrite = false;
+
+    // End bulk write transaction
+    gfx.endWrite();
+
     // Single display update after processing entire buffer
-    if (n > 0 && isActive())
+    if (n > 0)
     {
         M1Shield.display();
     }
+
     return n;
 }
 
@@ -425,9 +452,13 @@ void ConsoleScreen::_renderChar(char c)
     uint16_t x = _contentLeft + _currentX;
     uint16_t y = _contentTop + _currentY;
 
-    // Set text properties and render character
-    gfx.setTextColor(_textColor, _textBgColor);
-    gfx.setTextSize(_textSize);
+    // Only set text properties if not in bulk write mode (already set)
+    if (!_inBulkWrite)
+    {
+        gfx.setTextColor(_textColor, _textBgColor);
+        gfx.setTextSize(_textSize);
+    }
+
     gfx.setCursor(x, y);
     gfx.print(c);
 

@@ -96,20 +96,36 @@
 #define REST 0
 
 // External declarations for song data
-extern int imperialMelody[];
-extern float imperialDurations[];
+extern const int imperialMelody[];
+extern const float imperialDurations[];
 extern const size_t imperialMelodyLength;
 
-extern int tetrisMelodyLead[];
-extern float tetrisDurationsLead[];
+extern const int tetrisMelodyLead[];
+extern const float tetrisDurationsLead[];
 extern const size_t tetrisMelodyLength;
 
-extern int marioMelody[];
-extern float marioDurations[];
+extern const int marioMelody[];
+extern const float marioDurations[];
 extern const size_t marioMelodyLength;
 
-extern int pacmanMelody[];
-extern float pacmanDurations[];
+extern const int pacmanMelody[];
+extern const float pacmanDurations[];
 extern const size_t pacmanMelodyLength;
+
+extern const int underworldMelody[];
+extern const float underworldDurations[];
+extern const size_t underworldMelodyLength;
+
+extern const int simpsonsMelody[];
+extern const float simpsonsDurations[];
+extern const size_t simpsonsMelodyLength;
+
+extern const int gameOfThronesMelody[];
+extern const float gameOfThronesDurations[];
+extern const size_t gameOfThronesMelodyLength;
+
+extern const int doomMelody[];
+extern const float doomDurations[];
+extern const size_t doomMelodyLength;
 
 #endif
