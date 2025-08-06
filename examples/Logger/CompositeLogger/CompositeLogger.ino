@@ -88,9 +88,9 @@ void setup()
         Serial.println("Screen logger registered");
     }
 
-    Serial.printf("Total loggers active: %d\n", multiLogger.getLoggerCount());
-    Serial.println();
-
+    Serial.print(F("Total loggers active: "));
+    Serial.println(multiLogger.getLoggerCount());
+    
     // Activate the screen
     M1Shield.setScreen(screenLogger);
 
