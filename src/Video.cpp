@@ -369,11 +369,12 @@ char *Video::read(uint8_t x, uint8_t y, uint16_t length, bool raw)
 }
 
 /**
- * Write a byte to the viewport and return byte written.
+ * Write a byte to the viewport and count.
  */
 size_t Video::write(uint8_t ch)
 {
   _print((char)ch, false);
+  return 1;
 }
 
 /**
@@ -523,4 +524,5 @@ char Video::convertLocalCharacterToModel1(char character)
   }
 
   return character;
+
 }
