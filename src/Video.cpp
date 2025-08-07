@@ -333,13 +333,13 @@ char *Video::read(uint8_t x, uint8_t y, uint16_t length, bool raw)
   uint8_t *buffer = new uint8_t[length + 1];
 
   // Make sure this is filled with zeros in case the area is shorter than length
-  for (int i = 0; i < length + 1; i++)
+  for (uint16_t i = 0; i < length + 1; i++)
   {
     buffer[i] = 0;
   }
 
   // Read in string
-  for (int i = 0; i < length; i++)
+  for (uint16_t i = 0; i < length; i++)
   {
     uint16_t addr = _getColumnAddress(_getRowAddress(y), x);
     uint8_t character = Model1.readMemory(addr);
@@ -526,3 +526,4 @@ char Video::convertLocalCharacterToModel1(char character)
   return character;
 
 }
+
