@@ -24,6 +24,7 @@
 #define asmNoop() __asm__ __volatile__("nop\nnop")
 
 char *uint8ToBinary(uint8_t value, char *buffer);
+char *uint16ToBinary(uint16_t value, char *buffer);
 char pinStatus(bool value);
 char busStatus(uint8_t value);
 

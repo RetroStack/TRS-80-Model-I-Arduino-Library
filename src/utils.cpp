@@ -16,6 +16,19 @@ char *uint8ToBinary(uint8_t value, char *buffer)
 }
 
 /**
+ * Converts an 16-bit value to a string
+ */
+char *uint16ToBinary(uint16_t value, char *buffer)
+{
+  for (int i = 15; i >= 0; i--)
+  {
+    buffer[15 - i] = ((value >> i) & 1) ? '1' : '0';
+  }
+  buffer[16] = '\0'; // Null-terminate the string
+  return buffer;
+}
+
+/**
  * Returns the pin status
  */
 char pinStatus(bool value)

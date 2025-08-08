@@ -18,12 +18,14 @@ private:
     volatile bool _writable;
 
     void _setBus(bool writableOption);
-    void _configurePort(uint8_t config);
+    void _configurePort(uint16_t config);
 
 public:
     AddressBus();
 
     void begin();
+    void end();
+
     void setLogger(ILogger &logger);
 
     bool isReadable();

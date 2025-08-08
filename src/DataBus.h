@@ -24,6 +24,8 @@ public:
     DataBus();
 
     void begin();
+    void end();
+
     void setLogger(ILogger &logger);
 
     bool isReadable();

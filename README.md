@@ -16,6 +16,13 @@ This Arduino library enables interfacing a TRS-80 Model I mainboard directly wit
   - Supports I/O access as well.
   - Additional support for interrupt, WAIT, and TEST signals.
   - Provides convenience functions to check address spaces.
+- **Model1LowLevel Class**
+  - Direct, low-level access to all TRS-80 Model I hardware control signals and buses
+  - Bypasses safety mechanisms for maximum performance and control
+  - Static inline functions for zero call overhead
+  - Complete pin configuration, reading, and control for all signals (RAS, CAS, MUX, RD, WR, IN, OUT, INT, TEST, WAIT, SYS_RES, INT_ACK)
+  - Full address and data bus manipulation
+  - **WARNING:** Advanced users only - can damage hardware if used incorrectly
 
 ### Arduino Ecosystem Compatibility
 

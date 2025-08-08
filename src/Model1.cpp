@@ -1,7 +1,6 @@
 #include "Model1.h"
 #include "utils.h"
-#include "port_config.h"
-#include "port_macros.h"
+#include "Model1LowLevel.h"
 
 // Refresh trigger
 //
@@ -38,7 +37,7 @@ Model1Class::Model1Class()
     _mutability = false;
 
     // Initializes memory refresh to default values
-    _deactivateMemoryRefresh();
+    deactivateMemoryRefresh();
 }
 
 /**
@@ -55,7 +54,11 @@ void Model1Class::begin(int refreshTimer)
     _deactivateBusControlSignals();
     _deactivateBusAccessSignals();
 
-    _timer = refreshTimer;
+    if (refreshTimer != -1)
+    {
+        _timer = refreshTimer;
+    }
+
     if (refreshTimer == 1)
     {
         _setupMemoryRefreshTimer1();
@@ -64,6 +67,10 @@ void Model1Class::begin(int refreshTimer)
     {
         _setupMemoryRefreshTimer2();
     }
+    else
+    {
+        deactivateMemoryRefresh();
+    }
 }
 
 /**
@@ -71,6 +78,13 @@ void Model1Class::begin(int refreshTimer)
  */
 void Model1Class::end()
 {
+    _addressBus.end();
+    _dataBus.end();
+
+    _deactivateBusControlSignals();
+    _deactivateBusAccessSignals();
+
+    deactivateMemoryRefresh();
 }
 
 /**
@@ -252,7 +266,7 @@ void Model1Class::_setupMemoryRefreshTimer2()
 /**
  * Activates the refresh timer
  */
-void Model1Class::_activateMemoryRefresh()
+void Model1Class::activateMemoryRefresh()
 {
     _activeRefresh = true;
     if (_timer == 1)
@@ -270,7 +284,7 @@ void Model1Class::_activateMemoryRefresh()
 /**
  * Deactivates the refresh timer
  */
-void Model1Class::_deactivateMemoryRefresh()
+void Model1Class::deactivateMemoryRefresh()
 {
     if (_timer == 1)
     {
@@ -308,13 +322,13 @@ void Model1Class::_refreshNextMemoryRow()
     _addressBus.writeRefreshAddress(currentRefreshRow);
 
     // Timing of various signals
-    pinWrite(RAS, LOW); // 45ns (62.5ns, but when the pulse is down)
-    asmNoop();          // 125ns
-    asmNoop();          // 125ns
-    asmNoop();          // 125ns
+    Model1LowLevel::setRAS(LOW); // 45ns (62.5ns, but when the pulse is down)
+    asmNoop();                   // 125ns
+    asmNoop();                   // 125ns
+    asmNoop();                   // 125ns
 
     // Reset, leaving address as-is
-    pinWrite(RAS, HIGH); // 45ns (62.5ns, but when the pulse is down)
+    Model1LowLevel::setRAS(HIGH); // 45ns (62.5ns, but when the pulse is down)
 }
 
 // ----------------------------------------
@@ -337,20 +351,20 @@ uint8_t Model1Class::readMemory(uint16_t address)
     _addressBus.writeMemoryAddress(address);
 
     // Timing of various signals
-    pinWrite(RAS, LOW);
-    pinWrite(RD, LOW);
-    pinWrite(MUX, HIGH);
-    pinWrite(CAS, LOW);
+    Model1LowLevel::setRAS(LOW);
+    Model1LowLevel::setRD(LOW);
+    Model1LowLevel::setMUX(HIGH);
+    Model1LowLevel::setCAS(LOW);
     asmWait(3); // 772 ns
 
     // Read data
     uint8_t data = _dataBus.readData();
 
     // Reset, leaving address as-is
-    pinWrite(CAS, HIGH);
-    pinWrite(RD, HIGH);
-    pinWrite(RAS, HIGH);
-    pinWrite(MUX, LOW);
+    Model1LowLevel::setCAS(HIGH);
+    Model1LowLevel::setRD(HIGH);
+    Model1LowLevel::setRAS(HIGH);
+    Model1LowLevel::setMUX(LOW);
 
     SREG = oldSREG;
 
@@ -377,20 +391,20 @@ void Model1Class::writeMemory(uint16_t address, uint8_t data)
     _dataBus.writeData(data);
 
     // Timing of various signals
-    pinWrite(RAS, LOW);
+    Model1LowLevel::setRAS(LOW);
     asmNoop();
     asmNoop();
     asmNoop();
-    pinWrite(WR, LOW);
-    pinWrite(MUX, HIGH);
-    pinWrite(CAS, LOW);
+    Model1LowLevel::setWR(LOW);
+    Model1LowLevel::setMUX(HIGH);
+    Model1LowLevel::setCAS(LOW);
     asmWait(1); // 252 ns
 
     // Reset, leaving address as-is, removing data
-    pinWrite(WR, HIGH);
-    pinWrite(CAS, HIGH);
-    pinWrite(RAS, HIGH);
-    pinWrite(MUX, LOW);
+    Model1LowLevel::setWR(HIGH);
+    Model1LowLevel::setCAS(HIGH);
+    Model1LowLevel::setRAS(HIGH);
+    Model1LowLevel::setMUX(LOW);
     _dataBus.setAsReadable();
 
     SREG = oldSREG;
@@ -497,17 +511,17 @@ uint8_t Model1Class::readIO(uint8_t address)
     _addressBus.writeIOAddress(address);
 
     // Timing of various signals
-    pinWrite(IN, LOW);
-    pinWrite(MUX, HIGH);
-    pinWrite(CAS, LOW);
+    Model1LowLevel::setIN(LOW);
+    Model1LowLevel::setMUX(HIGH);
+    Model1LowLevel::setCAS(LOW);
 
     // Read data
     uint8_t data = _dataBus.readData();
 
     // Reset, leaving address as-is
-    pinWrite(CAS, HIGH);
-    pinWrite(IN, HIGH);
-    pinWrite(MUX, LOW);
+    Model1LowLevel::setCAS(HIGH);
+    Model1LowLevel::setIN(HIGH);
+    Model1LowLevel::setMUX(LOW);
 
     SREG = oldSREG;
 
@@ -534,15 +548,15 @@ void Model1Class::writeIO(uint8_t address, uint8_t data)
     _dataBus.writeData(data);
 
     // Timing of various signals
-    pinWrite(OUT, LOW);
-    pinWrite(MUX, HIGH);
-    pinWrite(CAS, LOW);
+    Model1LowLevel::setOUT(LOW);
+    Model1LowLevel::setMUX(HIGH);
+    Model1LowLevel::setCAS(LOW);
     asmWait(1); // 252 ns
 
     // Reset, leving address as-is, removing data
-    pinWrite(CAS, HIGH);
-    pinWrite(OUT, HIGH);
-    pinWrite(MUX, LOW);
+    Model1LowLevel::setCAS(HIGH);
+    Model1LowLevel::setOUT(HIGH);
+    Model1LowLevel::setMUX(LOW);
     _dataBus.setAsReadable();
 
     SREG = oldSREG;
@@ -559,8 +573,11 @@ void Model1Class::writeIO(uint8_t address, uint8_t data)
  */
 void Model1Class::_initSystemControlSignals()
 {
-    pinConfigWrite(SYS_RES, INPUT);
-    pinConfigWrite(INT_ACK, INPUT);
+    Model1LowLevel::setSYS_RES(LOW);
+    Model1LowLevel::setINT_ACK(LOW);
+
+    Model1LowLevel::configSYS_RES(INPUT);
+    Model1LowLevel::configINT_ACK(INPUT);
 }
 
 /**
@@ -568,7 +585,7 @@ void Model1Class::_initSystemControlSignals()
  */
 bool Model1Class::readSystemResetSignal()
 {
-    return pinRead(SYS_RES) == LOW ? true : false;
+    return Model1LowLevel::readSYS_RES() == LOW ? true : false;
 }
 
 /**
@@ -576,7 +593,7 @@ bool Model1Class::readSystemResetSignal()
  */
 bool Model1Class::readInterruptAcknowledgeSignal()
 {
-    return pinRead(INT_ACK) == LOW ? true : false;
+    return Model1LowLevel::readINT_ACK() == LOW ? true : false;
 }
 
 // ----------------------------------------
@@ -590,9 +607,9 @@ void Model1Class::_activateBusControlSignals()
 {
     _resetBusControlSignals();
 
-    pinConfigWrite(RAS, OUTPUT);
-    pinConfigWrite(MUX, OUTPUT);
-    pinConfigWrite(CAS, OUTPUT);
+    Model1LowLevel::configRAS(OUTPUT);
+    Model1LowLevel::configMUX(OUTPUT);
+    Model1LowLevel::configCAS(OUTPUT);
 }
 
 /**
@@ -600,9 +617,9 @@ void Model1Class::_activateBusControlSignals()
  */
 void Model1Class::_deactivateBusControlSignals()
 {
-    pinConfigWrite(RAS, INPUT);
-    pinConfigWrite(MUX, INPUT);
-    pinConfigWrite(CAS, INPUT);
+    Model1LowLevel::configRAS(INPUT);
+    Model1LowLevel::configMUX(INPUT);
+    Model1LowLevel::configCAS(INPUT);
 }
 
 /**
@@ -610,9 +627,9 @@ void Model1Class::_deactivateBusControlSignals()
  */
 void Model1Class::_resetBusControlSignals()
 {
-    pinWrite(RAS, HIGH);
-    pinWrite(MUX, LOW);
-    pinWrite(CAS, HIGH);
+    Model1LowLevel::setRAS(HIGH);
+    Model1LowLevel::setMUX(LOW);
+    Model1LowLevel::setCAS(HIGH);
 }
 
 // ----------------------------------------
@@ -626,11 +643,11 @@ void Model1Class::_activateBusAccessSignals()
 {
     _resetBusAccessSignals();
 
-    pinConfigWrite(RD, OUTPUT);
-    pinConfigWrite(WR, OUTPUT);
+    Model1LowLevel::configRD(OUTPUT);
+    Model1LowLevel::configWR(OUTPUT);
 
-    pinConfigWrite(IN, OUTPUT);
-    pinConfigWrite(OUT, OUTPUT);
+    Model1LowLevel::configIN(OUTPUT);
+    Model1LowLevel::configOUT(OUTPUT);
 }
 
 /**
@@ -638,11 +655,11 @@ void Model1Class::_activateBusAccessSignals()
  */
 void Model1Class::_deactivateBusAccessSignals()
 {
-    pinConfigWrite(RD, INPUT);
-    pinConfigWrite(WR, INPUT);
+    Model1LowLevel::configRD(INPUT);
+    Model1LowLevel::configWR(INPUT);
 
-    pinConfigWrite(IN, INPUT);
-    pinConfigWrite(OUT, INPUT);
+    Model1LowLevel::configIN(INPUT);
+    Model1LowLevel::configOUT(INPUT);
 }
 
 /**
@@ -650,10 +667,10 @@ void Model1Class::_deactivateBusAccessSignals()
  */
 void Model1Class::_resetBusAccessSignals()
 {
-    pinWrite(RD, HIGH);
-    pinWrite(WR, HIGH);
-    pinWrite(IN, HIGH);
-    pinWrite(OUT, HIGH);
+    Model1LowLevel::setRD(HIGH);
+    Model1LowLevel::setWR(HIGH);
+    Model1LowLevel::setIN(HIGH);
+    Model1LowLevel::setOUT(HIGH);
 }
 
 // ----------------------------------------
@@ -667,13 +684,13 @@ void Model1Class::_resetBusAccessSignals()
  */
 void Model1Class::_initExternalControlSignals()
 {
-    pinWrite(INT, HIGH);
-    pinWrite(TEST, HIGH);
-    pinWrite(WAIT, HIGH);
+    Model1LowLevel::setINT(HIGH);
+    Model1LowLevel::setTEST(HIGH);
+    Model1LowLevel::setWAIT(HIGH);
 
-    pinConfigWrite(INT, OUTPUT);
-    pinConfigWrite(TEST, OUTPUT);
-    pinConfigWrite(WAIT, OUTPUT);
+    Model1LowLevel::configINT(OUTPUT);
+    Model1LowLevel::configTEST(OUTPUT);
+    Model1LowLevel::configWAIT(OUTPUT);
 }
 
 // ---------- Interrupt Request Signal
@@ -683,14 +700,7 @@ void Model1Class::_initExternalControlSignals()
  */
 void Model1Class::_setInterruptRequestSignal(bool value)
 {
-    if (value)
-    {
-        pinWrite(INT, LOW);
-    }
-    else
-    {
-        pinWrite(INT, HIGH);
-    }
+    Model1LowLevel::setINT(value ? LOW : HIGH);
 }
 
 /**
@@ -704,7 +714,7 @@ bool Model1Class::triggerInterrupt(uint8_t interrupt, uint16_t timeout)
 
     for (uint16_t i = 0; i < timeout; i++)
     {
-        if (pinRead(INT_ACK) == LOW)
+        if (Model1LowLevel::readINT_ACK() == LOW)
         {
             _dataBus.setAsWritable();
             _dataBus.writeData(interrupt);
@@ -730,7 +740,7 @@ bool Model1Class::triggerInterrupt(uint8_t interrupt, uint16_t timeout)
  */
 void Model1Class::activateInterruptRequestSignal()
 {
-    if (pinRead(INT) == LOW)
+    if (Model1LowLevel::readINT() == LOW)
     {
         if (_logger)
             _logger->warn("INT* signal already active.");
@@ -745,7 +755,7 @@ void Model1Class::activateInterruptRequestSignal()
  */
 void Model1Class::deactivateInterruptRequestSignal()
 {
-    if (pinRead(INT) == HIGH)
+    if (Model1LowLevel::readINT() == HIGH)
     {
         if (_logger)
             _logger->warn("INT* signal already deactive.");
@@ -762,14 +772,7 @@ void Model1Class::deactivateInterruptRequestSignal()
  */
 void Model1Class::_setTestSignal(bool value)
 {
-    if (value)
-    {
-        pinWrite(TEST, LOW);
-    }
-    else
-    {
-        pinWrite(TEST, HIGH);
-    }
+    Model1LowLevel::setTEST(value ? LOW : HIGH);
 }
 
 /**
@@ -777,7 +780,7 @@ void Model1Class::_setTestSignal(bool value)
  */
 bool Model1Class::hasActiveTestSignal()
 {
-    return (pinRead(TEST) == LOW);
+    return Model1LowLevel::readTEST() == LOW;
 }
 
 /**
@@ -785,7 +788,7 @@ bool Model1Class::hasActiveTestSignal()
  */
 void Model1Class::activateTestSignal()
 {
-    if (pinRead(TEST) == LOW)
+    if (Model1LowLevel::readTEST() == LOW)
     {
         if (_logger)
             _logger->warn("TEST* signal already active.");
@@ -810,7 +813,7 @@ void Model1Class::activateTestSignal()
     // Activate background services
     if (_timer != -1)
     {
-        _activateMemoryRefresh();
+        activateMemoryRefresh();
     }
 }
 
@@ -819,7 +822,7 @@ void Model1Class::activateTestSignal()
  */
 void Model1Class::deactivateTestSignal()
 {
-    if (pinRead(TEST) == HIGH)
+    if (Model1LowLevel::readTEST() == HIGH)
     {
         if (_logger)
             _logger->warn("TEST* signal already deactive.");
@@ -829,7 +832,7 @@ void Model1Class::deactivateTestSignal()
     // Deactivate background services
     if (_timer != -1)
     {
-        _deactivateMemoryRefresh();
+        deactivateMemoryRefresh();
     }
 
     // Set bus as immutable, blocking write requests from this code
@@ -855,14 +858,7 @@ void Model1Class::deactivateTestSignal()
  */
 void Model1Class::_setWaitSignal(bool value)
 {
-    if (value)
-    {
-        pinWrite(WAIT, LOW);
-    }
-    else
-    {
-        pinWrite(WAIT, HIGH);
-    }
+    Model1LowLevel::setWAIT(value ? LOW : HIGH);
 }
 
 /**
@@ -870,7 +866,7 @@ void Model1Class::_setWaitSignal(bool value)
  */
 void Model1Class::activateWaitSignal()
 {
-    if (pinRead(WAIT) == LOW)
+    if (Model1LowLevel::readWAIT() == LOW)
     {
         if (_logger)
             _logger->warn("WAIT* signal already active.");
@@ -885,7 +881,7 @@ void Model1Class::activateWaitSignal()
  */
 void Model1Class::deactivateWaitSignal()
 {
-    if (pinRead(WAIT) == HIGH)
+    if (Model1LowLevel::readWAIT() == HIGH)
     {
         if (_logger)
             _logger->warn("WAIT* signal already deactive.");
@@ -916,25 +912,24 @@ char *Model1Class::getState()
         _activeRefresh ? 'T' : 'F',
         _nextMemoryRefreshRow,
 
-        pinStatus(pinConfigRead(RD)),
-        pinRead(RD),
-        pinStatus(pinConfigRead(WR)), pinRead(WR),
-        pinStatus(pinConfigRead(IN)), pinRead(IN),
-        pinStatus(pinConfigRead(OUT)), pinRead(OUT),
+        pinStatus(Model1LowLevel::configReadRD()), Model1LowLevel::readRD(),
+        pinStatus(Model1LowLevel::configReadWR()), Model1LowLevel::readWR(),
+        pinStatus(Model1LowLevel::configReadIN()), Model1LowLevel::readIN(),
+        pinStatus(Model1LowLevel::configReadOUT()), Model1LowLevel::readOUT(),
 
         addrStatus,
         dataStatus,
 
-        pinStatus(pinConfigRead(RAS)), pinRead(RAS),
-        pinStatus(pinConfigRead(CAS)), pinRead(CAS),
-        pinStatus(pinConfigRead(MUX)), pinRead(MUX),
+        pinStatus(Model1LowLevel::configReadRAS()), Model1LowLevel::readRAS(),
+        pinStatus(Model1LowLevel::configReadCAS()), Model1LowLevel::readCAS(),
+        pinStatus(Model1LowLevel::configReadMUX()), Model1LowLevel::readMUX(),
 
-        pinStatus(pinConfigRead(SYS_RES)), pinRead(SYS_RES),
-        pinStatus(pinConfigRead(INT_ACK)), pinRead(INT_ACK),
+        pinStatus(Model1LowLevel::configReadSYS_RES()), Model1LowLevel::readSYS_RES(),
+        pinStatus(Model1LowLevel::configReadINT_ACK()), Model1LowLevel::readINT_ACK(),
 
-        pinStatus(pinConfigRead(INT)), pinRead(INT),
-        pinStatus(pinConfigRead(TEST)), pinRead(TEST),
-        pinStatus(pinConfigRead(WAIT)), pinRead(WAIT));
+        pinStatus(Model1LowLevel::configReadINT()), Model1LowLevel::readINT(),
+        pinStatus(Model1LowLevel::configReadTEST()), Model1LowLevel::readTEST(),
+        pinStatus(Model1LowLevel::configReadWAIT()), Model1LowLevel::readWAIT());
 
     delete[] addrStatus;
     delete[] dataStatus;

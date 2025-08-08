@@ -1,14 +1,13 @@
 #include "DataBus.h"
-#include "port_config.h"
-#include "port_macros.h"
 #include "utils.h"
+#include "Model1LowLevel.h"
 
 /**
  * Configures the port used.
  */
 void DataBus::_configurePort(uint8_t config)
 {
-  busConfigWrite(DATA, config);
+  Model1LowLevel::configDataBus(config);
 }
 
 /**
@@ -25,7 +24,15 @@ DataBus::DataBus()
  */
 void DataBus::begin()
 {
-  _configurePort(0x00);
+  setAsReadable();
+}
+
+/**
+ * Puts port into a stable mode
+ */
+void DataBus::end()
+{
+  setAsReadable();
 }
 
 /**
@@ -41,7 +48,7 @@ void DataBus::setLogger(ILogger &logger)
  */
 uint8_t DataBus::readData()
 {
-  return busRead(DATA);
+  return Model1LowLevel::readDataBus();
 }
 
 /**
@@ -57,7 +64,7 @@ void DataBus::writeData(uint8_t data)
       _logger->err("Data bus is not writable.");
     return;
   }
-  busWrite(DATA, data);
+  Model1LowLevel::setDataBus(data);
 }
 
 /**
@@ -99,14 +106,16 @@ char *DataBus::getState()
 {
   const int LEN = 20;
   char *buffer = new char[LEN];
-  char data[9];
+  char dataChars[9];
+  uint8_t dataConfig = Model1LowLevel::configReadDataBus();
+  uint8_t data = Model1LowLevel::readDataBus();
   snprintf(
       buffer,
       LEN,
       "DATA<%c-%c>(%s)",
-      busStatus(busConfigRead(DATA)),
+      busStatus(dataConfig),
       _writable ? 'w' : 'r',
-      uint8ToBinary(busRead(DATA), data));
+      uint8ToBinary(data, dataChars));
   return buffer;
 }
 

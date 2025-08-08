@@ -7,6 +7,7 @@ This library allows an Arduino to control the TRS-80 Model I mainboard through i
 ## Model 1 Classes
 
 - [**Model1**](Model1.md) — Main interface to control bus signals, memory, and interrupts.
+- [**Model1LowLevel**](Model1LowLevel.md) — Direct, low-level access to all TRS-80 hardware control signals and buses (⚠️ Advanced users only).
 - [**Cassette**](Cassette.md) — Cassette output and video mode control.
 - [**Keyboard**](Keyboard.md) — Reading the keyboard matrix.
 - [**Video**](Video.md) — Video memory management and text display.

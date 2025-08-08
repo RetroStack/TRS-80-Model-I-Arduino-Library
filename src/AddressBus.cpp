@@ -1,15 +1,13 @@
 #include "AddressBus.h"
-#include "port_config.h"
-#include "port_macros.h"
 #include "utils.h"
+#include "Model1LowLevel.h"
 
 /**
  * Configures the port used
  */
-void AddressBus::_configurePort(uint8_t config)
+void AddressBus::_configurePort(uint16_t config)
 {
-    busConfigWrite(ADDR_LOW, config);
-    busConfigWrite(ADDR_HIGH, config);
+    Model1LowLevel::configAddressBus(config);
 }
 
 /**
@@ -26,7 +24,15 @@ AddressBus::AddressBus()
  */
 void AddressBus::begin()
 {
-    _configurePort(0x00);
+    setAsReadable();
+}
+
+/**
+ * Puts ports into a stable mode
+ */
+void AddressBus::end()
+{
+    setAsReadable();
 }
 
 /**
@@ -42,7 +48,7 @@ void AddressBus::setLogger(ILogger &logger)
  */
 uint16_t AddressBus::readMemoryAddress()
 {
-    return (busRead(ADDR_HIGH) << 8) | busRead(ADDR_LOW);
+    return Model1LowLevel::readAddressBus();
 }
 
 /**
@@ -56,8 +62,7 @@ void AddressBus::writeMemoryAddress(uint16_t address)
             _logger->err("Address bus is not writable.");
         return;
     }
-    busWrite(ADDR_LOW, address & 0xff);
-    busWrite(ADDR_HIGH, (address & 0xff00) >> 8);
+    Model1LowLevel::setAddressBus(address);
 }
 
 /**
@@ -67,9 +72,7 @@ void AddressBus::writeMemoryAddress(uint16_t address)
  */
 void AddressBus::writeRefreshAddress(uint8_t address)
 {
-    // Direct call to ports to save time
-    busWrite(ADDR_LOW, address);
-    busWrite(ADDR_HIGH, 0);
+    Model1LowLevel::setAddressBus(address);
 }
 
 /**
@@ -77,7 +80,7 @@ void AddressBus::writeRefreshAddress(uint8_t address)
  */
 uint8_t AddressBus::readIOAddress()
 {
-    return busRead(ADDR_LOW);
+    return Model1LowLevel::readAddressBus() & 0xFF;
 }
 
 /**
@@ -91,8 +94,7 @@ void AddressBus::writeIOAddress(uint8_t address)
             _logger->err("IO address bus is not writable.");
         return;
     }
-    busWrite(ADDR_LOW, address);
-    busWrite(ADDR_HIGH, 0);
+    Model1LowLevel::setAddressBus(address);
 }
 
 /**
@@ -134,17 +136,16 @@ char *AddressBus::getState()
 {
     const int LEN = 31;
     char *buffer = new char[LEN];
-    char addrLow[9];
-    char addrHigh[9];
+    char addrChars[17];
+    uint16_t addrConfig = Model1LowLevel::configReadAddressBus();
+    uint16_t addr = Model1LowLevel::readAddressBus();
     snprintf(
         buffer,
         LEN,
-        "ADDR<%c %c-%c>(%s %s)",
-        busStatus(busConfigRead(ADDR_HIGH)),
-        busStatus(busConfigRead(ADDR_LOW)),
+        "ADDR<%c-%c>(%s)",
+        busStatus(addrConfig),
         _writable ? 'w' : 'r',
-        uint8ToBinary(busRead(ADDR_HIGH), addrHigh),
-        uint8ToBinary(busRead(ADDR_LOW), addrLow));
+        uint16ToBinary(addr, addrChars));
     return buffer;
 }
 
@@ -158,11 +159,11 @@ void AddressBus::_setBus(bool writableOption)
 
     if (writableOption)
     { // Output
-        _configurePort(0xff);
+        _configurePort(0xffff);
     }
     else
     { // Input
-        _configurePort(0x00);
+        _configurePort(0x0000);
     }
     _writable = writableOption;
 }

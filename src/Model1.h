@@ -44,8 +44,6 @@ private:
 
     void _setupMemoryRefreshTimer1();
     void _setupMemoryRefreshTimer2();
-    void _activateMemoryRefresh();
-    void _deactivateMemoryRefresh();
 
     void _activateBusControlSignals();
     void _deactivateBusControlSignals();
@@ -66,6 +64,9 @@ public:
     void end();
 
     void setLogger(ILogger &logger);
+
+    void activateMemoryRefresh();
+    void deactivateMemoryRefresh();
 
     // ---------- Address Space
     bool isROMAddress(uint16_t address);

@@ -49,6 +49,7 @@ void CassetteSongPlayer::playSong(int songIndex)
         Serial.println(_songs[songIndex].name);
 
         // Activate test signal for cassette operations
+        Model1.deactivateMemoryRefresh();
         Model1.activateTestSignal();
         Serial.println(F("Test signal activated for song playback"));
 
@@ -60,6 +61,7 @@ void CassetteSongPlayer::playSong(int songIndex)
 
         // Deactivate test signal after playback
         Model1.deactivateTestSignal();
+        Model1.activateMemoryRefresh();
         Serial.println(F("Test signal deactivated after song playback"));
 
         Serial.print(_songs[songIndex].name);
