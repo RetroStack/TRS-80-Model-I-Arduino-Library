@@ -13,10 +13,11 @@ The `ConsoleScreen` class provides a scrollable terminal-like interface for text
 5. [Text Output Methods](#text-output-methods)
 6. [Color and Formatting](#color-and-formatting)
 7. [Screen Management](#screen-management)
-8. [One-Time Execution](#one-time-execution)
-9. [Examples](#examples)
-10. [Technical Details](#technical-details)
-11. [Best Practices](#best-practices)
+8. [Auto-Paging System](#auto-paging-system)
+9. [One-Time Execution](#one-time-execution)
+10. [Examples](#examples)
+11. [Technical Details](#technical-details)
+12. [Best Practices](#best-practices)
 
 ## Overview
 
@@ -62,6 +63,15 @@ ConsoleScreen (implements Print interface)
 - Entire console clears and starts fresh (memory efficient)
 - No coordinate positioning - sequential output only
 - Content is not stored in memory once rendered
+
+### Auto-Paging System
+
+- **Configurable Behavior**: Four distinct paging modes for different use cases
+- **User Control**: Optional pause-and-wait functionality when screen fills
+- **Timeout Support**: Configurable automatic continuation after specified delay
+- **Button Integration**: M1Shield right button support for manual continuation
+- **Visual Feedback**: Clear progress indicators and user prompts
+- **Non-Blocking**: Paging waits don't interrupt other application logic
 
 ### Simple Text Output
 
@@ -232,6 +242,304 @@ bool hasWrapped();    // Check if screen has wrapped around
 ```
 
 The console automatically wraps when text reaches the bottom, clearing the entire screen and continuing from the top.
+
+## Auto-Paging System
+
+The `ConsoleScreen` includes a sophisticated auto-paging system that provides user control over how the console behaves when it reaches the bottom of the screen. Instead of immediately clearing and wrapping to the top, you can configure the console to pause and wait for user interaction.
+
+### Paging Modes
+
+The auto-paging system supports four distinct modes via the `ConsolePagingMode` enum:
+
+```cpp
+enum ConsolePagingMode {
+    PAGING_AUTO_CLEAR,    // Default: immediately clear and continue (original behavior)
+    PAGING_WAIT_TIMEOUT,  // Wait for timeout, then continue
+    PAGING_WAIT_BUTTON,   // Wait for M1Shield right button press to continue
+    PAGING_WAIT_BOTH      // Wait for either timeout OR button press
+};
+```
+
+### Configuration Methods
+
+```cpp
+void setPagingMode(ConsolePagingMode mode);
+ConsolePagingMode getPagingMode();
+void setPagingTimeout(unsigned long timeoutMs);
+unsigned long getPagingTimeout();
+```
+
+### Status and Control Methods
+
+```cpp
+bool isWaitingForPaging();    // Check if console is currently paused waiting
+void continuePaging();        // Programmatically continue from paused state
+```
+
+### Paging Mode Details
+
+#### PAGING_AUTO_CLEAR (Default)
+
+- **Behavior**: Immediately clears screen when full and continues from top
+- **Use Case**: Continuous logging where interruption is not desired
+- **Visual**: No pause, seamless operation
+- **User Interaction**: None required
+
+#### PAGING_WAIT_TIMEOUT
+
+- **Behavior**: Shows message "--- Press RIGHT or wait 5s to continue ---", waits for timeout
+- **Use Case**: Automatic progression with user read time
+- **Default Timeout**: 5000ms (5 seconds), configurable
+- **Visual**: Progress indicator showing remaining time
+- **User Interaction**: Optional - can press right button to skip wait
+
+#### PAGING_WAIT_BUTTON
+
+- **Behavior**: Shows message "--- Press RIGHT button to continue ---", waits indefinitely
+- **Use Case**: Manual control, debugging, step-through operation
+- **Timeout**: None - waits indefinitely
+- **Visual**: Static message with blinking cursor
+- **User Interaction**: Required - must press M1Shield right button
+
+#### PAGING_WAIT_BOTH
+
+- **Behavior**: Shows message "--- Press RIGHT or wait 5s to continue ---", waits for either
+- **Use Case**: Flexible operation allowing both manual and automatic progression
+- **Default Timeout**: 5000ms (5 seconds), configurable
+- **Visual**: Progress indicator with button option
+- **User Interaction**: Optional - either button press or timeout
+
+### Usage Examples
+
+#### Basic Timeout Paging
+
+```cpp
+ConsoleScreen console;
+
+void setup() {
+    console.setPagingMode(PAGING_WAIT_TIMEOUT);
+    console.setPagingTimeout(3000);  // 3 second wait
+}
+
+void loop() {
+    static int counter = 0;
+
+    console.print("Message ");
+    console.println(counter++);
+
+    delay(100);  // Generate messages quickly to trigger paging
+    console.loop();  // Essential for paging system
+}
+```
+
+#### Manual Button Control
+
+```cpp
+ConsoleScreen console;
+
+void setup() {
+    console.setPagingMode(PAGING_WAIT_BUTTON);
+    // No timeout - waits for button indefinitely
+}
+
+void loop() {
+    if (someCondition()) {
+        console.println("Debug message that requires user attention");
+        // Console will pause when full, waiting for right button
+    }
+
+    console.loop();  // Essential for button handling
+}
+```
+
+#### Flexible Both Mode
+
+```cpp
+ConsoleScreen console;
+
+void setup() {
+    console.setPagingMode(PAGING_WAIT_BOTH);
+    console.setPagingTimeout(7000);  // 7 second auto-continue
+}
+
+void loop() {
+    static unsigned long lastMessage = 0;
+
+    if (millis() - lastMessage > 500) {
+        lastMessage = millis();
+
+        console.print("Timestamp: ");
+        console.println(millis());
+
+        // Users can either wait 7 seconds or press button to continue
+    }
+
+    console.loop();
+}
+```
+
+#### Programmatic Control
+
+```cpp
+ConsoleScreen console;
+
+void setup() {
+    console.setPagingMode(PAGING_WAIT_BUTTON);
+}
+
+void loop() {
+    // Fill up the console
+    for (int i = 0; i < 100; i++) {
+        console.print("Line ");
+        console.println(i);
+
+        console.loop();  // Allow paging to trigger
+
+        // Check if we're waiting and handle programmatically
+        if (console.isWaitingForPaging()) {
+            delay(2000);  // Simulate some processing
+            console.continuePaging();  // Continue programmatically
+            break;  // Exit loop since paging happened
+        }
+    }
+}
+```
+
+### Visual Feedback System
+
+The paging system provides clear visual feedback to users:
+
+#### Timeout Mode Messages
+
+- **Initial**: "--- Press RIGHT or wait 5s to continue ---"
+- **Progress**: "--- Press RIGHT or wait 3s to continue ---" (countdown)
+- **Completion**: Message clears, screen clears, normal operation resumes
+
+#### Button Mode Messages
+
+- **Message**: "--- Press RIGHT button to continue ---"
+- **Visual Cue**: Blinking text or cursor to indicate waiting state
+- **Completion**: Message clears on button press, screen clears
+
+#### Color Coding
+
+- **Paging Messages**: Displayed in distinguishable color (typically cyan/yellow)
+- **Normal Text**: Resumes with previously set text colors
+- **Preservation**: Text colors are preserved across paging operations
+
+### Integration with M1Shield
+
+The paging system is fully integrated with the M1Shield button system:
+
+```cpp
+// In your main loop, M1Shield.loop() handles button detection
+void loop() {
+    M1Shield.loop();     // Handles button state changes
+    console.loop();      // Handles paging based on button state
+
+    // Your application code here
+}
+```
+
+**Button Behavior:**
+
+- **Right Button**: Continues paging when in wait state
+- **Button Debouncing**: Handled automatically by M1Shield
+- **State Management**: Paging system tracks button press timing
+- **Non-Interference**: Button only responds during paging wait states
+
+### Advanced Configuration
+
+#### Dynamic Mode Switching
+
+```cpp
+void switchToDebugMode() {
+    console.setPagingMode(PAGING_WAIT_BUTTON);  // Manual step-through
+    console.println("Entering debug mode - manual paging enabled");
+}
+
+void switchToProductionMode() {
+    console.setPagingMode(PAGING_AUTO_CLEAR);   // Continuous operation
+    console.println("Production mode - auto-clear enabled");
+}
+```
+
+#### Conditional Paging
+
+```cpp
+void conditionalPaging() {
+    if (debugMode) {
+        console.setPagingMode(PAGING_WAIT_BUTTON);
+    } else if (slowMode) {
+        console.setPagingMode(PAGING_WAIT_TIMEOUT);
+        console.setPagingTimeout(2000);
+    } else {
+        console.setPagingMode(PAGING_AUTO_CLEAR);
+    }
+}
+```
+
+### Performance Considerations
+
+#### Memory Usage
+
+- **Minimal Overhead**: Paging adds ~50 bytes of RAM usage
+- **No Content Storage**: Still no buffering of console content
+- **Efficient State**: Simple state machine for paging logic
+
+#### Timing Considerations
+
+- **Non-Blocking**: Paging wait states don't block other code execution
+- **Loop Dependency**: Requires regular calls to `console.loop()` for proper operation
+- **Timeout Accuracy**: Uses millis() for timeout tracking (1ms resolution)
+
+#### Button Responsiveness
+
+- **Immediate Response**: Button presses detected on next `console.loop()` call
+- **Debouncing**: Handled by M1Shield system automatically
+- **State Cleanup**: Proper state management prevents missed button presses
+
+### Best Practices for Paging
+
+#### Essential Loop Call
+
+```cpp
+void loop() {
+    // ALWAYS include these for proper paging operation
+    M1Shield.loop();     // Button detection
+    console.loop();      // Paging state management
+
+    // Your application code
+}
+```
+
+#### Mode Selection Guidelines
+
+- **PAGING_AUTO_CLEAR**: Fast logging, production systems, continuous monitoring
+- **PAGING_WAIT_TIMEOUT**: User-friendly logging, casual debugging, demo applications
+- **PAGING_WAIT_BUTTON**: Interactive debugging, step-through operation, educational demos
+- **PAGING_WAIT_BOTH**: Flexible systems, user preference accommodation, mixed-use scenarios
+
+#### Timeout Configuration
+
+- **Fast Systems**: 2-3 seconds for quick progression
+- **Reading Applications**: 5-7 seconds for comfortable reading time
+- **Debug Applications**: 10+ seconds for detailed analysis
+- **Demo Applications**: 3-5 seconds for presentation pacing
+
+#### Error Handling
+
+```cpp
+// Check for valid timeout values
+if (timeoutValue < 1000) {
+    console.setPagingTimeout(1000);  // Minimum 1 second
+}
+
+// Verify paging state before critical operations
+if (!console.isWaitingForPaging()) {
+    console.println("Critical system message");
+}
+```
 
 ## One-Time Execution
 
@@ -469,6 +777,122 @@ public:
 };
 ```
 
+### Auto-Paging Console Example
+
+```cpp
+class PagingConsole : public ConsoleScreen {
+private:
+    unsigned long lastMessageTime = 0;
+    int messageCounter = 0;
+
+protected:
+    void _executeOnce() override {
+        cls();
+        setTextColor(0x07FF);
+        println("=== PAGING DEMO CONSOLE ===");
+        setTextColor(0xFFFF);
+        println("Messages will auto-generate...");
+        println("Console will pause when full");
+        println("Press RIGHT button or wait for timeout");
+        println("------------------------");
+    }
+
+public:
+    PagingConsole() {
+        _setTitle("Paging Demo");
+
+        // Configure paging for demo
+        setPagingMode(PAGING_WAIT_BOTH);    // Button OR timeout
+        setPagingTimeout(4000);             // 4 second auto-continue
+    }
+
+    void loop() override {
+        // Generate messages periodically
+        if (millis() - lastMessageTime > 800) {
+            lastMessageTime = millis();
+
+            // Different types of messages for variety
+            if (messageCounter % 4 == 0) {
+                setTextColor(0x07E0);
+                print("[INFO] ");
+            } else if (messageCounter % 4 == 1) {
+                setTextColor(0xFFE0);
+                print("[WARN] ");
+            } else if (messageCounter % 4 == 2) {
+                setTextColor(0xF800);
+                print("[ERROR] ");
+            } else {
+                setTextColor(0x07FF);
+                print("[DEBUG] ");
+            }
+
+            setTextColor(0xFFFF);
+            print("Message #");
+            print(messageCounter);
+            print(" at ");
+            print(millis() / 1000);
+            println("s");
+
+            messageCounter++;
+        }
+
+        ConsoleScreen::loop();  // Essential for paging system
+    }
+
+    // Method to demonstrate dynamic paging mode changes
+    void changePagingMode(ConsolePagingMode newMode) {
+        setPagingMode(newMode);
+
+        setTextColor(0xF81F);
+        print(">>> Paging mode changed to: ");
+
+        switch (newMode) {
+            case PAGING_AUTO_CLEAR:
+                println("AUTO_CLEAR");
+                break;
+            case PAGING_WAIT_TIMEOUT:
+                println("WAIT_TIMEOUT");
+                break;
+            case PAGING_WAIT_BUTTON:
+                println("WAIT_BUTTON");
+                break;
+            case PAGING_WAIT_BOTH:
+                println("WAIT_BOTH");
+                break;
+        }
+        setTextColor(0xFFFF);
+    }
+};
+
+// Usage in main program
+PagingConsole console;
+
+void setup() {
+    // Console initializes automatically with paging enabled
+}
+
+void loop() {
+    M1Shield.loop();    // Essential for button detection
+    console.loop();     // Essential for paging system and message generation
+
+    // Example: Change paging mode based on some condition
+    static unsigned long lastModeChange = 0;
+    if (millis() - lastModeChange > 20000) {  // Change mode every 20 seconds
+        static int modeIndex = 0;
+        ConsolePagingMode modes[] = {
+            PAGING_WAIT_BOTH,
+            PAGING_WAIT_TIMEOUT,
+            PAGING_WAIT_BUTTON,
+            PAGING_AUTO_CLEAR
+        };
+
+        console.changePagingMode(modes[modeIndex]);
+        modeIndex = (modeIndex + 1) % 4;
+        lastModeChange = millis();
+    }
+}
+```
+
 ## Technical Details
 
 ### Print Interface Implementation
@@ -513,6 +937,18 @@ public:
 - Pass console to functions expecting Print streams for code reuse
 - Use `write()` method directly for single characters when performance matters
 
+### Auto-Paging System
+
+- **Always call `M1Shield.loop()` and `console.loop()`** in your main loop for proper paging operation
+- Choose appropriate paging mode for your use case:
+  - `PAGING_AUTO_CLEAR`: Production systems, continuous monitoring
+  - `PAGING_WAIT_TIMEOUT`: User-friendly interfaces, demos
+  - `PAGING_WAIT_BUTTON`: Interactive debugging, step-through operation
+  - `PAGING_WAIT_BOTH`: Flexible systems accommodating user preferences
+- Configure timeouts appropriately (2-3s for fast systems, 5-7s for reading, 10+s for debugging)
+- Check `isWaitingForPaging()` before critical operations if needed
+- Use `continuePaging()` for programmatic control when appropriate
+
 ### Efficient Output
 
 - Use `print()` for building lines, `println()` to complete them
@@ -524,6 +960,7 @@ public:
 - Let auto-clear handle memory - don't manually clear unless needed
 - Avoid storing console content in variables
 - Use for streaming output, not persistent display
+- Paging adds minimal memory overhead (~50 bytes)
 
 ### Color Usage
 
@@ -537,4 +974,4 @@ public:
 - Keep initialization fast to avoid blocking
 - Set title and initial state in constructor
 
-The `ConsoleScreen` class provides a simple, efficient solution for scrolling text output with automatic memory management and full Arduino Print interface compatibility. This makes it ideal for debugging interfaces, logging systems, and any application requiring continuous text display while maintaining seamless integration with the Arduino ecosystem.
+The `ConsoleScreen` class provides a simple, efficient solution for scrolling text output with automatic memory management, comprehensive auto-paging capabilities, and full Arduino Print interface compatibility. The configurable paging system allows for flexible user interaction patterns, from continuous automatic operation to interactive step-through debugging, making it ideal for debugging interfaces, logging systems, demonstration applications, and any application requiring continuous text display while maintaining seamless integration with the Arduino ecosystem.

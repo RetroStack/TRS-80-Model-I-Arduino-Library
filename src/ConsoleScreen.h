@@ -11,6 +11,17 @@
 #include "ContentScreen.h"
 
 /**
+ * @brief Auto-paging behavior when console reaches bottom of screen
+ */
+enum ConsolePagingMode
+{
+    PAGING_AUTO_CLEAR,   // Clear immediately and continue (original behavior)
+    PAGING_WAIT_TIMEOUT, // Wait for timeout before clearing (default)
+    PAGING_WAIT_BUTTON,  // Wait for right button press before clearing
+    PAGING_WAIT_BOTH     // Wait for timeout OR button press (whichever comes first)
+};
+
+/**
  * @brief Scrollable console screen for terminal-like text output
  *
  * ConsoleScreen provides a scrollable terminal interface similar to a serial monitor.
@@ -25,6 +36,7 @@
  * Key Features:
  * - Implements Arduino Print interface for full ecosystem compatibility
  * - Automatic screen clearing when content reaches bottom (memory efficient)
+ * - Configurable auto-paging behavior (immediate, timeout, button, or both)
  * - Color support for text foreground and background
  * - Tab support with predefined tab stops
  * - Newline character (\n) support
@@ -34,7 +46,11 @@
  * - Memory efficient - doesn't store written content, auto-clears when full
  *
  * @note Content is not stored in memory - once rendered, it's forgotten
- * @note When screen fills up, entire console clears and starts from top (wrap-around)
+ * @note When screen fills up, console behavior depends on paging mode:
+ *       - Auto-clear: immediately clears and continues (original behavior)
+ *       - Wait timeout: waits 5 seconds (configurable) then clears
+ *       - Wait button: waits for right button press then clears
+ *       - Wait both: waits for timeout OR button press (whichever first)
  * @note This auto-clear behavior is memory efficient and ideal for continuous logging
  * @note Suitable for logging, debugging, and serial monitor interfaces
  *
@@ -54,6 +70,9 @@
  * public:
  *     DebugConsole() {
  *         _setTitle("Debug Console");
+ *         // Configure paging behavior
+ *         setPagingMode(PAGING_WAIT_TIMEOUT);  // Wait 5 seconds before clearing
+ *         setPagingTimeout(3000);              // Change to 3 second timeout
  *         // _executeOnce() will be called automatically after 1 second
  *     }
  *
@@ -101,6 +120,13 @@ private:
     unsigned long _screenOpenTime; // Timestamp when screen was opened
     bool _hasExecutedOnce;         // Whether _executeOnce() has been called
 
+    // Auto-paging management
+    ConsolePagingMode _pagingMode;      // Current paging behavior mode
+    uint16_t _pagingTimeoutMs;          // Timeout in milliseconds for auto-paging
+    bool _isWaitingForPaging;           // True when console is full and waiting
+    unsigned long _pagingWaitStartTime; // When the paging wait period started
+    bool _showPagingPrompt;             // Whether to show paging prompt message
+
     /**
      * @brief Update cached screen dimensions from ContentScreen
      */
@@ -142,6 +168,41 @@ private:
      * width, moves to the next line instead.
      */
     void _processTab();
+
+    /**
+     * @brief Check if console has reached the bottom and handle paging
+     *
+     * Called when text would exceed the console area. Handles the paging
+     * behavior based on current paging mode settings.
+     *
+     * @return true if console was cleared and can continue, false if waiting
+     */
+    bool _handlePaging();
+
+    /**
+     * @brief Check if paging wait period should end
+     *
+     * Evaluates timeout and button conditions to determine if
+     * the paging wait should be completed.
+     *
+     * @return true if wait period should end and console should clear
+     */
+    bool _shouldEndPagingWait();
+
+    /**
+     * @brief Display paging prompt message
+     *
+     * Shows appropriate message based on paging mode to inform
+     * user how to continue.
+     */
+    void _showPagingMessage();
+
+    /**
+     * @brief Clear paging prompt and prepare for new content
+     *
+     * Removes paging prompt and resets console for continued output.
+     */
+    void _clearPagingMessage();
 
 protected:
     /**
@@ -336,6 +397,73 @@ public:
      * @endcode
      */
     void setTabSize(uint8_t size);
+
+    // Console Paging Configuration Methods
+
+    /**
+     * @brief Set console paging behavior mode
+     *
+     * Controls what happens when console reaches the bottom of the screen.
+     *
+     * @param mode Paging behavior mode:
+     *             - PAGING_AUTO_CLEAR: Clear immediately (original behavior)
+     *             - PAGING_WAIT_TIMEOUT: Wait for timeout before clearing (default)
+     *             - PAGING_WAIT_BUTTON: Wait for right button press
+     *             - PAGING_WAIT_BOTH: Wait for timeout OR button (whichever first)
+     *
+     * @example
+     * @code
+     * setPagingMode(PAGING_WAIT_BUTTON);  // Manual paging control
+     * setPagingMode(PAGING_WAIT_TIMEOUT); // Auto-paging with delay
+     * @endcode
+     */
+    void setPagingMode(ConsolePagingMode mode);
+
+    /**
+     * @brief Set paging timeout duration
+     *
+     * Sets how long to wait before auto-clearing when using timeout-based paging modes.
+     *
+     * @param timeoutMs Timeout in milliseconds (default: 5000ms = 5 seconds)
+     *
+     * @note Only affects PAGING_WAIT_TIMEOUT and PAGING_WAIT_BOTH modes
+     * @note Minimum recommended timeout is 1000ms (1 second)
+     *
+     * @example
+     * @code
+     * setPagingTimeout(3000);  // 3 second timeout
+     * setPagingMode(PAGING_WAIT_TIMEOUT);
+     * @endcode
+     */
+    void setPagingTimeout(uint16_t timeoutMs);
+
+    /**
+     * @brief Get current paging mode
+     * @return ConsolePagingMode Current paging behavior mode
+     */
+    ConsolePagingMode getPagingMode() const;
+
+    /**
+     * @brief Get current paging timeout
+     * @return uint16_t Current timeout in milliseconds
+     */
+    uint16_t getPagingTimeout() const;
+
+    /**
+     * @brief Check if console is currently waiting for paging action
+     * @return true if console is full and waiting for user action or timeout
+     */
+    bool isWaitingForPaging() const;
+
+    /**
+     * @brief Manually trigger page continuation
+     *
+     * Forces the console to clear and continue output, regardless of
+     * current paging mode. Useful for programmatic control.
+     *
+     * @note Only has effect when console is waiting for paging
+     */
+    void continuePaging();
 
 protected:
     /**

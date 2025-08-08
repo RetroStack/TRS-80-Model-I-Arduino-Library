@@ -49,6 +49,13 @@ ConsoleScreen::ConsoleScreen() : ContentScreen()
     _screenOpenTime = 0;
     _hasExecutedOnce = false;
 
+    // Initialize paging management
+    _pagingMode = PAGING_WAIT_TIMEOUT; // Default to timeout-based paging
+    _pagingTimeoutMs = 5000;           // Default 5 second timeout
+    _isWaitingForPaging = false;
+    _pagingWaitStartTime = 0;
+    _showPagingPrompt = true; // Show prompts by default
+
     // Initialize bulk write optimization
     _inBulkWrite = false;
 
@@ -79,9 +86,9 @@ void ConsoleScreen::_updateDimensions()
 /**
  * @brief Main loop processing for console screen updates
  *
- * Handles one-time execution timing and delegates to ContentScreen
- * for standard screen processing. Override this method in derived
- * classes for custom behavior.
+ * Handles one-time execution timing, paging wait states, and delegates
+ * to ContentScreen for standard screen processing. Override this method
+ * in derived classes for custom behavior.
  */
 void ConsoleScreen::loop()
 {
@@ -90,6 +97,14 @@ void ConsoleScreen::loop()
     {
         _executeOnce();
         _hasExecutedOnce = true;
+    }
+
+    // Handle paging wait state
+    if (_isWaitingForPaging && _shouldEndPagingWait())
+    {
+        _clearPagingMessage();
+        cls(); // Clear and reset console
+        _isWaitingForPaging = false;
     }
 
     // Call parent loop is not necessary since nothing is defined there
@@ -111,6 +126,18 @@ Screen *ConsoleScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t 
     if (!isActive())
     {
         return nullptr;
+    }
+
+    // Handle right button for paging continuation
+    if ((action & BUTTON_RIGHT) && _isWaitingForPaging)
+    {
+        if (_pagingMode == PAGING_WAIT_BUTTON || _pagingMode == PAGING_WAIT_BOTH)
+        {
+            _clearPagingMessage();
+            cls(); // Clear and reset console
+            _isWaitingForPaging = false;
+        }
+        return nullptr; // Stay on current screen
     }
 
     // Handle back/menu button to exit console
@@ -143,8 +170,8 @@ void ConsoleScreen::_drawContent()
  * @brief Move to the next line (newline operation)
  *
  * Advances the cursor to the beginning of the next line.
- * If at the bottom of the screen, clears the entire screen and
- * starts fresh from the top-left for memory efficiency.
+ * If at the bottom of the screen, handles paging behavior based
+ * on current paging mode settings.
  */
 void ConsoleScreen::_newLine()
 {
@@ -154,10 +181,14 @@ void ConsoleScreen::_newLine()
     _currentY += _lineHeight;
 
     // Check if we've reached the bottom of the screen
-    // If so, clear screen and start from top (memory efficient)
     if (_currentY + _lineHeight > _contentHeight)
     {
-        cls();
+        if (!_handlePaging())
+        {
+            // If _handlePaging() returns false, we're waiting for user action
+            // Don't advance cursor further - stay at current position
+            _currentY -= _lineHeight; // Revert the Y advance
+        }
     }
 }
 
@@ -223,6 +254,12 @@ bool ConsoleScreen::open()
  */
 size_t ConsoleScreen::write(uint8_t c)
 {
+    // If we're waiting for paging action, don't process new characters
+    if (_isWaitingForPaging)
+    {
+        return 0; // Indicate character was not written
+    }
+
     _processChar((char)c);
     if (isActive())
     {
@@ -464,4 +501,191 @@ void ConsoleScreen::_renderChar(char c)
 
     // Advance cursor position
     _currentX += _charWidth;
+}
+
+// ========== Paging Management Methods ==========
+
+/**
+ * @brief Check if console has reached the bottom and handle paging
+ *
+ * Called when text would exceed the console area. Handles the paging
+ * behavior based on current paging mode settings.
+ *
+ * @return true if console was cleared and can continue, false if waiting
+ */
+bool ConsoleScreen::_handlePaging()
+{
+    switch (_pagingMode)
+    {
+    case PAGING_AUTO_CLEAR:
+        // Original behavior - clear immediately
+        cls();
+        return true;
+
+    case PAGING_WAIT_TIMEOUT:
+    case PAGING_WAIT_BUTTON:
+    case PAGING_WAIT_BOTH:
+        // Start waiting for paging action
+        _isWaitingForPaging = true;
+        _pagingWaitStartTime = millis();
+        if (_showPagingPrompt)
+        {
+            _showPagingMessage();
+        }
+        return false; // Don't continue yet
+    }
+
+    return true; // Default fallback
+}
+
+/**
+ * @brief Check if paging wait period should end
+ *
+ * Evaluates timeout and button conditions to determine if
+ * the paging wait should be completed.
+ *
+ * @return true if wait period should end and console should clear
+ */
+bool ConsoleScreen::_shouldEndPagingWait()
+{
+    if (!_isWaitingForPaging)
+        return false;
+
+    unsigned long elapsed = millis() - _pagingWaitStartTime;
+
+    switch (_pagingMode)
+    {
+    case PAGING_WAIT_TIMEOUT:
+        return elapsed >= _pagingTimeoutMs;
+
+    case PAGING_WAIT_BUTTON:
+        // Only button press can end wait (handled in actionTaken)
+        return false;
+
+    case PAGING_WAIT_BOTH:
+        // Either timeout OR button press (button handled in actionTaken)
+        return elapsed >= _pagingTimeoutMs;
+
+    default:
+        return true; // Fallback
+    }
+}
+
+/**
+ * @brief Display paging prompt message
+ *
+ * Shows appropriate message based on paging mode to inform
+ * user how to continue.
+ */
+void ConsoleScreen::_showPagingMessage()
+{
+    Adafruit_GFX &gfx = M1Shield.getGFX();
+
+    // Save current text settings
+    uint16_t savedTextColor = _textColor;
+    uint16_t savedBgColor = _textBgColor;
+    uint8_t savedTextSize = _textSize;
+
+    // Set prompt styling (smaller, different color)
+    gfx.setTextColor(M1Shield.convertColor(0x7BEF), M1Shield.convertColor(0x0000)); // Light gray on black
+    gfx.setTextSize(1);
+
+    // Position at bottom of content area
+    uint16_t promptY = _contentTop + _contentHeight - CHAR_HEIGHT_SIZE_1 - 2;
+    gfx.setCursor(_contentLeft + 2, promptY);
+
+    // Show appropriate message based on mode
+    switch (_pagingMode)
+    {
+    case PAGING_WAIT_TIMEOUT:
+        gfx.print("Auto-continue in ");
+        gfx.print((_pagingTimeoutMs - (millis() - _pagingWaitStartTime)) / 1000 + 1);
+        gfx.print("s...");
+        break;
+
+    case PAGING_WAIT_BUTTON:
+        gfx.print("Press [>] to continue...");
+        break;
+
+    case PAGING_WAIT_BOTH:
+        gfx.print("Press [>] or wait ");
+        gfx.print((_pagingTimeoutMs - (millis() - _pagingWaitStartTime)) / 1000 + 1);
+        gfx.print("s...");
+        break;
+
+    default:
+        break;
+    }
+
+    // Restore original text settings
+    gfx.setTextColor(savedTextColor, savedBgColor);
+    gfx.setTextSize(savedTextSize);
+}
+
+/**
+ * @brief Clear paging prompt and prepare for new content
+ *
+ * Removes paging prompt and resets console for continued output.
+ */
+void ConsoleScreen::_clearPagingMessage()
+{
+    // Simply clear the prompt area by filling with background color
+    Adafruit_GFX &gfx = M1Shield.getGFX();
+    uint16_t promptY = _contentTop + _contentHeight - CHAR_HEIGHT_SIZE_1 - 2;
+    gfx.fillRect(_contentLeft, promptY, _contentWidth, CHAR_HEIGHT_SIZE_1 + 2, _consoleBgColor);
+}
+
+// ========== Paging Configuration Methods ==========
+
+/**
+ * @brief Set console paging behavior mode
+ */
+void ConsoleScreen::setPagingMode(ConsolePagingMode mode)
+{
+    _pagingMode = mode;
+}
+
+/**
+ * @brief Set paging timeout duration
+ */
+void ConsoleScreen::setPagingTimeout(uint16_t timeoutMs)
+{
+    _pagingTimeoutMs = timeoutMs;
+}
+
+/**
+ * @brief Get current paging mode
+ */
+ConsolePagingMode ConsoleScreen::getPagingMode() const
+{
+    return _pagingMode;
+}
+
+/**
+ * @brief Get current paging timeout
+ */
+uint16_t ConsoleScreen::getPagingTimeout() const
+{
+    return _pagingTimeoutMs;
+}
+
+/**
+ * @brief Check if console is currently waiting for paging action
+ */
+bool ConsoleScreen::isWaitingForPaging() const
+{
+    return _isWaitingForPaging;
+}
+
+/**
+ * @brief Manually trigger page continuation
+ */
+void ConsoleScreen::continuePaging()
+{
+    if (_isWaitingForPaging)
+    {
+        _clearPagingMessage();
+        cls();
+        _isWaitingForPaging = false;
+    }
 }

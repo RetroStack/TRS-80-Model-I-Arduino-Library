@@ -14,6 +14,7 @@ ContentScreen   KEYWORD1
 MenuScreen  KEYWORD1
 M1TerminalScreen    KEYWORD1
 ConsoleScreen   KEYWORD1
+ConsolePagingMode   KEYWORD1
 LoggerScreen    KEYWORD1
 DisplayProvider KEYWORD1
 Display_ST7789_240x240  KEYWORD1
@@ -237,6 +238,12 @@ setTextColor    KEYWORD2
 setConsoleBackground    KEYWORD2
 setTextSize KEYWORD2
 setTabSize  KEYWORD2
+setPagingMode   KEYWORD2
+setPagingTimeout    KEYWORD2
+getPagingMode   KEYWORD2
+getPagingTimeout    KEYWORD2
+isWaitingForPaging  KEYWORD2
+continuePaging  KEYWORD2
 configRAS   KEYWORD2
 configCAS   KEYWORD2
 configMUX   KEYWORD2
