@@ -7,7 +7,7 @@
  */
 void DataBus::_configurePort(uint8_t config)
 {
-  Model1LowLevel::configDataBus(config);
+  Model1LowLevel::configWriteDataBus(config);
 }
 
 /**
@@ -64,7 +64,7 @@ void DataBus::writeData(uint8_t data)
       _logger->err("Data bus is not writable.");
     return;
   }
-  Model1LowLevel::setDataBus(data);
+  Model1LowLevel::writeDataBus(data);
 }
 
 /**

@@ -322,13 +322,13 @@ void Model1Class::_refreshNextMemoryRow()
     _addressBus.writeRefreshAddress(currentRefreshRow);
 
     // Timing of various signals
-    Model1LowLevel::setRAS(LOW); // 45ns (62.5ns, but when the pulse is down)
-    asmNoop();                   // 125ns
-    asmNoop();                   // 125ns
-    asmNoop();                   // 125ns
+    Model1LowLevel::writeRAS(LOW); // 45ns (62.5ns, but when the pulse is down)
+    asmNoop();                     // 125ns
+    asmNoop();                     // 125ns
+    asmNoop();                     // 125ns
 
     // Reset, leaving address as-is
-    Model1LowLevel::setRAS(HIGH); // 45ns (62.5ns, but when the pulse is down)
+    Model1LowLevel::writeRAS(HIGH); // 45ns (62.5ns, but when the pulse is down)
 }
 
 // ----------------------------------------
@@ -351,20 +351,20 @@ uint8_t Model1Class::readMemory(uint16_t address)
     _addressBus.writeMemoryAddress(address);
 
     // Timing of various signals
-    Model1LowLevel::setRAS(LOW);
-    Model1LowLevel::setRD(LOW);
-    Model1LowLevel::setMUX(HIGH);
-    Model1LowLevel::setCAS(LOW);
+    Model1LowLevel::writeRAS(LOW);
+    Model1LowLevel::writeRD(LOW);
+    Model1LowLevel::writeMUX(HIGH);
+    Model1LowLevel::writeCAS(LOW);
     asmWait(3); // 772 ns
 
     // Read data
     uint8_t data = _dataBus.readData();
 
     // Reset, leaving address as-is
-    Model1LowLevel::setCAS(HIGH);
-    Model1LowLevel::setRD(HIGH);
-    Model1LowLevel::setRAS(HIGH);
-    Model1LowLevel::setMUX(LOW);
+    Model1LowLevel::writeCAS(HIGH);
+    Model1LowLevel::writeRD(HIGH);
+    Model1LowLevel::writeRAS(HIGH);
+    Model1LowLevel::writeMUX(LOW);
 
     SREG = oldSREG;
 
@@ -391,20 +391,20 @@ void Model1Class::writeMemory(uint16_t address, uint8_t data)
     _dataBus.writeData(data);
 
     // Timing of various signals
-    Model1LowLevel::setRAS(LOW);
+    Model1LowLevel::writeRAS(LOW);
     asmNoop();
     asmNoop();
     asmNoop();
-    Model1LowLevel::setWR(LOW);
-    Model1LowLevel::setMUX(HIGH);
-    Model1LowLevel::setCAS(LOW);
+    Model1LowLevel::writeWR(LOW);
+    Model1LowLevel::writeMUX(HIGH);
+    Model1LowLevel::writeCAS(LOW);
     asmWait(1); // 252 ns
 
     // Reset, leaving address as-is, removing data
-    Model1LowLevel::setWR(HIGH);
-    Model1LowLevel::setCAS(HIGH);
-    Model1LowLevel::setRAS(HIGH);
-    Model1LowLevel::setMUX(LOW);
+    Model1LowLevel::writeWR(HIGH);
+    Model1LowLevel::writeCAS(HIGH);
+    Model1LowLevel::writeRAS(HIGH);
+    Model1LowLevel::writeMUX(LOW);
     _dataBus.setAsReadable();
 
     SREG = oldSREG;
@@ -511,17 +511,17 @@ uint8_t Model1Class::readIO(uint8_t address)
     _addressBus.writeIOAddress(address);
 
     // Timing of various signals
-    Model1LowLevel::setIN(LOW);
-    Model1LowLevel::setMUX(HIGH);
-    Model1LowLevel::setCAS(LOW);
+    Model1LowLevel::writeIN(LOW);
+    Model1LowLevel::writeMUX(HIGH);
+    Model1LowLevel::writeCAS(LOW);
 
     // Read data
     uint8_t data = _dataBus.readData();
 
     // Reset, leaving address as-is
-    Model1LowLevel::setCAS(HIGH);
-    Model1LowLevel::setIN(HIGH);
-    Model1LowLevel::setMUX(LOW);
+    Model1LowLevel::writeCAS(HIGH);
+    Model1LowLevel::writeIN(HIGH);
+    Model1LowLevel::writeMUX(LOW);
 
     SREG = oldSREG;
 
@@ -548,15 +548,15 @@ void Model1Class::writeIO(uint8_t address, uint8_t data)
     _dataBus.writeData(data);
 
     // Timing of various signals
-    Model1LowLevel::setOUT(LOW);
-    Model1LowLevel::setMUX(HIGH);
-    Model1LowLevel::setCAS(LOW);
+    Model1LowLevel::writeOUT(LOW);
+    Model1LowLevel::writeMUX(HIGH);
+    Model1LowLevel::writeCAS(LOW);
     asmWait(1); // 252 ns
 
     // Reset, leving address as-is, removing data
-    Model1LowLevel::setCAS(HIGH);
-    Model1LowLevel::setOUT(HIGH);
-    Model1LowLevel::setMUX(LOW);
+    Model1LowLevel::writeCAS(HIGH);
+    Model1LowLevel::writeOUT(HIGH);
+    Model1LowLevel::writeMUX(LOW);
     _dataBus.setAsReadable();
 
     SREG = oldSREG;
@@ -573,11 +573,11 @@ void Model1Class::writeIO(uint8_t address, uint8_t data)
  */
 void Model1Class::_initSystemControlSignals()
 {
-    Model1LowLevel::setSYS_RES(LOW);
-    Model1LowLevel::setINT_ACK(LOW);
+    Model1LowLevel::writeSYS_RES(LOW);
+    Model1LowLevel::writeINT_ACK(LOW);
 
-    Model1LowLevel::configSYS_RES(INPUT);
-    Model1LowLevel::configINT_ACK(INPUT);
+    Model1LowLevel::configWriteSYS_RES(INPUT);
+    Model1LowLevel::configWriteINT_ACK(INPUT);
 }
 
 /**
@@ -607,9 +607,9 @@ void Model1Class::_activateBusControlSignals()
 {
     _resetBusControlSignals();
 
-    Model1LowLevel::configRAS(OUTPUT);
-    Model1LowLevel::configMUX(OUTPUT);
-    Model1LowLevel::configCAS(OUTPUT);
+    Model1LowLevel::configWriteRAS(OUTPUT);
+    Model1LowLevel::configWriteMUX(OUTPUT);
+    Model1LowLevel::configWriteCAS(OUTPUT);
 }
 
 /**
@@ -617,9 +617,9 @@ void Model1Class::_activateBusControlSignals()
  */
 void Model1Class::_deactivateBusControlSignals()
 {
-    Model1LowLevel::configRAS(INPUT);
-    Model1LowLevel::configMUX(INPUT);
-    Model1LowLevel::configCAS(INPUT);
+    Model1LowLevel::configWriteRAS(INPUT);
+    Model1LowLevel::configWriteMUX(INPUT);
+    Model1LowLevel::configWriteCAS(INPUT);
 }
 
 /**
@@ -627,9 +627,9 @@ void Model1Class::_deactivateBusControlSignals()
  */
 void Model1Class::_resetBusControlSignals()
 {
-    Model1LowLevel::setRAS(HIGH);
-    Model1LowLevel::setMUX(LOW);
-    Model1LowLevel::setCAS(HIGH);
+    Model1LowLevel::writeRAS(HIGH);
+    Model1LowLevel::writeMUX(LOW);
+    Model1LowLevel::writeCAS(HIGH);
 }
 
 // ----------------------------------------
@@ -643,11 +643,11 @@ void Model1Class::_activateBusAccessSignals()
 {
     _resetBusAccessSignals();
 
-    Model1LowLevel::configRD(OUTPUT);
-    Model1LowLevel::configWR(OUTPUT);
+    Model1LowLevel::configWriteRD(OUTPUT);
+    Model1LowLevel::configWriteWR(OUTPUT);
 
-    Model1LowLevel::configIN(OUTPUT);
-    Model1LowLevel::configOUT(OUTPUT);
+    Model1LowLevel::configWriteIN(OUTPUT);
+    Model1LowLevel::configWriteOUT(OUTPUT);
 }
 
 /**
@@ -655,11 +655,11 @@ void Model1Class::_activateBusAccessSignals()
  */
 void Model1Class::_deactivateBusAccessSignals()
 {
-    Model1LowLevel::configRD(INPUT);
-    Model1LowLevel::configWR(INPUT);
+    Model1LowLevel::configWriteRD(INPUT);
+    Model1LowLevel::configWriteWR(INPUT);
 
-    Model1LowLevel::configIN(INPUT);
-    Model1LowLevel::configOUT(INPUT);
+    Model1LowLevel::configWriteIN(INPUT);
+    Model1LowLevel::configWriteOUT(INPUT);
 }
 
 /**
@@ -667,10 +667,10 @@ void Model1Class::_deactivateBusAccessSignals()
  */
 void Model1Class::_resetBusAccessSignals()
 {
-    Model1LowLevel::setRD(HIGH);
-    Model1LowLevel::setWR(HIGH);
-    Model1LowLevel::setIN(HIGH);
-    Model1LowLevel::setOUT(HIGH);
+    Model1LowLevel::writeRD(HIGH);
+    Model1LowLevel::writeWR(HIGH);
+    Model1LowLevel::writeIN(HIGH);
+    Model1LowLevel::writeOUT(HIGH);
 }
 
 // ----------------------------------------
@@ -684,13 +684,13 @@ void Model1Class::_resetBusAccessSignals()
  */
 void Model1Class::_initExternalControlSignals()
 {
-    Model1LowLevel::setINT(HIGH);
-    Model1LowLevel::setTEST(HIGH);
-    Model1LowLevel::setWAIT(HIGH);
+    Model1LowLevel::writeINT(HIGH);
+    Model1LowLevel::writeTEST(HIGH);
+    Model1LowLevel::writeWAIT(HIGH);
 
-    Model1LowLevel::configINT(OUTPUT);
-    Model1LowLevel::configTEST(OUTPUT);
-    Model1LowLevel::configWAIT(OUTPUT);
+    Model1LowLevel::configWriteINT(OUTPUT);
+    Model1LowLevel::configWriteTEST(OUTPUT);
+    Model1LowLevel::configWriteWAIT(OUTPUT);
 }
 
 // ---------- Interrupt Request Signal
@@ -700,7 +700,7 @@ void Model1Class::_initExternalControlSignals()
  */
 void Model1Class::_setInterruptRequestSignal(bool value)
 {
-    Model1LowLevel::setINT(value ? LOW : HIGH);
+    Model1LowLevel::writeINT(value ? LOW : HIGH);
 }
 
 /**
@@ -772,7 +772,7 @@ void Model1Class::deactivateInterruptRequestSignal()
  */
 void Model1Class::_setTestSignal(bool value)
 {
-    Model1LowLevel::setTEST(value ? LOW : HIGH);
+    Model1LowLevel::writeTEST(value ? LOW : HIGH);
 }
 
 /**
@@ -858,7 +858,7 @@ void Model1Class::deactivateTestSignal()
  */
 void Model1Class::_setWaitSignal(bool value)
 {
-    Model1LowLevel::setWAIT(value ? LOW : HIGH);
+    Model1LowLevel::writeWAIT(value ? LOW : HIGH);
 }
 
 /**

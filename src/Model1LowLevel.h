@@ -34,16 +34,16 @@
  * 
  * Usage Example:
  *   // Configure RAS pin as output and set it high
- *   Model1LowLevel::configRAS(OUTPUT);
- *   Model1LowLevel::setRAS(HIGH);
+ *   Model1LowLevel::configWriteRAS(OUTPUT);
+ *   Model1LowLevel::writeRAS(HIGH);
  *   
  *   // Read current state
  *   uint8_t rasState = Model1LowLevel::readRAS();
  *   uint8_t rasConfig = Model1LowLevel::configReadRAS();
  *   
  *   // Bus operations
- *   Model1LowLevel::setAddressBus(0x1234);
- *   Model1LowLevel::setDataBus(0xFF);
+ *   Model1LowLevel::writeAddressBus(0x1234);
+ *   Model1LowLevel::writeDataBus(0xFF);
  * 
  * WARNING: This class bypasses all safety checks and can potentially damage
  * hardware if used incorrectly. Only use if you understand the TRS-80 Model 1
@@ -65,7 +65,7 @@ public:
     // Parameters: outputMode - Use OUTPUT or INPUT constants
     
     /** Configure RAS (Row Address Strobe) pin direction */
-    static inline void configRAS(uint8_t outputMode)
+    static inline void configWriteRAS(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
             pinConfigWrite(RAS, OUTPUT);
@@ -73,7 +73,7 @@ public:
             pinConfigWrite(RAS, INPUT);
     }
 
-    static inline void configCAS(uint8_t outputMode)
+    static inline void configWriteCAS(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
             pinConfigWrite(CAS, OUTPUT);
@@ -81,7 +81,7 @@ public:
             pinConfigWrite(CAS, INPUT);
     }
 
-    static inline void configMUX(uint8_t outputMode)
+    static inline void configWriteMUX(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
             pinConfigWrite(MUX, OUTPUT);
@@ -89,7 +89,7 @@ public:
             pinConfigWrite(MUX, INPUT);
     }
 
-    static inline void configRD(uint8_t outputMode)
+    static inline void configWriteRD(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
             pinConfigWrite(RD, OUTPUT);
@@ -97,7 +97,7 @@ public:
             pinConfigWrite(RD, INPUT);
     }
 
-    static inline void configWR(uint8_t outputMode)
+    static inline void configWriteWR(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
             pinConfigWrite(WR, OUTPUT);
@@ -105,7 +105,7 @@ public:
             pinConfigWrite(WR, INPUT);
     }
 
-    static inline void configIN(uint8_t outputMode)
+    static inline void configWriteIN(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
             pinConfigWrite(IN, OUTPUT);
@@ -113,7 +113,7 @@ public:
             pinConfigWrite(IN, INPUT);
     }
 
-    static inline void configOUT(uint8_t outputMode)
+    static inline void configWriteOUT(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
             pinConfigWrite(OUT, OUTPUT);
@@ -121,7 +121,7 @@ public:
             pinConfigWrite(OUT, INPUT);
     }
 
-    static inline void configINT(uint8_t outputMode)
+    static inline void configWriteINT(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
             pinConfigWrite(INT, OUTPUT);
@@ -129,7 +129,7 @@ public:
             pinConfigWrite(INT, INPUT);
     }
 
-    static inline void configTEST(uint8_t outputMode)
+    static inline void configWriteTEST(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
             pinConfigWrite(TEST, OUTPUT);
@@ -137,7 +137,7 @@ public:
             pinConfigWrite(TEST, INPUT);
     }
 
-    static inline void configWAIT(uint8_t outputMode)
+    static inline void configWriteWAIT(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
             pinConfigWrite(WAIT, OUTPUT);
@@ -145,7 +145,7 @@ public:
             pinConfigWrite(WAIT, INPUT);
     }
 
-    static inline void configSYS_RES(uint8_t outputMode)
+    static inline void configWriteSYS_RES(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
             pinConfigWrite(SYS_RES, OUTPUT);
@@ -153,7 +153,7 @@ public:
             pinConfigWrite(SYS_RES, INPUT);
     }
 
-    static inline void configINT_ACK(uint8_t outputMode)
+    static inline void configWriteINT_ACK(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
             pinConfigWrite(INT_ACK, OUTPUT);
@@ -161,13 +161,13 @@ public:
             pinConfigWrite(INT_ACK, INPUT);
     }
 
-    // ========== Control Signal Setters ==========
+    // ========== Control Signal Writers ==========
     // Set individual pins to HIGH or LOW state
     // Parameters: value - Use HIGH or LOW constants
     // Note: Pin must be configured as OUTPUT before setting
     
-    /** Set RAS (Row Address Strobe) signal state */
-    static inline void setRAS(uint8_t value)
+    /** Write RAS (Row Address Strobe) signal state */
+    static inline void writeRAS(uint8_t value)
     {
         if (value == HIGH)
             pinWrite(RAS, HIGH);
@@ -175,7 +175,7 @@ public:
             pinWrite(RAS, LOW);
     }
 
-    static inline void setCAS(uint8_t value)
+    static inline void writeCAS(uint8_t value)
     {
         if (value == HIGH)
             pinWrite(CAS, HIGH);
@@ -183,7 +183,7 @@ public:
             pinWrite(CAS, LOW);
     }
 
-    static inline void setMUX(uint8_t value)
+    static inline void writeMUX(uint8_t value)
     {
         if (value == HIGH)
             pinWrite(MUX, HIGH);
@@ -191,7 +191,7 @@ public:
             pinWrite(MUX, LOW);
     }
 
-    static inline void setRD(uint8_t value)
+    static inline void writeRD(uint8_t value)
     {
         if (value == HIGH)
             pinWrite(RD, HIGH);
@@ -199,7 +199,7 @@ public:
             pinWrite(RD, LOW);
     }
 
-    static inline void setWR(uint8_t value)
+    static inline void writeWR(uint8_t value)
     {
         if (value == HIGH)
             pinWrite(WR, HIGH);
@@ -207,7 +207,7 @@ public:
             pinWrite(WR, LOW);
     }
 
-    static inline void setIN(uint8_t value)
+    static inline void writeIN(uint8_t value)
     {
         if (value == HIGH)
             pinWrite(IN, HIGH);
@@ -215,7 +215,7 @@ public:
             pinWrite(IN, LOW);
     }
 
-    static inline void setOUT(uint8_t value)
+    static inline void writeOUT(uint8_t value)
     {
         if (value == HIGH)
             pinWrite(OUT, HIGH);
@@ -223,7 +223,7 @@ public:
             pinWrite(OUT, LOW);
     }
 
-    static inline void setINT(uint8_t value)
+    static inline void writeINT(uint8_t value)
     {
         if (value == HIGH)
             pinWrite(INT, HIGH);
@@ -231,7 +231,7 @@ public:
             pinWrite(INT, LOW);
     }
 
-    static inline void setTEST(uint8_t value)
+    static inline void writeTEST(uint8_t value)
     {
         if (value == HIGH)
             pinWrite(TEST, HIGH);
@@ -239,7 +239,7 @@ public:
             pinWrite(TEST, LOW);
     }
 
-    static inline void setWAIT(uint8_t value)
+    static inline void writeWAIT(uint8_t value)
     {
         if (value == HIGH)
             pinWrite(WAIT, HIGH);
@@ -247,7 +247,7 @@ public:
             pinWrite(WAIT, LOW);
     }
 
-    static inline void setSYS_RES(uint8_t value)
+    static inline void writeSYS_RES(uint8_t value)
     {
         if (value == HIGH)
             pinWrite(SYS_RES, HIGH);
@@ -255,7 +255,7 @@ public:
             pinWrite(SYS_RES, LOW);
     }
 
-    static inline void setINT_ACK(uint8_t value)
+    static inline void writeINT_ACK(uint8_t value)
     {
         if (value == HIGH)
             pinWrite(INT_ACK, HIGH);
@@ -304,8 +304,8 @@ public:
     // Address bus: pins 22-37 (ADDR_LOW: 22-29, ADDR_HIGH: 30-37)
     // Data bus: pins 14-21
     
-    /** Set complete 16-bit address on address bus */
-    static inline void setAddressBus(uint16_t address)
+    /** Write complete 16-bit address on address bus */
+    static inline void writeAddressBus(uint16_t address)
     {
         busWrite(ADDR_LOW, address & 0xff);
         busWrite(ADDR_HIGH, (address & 0xff00) >> 8);
@@ -316,13 +316,13 @@ public:
         return (busRead(ADDR_HIGH) << 8) | busRead(ADDR_LOW);
     }
 
-    static inline void configAddressBus(uint16_t outputMode)
+    static inline void configWriteAddressBus(uint16_t outputMode)
     {
         busConfigWrite(ADDR_LOW, outputMode & 0xff);
         busConfigWrite(ADDR_HIGH, (outputMode >> 8) & 0xff);
     }
 
-    static inline void setDataBus(uint8_t data)
+    static inline void writeDataBus(uint8_t data)
     {
         busWrite(DATA, data);
     }
@@ -332,7 +332,7 @@ public:
         return busRead(DATA);
     }
 
-    static inline void configDataBus(uint8_t outputMode)
+    static inline void configWriteDataBus(uint8_t outputMode)
     {
         busConfigWrite(DATA, outputMode);
     }

@@ -7,7 +7,7 @@
  */
 void AddressBus::_configurePort(uint16_t config)
 {
-    Model1LowLevel::configAddressBus(config);
+    Model1LowLevel::configWriteAddressBus(config);
 }
 
 /**
@@ -62,7 +62,7 @@ void AddressBus::writeMemoryAddress(uint16_t address)
             _logger->err("Address bus is not writable.");
         return;
     }
-    Model1LowLevel::setAddressBus(address);
+    Model1LowLevel::writeAddressBus(address);
 }
 
 /**
@@ -72,7 +72,7 @@ void AddressBus::writeMemoryAddress(uint16_t address)
  */
 void AddressBus::writeRefreshAddress(uint8_t address)
 {
-    Model1LowLevel::setAddressBus(address);
+    Model1LowLevel::writeAddressBus(address);
 }
 
 /**
@@ -94,7 +94,7 @@ void AddressBus::writeIOAddress(uint8_t address)
             _logger->err("IO address bus is not writable.");
         return;
     }
-    Model1LowLevel::setAddressBus(address);
+    Model1LowLevel::writeAddressBus(address);
 }
 
 /**

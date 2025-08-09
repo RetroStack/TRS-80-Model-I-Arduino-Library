@@ -24,30 +24,30 @@ Set pin direction (INPUT/OUTPUT mode).
 
 ```cpp
 // Configure individual pins
-Model1LowLevel::configRAS(OUTPUT);  // Set RAS as output
-Model1LowLevel::configCAS(INPUT);   // Set CAS as input
+Model1LowLevel::configWriteRAS(OUTPUT);  // Set RAS as output
+Model1LowLevel::configWriteCAS(INPUT);   // Set CAS as input
 
 // Configure buses
-Model1LowLevel::configAddressBus(0xFFFF);  // All address pins as output
-Model1LowLevel::configDataBus(0xFF);       // All data pins as output
+Model1LowLevel::configWriteAddressBus(0xFFFF);  // All address pins as output
+Model1LowLevel::configWriteDataBus(0xFF);       // All data pins as output
 ```
 
 **Available Functions:**
 
-- `configRAS(uint8_t outputMode)`
-- `configCAS(uint8_t outputMode)`
-- `configMUX(uint8_t outputMode)`
-- `configRD(uint8_t outputMode)`
-- `configWR(uint8_t outputMode)`
-- `configIN(uint8_t outputMode)`
-- `configOUT(uint8_t outputMode)`
-- `configINT(uint8_t outputMode)`
-- `configTEST(uint8_t outputMode)`
-- `configWAIT(uint8_t outputMode)`
-- `configSYS_RES(uint8_t outputMode)`
-- `configINT_ACK(uint8_t outputMode)`
-- `configAddressBus(uint16_t outputMode)`
-- `configDataBus(uint8_t outputMode)`
+- `configWriteRAS(uint8_t outputMode)`
+- `configWriteCAS(uint8_t outputMode)`
+- `configWriteMUX(uint8_t outputMode)`
+- `configWriteRD(uint8_t outputMode)`
+- `configWriteWR(uint8_t outputMode)`
+- `configWriteIN(uint8_t outputMode)`
+- `configWriteOUT(uint8_t outputMode)`
+- `configWriteINT(uint8_t outputMode)`
+- `configWriteTEST(uint8_t outputMode)`
+- `configWriteWAIT(uint8_t outputMode)`
+- `configWriteSYS_RES(uint8_t outputMode)`
+- `configWriteINT_ACK(uint8_t outputMode)`
+- `configWriteAddressBus(uint16_t outputMode)`
+- `configWriteDataBus(uint8_t outputMode)`
 
 ### 2. Configuration Readers
 
@@ -82,39 +82,39 @@ uint8_t dataConfig = Model1LowLevel::configReadDataBus();
 - `configReadAddressBus()` → `uint16_t`
 - `configReadDataBus()` → `uint8_t`
 
-### 3. Signal Setters
+### 3. Signal Writers
 
-Set pin states (HIGH/LOW). Pin must be configured as OUTPUT first.
+Write pin states (HIGH/LOW). Pin must be configured as OUTPUT first.
 
 ```cpp
-// Configure and set individual signals
-Model1LowLevel::configRAS(OUTPUT);
-Model1LowLevel::setRAS(HIGH);  // Set RAS high
+// Configure and write individual signals
+Model1LowLevel::configWriteRAS(OUTPUT);
+Model1LowLevel::writeRAS(HIGH);  // Write RAS high
 
-Model1LowLevel::configWR(OUTPUT);
-Model1LowLevel::setWR(LOW);    // Set WR low
+Model1LowLevel::configWriteWR(OUTPUT);
+Model1LowLevel::writeWR(LOW);    // Write WR low
 
-// Set bus values
-Model1LowLevel::setAddressBus(0x1234);  // Set address to 0x1234
-Model1LowLevel::setDataBus(0xFF);       // Set data to 0xFF
+// Write bus values
+Model1LowLevel::writeAddressBus(0x1234);  // Write address to 0x1234
+Model1LowLevel::writeDataBus(0xFF);       // Write data to 0xFF
 ```
 
 **Available Functions:**
 
-- `setRAS(uint8_t value)`
-- `setCAS(uint8_t value)`
-- `setMUX(uint8_t value)`
-- `setRD(uint8_t value)`
-- `setWR(uint8_t value)`
-- `setIN(uint8_t value)`
-- `setOUT(uint8_t value)`
-- `setINT(uint8_t value)`
-- `setTEST(uint8_t value)`
-- `setWAIT(uint8_t value)`
-- `setSYS_RES(uint8_t value)`
-- `setINT_ACK(uint8_t value)`
-- `setAddressBus(uint16_t address)`
-- `setDataBus(uint8_t data)`
+- `writeRAS(uint8_t value)`
+- `writeCAS(uint8_t value)`
+- `writeMUX(uint8_t value)`
+- `writeRD(uint8_t value)`
+- `writeWR(uint8_t value)`
+- `writeIN(uint8_t value)`
+- `writeOUT(uint8_t value)`
+- `writeINT(uint8_t value)`
+- `writeTEST(uint8_t value)`
+- `writeWAIT(uint8_t value)`
+- `writeSYS_RES(uint8_t value)`
+- `writeINT_ACK(uint8_t value)`
+- `writeAddressBus(uint16_t address)`
+- `writeDataBus(uint8_t data)`
 
 ### 4. Signal Readers
 
@@ -157,12 +157,12 @@ uint8_t data = Model1LowLevel::readDataBus();
 #include "Model1LowLevel.h"
 
 void setup() {
-    // Configure RAS as output and set it high
-    Model1LowLevel::configRAS(OUTPUT);
-    Model1LowLevel::setRAS(HIGH);
+    // Configure RAS as output and write it high
+    Model1LowLevel::configWriteRAS(OUTPUT);
+    Model1LowLevel::writeRAS(HIGH);
 
     // Configure WR as input to read external signal
-    Model1LowLevel::configWR(INPUT);
+    Model1LowLevel::configWriteWR(INPUT);
 
     // Read the current state
     uint8_t wrState = Model1LowLevel::readWR();
@@ -177,37 +177,37 @@ void setup() {
 ```cpp
 void writeToMemory(uint16_t address, uint8_t data) {
     // Configure buses as outputs
-    Model1LowLevel::configAddressBus(0xFFFF);  // All address pins output
-    Model1LowLevel::configDataBus(0xFF);       // All data pins output
+    Model1LowLevel::configWriteAddressBus(0xFFFF);  // All address pins output
+    Model1LowLevel::configWriteDataBus(0xFF);       // All data pins output
 
-    // Set address and data
-    Model1LowLevel::setAddressBus(address);
-    Model1LowLevel::setDataBus(data);
+    // Write address and data
+    Model1LowLevel::writeAddressBus(address);
+    Model1LowLevel::writeDataBus(data);
 
     // Control write signal
-    Model1LowLevel::configWR(OUTPUT);
-    Model1LowLevel::setWR(LOW);   // Assert write
-    delayMicroseconds(1);         // Hold time
-    Model1LowLevel::setWR(HIGH);  // Deassert write
+    Model1LowLevel::configWriteWR(OUTPUT);
+    Model1LowLevel::writeWR(LOW);   // Assert write
+    delayMicroseconds(1);           // Hold time
+    Model1LowLevel::writeWR(HIGH);  // Deassert write
 }
 
 uint8_t readFromMemory(uint16_t address) {
-    // Set address
-    Model1LowLevel::configAddressBus(0xFFFF);
-    Model1LowLevel::setAddressBus(address);
+    // Write address
+    Model1LowLevel::configWriteAddressBus(0xFFFF);
+    Model1LowLevel::writeAddressBus(address);
 
     // Configure data bus as input
-    Model1LowLevel::configDataBus(0x00);
+    Model1LowLevel::configWriteDataBus(0x00);
 
     // Control read signal
-    Model1LowLevel::configRD(OUTPUT);
-    Model1LowLevel::setRD(LOW);   // Assert read
-    delayMicroseconds(1);         // Access time
+    Model1LowLevel::configWriteRD(OUTPUT);
+    Model1LowLevel::writeRD(LOW);   // Assert read
+    delayMicroseconds(1);           // Access time
 
     // Read data
     uint8_t data = Model1LowLevel::readDataBus();
 
-    Model1LowLevel::setRD(HIGH);  // Deassert read
+    Model1LowLevel::writeRD(HIGH);  // Deassert read
 
     return data;
 }
@@ -249,8 +249,8 @@ You can access the Model1LowLevel functionality by including it directly:
 
 void setup() {
     // Access low-level functions directly
-    Model1LowLevel::configRAS(OUTPUT);
-    Model1LowLevel::setRAS(HIGH);
+    Model1LowLevel::configWriteRAS(OUTPUT);
+    Model1LowLevel::writeRAS(HIGH);
 
     uint8_t rasState = Model1LowLevel::readRAS();
 }
