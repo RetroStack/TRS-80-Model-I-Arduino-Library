@@ -9,15 +9,23 @@ The `ContentScreen` class provides a structured layout template for screens with
 - [Protected Methods](#protected-methods)
   - [\_drawContent](#void-_drawcontent)
   - [Layout Getters](#layout-getters)
-  - [Content Management](#content-management)
 - [Public Methods](#public-methods)
   - [Title Management](#title-management)
-  - [Footer Management](#footer-management)
+    - [setTitle](#void-settitleconst-char-title)
+    - [clearTitle](#void-cleartitle)
+    - [getTitle](#const-char-gettitle-const)
   - [Progress Control](#progress-control)
+    - [setProgressValue](#void-setprogressvalueint-value)
+    - [getProgressValue](#uint8_t-getprogressvalue-const)
+  - [Button Management](#button-management)
+    - [setButtonItems](#void-setbuttonitemsconst-char-buttonitems-uint8_t-buttonitemcount)
+    - [clearButtonItems](#void-clearbuttonitems)
+  - [Content Area Utilities](#content-area-utilities)
+    - [clearContentArea](#void-clearcontentarea)
+    - [drawText](#void-drawtextuint16_t-x-uint16_t-y-const-char-text-uint16_t-color-uint8_t-size--1)
 - [Layout Regions](#layout-regions)
 - [Implementation Pattern](#implementation-pattern)
-- [Notes](#notes)
-- [Example](#example)
+- [Examples](#examples)
 
 ## Constructor
 
@@ -70,7 +78,7 @@ protected:
         uint16_t h = _getContentHeight();
 
         // Your content rendering here
-        _drawText(x, y, "Custom content");
+        drawText(x, y, "Custom content");
     }
 };
 ```
@@ -84,51 +92,104 @@ Access content area boundaries for positioning:
 - `uint16_t _getContentWidth()`: Returns content area width in pixels
 - `uint16_t _getContentHeight()`: Returns content area height in pixels
 
-### Content Management
-
-Text rendering utilities for derived classes:
-
-- `void _drawText(uint16_t x, uint16_t y, const char* text, uint16_t color, uint8_t size = 1)`: Draw text with optional size scaling
-- `void _clearContentArea()`: Clear content area to background color
-
 ## Public Methods
 
 ### Title Management
 
 Control the header area display:
 
-```cpp
-void _setTitle(const char* title)
-```
+#### `void setTitle(const char* title)`
 
 Sets the title text displayed in the header region. The title is dynamically allocated and automatically freed when changed or when the screen is destroyed.
 
-### Footer Management
+**Parameters:**
 
-Manage button labels in the footer:
+- `title`: Null-terminated string for title (pass nullptr or empty string to clear)
+
+**Example:**
 
 ```cpp
-void _setFooterButtons(const char** buttonLabels, uint8_t count)
+setTitle("System Configuration");
+setTitle(nullptr);  // Clear title
 ```
 
-Sets button labels displayed in the footer region. Common patterns:
+#### `void clearTitle()`
 
-- Navigation hints: `{"◄ Back", "Select ►"}`
-- Action prompts: `{"Cancel", "OK"}`
-- Status indicators: `{"Ready", "Processing..."}`
+Clears the current title and frees any dynamically allocated title memory.
+
+#### `const char* getTitle() const`
+
+Returns the current title string, or nullptr if no title is set.
 
 ### Progress Control
 
 Control progress bar visibility and value:
 
-```cpp
-void _setProgressValue(int value)
-```
+#### `void setProgressValue(int value)`
 
 Sets progress bar value (0-100):
 
 - `0`: Progress bar hidden
 - `1-100`: Progress bar visible with percentage fill
+
+**Example:**
+
+```cpp
+setProgressValue(0);   // Hide progress bar
+setProgressValue(50);  // Show 50% progress
+setProgressValue(100); // Show complete
+```
+
+#### `uint8_t getProgressValue() const`
+
+Returns the current progress bar value (0-100).
+
+### Button Management
+
+Manage button labels in the footer:
+
+#### `void setButtonItems(const char** buttonItems, uint8_t buttonItemCount)`
+
+Sets button labels displayed in the footer region with dynamic memory allocation.
+
+**Parameters:**
+
+- `buttonItems`: Array of string pointers for button labels
+- `buttonItemCount`: Number of strings in the array
+
+**Example:**
+
+```cpp
+const char* buttons[] = {"◄ Back", "Select ►"};
+setButtonItems(buttons, 2);
+
+// Clear all buttons
+setButtonItems(nullptr, 0);
+```
+
+#### `void clearButtonItems()`
+
+Clears all button labels and frees allocated memory.
+
+### Content Area Utilities
+
+Utilities for content rendering:
+
+#### `void clearContentArea()`
+
+Clears the content area to background color while preserving header, footer, and progress bar areas.
+
+#### `void drawText(uint16_t x, uint16_t y, const char* text, uint16_t color, uint8_t size = 1)`
+
+Draws text within the content area with clipping.
+
+**Parameters:**
+
+- `x`: X position relative to content area
+- `y`: Y position relative to content area
+- `text`: Text to display
+- `color`: Text color
+- `size`: Text size multiplier (default: 1)
 
 ## Layout Regions
 
@@ -174,18 +235,18 @@ protected:
         uint16_t h = _getContentHeight();
 
         // Render content within bounds
-        _drawText(x + 10, y + 10, "Current Value:");
-        _drawText(x + 10, y + 30, String(_currentValue).c_str());
+        drawText(x + 10, y + 10, "Current Value:");
+        drawText(x + 10, y + 30, String(_currentValue).c_str());
     }
 
 public:
     MyContentScreen() : ContentScreen() {
-        _setTitle("My Screen");
+        setTitle("My Screen");
 
         const char* buttons[] = {"◄ Back", "Select ►"};
-        _setFooterButtons(buttons, 2);
+        setButtonItems(buttons, 2);
 
-        _setProgressValue(0);  // Hide progress bar
+        setProgressValue(0);  // Hide progress bar
         _currentValue = 42;
     }
 
@@ -228,21 +289,21 @@ protected:
         uint16_t y = _getContentTop();
 
         // Draw status information
-        _drawText(x + 10, y + 10, "System Status");
+        drawText(x + 10, y + 10, "System Status");
 
         String battery = "Battery: " + String(_batteryLevel) + "%";
-        _drawText(x + 10, y + 30, battery.c_str());
+        drawText(x + 10, y + 30, battery.c_str());
 
         String wifi = "WiFi: " + String(_wifiConnected ? "Connected" : "Disconnected");
-        _drawText(x + 10, y + 50, wifi.c_str());
+        drawText(x + 10, y + 50, wifi.c_str());
     }
 
 public:
     StatusScreen() : ContentScreen() {
-        _setTitle("Device Status");
+        setTitle("Device Status");
 
         const char* buttons[] = {"◄ Back", "Refresh"};
-        _setFooterButtons(buttons, 2);
+        setButtonItems(buttons, 2);
 
         _batteryLevel = 85;
         _wifiConnected = true;

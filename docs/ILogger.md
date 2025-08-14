@@ -1,84 +1,174 @@
 # ILogger Interface
 
-The `ILogger` interface defines how logging works in the library. You can implement this yourself if you want to send logs to Serial, a file, or another output.
-The class inherits the `Print` behavior, and therefore all `Print::print` and `Print::println` methods are available.
+## Overview
 
-## Methods
+The `ILogger` interface provides a standardized logging system for the TRS-80 Model 1 Arduino Library. It extends Arduino's `Print` class and offers multiple ways to log messages with different severity levels.
 
-Any class implementing `ILogger` **must** provide:
+## Table of Contents
 
-- `void info(const char* fmt, ...)`: For informational messages.
-- `void warn(const char* fmt, ...)`: For warnings.
-- `void err(const char* fmt, ...)`: For errors.
+- [Overview](#overview)
+- [Features](#features)
+- [Method Signatures](#method-signatures)
+  - [Core Interface (Pure Virtual)](#core-interface-pure-virtual)
+  - [String Convenience Methods](#string-convenience-methods)
+  - [F() Macro Support (Flash Strings)](#f-macro-support-flash-strings)
+  - [Print Interface](#print-interface)
+- [Usage Examples](#usage-examples)
+  - [Basic Logging](#basic-logging)
+  - [Printf-style Formatting](#printf-style-formatting)
+  - [String Objects](#string-objects)
+  - [F() Macro (Flash Strings)](#f-macro-flash-strings)
+  - [Mixed Usage](#mixed-usage)
+- [Memory Efficiency](#memory-efficiency)
+- [Implementation Notes](#implementation-notes)
+  - [For Library Users](#for-library-users)
+  - [For Logger Implementers](#for-logger-implementers)
+- [Available Implementations](#available-implementations)
+- [Built-in Logger Implementations](#built-in-logger-implementations)
+  - [SerialLogger](#seriallogger)
+  - [CompositeLogger](#compositelogger)
+- [See Also](#see-also)
 
-Each method takes a printf-style format string and additional arguments.
+## Features
 
-## Example Implementation
+- **Multiple Log Levels**: `info()`, `warn()`, and `err()` methods for different message types
+- **Printf-style Formatting**: Support for format strings with variable arguments
+- **String Object Support**: Direct logging of Arduino `String` objects
+- **F() Macro Support**: Memory-efficient logging of flash strings using the `F()` macro
+- **Print Interface**: Inherits from `Print` for direct character/buffer output
 
-Here is an example logger that prints messages to a character LCD display (using the LiquidCrystal library):
+## Method Signatures
+
+### Core Interface (Pure Virtual)
 
 ```cpp
-#include <LiquidCrystal.h>
-#include <ILogger.h>
+virtual void info(const char *fmt, ...) = 0;
+virtual void warn(const char *fmt, ...) = 0;
+virtual void err(const char *fmt, ...) = 0;
+```
 
-class LCDLogger : public ILogger {
+### String Convenience Methods
+
+```cpp
+void info(const String &msg);    // Log String object as info
+void warn(const String &msg);    // Log String object as warning
+void err(const String &msg);     // Log String object as error
+```
+
+### F() Macro Support (Flash Strings)
+
+```cpp
+void info(const __FlashStringHelper *msg);    // Log F() string as info
+void warn(const __FlashStringHelper *msg);    // Log F() string as warning
+void err(const __FlashStringHelper *msg);     // Log F() string as error
+```
+
+### Print Interface
+
+```cpp
+virtual size_t write(uint8_t ch) = 0;
+virtual size_t write(const uint8_t *buffer, size_t size) = 0;
+```
+
+## Usage Examples
+
+### Basic Logging
+
+```cpp
+logger->info("System initialized");
+logger->warn("Low memory warning");
+logger->err("Connection failed");
+```
+
+### Printf-style Formatting
+
+```cpp
+int value = 42;
+const char* status = "OK";
+logger->info("Sensor reading: %d, Status: %s", value, status);
+logger->warn("Temperature: %d°C (threshold: %d°C)", temp, threshold);
+logger->err("Error code: 0x%02X", errorCode);
+```
+
+### String Objects
+
+```cpp
+String message = "Dynamic message: " + String(counter);
+logger->info(message);
+
+String errorMsg = "Failed to connect to " + serverName;
+logger->err(errorMsg);
+```
+
+### F() Macro (Flash Strings)
+
+```cpp
+logger->info(F("This string is stored in flash memory"));
+logger->warn(F("Low battery warning"));
+logger->err(F("Critical system error"));
+```
+
+### Mixed Usage
+
+```cpp
+int temperature = 25;
+String sensor = "DHT22";
+
+// All of these work seamlessly:
+logger->info("Temperature sensor initialized");              // const char*
+logger->info(F("Reading from sensor..."));                   // F() macro
+logger->info(String("Sensor: ") + sensor);                   // String object
+logger->info("Current temperature: %d°C", temperature);      // Printf formatting
+```
+
+## Memory Efficiency
+
+- **const char\***: No memory overhead, strings in program memory
+- **F() macro**: Strings stored in flash memory, saves RAM
+- **String objects**: Use heap memory, convenient but less efficient
+
+For memory-constrained applications, prefer `const char*` literals and `F()` macro over `String` objects.
+
+## Implementation Notes
+
+### For Library Users
+
+Simply use any of the supported method signatures. The interface automatically handles the conversion and routing to the underlying logger implementation.
+
+### For Logger Implementers
+
+Implement only the three pure virtual methods:
+
+```cpp
+class MyLogger : public ILogger {
 public:
-    LCDLogger(LiquidCrystal* lcd) : _lcd(lcd) {}
+    void info(const char *fmt, ...) override;
+    void warn(const char *fmt, ...) override;
+    void err(const char *fmt, ...) override;
 
-    void info(const char* fmt, ...) override {
-        _lcd->clear();
-        _lcd->print("INFO: ");
-        char buf[32];
-        va_list args;
-        va_start(args, fmt);
-        vsnprintf(buf, sizeof(buf), fmt, args);
-        va_end(args);
-        _lcd->setCursor(0, 1);
-        _lcd->print(buf);
-    }
-
-    void warn(const char* fmt, ...) override {
-        _lcd->clear();
-        _lcd->print("WARN: ");
-        char buf[32];
-        va_list args;
-        va_start(args, fmt);
-        vsnprintf(buf, sizeof(buf), fmt, args);
-        va_end(args);
-        _lcd->setCursor(0, 1);
-        _lcd->print(buf);
-    }
-
-    void err(const char* fmt, ...) override {
-        _lcd->clear();
-        _lcd->print("ERROR: ");
-        char buf[32];
-        va_list args;
-        va_start(args, fmt);
-        vsnprintf(buf, sizeof(buf), fmt, args);
-        va_end(args);
-        _lcd->setCursor(0, 1);
-        _lcd->print(buf);
-    }
-
+    // Add using declarations to expose inherited overloads
     using ILogger::info;
     using ILogger::warn;
     using ILogger::err;
 
-private:
-    LiquidCrystal* _lcd;
+    size_t write(uint8_t ch) override;
+    size_t write(const uint8_t *buffer, size_t size) override;
 };
 ```
 
-Usage:
+The `using` declarations are necessary to prevent method hiding when you declare the `const char*` versions in your derived class.
 
-```cpp
-LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
-lcd.begin(16, 2);
+## Available Implementations
 
-LCDLogger logger(&lcd);
-Model1.setLogger(logger);
-```
+- **SerialLogger**: Logs to Arduino Serial interface
+- **CompositeLogger**: Broadcasts to multiple loggers
+- **LoggerScreen**: Displays logs on screen with visual formatting
+
+## See Also
+
+- [SerialLogger](SerialLogger.md) - Serial port logging implementation
+- [CompositeLogger](CompositeLogger.md) - Multi-logger broadcasting
+- [LoggerScreen](LoggerScreen.md) - On-screen log display
 
 ## Built-in Logger Implementations
 

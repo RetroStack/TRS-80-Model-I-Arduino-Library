@@ -2,6 +2,15 @@
 
 **Note:** This modification is only necessary if preserving the system state before and after returning control to the Model I is important for your use case.
 
+## Table of Contents
+
+- [Background](#background)
+- [Root Cause](#root-cause)
+- [Observed Behavior](#observed-behavior)
+- [Hardware Fix](#hardware-fix)
+  - [Result](#result)
+- [Legacy Use Case: Screen Printers](#legacy-use-case-screen-printers)
+
 ## Background
 
 The TRS-80 Model I (all revisions, including the G revision and later TEC/Japanese versions) contains a **hardware design flaw** related to the `TEST` signal and how it interacts with the CPU's bus control lines. This flaw can intermittently **corrupt memory or crash the CPU** when external devices attempt to take over the bus.

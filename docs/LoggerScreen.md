@@ -2,6 +2,34 @@
 
 The `LoggerScreen` is a visual logging destination that extends `ConsoleScreen` with logging functionality compatible with the `ILogger` interface. It provides real-time, on-screen logging with formatted output, color coding, and timestamps - perfect for debugging and monitoring applications on the M1Shield display.
 
+## Table of Contents
+
+- [Features](#features)
+- [Usage](#usage)
+  - [Basic Logger Screen](#basic-logger-screen)
+  - [Integration with CompositeLogger](#integration-with-compositelogger)
+  - [Configuration Options](#configuration-options)
+- [API Reference](#api-reference)
+  - [Constructor](#constructor)
+  - [Configuration Methods](#configuration-methods)
+    - [setTimestampEnabled](#void-settimestampenabledbool-enabled)
+    - [isTimestampEnabled](#bool-istimestampenabled-const)
+    - [setColorCodingEnabled](#void-setcolorcodingenabledbool-enabled)
+    - [isColorCodingEnabled](#bool-iscolorcodingenabled-const)
+    - [resetTimestamp](#void-resettimestamp)
+  - [ILogger Compatibility](#ilogger-compatibility)
+    - [asLogger](#ilogger-aslogger)
+  - [Logging Interface](#logging-interface)
+    - [info](#void-infoconst-char-fmt-)
+    - [warn](#void-warnconst-char-fmt-)
+    - [err](#void-errconst-char-fmt-)
+  - [Inherited from ConsoleScreen](#inherited-from-consolescreen)
+- [Visual Output Format](#visual-output-format)
+- [Use Cases](#use-cases)
+- [Performance Considerations](#performance-considerations)
+- [Integration with M1Shield](#integration-with-m1shield)
+- [Thread Safety](#thread-safety)
+
 ## Features
 
 - **Visual Logging**: Display log messages directly on the M1Shield screen
@@ -25,7 +53,7 @@ LoggerScreen* logScreen = new LoggerScreen("System Monitor");
 void setup() {
     M1Shield.begin(displayProvider);
     M1Shield.setScreen(logScreen);
-    
+
     // Log some messages
     logScreen->info("System starting up...");
     logScreen->warn("Configuration using defaults");
@@ -53,13 +81,13 @@ CompositeLogger multiLogger;
 void setup() {
     Serial.begin(115200);
     M1Shield.begin(displayProvider);
-    
+
     // Set up multi-destination logging
     multiLogger.addLogger(&serialLogger);           // Log to Serial
     multiLogger.addLogger(screenLogger->asLogger()); // Log to screen (use asLogger())
-    
+
     M1Shield.setScreen(screenLogger);
-    
+
     // Now logs appear in both Serial Monitor and on screen
     multiLogger.info("Multi-destination logging active");
     multiLogger.warn("System memory: %d bytes free", getFreeMemory());
@@ -88,32 +116,31 @@ logger->resetTimestamp();
 ```cpp
 LoggerScreen(const char* title = "Logger")
 ```
+
 Creates a new logger screen with the specified title.
 
 ### Configuration Methods
 
-```cpp
-void setTimestampEnabled(bool enabled)
-bool isTimestampEnabled() const
-```
+#### `void setTimestampEnabled(bool enabled)`
+
+#### `bool isTimestampEnabled() const`
+
 Control whether timestamps are displayed in log messages.
 
-```cpp
-void setColorCodingEnabled(bool enabled)
-bool isColorCodingEnabled() const
-```
+#### `void setColorCodingEnabled(bool enabled)`
+
+#### `bool isColorCodingEnabled() const`
+
 Control whether different log levels use different colors.
 
-```cpp
-void resetTimestamp()
-```
+#### `void resetTimestamp()`
+
 Reset the timestamp reference point to the current time.
 
 ### ILogger Compatibility
 
-```cpp
-ILogger* asLogger()
-```
+#### `ILogger* asLogger()`
+
 Get an ILogger adapter for this LoggerScreen. Use this method to add the LoggerScreen to a CompositeLogger:
 
 ```cpp
@@ -124,12 +151,22 @@ composite.addLogger(screen->asLogger());  // Use asLogger()
 
 ### Logging Interface
 
-```cpp
-void info(const char *fmt, ...)
-void warn(const char *fmt, ...)
-void err(const char *fmt, ...)
-```
+#### `void info(const char *fmt, ...)`
+
+#### `void warn(const char *fmt, ...)`
+
+#### `void err(const char *fmt, ...)`
+
 Standard logging methods with printf-style formatting. Messages are displayed with appropriate formatting and colors.
+
+**Note:** The adapter returned by `asLogger()` also supports String and F() macro overloads through the ILogger interface:
+
+```cpp
+ILogger* adapter = screen->asLogger();
+adapter->info("Temperature: %d°C", temp);           // printf-style
+adapter->info(String("Status: ") + statusText);    // String support
+adapter->info(F("System ready"));                  // F() macro support
+```
 
 ### Inherited from ConsoleScreen
 
@@ -153,6 +190,7 @@ void setTabSize(uint8_t size)
 ## Visual Output Format
 
 ### With Timestamps (Default)
+
 ```
 [12:34] [INFO] System initialized
 [12:35] [WARN] Low memory: 512 bytes
@@ -160,6 +198,7 @@ void setTabSize(uint8_t size)
 ```
 
 ### Without Timestamps
+
 ```
 [INFO] System initialized
 [WARN] Low memory: 512 bytes
@@ -167,6 +206,7 @@ void setTabSize(uint8_t size)
 ```
 
 ### Color Coding
+
 - **INFO**: White text - normal system information
 - **WARN**: Yellow text - warnings and non-critical issues
 - **ERR**: Red text - errors and critical problems
@@ -181,19 +221,19 @@ LoggerScreen* diagLogger = new LoggerScreen("Diagnostics");
 
 void runDiagnostics() {
     diagLogger->info("Starting system diagnostics...");
-    
+
     if (testMemory()) {
         diagLogger->info("Memory test: PASSED");
     } else {
         diagLogger->err("Memory test: FAILED");
     }
-    
+
     if (testSensors()) {
         diagLogger->info("Sensor test: PASSED");
     } else {
         diagLogger->warn("Sensor test: Some sensors offline");
     }
-    
+
     diagLogger->info("Diagnostics complete");
 }
 ```
@@ -206,17 +246,17 @@ LoggerScreen* monitor = new LoggerScreen("System Monitor");
 void loop() {
     int memFree = getFreeMemory();
     int tempC = readTemperature();
-    
+
     if (memFree < 512) {
         monitor->warn("Low memory: %d bytes free", memFree);
     }
-    
+
     if (tempC > 75) {
         monitor->err("High temperature: %d°C", tempC);
     } else {
         monitor->info("Status OK - Temp: %d°C, Mem: %d", tempC, memFree);
     }
-    
+
     delay(5000);
 }
 ```
@@ -228,7 +268,7 @@ LoggerScreen* debugLog = new LoggerScreen("Debug Output");
 
 void debugFunction() {
     debugLog->info("Entering function: %s", __FUNCTION__);
-    
+
     for (int i = 0; i < sensorCount; i++) {
         int value = readSensor(i);
         if (value < 0) {
@@ -237,7 +277,7 @@ void debugFunction() {
             debugLog->info("Sensor %d: %d", i, value);
         }
     }
-    
+
     debugLog->info("Function complete");
 }
 ```
@@ -251,14 +291,14 @@ SerialLogger serialLogger;
 void setupLogging() {
     // Always log to serial for development
     logger.addLogger(&serialLogger);
-    
+
     #ifdef DEBUG_BUILD
     // In debug builds, also show on screen
     LoggerScreen* screenLogger = new LoggerScreen("Debug Log");
     logger.addLogger(screenLogger->asLogger());  // Use asLogger()
     M1Shield.setScreen(screenLogger);
     #endif
-    
+
     logger.info("Logging system configured");
 }
 ```

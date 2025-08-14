@@ -2,6 +2,27 @@
 
 The `CompositeLogger` is a logger implementation that forwards log events to multiple registered `ILogger` instances. This allows you to send log output to multiple destinations simultaneously, such as Serial output, file storage, network endpoints, or any other logger implementation.
 
+## Table of Contents
+
+- [Features](#features)
+- [Constructor](#constructor)
+- [Logger Management Methods](#logger-management-methods)
+  - [addLogger](#bool-addloggerilogger-logger)
+  - [removeLogger](#bool-removeloggerilogger-logger)
+  - [clearLoggers](#void-clearloggers)
+  - [getLoggerCount](#uint8_t-getloggercount-const)
+  - [hasLogger](#bool-hasloggerilogger-logger-const)
+- [Logging Methods](#logging-methods)
+  - [info](#void-infoconst-char-fmt-)
+  - [warn](#void-warnconst-char-fmt-)
+  - [err](#void-errconst-char-fmt-)
+  - [write](#size_t-writeuint8_t-ch--size_t-writeconst-uint8_t-buffer-size_t-size)
+- [Configuration](#configuration)
+- [Use Cases](#use-cases)
+- [Performance Considerations](#performance-considerations)
+- [Thread Safety](#thread-safety)
+- [Examples](#examples)
+
 ## Features
 
 - **Multiple Logger Support**: Register up to 8 different logger instances
@@ -11,7 +32,15 @@ The `CompositeLogger` is a logger implementation that forwards log events to mul
 - **Type Safety**: Prevents duplicate registrations and null pointer issues
 - **Full ILogger Interface**: Supports all standard logging methods (info, warn, err) and Print functionality
 
-## Usage
+## Constructor
+
+```cpp
+CompositeLogger()
+```
+
+Creates an empty composite logger with no registered loggers.
+
+## Examples
 
 ### Basic Setup
 
@@ -28,12 +57,12 @@ CompositeLogger multiLogger;
 
 void setup() {
     Serial.begin(115200);
-    
+
     // Register multiple loggers
     multiLogger.addLogger(&serialLogger);
     // multiLogger.addLogger(&fileLogger);
     // multiLogger.addLogger(&networkLogger);
-    
+
     // Now all log calls go to all registered loggers
     multiLogger.info("System initialized with %d loggers", multiLogger.getLoggerCount());
 }
@@ -82,59 +111,46 @@ multiLogger.print("Raw output: ");
 multiLogger.println(sensorValue);
 ```
 
-## API Reference
+## Logger Management Methods
 
-### Constructor
+### `bool addLogger(ILogger* logger)`
 
-```cpp
-CompositeLogger()
-```
-Creates an empty composite logger with no registered loggers.
-
-### Logger Management
-
-```cpp
-bool addLogger(ILogger* logger)
-```
 - **Parameters**: `logger` - Pointer to ILogger instance to register
 - **Returns**: `true` if successfully added, `false` if maximum capacity reached or logger already registered
 - **Note**: Prevents duplicate registrations and null pointer additions
 
-```cpp
-bool removeLogger(ILogger* logger)
-```
+### `bool removeLogger(ILogger* logger)`
+
 - **Parameters**: `logger` - Pointer to ILogger instance to remove
 - **Returns**: `true` if logger was found and removed, `false` if not found
 
-```cpp
-void clearLoggers()
-```
+### `void clearLoggers()`
+
 Removes all registered loggers from the composite logger.
 
-```cpp
-uint8_t getLoggerCount() const
-```
+### `uint8_t getLoggerCount() const`
+
 - **Returns**: Number of currently registered loggers (0-8)
 
-```cpp
-bool hasLogger(ILogger* logger) const
-```
+### `bool hasLogger(ILogger* logger) const`
+
 - **Parameters**: `logger` - Pointer to ILogger instance to check
 - **Returns**: `true` if logger is currently registered, `false` otherwise
 
-### Logging Methods
+## Logging Methods
 
-```cpp
-void info(const char *fmt, ...)
-void warn(const char *fmt, ...)
-void err(const char *fmt, ...)
-```
+### `void info(const char *fmt, ...)`
+
+### `void warn(const char *fmt, ...)`
+
+### `void err(const char *fmt, ...)`
+
 Standard logging methods with printf-style formatting. All calls are forwarded to all registered loggers.
 
-```cpp
-size_t write(uint8_t ch)
-size_t write(const uint8_t *buffer, size_t size)
-```
+**Note**: The CompositeLogger also supports String and F() macro overloads through the inherited ILogger interface.
+
+### `size_t write(uint8_t ch)` / `size_t write(const uint8_t *buffer, size_t size)`
+
 Print interface methods that forward output to all registered loggers. Returns the total number of bytes written across all loggers.
 
 ## Configuration
@@ -159,12 +175,12 @@ FileLogger fileLogger;
 void setup() {
     // Always log to serial for development
     logger.addLogger(&serialLogger);
-    
+
     #ifdef PRODUCTION
     // In production, also log to file
     logger.addLogger(&fileLogger);
     #endif
-    
+
     logger.info("Logging system initialized");
 }
 ```
@@ -181,7 +197,7 @@ void setupLogging() {
     logger.addLogger(&serialLogger);    // Local debugging
     logger.addLogger(&sdLogger);        // Persistent storage
     logger.addLogger(&wifiLogger);      // Remote monitoring
-    
+
     logger.info("Multi-destination logging active");
 }
 ```

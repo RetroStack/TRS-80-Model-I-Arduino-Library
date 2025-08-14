@@ -4,19 +4,22 @@ The `M1Shield` class provides a comprehensive hardware abstraction layer for the
 
 ## Table of Contents
 
-- [Constructor](#constructor)
-- [Initialization](#initialization)
-- [Display Provider System](#display-provider-system)
-- [Display Management](#display-management)
-  - [Color Conversion System](#color-conversion-system)
-- [Input Handling](#input-handling)
-  - [Button Input](#button-input)
-  - [Joystick Input](#joystick-input)
-- [LED Control](#led-control)
-- [Screen Management](#screen-management)
-- [Hardware Status](#hardware-status)
-- [Display Support](#display-support)
-- [Notes](#notes)
+- [Constructor](#constructor)  
+- [Initialization](#initialization)  
+- [Display Provider System](#display-provider-system)  
+- [Display Management](#display-management)  
+  - [Display Access](#display-access)  
+  - [Screen Dimensions](#screen-dimensions)  
+  - [Display Update](#display-update)  
+  - [Color Conversion](#color-conversion)  
+- [Input Handling](#input-handling)  
+  - [Button Input](#button-input)  
+  - [Joystick Input](#joystick-input)  
+- [LED Control](#led-control)  
+- [Screen Management](#screen-management)  
+- [Main Loop](#main-loop)  
+- [Hardware Status](#hardware-status)  
+- [Notes](#notes)  
 - [Example](#example)
 
 ## Constructor
@@ -96,12 +99,22 @@ void setup() {
 
 ### Display Access
 
-- `Adafruit_GFX& getGFX()`: Returns reference to graphics library for direct drawing
-- `DisplayProvider& getDisplayProvider()`: Returns reference to the display provider instance
-- `bool display()`: Updates the display (pushes framebuffer for OLED, validates for TFT)
-- `uint16_t getScreenWidth()`: Returns display width in pixels
-- `uint16_t getScreenHeight()`: Returns display height in pixels
-- `bool isDisplayInitialized()`: Returns true if display initialization was successful
+- **`Adafruit_GFX& getGFX()`** - Returns reference to graphics library for direct drawing
+- **`DisplayProvider& getDisplayProvider()`** - Returns reference to the display provider instance
+
+### Screen Dimensions
+
+- **`uint16_t getScreenWidth()`** - Returns display width in pixels
+- **`uint16_t getScreenHeight()`** - Returns display height in pixels
+
+### Display Update
+
+- **`bool display()`** - Updates the display (pushes framebuffer for OLED, validates for TFT)
+- **`bool isDisplayInitialized()`** - Returns true if display initialization was successful
+
+### Color Conversion
+
+- **`uint16_t convertColor(uint16_t color)`** - Converts 16-bit RGB565 color values to the optimal format for the current display
 
 ### Display Updates and OLED Compatibility
 
@@ -111,6 +124,7 @@ The `display()` method is **REQUIRED** for OLED displays (SSD1306, SH1106) and o
 - **TFT Displays**: Drawing operations update the screen immediately, so `display()` simply returns `true`
 
 **When display() is called automatically:**
+
 - Screen opening (`Screen::open()`)
 - Screen refreshing (`Screen::refresh()`)
 - After drawing operations in built-in screen classes
@@ -118,6 +132,7 @@ The `display()` method is **REQUIRED** for OLED displays (SSD1306, SH1106) and o
 - After menu navigation changes
 
 **When you must call display() manually:**
+
 - Custom drawing operations outside of screen classes
 - Direct GFX operations in your application code
 
@@ -142,6 +157,7 @@ The M1Shield provides automatic color conversion to ensure compatibility across 
 - `uint16_t convertColor(uint16_t color)`: Converts 16-bit RGB565 color values to the optimal format for the current display
 
 **Why use convertColor():**
+
 - **Display Compatibility**: Automatically handles different color depths (16-bit TFT vs 1-bit OLED)
 - **Monochrome Support**: Converts RGB colors to appropriate monochrome values for OLED displays
 - **Future Compatibility**: Ensures your code works with different display providers
@@ -165,8 +181,9 @@ gfx.fillCircle(50, 100, 20, M1Shield.convertColor(0x07FF));   // Cyan circle
 ```
 
 **Common RGB565 Color Values:**
+
 - `0x0000` - Black
-- `0xFFFF` - White  
+- `0xFFFF` - White
 - `0xF800` - Red
 - `0x07E0` - Green
 - `0x001F` - Blue
@@ -184,56 +201,32 @@ Six buttons are supported: Menu, Up, Down, Left, Right, and Joystick button.
 
 **Current State Methods (continuous reading):**
 
-```cpp
-bool isMenuPressed()       // Menu/center button
-bool isUpPressed()         // Up directional button
-bool isDownPressed()       // Down directional button
-bool isLeftPressed()       // Left directional button
-bool isRightPressed()      // Right directional button
-bool isJoystickPressed()   // Joystick center button (push down)
-```
+- **`bool isMenuPressed()`** - Menu/center button
+- **`bool isUpPressed()`** - Up directional button
+- **`bool isDownPressed()`** - Down directional button
+- **`bool isLeftPressed()`** - Left directional button
+- **`bool isRightPressed()`** - Right directional button
+- **`bool isJoystickPressed()`** - Joystick center button (push down)
 
 **Event Detection Methods (one-shot, consuming):**
 
-```cpp
-bool wasMenuPressed()      // Menu button was pressed since last call
-bool wasUpPressed()        // Up button was pressed since last call
-bool wasDownPressed()      // Down button was pressed since last call
-bool wasLeftPressed()      // Left button was pressed since last call
-bool wasRightPressed()     // Right button was pressed since last call
-bool wasJoystickPressed()  // Joystick button was pressed since last call
-```
-
-**Example Usage:**
-
-```cpp
-void loop() {
-    // Use was* methods for one-time actions (menus, toggles)
-    if (M1Shield.wasMenuPressed()) {
-        Serial.println("Menu button was pressed - toggle menu");
-    }
-
-    // Use is* methods for continuous actions (movement, games)
-    if (M1Shield.isUpPressed() || M1Shield.isDownPressed()) {
-        Serial.println("Directional button held - continuous movement");
-    }
-}
-```
+- **`bool wasMenuPressed()`** - Menu button was pressed since last call
+- **`bool wasUpPressed()`** - Up button was pressed since last call
+- **`bool wasDownPressed()`** - Down button was pressed since last call
+- **`bool wasLeftPressed()`** - Left button was pressed since last call
+- **`bool wasRightPressed()`** - Right button was pressed since last call
+- **`bool wasJoystickPressed()`** - Joystick button was pressed since last call
 
 ### Joystick Input
 
 Analog joystick with direction detection, activation control, and raw value access:
 
-```cpp
-void activateJoystick()                     // Enable joystick for screen actions
-void deactivateJoystick()                   // Disable joystick for screen actions
-JoystickDirection getJoystickDirection()    // Get current direction
-bool isJoystickCentered()                   // Check if joystick is centered
-uint8_t getJoystickX()                      // Raw X value (0-255, 128 = center)
-uint8_t getJoystickY()                      // Raw Y value (0-255, 128 = center)
-bool isJoystickPressed()                    // Check if joystick button is currently pressed
-bool wasJoystickPressed()                   // Check if joystick button was just pressed (debounced)
-```
+- **`void activateJoystick()`** - Enable joystick for screen actions
+- **`void deactivateJoystick()`** - Disable joystick for screen actions
+- **`JoystickDirection getJoystickDirection()`** - Get current direction
+- **`bool isJoystickCentered()`** - Check if joystick is centered
+- **`uint8_t getJoystickX()`** - Raw X value (0-255, 128 = center)
+- **`uint8_t getJoystickY()`** - Raw Y value (0-255, 128 = center)
 
 **Joystick Activation:**
 
@@ -299,10 +292,8 @@ void loop() {
 
 RGB LED with predefined color constants:
 
-```cpp
-void setLEDColor(LEDColor color, uint8_t intensity = 255)
-void setLEDColor(uint8_t r, uint8_t g, uint8_t b)
-```
+- **`void setLEDColor(LEDColor color, uint8_t intensity = 255)`** - Set LED color using predefined constants with optional intensity
+- **`void setLEDColor(uint8_t r, uint8_t g, uint8_t b)`** - Set LED color using custom RGB values
 
 **LEDColor Constants:**
 
@@ -342,17 +333,38 @@ void setup() {
 }
 ```
 
+## Main Loop
+
+### Main Update Loop
+
+- **`void loop()`** - Main update loop for shield operations
+
+This method handles all shield operations including:
+
+- Input polling and debouncing
+- Screen update calls
+- Input event processing and screen navigation
+- Hardware state management
+
+**Important:** Must be called regularly from main Arduino loop()
+
+**Example Usage:**
+
+```cpp
+void loop() {
+    M1Shield.loop();    // Handle input, screen updates, and transitions
+}
+```
+
 ## Screen Management
 
 Advanced screen management system for complex applications:
 
-```cpp
-void setScreen(Screen* screen)              // Set active screen
-Screen* getCurrentScreen()                  // Get current screen pointer
-void processInput()                         // Process input and handle screen transitions
-void updateScreen()                         // Update current screen (calls loop())
-void renderScreen()                         // Render current screen if needed
-```
+- **`void setScreen(Screen* screen)`** - Set active screen
+- **`Screen* getCurrentScreen()`** - Get current screen pointer  
+- **`void processInput()`** - Process input and handle screen transitions
+- **`void updateScreen()`** - Update current screen (calls loop())
+- **`void renderScreen()`** - Render current screen if needed
 
 **Screen Lifecycle:**
 

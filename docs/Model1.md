@@ -16,32 +16,38 @@ The `Model1` class provides the main interface for interacting with the TRS-80 M
 - [Constructor](#constructor)
 - [Initialization](#initialization)
 - [Loggers](#loggers)
+- [Memory Refresh](#memory-refresh)
 - [Address Space Checks](#address-space-checks)
 - [Memory Access](#memory-access)
 - [I/O Access](#io-access)
+- [System Updates](#system-updates)
+- [System Signals](#system-signals)
 - [Interrupt Control](#interrupt-control)
 - [TEST Signal Control](#test-signal-control)
 - [WAIT Signal Control](#wait-signal-control)
 - [State Reporting](#state-reporting)
+- [Memory Display](#memory-display)
 - [Version Info](#version-info)
 - [Example Workflow](#example-workflow)
+- [Notes](#notes)
 
 ## Constructor
 
-```cpp
-Model1()
-```
-
-Creates a new `Model1` instance.
+- **`Model1()`** - Creates a new Model1 instance
 
 ## Initialization
 
-### `begin(int refreshTimer = -1)`
+- **`void begin(int refreshTimer = -1)`** - Initializes hardware pins and optional memory refresh
+- **`void end()`** - Deinitializes hardware (called automatically in destructor)
 
-Initializes hardware pins and optional memory refresh:
+## Initialization
+
+- **`void begin(int refreshTimer = -1)`** - Initializes hardware pins and optional memory refresh
+- **`void end()`** - Deinitializes hardware (called automatically in destructor)
+
+The `begin()` method initializes hardware pins and optional memory refresh:
 
 - `refreshTimer`:
-
   - `-1`: No DRAM refresh.
   - `1`: Timer 1 refresh.
   - `2`: Timer 2 refresh.
@@ -53,219 +59,129 @@ If you setup a refresh timer here, make sure to provide the timer interrupt func
 ISR(TIMER2_COMPA_vect)
 {
     // Trigger a refresh to happen
-    model1->refreshNextMemoryRow();
+    Model1.nextUpdate();
 }
 ```
 
-### `end()`
-
-Deinitializes hardware. Called automatically in the destructor.
-
-You most likely never will need this.
+You most likely never will need `end()`.
 
 ## Loggers
 
-### `void setLogger(ILogger &logger)`
+- **`void setLogger(ILogger &logger)`** - Sets the logger used for errors and warnings
 
-Sets the logger used for errors and warnings.
+This is often useful for debugging as it tells what went wrong.
 
-_This is often useful for debugging as it tells what went wrong._
+## Memory Refresh
+
+- **`void activateMemoryRefresh()`** - Enable DRAM memory refresh cycles
+- **`void deactivateMemoryRefresh()`** - Disable DRAM memory refresh cycles
 
 ## Address Space Checks
 
 Convenience methods for determining memory regions:
 
-```cpp
-bool isROMAddress(uint16_t address)
-bool isUnusedAddress(uint16_t address)
-bool isMemoryMappedIOAddress(uint16_t address)
-bool isKeyboardAddress(uint16_t address)
-bool isVideoAddress(uint16_t address)
-bool isSystemAddress(uint16_t address)
-bool isLowerMemoryAddress(uint16_t address)
-bool isHigherMemoryAddress(uint16_t address)
-```
+- **`bool isROMAddress(uint16_t address)`** - Check if address is in ROM space
+- **`bool isUnusedAddress(uint16_t address)`** - Check if address is in unused space
+- **`bool isMemoryMappedIOAddress(uint16_t address)`** - Check if address is memory-mapped I/O
+- **`bool isKeyboardAddress(uint16_t address)`** - Check if address is keyboard I/O
+- **`bool isVideoAddress(uint16_t address)`** - Check if address is video RAM
+- **`bool isSystemAddress(uint16_t address)`** - Check if address is system space
+- **`bool isLowerMemoryAddress(uint16_t address)`** - Check if address is in lower memory
+- **`bool isHigherMemoryAddress(uint16_t address)`** - Check if address is in higher memory
 
 Example:
 
 ```cpp
-if (model1.isVideoAddress(0x3C00)) {
+if (Model1.isVideoAddress(0x3C00)) {
   // Handle video RAM
 }
 ```
 
 ## Memory Access
 
-**Note:** These require the bus to be active [`activateTestSignal`]](#test-signal-control).
+**Note:** These require the bus to be active [`activateTestSignal`](#test-signal-control).
 
 ### Read Memory
 
-- Single byte:
+- **`uint8_t readMemory(uint16_t address)`** - Read single byte from memory
+- **`uint8_t* readMemory(uint16_t address, uint16_t length)`** - Read block from memory (heap-allocated buffer)
 
-  ```cpp
-  uint8_t readMemory(uint16_t address)
-  ```
-
-- Block read (heap-allocated buffer):
-
-  ```cpp
-  uint8_t* readMemory(uint16_t address, uint16_t length)
-  ```
-
-  _(Remember to `delete[]` the buffer.)_
+_(Remember to `delete[]` the buffer returned by block read.)_
 
 ### Write Memory
 
-- Single byte:
-
-  ```cpp
-  void writeMemory(uint16_t address, uint8_t data)
-  ```
-
-- Block write:
-
-  ```cpp
-  void writeMemory(uint16_t address, uint8_t* data, uint16_t length)
-  ```
-
-- Block write with offset:
-
-  ```cpp
-  void writeMemory(uint16_t address, uint8_t* data, uint16_t length, uint16_t offset)
-  ```
-
-- Copy memory between addresses:
-
-  ```cpp
-  void copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length)
-  ```
-
-- Fill memory with a byte:
-
-  ```cpp
-  void fillMemory(uint8_t fill_data, uint16_t address, uint16_t length)
-  ```
-
-- Fill memory repeating a byte array:
-
-  ```cpp
-  void fillMemory(uint8_t* fill_data, uint16_t length, uint16_t start_address, uint16_t end_address)
-  ```
+- **`void writeMemory(uint16_t address, uint8_t data)`** - Write single byte to memory
+- **`void writeMemory(uint16_t address, uint8_t* data, uint16_t length)`** - Write block to memory
+- **`void writeMemory(uint16_t address, uint8_t* data, uint16_t length, uint16_t offset)`** - Write block with offset
+- **`void copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length)`** - Copy memory between addresses
+- **`void fillMemory(uint8_t fill_data, uint16_t address, uint16_t length)`** - Fill memory with a byte
+- **`void fillMemory(uint8_t* fill_data, uint16_t length, uint16_t start_address, uint16_t end_address)`** - Fill memory repeating a byte array
 
 ## I/O Access
 
 **Note:** These also require the bus to be [active](#test-signal-control).
 
-- Read from I/O:
+- **`uint8_t readIO(uint8_t address)`** - Read from I/O port
+- **`void writeIO(uint8_t address, uint8_t data)`** - Write to I/O port
 
-  ```cpp
-  uint8_t readIO(uint8_t address)
-  ```
+## System Updates
 
-- Write to I/O:
-
-  ```cpp
-  void writeIO(uint8_t address, uint8_t data)
-  ```
+- **`void nextUpdate()`** - Trigger the next system update cycle (used in refresh timer interrupts)
 
 ## System Signals
 
-- `bool readSystemResetSignal()`
-
-  Returns `true` if the system reset signal (`SYS_RES`) is active.
-
-- `bool readInterruptAcknowledgeSignal()`
-
-  Returns `true` if the CPU has acknowledged an interrupt request (see below).
+- **`bool readSystemResetSignal()`** - Returns true if the system reset signal (SYS_RES) is active
+- **`bool readInterruptAcknowledgeSignal()`** - Returns true if the CPU has acknowledged an interrupt request
 
 These functions can be used for monitoring the CPU state without taking over the bus.
 
 ## Interrupt Control
 
-- Trigger an interrupt vector:
+- **`bool triggerInterrupt(uint8_t interrupt, uint16_t timeout = 1000)`** - Trigger an interrupt vector
+- **`void activateInterruptRequestSignal()`** - Manually activate the interrupt request signal
+- **`void deactivateInterruptRequestSignal()`** - Manually deactivate the interrupt request signal
 
-  ```cpp
-  bool triggerInterrupt(uint8_t interrupt, uint16_t timeout = 1000)
-  ```
+The `triggerInterrupt()` method returns `true` if acknowledged within timeout. The `interrupt` parameter is the identifier provided to the CPU for resolution on the interrupt vector.
 
-  Returns `true` if acknowledged within timeout.
-
-  `interrupt` is the identifier provided to the CPU for resolution on the interrupt vector.
-
-- Manually control the interrupt request signal:
-
-  ```cpp
-  void activateInterruptRequestSignal()
-  void deactivateInterruptRequestSignal()
-  ```
-
-  _You have to manage the interrupt identitier yourself._
+_When using manual control, you have to manage the interrupt identifier yourself._
 
 ## TEST Signal Control
 
 Controls whether the Arduino takes control of the bus.
 
-- Activate TEST:
-
-  ```cpp
-  void activateTestSignal()
-  ```
-
-  Takes control and makes the bus mutable.
-
-- Deactivate TEST:
-
-  ```cpp
-  void deactivateTestSignal()
-  ```
-
-  Releases control back to the CPU.
+- **`void activateTestSignal()`** - Take control of the bus and make it mutable
+- **`void deactivateTestSignal()`** - Release control back to the CPU
+- **`bool hasActiveTestSignal()`** - Check if TEST signal is currently active
 
 ## WAIT Signal Control
 
 Controls whether the CPU is held in a wait state.
 
-- Activate WAIT:
-
-  ```cpp
-  void activateWaitSignal()
-  ```
-
-- Deactivate WAIT:
-
-  ```cpp
-  void deactivateWaitSignal()
-  ```
+- **`void activateWaitSignal()`** - Put CPU in wait state
+- **`void deactivateWaitSignal()`** - Release CPU from wait state
 
 ## State Reporting
 
-- Get current state string (heap-allocated):
+- **`char* getState()`** - Get current state string (heap-allocated)
+- **`void logState()`** - Log the current state using the configured logger
 
-  ```cpp
-  char* getState()
-  ```
+## Memory Display
 
-- Log the state:
+- **`void printMemoryContents(uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32)`** - Print memory contents to Serial
+- **`void printMemoryContents(Print &output, uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32)`** - Print memory contents to specified output stream
 
-  ```cpp
-  void logState()
-  ```
+PRINT_STYLE options:
+
+- `ASCII` - ASCII representation only
+- `HEXADECIMAL` - Hexadecimal values only
+- `BOTH` - Both hex and ASCII (default)
 
 ## Version Info
 
-- Retrieve version numbers:
-
-  ```cpp
-  uint8_t getVersionMajor()
-  uint8_t getVersionMinor()
-  uint8_t getVersionRevision()
-  ```
-
-- Retrieve version string:
-
-  ```cpp
-  char* getVersion()
-  ```
+- **`uint8_t getVersionMajor()`** - Get major version number
+- **`uint8_t getVersionMinor()`** - Get minor version number
+- **`uint8_t getVersionRevision()`** - Get revision number
+- **`char* getVersion()`** - Get version string (heap-allocated)
 
 ## Example Workflow
 
@@ -299,3 +215,5 @@ void loop() {
 ## Notes
 
 - Always call `activateTestSignal()` before memory or I/O operations.
+- Remember to `delete[]` buffers returned by `readMemory()` block operations.
+- Use proper timer interrupt handlers when enabling memory refresh.

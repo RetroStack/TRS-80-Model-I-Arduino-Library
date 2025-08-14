@@ -1,10 +1,22 @@
-# Model1LowLevel Class Documentation
+# Model1LowLevel Class
 
 ## Overview
 
 The `Model1LowLevel` class provides direct, low-level access to all TRS-80 Model 1 hardware control signals and buses. This class bypasses the safety mechanisms of the main `Model1` class and should be used with extreme caution.
 
 **⚠️ WARNING:** This class provides direct hardware access that can potentially damage your Arduino or connected hardware if used incorrectly. Only use if you fully understand the TRS-80 Model 1 hardware architecture.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Configuration Functions](#configuration-functions)
+- [Configuration Readers](#configuration-readers)
+- [Signal Writers](#signal-writers)
+- [Signal Readers](#signal-readers)
+- [Bus Control Functions](#bus-control-functions)
+- [Usage Examples](#usage-examples)
+- [Performance Notes](#performance-notes)
 
 ## Features
 
@@ -16,11 +28,26 @@ The `Model1LowLevel` class provides direct, low-level access to all TRS-80 Model
 - **High Performance**: Static inline functions with zero call overhead
 - **Macro Integration**: Uses optimized port macros for maximum speed
 
-## Function Categories
-
-### 1. Configuration Functions
+## Configuration Functions
 
 Set pin direction (INPUT/OUTPUT mode).
+
+- **`static void configWriteRAS(uint8_t outputMode)`** - Configure RAS (Row Address Strobe) pin direction
+- **`static void configWriteCAS(uint8_t outputMode)`** - Configure CAS (Column Address Strobe) pin direction
+- **`static void configWriteMUX(uint8_t outputMode)`** - Configure MUX (Address Multiplexer) pin direction
+- **`static void configWriteRD(uint8_t outputMode)`** - Configure RD (Read signal) pin direction
+- **`static void configWriteWR(uint8_t outputMode)`** - Configure WR (Write signal) pin direction
+- **`static void configWriteIN(uint8_t outputMode)`** - Configure IN (Input signal) pin direction
+- **`static void configWriteOUT(uint8_t outputMode)`** - Configure OUT (Output signal) pin direction
+- **`static void configWriteINT(uint8_t outputMode)`** - Configure INT (Interrupt signal) pin direction
+- **`static void configWriteTEST(uint8_t outputMode)`** - Configure TEST (Test signal) pin direction
+- **`static void configWriteWAIT(uint8_t outputMode)`** - Configure WAIT (Wait signal) pin direction
+- **`static void configWriteSYS_RES(uint8_t outputMode)`** - Configure SYS_RES (System Reset) pin direction
+- **`static void configWriteINT_ACK(uint8_t outputMode)`** - Configure INT_ACK (Interrupt Acknowledge) pin direction
+- **`static void configWriteAddressBus(uint16_t outputMode)`** - Configure all address bus pins
+- **`static void configWriteDataBus(uint8_t outputMode)`** - Configure all data bus pins
+
+**Example:**
 
 ```cpp
 // Configure individual pins
@@ -32,26 +59,26 @@ Model1LowLevel::configWriteAddressBus(0xFFFF);  // All address pins as output
 Model1LowLevel::configWriteDataBus(0xFF);       // All data pins as output
 ```
 
-**Available Functions:**
-
-- `configWriteRAS(uint8_t outputMode)`
-- `configWriteCAS(uint8_t outputMode)`
-- `configWriteMUX(uint8_t outputMode)`
-- `configWriteRD(uint8_t outputMode)`
-- `configWriteWR(uint8_t outputMode)`
-- `configWriteIN(uint8_t outputMode)`
-- `configWriteOUT(uint8_t outputMode)`
-- `configWriteINT(uint8_t outputMode)`
-- `configWriteTEST(uint8_t outputMode)`
-- `configWriteWAIT(uint8_t outputMode)`
-- `configWriteSYS_RES(uint8_t outputMode)`
-- `configWriteINT_ACK(uint8_t outputMode)`
-- `configWriteAddressBus(uint16_t outputMode)`
-- `configWriteDataBus(uint8_t outputMode)`
-
-### 2. Configuration Readers
+## Configuration Readers
 
 Read current pin direction configuration.
+
+- **`static uint8_t configReadRAS()`** - Read RAS pin configuration state
+- **`static uint8_t configReadCAS()`** - Read CAS pin configuration state
+- **`static uint8_t configReadMUX()`** - Read MUX pin configuration state
+- **`static uint8_t configReadRD()`** - Read RD pin configuration state
+- **`static uint8_t configReadWR()`** - Read WR pin configuration state
+- **`static uint8_t configReadIN()`** - Read IN pin configuration state
+- **`static uint8_t configReadOUT()`** - Read OUT pin configuration state
+- **`static uint8_t configReadINT()`** - Read INT pin configuration state
+- **`static uint8_t configReadTEST()`** - Read TEST pin configuration state
+- **`static uint8_t configReadWAIT()`** - Read WAIT pin configuration state
+- **`static uint8_t configReadSYS_RES()`** - Read SYS_RES pin configuration state
+- **`static uint8_t configReadINT_ACK()`** - Read INT_ACK pin configuration state
+- **`static uint16_t configReadAddressBus()`** - Read address bus configuration state
+- **`static uint8_t configReadDataBus()`** - Read data bus configuration state
+
+**Example:**
 
 ```cpp
 // Check if pin is configured as output
@@ -65,26 +92,31 @@ uint16_t addrConfig = Model1LowLevel::configReadAddressBus();
 uint8_t dataConfig = Model1LowLevel::configReadDataBus();
 ```
 
-**Available Functions:**
-
-- `configReadRAS()` → `uint8_t`
-- `configReadCAS()` → `uint8_t`
-- `configReadMUX()` → `uint8_t`
-- `configReadRD()` → `uint8_t`
-- `configReadWR()` → `uint8_t`
-- `configReadIN()` → `uint8_t`
-- `configReadOUT()` → `uint8_t`
-- `configReadINT()` → `uint8_t`
-- `configReadTEST()` → `uint8_t`
-- `configReadWAIT()` → `uint8_t`
-- `configReadSYS_RES()` → `uint8_t`
-- `configReadINT_ACK()` → `uint8_t`
-- `configReadAddressBus()` → `uint16_t`
-- `configReadDataBus()` → `uint8_t`
-
-### 3. Signal Writers
+## Signal Writers
 
 Write pin states (HIGH/LOW). Pin must be configured as OUTPUT first.
+
+- **`static void writeRAS(uint8_t value)`** - Write RAS (Row Address Strobe) signal state
+- **`static void writeCAS(uint8_t value)`** - Write CAS (Column Address Strobe) signal state
+- **`static void writeMUX(uint8_t value)`** - Write MUX (Address Multiplexer) signal state
+- **`static void writeRD(uint8_t value)`** - Write RD (Read signal) state
+- **`static void writeWR(uint8_t value)`** - Write WR (Write signal) state
+- **`static void writeIN(uint8_t value)`** - Write IN (Input signal) state
+- **`static void writeOUT(uint8_t value)`** - Write OUT (Output signal) state
+- **`static void writeINT(uint8_t value)`** - Write INT (Interrupt signal) state
+- **`static void writeTEST(uint8_t value)`** - Write TEST (Test signal) state
+- **`static void writeWAIT(uint8_t value)`** - Write WAIT (Wait signal) state
+- **`static void writeSYS_RES(uint8_t value)`** - Write SYS_RES (System Reset) signal state
+- **`static void writeINT_ACK(uint8_t value)`** - Write INT_ACK (Interrupt Acknowledge) signal state
+
+## Bus Control Functions
+
+- **`static void writeAddressBus(uint16_t address)`** - Write complete 16-bit address on address bus
+- **`static void writeDataBus(uint8_t data)`** - Write 8-bit data on data bus
+- **`static uint16_t readAddressBus()`** - Read complete 16-bit address from address bus
+- **`static uint8_t readDataBus()`** - Read 8-bit data from data bus
+
+**Example:**
 
 ```cpp
 // Configure and write individual signals
@@ -99,26 +131,24 @@ Model1LowLevel::writeAddressBus(0x1234);  // Write address to 0x1234
 Model1LowLevel::writeDataBus(0xFF);       // Write data to 0xFF
 ```
 
-**Available Functions:**
-
-- `writeRAS(uint8_t value)`
-- `writeCAS(uint8_t value)`
-- `writeMUX(uint8_t value)`
-- `writeRD(uint8_t value)`
-- `writeWR(uint8_t value)`
-- `writeIN(uint8_t value)`
-- `writeOUT(uint8_t value)`
-- `writeINT(uint8_t value)`
-- `writeTEST(uint8_t value)`
-- `writeWAIT(uint8_t value)`
-- `writeSYS_RES(uint8_t value)`
-- `writeINT_ACK(uint8_t value)`
-- `writeAddressBus(uint16_t address)`
-- `writeDataBus(uint8_t data)`
-
-### 4. Signal Readers
+## Signal Readers
 
 Read current pin states.
+
+- **`static uint8_t readRAS()`** - Read RAS (Row Address Strobe) signal current state
+- **`static uint8_t readCAS()`** - Read CAS (Column Address Strobe) signal current state
+- **`static uint8_t readMUX()`** - Read MUX (Address Multiplexer) signal current state
+- **`static uint8_t readRD()`** - Read RD (Read signal) current state
+- **`static uint8_t readWR()`** - Read WR (Write signal) current state
+- **`static uint8_t readIN()`** - Read IN (Input signal) current state
+- **`static uint8_t readOUT()`** - Read OUT (Output signal) current state
+- **`static uint8_t readINT()`** - Read INT (Interrupt signal) current state
+- **`static uint8_t readTEST()`** - Read TEST (Test signal) current state
+- **`static uint8_t readWAIT()`** - Read WAIT (Wait signal) current state
+- **`static uint8_t readSYS_RES()`** - Read SYS_RES (System Reset) signal current state
+- **`static uint8_t readINT_ACK()`** - Read INT_ACK (Interrupt Acknowledge) signal current state
+
+**Example:**
 
 ```cpp
 // Read individual signals
@@ -131,23 +161,6 @@ if (rasState == HIGH) {
 uint16_t address = Model1LowLevel::readAddressBus();
 uint8_t data = Model1LowLevel::readDataBus();
 ```
-
-**Available Functions:**
-
-- `readRAS()` → `uint8_t`
-- `readCAS()` → `uint8_t`
-- `readMUX()` → `uint8_t`
-- `readRD()` → `uint8_t`
-- `readWR()` → `uint8_t`
-- `readIN()` → `uint8_t`
-- `readOUT()` → `uint8_t`
-- `readINT()` → `uint8_t`
-- `readTEST()` → `uint8_t`
-- `readWAIT()` → `uint8_t`
-- `readSYS_RES()` → `uint8_t`
-- `readINT_ACK()` → `uint8_t`
-- `readAddressBus()` → `uint16_t`
-- `readDataBus()` → `uint8_t`
 
 ## Usage Examples
 
@@ -240,25 +253,9 @@ void printPinConfigurations() {
 }
 ```
 
-## Access Through Direct Include
-
-You can access the Model1LowLevel functionality by including it directly:
-
-```cpp
-#include <Model1LowLevel.h>
-
-void setup() {
-    // Access low-level functions directly
-    Model1LowLevel::configWriteRAS(OUTPUT);
-    Model1LowLevel::writeRAS(HIGH);
-
-    uint8_t rasState = Model1LowLevel::readRAS();
-}
-```
-
 ## Performance Notes
 
-- All functions are `static inline` for maximum performance
-- Zero function call overhead when optimized
-- Direct port manipulation through macros
-- Suitable for time-critical applications
+- **Static Inline Functions**: All functions are `static inline` for maximum performance
+- **Zero Call Overhead**: No function call overhead when compiled with optimization
+- **Direct Port Manipulation**: Uses optimized port macros for fastest access
+- **Time-Critical Suitable**: Appropriate for time-critical applications requiring precise timing

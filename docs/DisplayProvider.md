@@ -9,6 +9,14 @@ The DisplayProvider system provides a flexible, type-safe way to support multipl
 - [Basic Usage](#basic-usage)
 - [SH1106 Dual Communication Support](#sh1106-dual-communication-support)
 - [Provider Interface](#provider-interface)
+  - [create](#bool-createint8_t-cs-int8_t-dc-int8_t-rst)
+  - [destroy](#void-destroy)
+  - [getGFX](#adafruit_gfx-getgfx)
+  - [display](#bool-display)
+  - [convertColor](#uint16_t-convertcoloruint16_t-color)
+  - [name](#const-char-name-const)
+  - [width](#uint16_t-width-const)
+  - [height](#uint16_t-height-const)
 - [Migration Guide](#migration-guide)
 - [Adding New Displays](#adding-new-displays)
 - [Troubleshooting](#troubleshooting)
@@ -441,9 +449,11 @@ public:
     virtual void destroy() = 0;
     virtual Adafruit_GFX &getGFX() = 0;
     virtual bool display() = 0;
+    virtual uint16_t convertColor(uint16_t color) = 0;
     virtual const char *name() const = 0;
     virtual uint16_t width() const = 0;
     virtual uint16_t height() const = 0;
+    virtual ~DisplayProvider() = default;
 };
 ```
 
@@ -471,6 +481,12 @@ public:
   - For TFT displays: Returns `true` (updates immediately)
   - Returns `true` on success, `false` on failure
 
+- **`convertColor(color)`**: Convert color values for display-specific format
+
+  - Converts RGB565 colors to display-native format
+  - Some displays may require color channel swapping or different formats
+  - Returns converted color value ready for use with drawing operations
+
 - **`name()`**: Get human-readable display name
 
   - Returns string like "ST7789 240x320"
@@ -479,14 +495,6 @@ public:
 - **`width()` / `height()`**: Get display dimensions
   - Returns dimensions after rotation is applied
   - Matches what you'll use for drawing coordinates
-
-### Methods
-
-- **`create()`**: Creates and initializes the display instance, stores it internally
-- **`destroy()`**: Cleans up the internally stored display resources
-- **`name()`**: Returns human-readable display name
-- **`width()`**: Returns effective width (after rotation)
-- **`height()`**: Returns effective height (after rotation)
 
 ## Adding New Displays
 

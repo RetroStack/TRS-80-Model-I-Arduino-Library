@@ -6,18 +6,31 @@ The `ConsoleScreen` class provides a scrollable terminal-like interface for text
 
 ## Table of Contents
 
-1. [Overview](#overview)
-2. [Class Hierarchy](#class-hierarchy)
-3. [Core Features](#core-features)
-4. [Constructor](#constructor)
-5. [Text Output Methods](#text-output-methods)
-6. [Color and Formatting](#color-and-formatting)
-7. [Screen Management](#screen-management)
-8. [Auto-Paging System](#auto-paging-system)
-9. [One-Time Execution](#one-time-execution)
-10. [Examples](#examples)
-11. [Technical Details](#technical-details)
-12. [Best Practices](#best-practices)
+- [Overview](#overview)
+- [Class Hierarchy](#class-hierarchy)
+- [Core Features](#core-features)
+- [Constructor](#constructor)
+- [Text Output Methods](#text-output-methods)
+- [Write Interface Methods](#write-interface-methods)
+- [Color and Formatting](#color-and-formatting)
+  - [setTextColor](#text-color-settings)
+  - [setConsoleBackground](#text-color-settings)
+  - [setTextSize](#text-color-settings)
+  - [setTabSize](#tab-configuration)
+- [Screen Management](#screen-management)
+  - [cls](#clear-operations)
+  - [refresh](#clear-operations)
+- [Auto-Paging System](#auto-paging-system)
+  - [setPagingMode](#paging-modes)
+  - [setPagingTimeout](#paging-modes)
+  - [getPagingMode](#paging-modes)
+  - [getPagingTimeout](#paging-modes)
+  - [isWaitingForPaging](#paging-modes)
+  - [continuePaging](#paging-modes)
+- [One-Time Execution](#one-time-execution)
+- [Examples](#examples)
+- [Technical Details](#technical-details)
+- [Best Practices](#best-practices)
 
 ## Overview
 
@@ -172,6 +185,32 @@ void logMessage(Print& output, const char* msg) {
 logMessage(console, "System ready");  // Works seamlessly
 ```
 
+### Write Interface Methods
+
+Since ConsoleScreen implements the Print interface, it also provides the core write methods:
+
+```cpp
+size_t write(uint8_t c);                                    // Write single character
+size_t write(const uint8_t *buffer, size_t size);         // Write buffer of characters
+```
+
+**Usage:**
+
+```cpp
+// Write single character
+console.write('A');                    // Outputs: "A"
+console.write('\n');                   // Outputs newline
+
+// Write buffer
+uint8_t data[] = {72, 101, 108, 108, 111};  // "Hello"
+console.write(data, 5);                     // Outputs: "Hello"
+
+// These are used internally by all print() methods
+console.print("Hello");  // Uses write() internally
+```
+
+**Note:** These are low-level methods typically used internally by the Print interface. For normal text output, use the print() and println() methods instead.
+
 ## Color and Formatting
 
 ### Text Color Settings
@@ -179,7 +218,8 @@ logMessage(console, "System ready");  // Works seamlessly
 ```cpp
 void setTextColor(uint16_t color);
 void setTextColor(uint16_t foreground, uint16_t background);
-void setConsoleBgColor(uint16_t color);
+void setConsoleBackground(uint16_t color);
+void setTextSize(uint8_t size);
 ```
 
 **Example:**
@@ -194,7 +234,11 @@ console.setTextColor(M1Shield.convertColor(0xFFFF), M1Shield.convertColor(0xF800
 console.println("ERROR: Critical failure");
 
 // Set console background color
-console.setConsoleBgColor(M1Shield.convertColor(0x0000));
+console.setConsoleBackground(M1Shield.convertColor(0x0000));
+
+// Set text size (1=smallest, 2=medium, 3=large, etc.)
+console.setTextSize(2);
+console.println("Large text");
 ```
 
 ### Available Colors
@@ -649,7 +693,7 @@ protected:
 public:
     DebugConsole() {
         _setTitle("Debug Output");
-        setConsoleBgColor(M1Shield.convertColor(0x0000));
+        setConsoleBackground(M1Shield.convertColor(0x0000));
     }
 
     void logInfo(const char* message) {

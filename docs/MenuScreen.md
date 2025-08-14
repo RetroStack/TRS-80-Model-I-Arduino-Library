@@ -4,22 +4,25 @@ The `MenuScreen` class provides a complete framework for creating navigable menu
 
 ## Table of Contents
 
-- [Constructor](#constructor)
-- [Menu Management](#menu-management)
-- [Navigation System](#navigation-system)
-- [Pagination](#pagination)
-- [Visual Design](#visual-design)
-- [Protected Methods](#protected-methods)
-- [Implementation Pattern](#implementation-pattern)
-- [Memory Management](#memory-management)
-- [Notes](#notes)
+- [Constructor](#constructor)  
+- [Destructor](#destructor)  
+- [Menu Management](#menu-management)  
+- [Navigation System](#navigation-system)  
+- [Input Handling](#input-handling)  
+- [Pagination](#pagination)  
+- [Protected Methods](#protected-methods)  
+  - [Abstract Methods](#abstract-methods)  
+  - [Optional Override Methods](#optional-override-methods)  
+  - [Protected Utility Methods](#protected-utility-methods)  
+- [Visual Design](#visual-design)  
+- [Implementation Pattern](#implementation-pattern)  
+- [Memory Management](#memory-management)  
+- [Notes](#notes)  
 - [Example](#example)
 
 ## Constructor
 
-```cpp
-MenuScreen()
-```
+- **`MenuScreen()`** - Creates a new MenuScreen instance
 
 Creates a new `MenuScreen` instance with:
 
@@ -30,15 +33,20 @@ Creates a new `MenuScreen` instance with:
 
 > **Note**: This is an abstract class - derived classes must implement `_getSelectedMenuItemScreen()`
 
+## Destructor
+
+- **`virtual ~MenuScreen()`** - Frees dynamically allocated menu items
+
+Ensures proper cleanup of any dynamically allocated menu items to prevent memory leaks when menu screens are destroyed.
+
 ## Menu Management
+
+- **`void setMenuItems(const char** menuItems, uint8_t menuItemCount)`** - Set the menu items to be displayed
+- **`void clearMenuItems()`\*\* - Clear and free all dynamically allocated menu items
 
 ### Setting Menu Items
 
-```cpp
-void _setMenuItems(const char** menuItems, uint8_t menuItemCount)
-```
-
-Configures the menu with an array of menu item strings:
+The `setMenuItems()` method configures the menu with an array of menu item strings:
 
 - **Deep Copy**: Creates copies of all strings - original array can be freed
 - **Dynamic Allocation**: Automatically manages memory for menu items
@@ -49,17 +57,39 @@ Configures the menu with an array of menu item strings:
 
 ```cpp
 const char* items[] = {"New Game", "Load Game", "Settings", "Exit"};
-_setMenuItems(items, 4);
+setMenuItems(items, 4);
 ```
 
-### Menu Item Access
+## Navigation System
 
-```cpp
-uint8_t getMenuItemCount()           // Get total number of menu items
-uint8_t getSelectedIndex()           // Get currently selected item index (0-based)
-const char* getSelectedItem()        // Get text of currently selected item
-const char* getMenuItem(uint8_t index)  // Get text of specific menu item
-```
+### Selection Control
+
+Navigation is handled automatically by the base class:
+
+- **Up Arrow**: Move to previous item (wraps to last item)
+- **Down Arrow**: Move to next item (wraps to first item)
+- **Page Up**: Jump to first item on previous page
+- **Page Down**: Jump to first item on next page
+- **Select Action**: Typically Menu button or Right arrow
+
+### Selection Wrapping
+
+- **Top Wrap**: Selecting up from first item goes to last item
+- **Bottom Wrap**: Selecting down from last item goes to first item
+- **Page Boundaries**: Selection automatically handles page transitions
+- **Smooth Navigation**: Page changes maintain relative position when possible
+
+## Input Handling
+
+- **`virtual void loop()`** - Main loop processing for menu screen updates (override for custom processing)
+- **`Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override`** - Handle user input actions and navigate accordingly
+
+The `actionTaken()` method processes user input for menu navigation including:
+
+- Up/Down: Navigate between menu items with wraparound
+- Right/Select: Activate selected menu item
+- Left/Back: Return to previous screen
+- Page navigation for multi-page menus
 
 ## Navigation System
 
@@ -84,13 +114,7 @@ Navigation is handled automatically by the base class:
 
 ### Automatic Page Calculation
 
-```cpp
-uint8_t _getItemsPerPage()    // Returns items that fit in content area
-uint8_t getCurrentPage()      // Returns current page number (0-based)
-uint8_t getTotalPages()       // Returns total number of pages
-```
-
-### Page Navigation
+Pagination is handled automatically by the MenuScreen system:
 
 - **Automatic**: Pages change automatically when selection moves beyond page boundaries
 - **Efficient**: Only displays items for current page
@@ -108,47 +132,24 @@ Page 1 of 3        Page 2 of 3        Page 3 of 3
   Tutorial           Controls
 ```
 
-## Visual Design
-
-### Menu Appearance
-
-- **Selection Highlight**: Currently selected item is visually highlighted
-- **Alternating Rows**: Subtle background alternation for readability
-- **Consistent Spacing**: Uniform spacing between menu items
-- **Page Indicators**: Page numbers displayed when multiple pages exist
-- **Scroll Hints**: Visual indicators when more items are available
-
-### Color Scheme
-
-- **Selected Item**: Highlighted background with contrasting text
-- **Normal Items**: Standard text color on transparent background
-- **Alternating Rows**: Subtle background color variation
-- **Page Info**: Dimmed text for page indicators
-
 ## Protected Methods
 
-### Pure Virtual Method
+### Abstract Methods
 
-```cpp
-virtual Screen* _getSelectedMenuItemScreen(int index) = 0
-```
+- **`virtual Screen* _getSelectedMenuItemScreen(int index) = 0`** - Abstract method to get the screen for a selected menu item
 
-**Must be implemented** by derived classes to define what happens when a menu item is selected:
+**Must be implemented** by derived classes to define what happens when a menu item is selected. Return nullptr to stay on current screen.
 
-```cpp
-class MainMenu : public MenuScreen {
-protected:
-    Screen* _getSelectedMenuItemScreen(int index) override {
-        switch(index) {
-            case 0: return new GameScreen();
-            case 1: return new LoadScreen();
-            case 2: return new SettingsScreen();
-            case 3: return nullptr;  // Exit - handled by returning nullptr
-        }
-        return nullptr;
-    }
-};
-```
+### Optional Override Methods
+
+- **`virtual const char* _getMenuItemConfigValue(uint8_t index)`** - Get configuration value string for a menu item
+- **`virtual bool _isMenuItemEnabled(uint8_t index) const`** - Check if a menu item is enabled/selectable
+
+### Protected Utility Methods
+
+- **`void _drawContent()`** - Draw the menu content area with paginated item list
+- **`void _setSelectedMenuItemIndex(uint8_t index)`** - Set the currently selected menu item by index
+- **`uint8_t _getSelectedMenuItemIndex() const`** - Get the index of the currently selected menu item
 
 ### Menu Configuration
 
@@ -188,6 +189,23 @@ protected:
 };
 ```
 
+## Visual Design
+
+### Menu Appearance
+
+- **Selection Highlight**: Currently selected item is visually highlighted
+- **Alternating Rows**: Subtle background alternation for readability
+- **Consistent Spacing**: Uniform spacing between menu items
+- **Page Indicators**: Page numbers displayed when multiple pages exist
+- **Scroll Hints**: Visual indicators when more items are available
+
+### Color Scheme
+
+- **Selected Item**: Highlighted background with contrasting text
+- **Normal Items**: Standard text color on transparent background
+- **Alternating Rows**: Subtle background color variation
+- **Page Info**: Dimmed text for page indicators
+
 ## Implementation Pattern
 
 ### Standard Menu Implementation
@@ -210,7 +228,7 @@ public:
             "Reset to Defaults",
             "Back to Main Menu"
         };
-        _setMenuItems(items, 6);
+        setMenuItems(items, 6);
 
         // Configure layout
         _setTitle("Settings");
@@ -484,7 +502,7 @@ public:
         Screen* result = MenuScreen::actionTaken(action, offsetX, offsetY);
 
         // Handle exit button
-        if ((action & BUTTON_RIGHT) && getSelectedIndex() == 5) {
+        if ((action & BUTTON_RIGHT) && _getSelectedMenuItemIndex() == 5) {
             // Exit application
             M1Shield.setLEDColor(COLOR_RED);
             Serial.println("Exiting application...");
@@ -497,15 +515,13 @@ public:
 
 // Usage
 void setup() {
-    M1Shield.begin();
+    M1Shield.begin(displayProvider);
 
     MainMenu* menu = new MainMenu();
     M1Shield.setScreen(menu);
 }
 
 void loop() {
-    M1Shield.processInput();
-    M1Shield.updateScreen();
-    M1Shield.renderScreen();
+    M1Shield.loop();
 }
 ```

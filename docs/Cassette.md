@@ -13,8 +13,10 @@ The `Cassette` class provides control over the TRS-80 Model I cassette interface
 
   - [update](#void-update)
   - [writeRaw](#void-writerawbool-bool)
+  - [readRaw](#bool-readraw)
   - [play](#void-playuint16_t-uint32_t)
   - [playSong](#void-playsongint-float-size_t-int)
+  - [playSongPGM](#void-playsongpgmconst-int-const-float-size_t-int)
   - [activateRemote](#void-activateremote)
   - [deactivateRemote](#void-deactivateremote)
 
@@ -60,6 +62,14 @@ Here a list of output values you can get at the cassette output:
 - `value1=true`, `value2=false` => ~0.85V
 - `value1=true`, `value2=true` => ~0V
 
+### `bool readRaw()`
+
+Reads a raw bit from the cassette input port.
+
+**Returns:** `true` if the input signal is high, `false` if low.
+
+_This method allows direct reading of the cassette input signal for custom tape decoding routines._
+
 ### `void play(uint16_t frequency, uint32_t durationMs)`
 
 Plays a tone at the specified frequency and duration.
@@ -67,6 +77,26 @@ Plays a tone at the specified frequency and duration.
 ### `void playSong(int* melody, float* durations, size_t numNotes, int bpm)`
 
 Plays a melody sequence given note frequencies and note durations.
+
+**Parameters:**
+
+- `melody`: Array of note frequencies (use NOTE\_\* constants)
+- `durations`: Array of note durations as fractions (0.25 = quarter note, 0.5 = half note, etc.)
+- `numNotes`: Number of notes in the melody
+- `bpm`: Beats per minute for tempo control
+
+### `void playSongPGM(const int* melody, const float* durations, size_t numNotes, int bpm)`
+
+Plays a melody sequence stored in program memory (PROGMEM) to save RAM.
+
+**Parameters:**
+
+- `melody`: Array of note frequencies stored in PROGMEM (use NOTE\_\* constants)
+- `durations`: Array of note durations stored in PROGMEM as fractions
+- `numNotes`: Number of notes in the melody
+- `bpm`: Beats per minute for tempo control
+
+_Use this method when storing large melodies to conserve RAM by keeping the data in program memory._
 
 ### `void activateRemote()`
 
@@ -162,6 +192,17 @@ cassette.play(NOTE_A5, 200);
 int melody[] = { NOTE_E4, NOTE_D4, NOTE_C4 };
 float durations[] = { 0.25, 0.25, 0.5 };
 cassette.playSong(melody, durations, 3, 120);
+
+// Read cassette input
+bool inputSignal = cassette.readRaw();
+if (inputSignal) {
+  Serial.println("Cassette input is HIGH");
+}
+
+// Play a melody from PROGMEM to save RAM
+const int PROGMEM pgmMelody[] = { NOTE_C4, NOTE_E4, NOTE_G4, NOTE_C5 };
+const float PROGMEM pgmDurations[] = { 0.25, 0.25, 0.25, 0.5 };
+cassette.playSongPGM(pgmMelody, pgmDurations, 4, 100);
 ```
 
 ## Full List of Note Constants

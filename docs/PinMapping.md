@@ -4,13 +4,25 @@ This document provides the complete pin mapping between the TRS-80 Model I 40-pi
 
 ## Table of Contents
 
-1. [Overview](#overview)
-2. [Safety Warnings](#safety-warnings)
-3. [Pin Mapping Table](#pin-mapping-table)
-4. [Connection Diagram](#connection-diagram)
-5. [Verification Procedure](#verification-procedure)
-6. [Troubleshooting](#troubleshooting)
-7. [M1Shield Alternative](#m1shield-alternative)
+- [Overview](#overview)
+- [Safety Warnings](#safety-warnings)
+- [Pin Mapping Table](#pin-mapping-table)
+  - [Address Bus (16-bit)](#address-bus-16-bit)
+  - [Data Bus (8-bit)](#data-bus-8-bit)
+  - [Control Signals](#control-signals)
+  - [Clock and Special Signals](#clock-and-special-signals)
+  - [Power and Ground](#power-and-ground)
+- [Connection Diagram](#connection-diagram)
+- [Verification Procedure](#verification-procedure)
+  - [Visual Inspection](#1-visual-inspection)
+  - [Continuity Testing](#2-continuity-testing)
+  - [Signal Testing](#3-signal-testing)
+- [Troubleshooting](#troubleshooting)
+  - [Common Issues](#common-issues)
+  - [Signal Quality Tips](#signal-quality-tips)
+- [M1Shield Alternative](#m1shield-alternative)
+- [Example Connection Code](#example-connection-code)
+- [Pin Assignment Rationale](#pin-assignment-rationale)
 
 ## Overview
 
