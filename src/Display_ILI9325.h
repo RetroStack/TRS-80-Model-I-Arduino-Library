@@ -7,13 +7,13 @@
 #ifndef DISPLAY_ILI9325_H
 #define DISPLAY_ILI9325_H
 
-#include <Adafruit_TFTLCD.h>
+#include <Adafruit_ILI9325.h>
 #include "DisplayProvider.h"
 
 class Display_ILI9325 : public DisplayProvider
 {
 private:
-    Adafruit_TFTLCD *_display;
+    Adafruit_ILI9325 *_display;
 
 public:
     Display_ILI9325() : _display(nullptr) {}
@@ -24,9 +24,9 @@ public:
         {
             delete _display;
         }
-        // ILI9325 typically uses parallel interface, cs pin is used as chip select
-        _display = new Adafruit_TFTLCD(cs, dc, rst);
-        _display->begin(0x9325); // ILI9325 identifier
+        // ILI9325 uses SPI interface
+        _display = new Adafruit_ILI9325(cs, dc, rst);
+        _display->begin();
         _display->setRotation(3);
         return _display != nullptr;
     }
