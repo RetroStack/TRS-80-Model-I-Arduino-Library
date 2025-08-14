@@ -4,22 +4,22 @@ The `M1Shield` class provides a comprehensive hardware abstraction layer for the
 
 ## Table of Contents
 
-- [Constructor](#constructor)  
-- [Initialization](#initialization)  
-- [Display Provider System](#display-provider-system)  
-- [Display Management](#display-management)  
-  - [Display Access](#display-access)  
-  - [Screen Dimensions](#screen-dimensions)  
-  - [Display Update](#display-update)  
-  - [Color Conversion](#color-conversion)  
-- [Input Handling](#input-handling)  
-  - [Button Input](#button-input)  
-  - [Joystick Input](#joystick-input)  
-- [LED Control](#led-control)  
-- [Screen Management](#screen-management)  
-- [Main Loop](#main-loop)  
-- [Hardware Status](#hardware-status)  
-- [Notes](#notes)  
+- [Constructor](#constructor)
+- [Initialization](#initialization)
+- [Display Provider System](#display-provider-system)
+- [Display Management](#display-management)
+  - [Display Access](#display-access)
+  - [Screen Dimensions](#screen-dimensions)
+  - [Display Update](#display-update)
+  - [Color Conversion](#color-conversion)
+- [Input Handling](#input-handling)
+  - [Button Input](#button-input)
+  - [Joystick Input](#joystick-input)
+- [LED Control](#led-control)
+- [Screen Management](#screen-management)
+- [Main Loop](#main-loop)
+- [Hardware Status](#hardware-status)
+- [Notes](#notes)
 - [Example](#example)
 
 ## Constructor
@@ -43,11 +43,12 @@ Initializes all M1Shield hardware components using the specified display provide
 - Hardware abstraction layer setup
 
 ```cpp
-#include <Display_ST7789.h>
+#include <Display_ILI9341.h>
 #include <M1Shield.h>
 
+Display_ILI9341 displayProvider;
+
 void setup() {
-    Display_ST7789 displayProvider;
     M1Shield.begin(displayProvider);
     // Hardware is now ready for use
 }
@@ -59,13 +60,21 @@ The M1Shield uses a DisplayProvider architecture for flexible display support. E
 
 ### Available Display Providers
 
-- **`Display_ST7789`** - ST7789 240x320 displays (landscape: 320x240)
+**TFT Color Displays:**
+
 - **`Display_ST7789_240x240`** - Square ST7789 240x240 displays
+- **`Display_ST7789_320x170`** - Wide ST7789 320x170 displays
+- **`Display_ST7789_320x240`** - Landscape ST7789 320x240 displays
 - **`Display_ST7735`** - Smaller ST7735 128x160 displays
 - **`Display_ILI9341`** - ILI9341 240x320 displays (landscape: 320x240)
 - **`Display_ST7796`** - Large ST7796 320x480 displays (landscape: 480x320)
 - **`Display_HX8357`** - Large HX8357 320x480 displays
 - **`Display_ILI9325`** - Parallel ILI9325 240x320 displays
+
+**OLED Monochrome Displays:**
+
+- **`Display_SSD1306`** - I2C/SPI SSD1306 128x64 OLED displays
+- **`Display_SH1106`** - I2C/SPI SH1106 128x64 OLED displays
 
 ### Display Provider Benefits
 
@@ -77,9 +86,9 @@ The M1Shield uses a DisplayProvider architecture for flexible display support. E
 ### Example Display Provider Usage
 
 ```cpp
-// Select your display provider
-#include <Display_ST7789.h>
-Display_ST7789 displayProvider;
+// Select your display provider (example using ILI9341)
+#include <Display_ILI9341.h>
+Display_ILI9341 displayProvider;
 
 void setup() {
     // Initialize with provider
@@ -87,7 +96,7 @@ void setup() {
 
     // Get display information
     Serial.print("Display: ");
-    Serial.println(displayProvider.name());        // "ST7789 240x320"
+    Serial.println(displayProvider.name());        // "ILI9341 240x320"
     Serial.print("Size: ");
     Serial.print(displayProvider.width());         // 320 (after rotation)
     Serial.print("x");
@@ -361,7 +370,7 @@ void loop() {
 Advanced screen management system for complex applications:
 
 - **`void setScreen(Screen* screen)`** - Set active screen
-- **`Screen* getCurrentScreen()`** - Get current screen pointer  
+- **`Screen* getCurrentScreen()`** - Get current screen pointer
 - **`void processInput()`** - Process input and handle screen transitions
 - **`void updateScreen()`** - Update current screen (calls loop())
 - **`void renderScreen()`** - Render current screen if needed
@@ -378,10 +387,10 @@ Advanced screen management system for complex applications:
 ```cpp
 #include "MenuScreen.h"
 #include "GameScreen.h"
-#include <Display_ST7789.h>
+#include <Display_ST7789_320x240.h>
 #include <M1Shield.h>
 
-Display_ST7789 displayProvider;
+Display_ST7789_320x240 displayProvider;
 MenuScreen* mainMenu = new MenuScreen();
 GameScreen* game = new GameScreen();
 
@@ -410,7 +419,7 @@ bool isDisplayInitialized()     // Display ready for use
 **Example Usage:**
 
 ```cpp
-Display_ST7789 displayProvider;
+Display_ST7789_320x240 displayProvider;
 
 void setup() {
     M1Shield.begin(displayProvider);
@@ -432,11 +441,11 @@ void setup() {
 The M1Shield uses a modern DisplayProvider system for flexible display support. Instead of compile-time defines, you select display providers at runtime:
 
 ```cpp
-// Example: Using ST7789 display
-#include <Display_ST7789.h>
+// Example: Using ST7789_320x240 display
+#include <Display_ST7789_320x240.h>
 #include "M1Shield.h"
 
-Display_ST7789 displayProvider;
+Display_ST7789_320x240 displayProvider;
 
 void setup() {
     M1Shield.begin(displayProvider);
@@ -445,15 +454,18 @@ void setup() {
 
 ### Supported Display Types
 
-| Provider Class           | Display Controller | Resolution        | Notes                           |
-| ------------------------ | ------------------ | ----------------- | ------------------------------- |
-| `Display_ST7789`         | ST7789             | 240x320 → 320x240 | Most common, landscape oriented |
-| `Display_ST7789_240x240` | ST7789             | 240x240           | Square displays                 |
-| `Display_ST7735`         | ST7735             | 128x160           | Smaller displays                |
-| `Display_ILI9341`        | ILI9341            | 240x320 → 320x240 | Alternative common display      |
-| `Display_ST7796`         | ST7796             | 320x480 → 480x320 | Large displays, landscape       |
-| `Display_HX8357`         | HX8357             | 320x480           | Large displays, portrait        |
-| `Display_ILI9325`        | ILI9325            | 240x320 → 320x240 | Parallel interface              |
+| Provider Class           | Display Controller | Resolution        | Notes                      |
+| ------------------------ | ------------------ | ----------------- | -------------------------- |
+| `Display_ST7789_240x240` | ST7789             | 240x240           | Square displays            |
+| `Display_ST7789_320x170` | ST7789             | 320x170           | Wide displays              |
+| `Display_ST7789_320x240` | ST7789             | 320x240           | Landscape displays         |
+| `Display_ST7735`         | ST7735             | 128x160           | Smaller displays           |
+| `Display_ILI9341`        | ILI9341            | 240x320 → 320x240 | Alternative common display |
+| `Display_ST7796`         | ST7796             | 320x480 → 480x320 | Large displays, landscape  |
+| `Display_HX8357`         | HX8357             | 320x480           | Large displays, portrait   |
+| `Display_ILI9325`        | ILI9325            | 240x320 → 320x240 | Parallel interface         |
+| `Display_SSD1306`        | SSD1306            | 128x64            | OLED monochrome display    |
+| `Display_SH1106`         | SH1106             | 128x64            | OLED monochrome display    |
 
 ### Migration from Legacy System
 
@@ -468,9 +480,9 @@ M1Shield.begin();
 **New way (recommended):**
 
 ```cpp
-#include <Display_ST7789.h>  // Runtime selection
+#include <Display_ILI9341.h>  // Runtime selection
 #include <M1Shield.h>
-Display_ST7789 displayProvider;
+Display_ILI9341 displayProvider;
 M1Shield.begin(displayProvider);
 ```
 
@@ -479,14 +491,14 @@ M1Shield.begin(displayProvider);
 Get display information from the provider:
 
 ```cpp
-#include <Display_ST7789.h>
+#include <Display_ILI9341.h>
 #include <M1Shield.h>
 
-Display_ST7789 displayProvider;
+Display_ILI9341 displayProvider;
 M1Shield.begin(displayProvider);
 
 // Access display info
-const char* name = displayProvider.name();      // "ST7789 240x320"
+const char* name = displayProvider.name();      // "ILI9341 240x320"
 uint16_t width = displayProvider.width();       // 320 (after rotation)
 uint16_t height = displayProvider.height();     // 240 (after rotation)
 
@@ -507,11 +519,11 @@ uint16_t h = M1Shield.getScreenHeight();        // Same as provider.height()
 ## Example
 
 ```cpp
-#include <Display_ST7789.h>  // Select your display provider
+#include <Display_ILI9341.h>  // Select your display provider
 #include <M1Shield.h>
 
 // Create display provider instance
-Display_ST7789 displayProvider;
+Display_ILI9341 displayProvider;
 
 void setup() {
     Serial.begin(115200);
