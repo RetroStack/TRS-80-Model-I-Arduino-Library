@@ -22,6 +22,10 @@ public:
     void warn(const char *fmt, ...);
     void err(const char *fmt, ...);
 
+    using ILogger::err;
+    using ILogger::info;
+    using ILogger::warn;
+
     size_t write(uint8_t ch) override;
     size_t write(const uint8_t *buffer, size_t size) override;
 

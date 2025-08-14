@@ -61,6 +61,10 @@ public:
         _lcd->print(buf);
     }
 
+    using ILogger::info;
+    using ILogger::warn;
+    using ILogger::err;
+
 private:
     LiquidCrystal* _lcd;
 };
@@ -81,6 +85,7 @@ Model1.setLogger(logger);
 The library provides several ready-to-use logger implementations:
 
 ### SerialLogger
+
 Outputs log messages to the Arduino Serial interface with formatted prefixes.
 
 ```cpp
@@ -88,11 +93,12 @@ Outputs log messages to the Arduino Serial interface with formatted prefixes.
 
 SerialLogger logger;
 logger.info("System initialized");  // Output: [INFO] System initialized
-logger.warn("Low memory");          // Output: [WARN] Low memory  
+logger.warn("Low memory");          // Output: [WARN] Low memory
 logger.err("Connection failed");    // Output: [ERR ] Connection failed
 ```
 
 ### CompositeLogger
+
 Forwards log messages to multiple registered loggers simultaneously, enabling multi-destination logging.
 
 ```cpp
@@ -111,6 +117,7 @@ multiLogger.info("Message sent to all registered loggers");
 ```
 
 The CompositeLogger is particularly useful for:
+
 - **Development vs Production**: Log to Serial during development, add file/network logging for production
 - **Redundancy**: Ensure critical logs reach multiple destinations
 - **Debugging**: Temporarily add debug loggers without changing existing code

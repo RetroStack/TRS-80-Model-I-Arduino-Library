@@ -37,6 +37,10 @@ public:
         va_end(args);
     }
 
+    using ILogger::err;
+    using ILogger::info;
+    using ILogger::warn;
+
     size_t write(uint8_t ch) override
     {
         return _parent->write(ch);
