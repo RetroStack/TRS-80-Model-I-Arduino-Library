@@ -34,10 +34,6 @@ private:
   bool _autoScroll;
   bool _hasLowerCaseMod;
 
-  uint16_t _getRowAddress(uint8_t y);
-  uint16_t _getColumnAddress(uint16_t rowAddress, uint8_t x);
-  uint16_t _getAddress(uint8_t x, uint8_t y);
-
   void _print(const char character, bool raw);
 
 public:
@@ -45,6 +41,10 @@ public:
 
   void setLogger(ILogger &logger);
   void setViewPort(ViewPort viewPort);
+
+  uint16_t getRowAddress(uint8_t y);
+  uint16_t getColumnAddress(uint16_t rowAddress, uint8_t x);
+  uint16_t getAddress(uint8_t x, uint8_t y);
 
   uint8_t getX();
   void setX(uint8_t x);

@@ -7,8 +7,6 @@ const uint16_t VIDEO_MEM_START = 0x3C00;
 
 const uint8_t SPACE_CHARACTER = 0x20;
 
-const uint8_t CASSETTE_PORT = 0xff;
-
 /**
  * Initializes the TRS-80 Model 1 Video Subsystem
  */
@@ -75,7 +73,7 @@ void Video::setViewPort(ViewPort viewPort)
  *
  * NOTE: No overflow is checked.
  */
-uint16_t Video::_getRowAddress(uint8_t y)
+uint16_t Video::getRowAddress(uint8_t y)
 {
   return VIDEO_MEM_START + ((_viewPort.y + y) * VIDEO_COLS);
 }
@@ -85,7 +83,7 @@ uint16_t Video::_getRowAddress(uint8_t y)
  *
  * NOTE: No overflow is checked.
  */
-uint16_t Video::_getColumnAddress(uint16_t rowAddress, uint8_t x)
+uint16_t Video::getColumnAddress(uint16_t rowAddress, uint8_t x)
 {
   return rowAddress + _viewPort.x + x;
 }
@@ -95,10 +93,10 @@ uint16_t Video::_getColumnAddress(uint16_t rowAddress, uint8_t x)
  *
  * NOTE: No overflow is checked.
  */
-uint16_t Video::_getAddress(uint8_t x, uint8_t y)
+uint16_t Video::getAddress(uint8_t x, uint8_t y)
 {
-  uint16_t rowAddress = _getRowAddress(y);
-  return _getColumnAddress(rowAddress, x);
+  uint16_t rowAddress = getRowAddress(y);
+  return getColumnAddress(rowAddress, x);
 }
 
 /**
@@ -263,10 +261,10 @@ void Video::cls(char *characters, uint16_t length)
   int i = 0;
   for (uint16_t y = 0; y < _viewPort.height; y++)
   {
-    int rowAddress = _getRowAddress(y);
+    int rowAddress = getRowAddress(y);
     for (uint16_t x = 0; x < _viewPort.width; x++)
     {
-      Model1.writeMemory(_getColumnAddress(rowAddress, x), convertLocalCharacterToModel1(characters[i % length]));
+      Model1.writeMemory(getColumnAddress(rowAddress, x), convertLocalCharacterToModel1(characters[i % length]));
       i++;
     }
   }
@@ -301,8 +299,8 @@ void Video::scroll(uint8_t rows)
   {
     for (uint16_t y = rows; y < _viewPort.height; y++)
     {
-      uint16_t src = _getColumnAddress(_getRowAddress(y), 0);
-      uint16_t dst = _getColumnAddress(_getRowAddress(y - rows), 0);
+      uint16_t src = getColumnAddress(getRowAddress(y), 0);
+      uint16_t dst = getColumnAddress(getRowAddress(y - rows), 0);
       Model1.copyMemory(src, dst, _viewPort.width);
     }
   }
@@ -310,7 +308,7 @@ void Video::scroll(uint8_t rows)
   // Fill the copied area with spaces
   for (uint16_t y = _viewPort.height - rows; y < _viewPort.height; y++)
   {
-    Model1.fillMemory(SPACE_CHARACTER, _getColumnAddress(_getRowAddress(y), 0), _viewPort.width);
+    Model1.fillMemory(SPACE_CHARACTER, getColumnAddress(getRowAddress(y), 0), _viewPort.width);
   }
 
   // Move the current cursor position the rows up
@@ -341,7 +339,7 @@ char *Video::read(uint8_t x, uint8_t y, uint16_t length, bool raw)
   // Read in string
   for (uint16_t i = 0; i < length; i++)
   {
-    uint16_t addr = _getColumnAddress(_getRowAddress(y), x);
+    uint16_t addr = getColumnAddress(getRowAddress(y), x);
     uint8_t character = Model1.readMemory(addr);
 
     if (raw)
@@ -430,7 +428,7 @@ void Video::_print(const char character, bool raw)
   }
   else
   {
-    uint16_t address = _getAddress(_cursorPositionX, _cursorPositionY);
+    uint16_t address = getAddress(_cursorPositionX, _cursorPositionY);
     uint8_t data = character;
     if (!raw)
     {
@@ -524,6 +522,4 @@ char Video::convertLocalCharacterToModel1(char character)
   }
 
   return character;
-
 }
-
