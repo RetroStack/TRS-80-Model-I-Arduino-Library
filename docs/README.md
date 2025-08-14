@@ -84,7 +84,6 @@ A complete screen management system for building interactive applications:
 - [**ConsoleScreen**](ConsoleScreen.md) — Terminal-style scrolling text interface ideal for debugging, logging, and command-line applications.
 - [**LoggerScreen**](LoggerScreen.md) — Visual logging destination with color-coded messages, timestamps, and ILogger compatibility.
 - [**MenuScreen**](MenuScreen.md) — Intelligent menu system with automatic pagination, navigation, and selection handling.
-- [**M1TerminalScreen**](M1TerminalScreen.md) — Authentic TRS-80 terminal emulation with 64×16 character display and full Model1 integration.
 
 ## Quick Start Guide
 

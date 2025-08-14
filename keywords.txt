@@ -12,7 +12,6 @@ M1Shield    KEYWORD1
 Screen  KEYWORD1
 ContentScreen   KEYWORD1
 MenuScreen  KEYWORD1
-M1TerminalScreen    KEYWORD1
 ConsoleScreen   KEYWORD1
 ConsolePagingMode   KEYWORD1
 LoggerScreen    KEYWORD1
