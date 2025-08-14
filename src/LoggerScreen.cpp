@@ -12,6 +12,7 @@ private:
 
 public:
     LoggerAdapter(LoggerScreen *parent) : _parent(parent) {}
+    virtual ~LoggerAdapter() = default;
 
     void info(const char *fmt, ...) override
     {

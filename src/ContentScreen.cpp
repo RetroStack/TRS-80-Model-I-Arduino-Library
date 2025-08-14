@@ -90,7 +90,6 @@ void ContentScreen::_drawScreen()
         return;
 
     uint16_t screenWidth = M1Shield.getScreenWidth();
-    uint16_t screenHeight = M1Shield.getScreenHeight();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
     gfx.fillScreen(M1Shield.convertColor(SCREEN_COLOR_BG));

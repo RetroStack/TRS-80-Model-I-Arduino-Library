@@ -58,7 +58,7 @@ const uint8_t PIN_IN_OFF = ~(0b00000001 << 3);
 
 // Port D, Bit(0) 7, Pin 38
 const uint8_t PIN_OUT_ON = 0b00000001 << 7;
-const uint8_t PIN_OUT_OFF = ~(0b00000001 << 7);
+const uint8_t PIN_OUT_OFF = (uint8_t)~(0b00000001 << 7);
 #define PIN_OUT_PORT D
 
 // Port L, Bit(0) 1, Pin 48
@@ -83,7 +83,7 @@ const uint8_t PIN_CR1_OFF = ~(0b00000001 << 6);
 
 // Port L, Bit(0) 7, Pin 42
 const uint8_t PIN_CR2_ON = 0b00000001 << 7;
-const uint8_t PIN_CR2_OFF = ~(0b00000001 << 7);
+const uint8_t PIN_CR2_OFF = (uint8_t)~(0b00000001 << 7);
 #define PIN_CR2_PORT L
 
 #endif // PORT_CONFIG_H

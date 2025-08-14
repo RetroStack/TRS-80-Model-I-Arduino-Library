@@ -48,7 +48,9 @@ M1ShieldClass M1Shield;
 /**
  * Constructor: Initializes internal state.
  */
-M1ShieldClass::M1ShieldClass() : _menuPressed(0),
+M1ShieldClass::M1ShieldClass() : _screen(nullptr),
+                                 _displayProvider(nullptr),
+                                 _menuPressed(0),
                                  _upPressed(0),
                                  _downPressed(0),
                                  _leftPressed(0),
@@ -56,8 +58,6 @@ M1ShieldClass::M1ShieldClass() : _menuPressed(0),
                                  _joystickPressed(0),
                                  _screenWidth(0),
                                  _screenHeight(0),
-                                 _screen(nullptr),
-                                 _displayProvider(nullptr),
                                  _activeJoystick(false)
 {
 }
@@ -85,7 +85,7 @@ M1ShieldClass::~M1ShieldClass()
 /**
  * Initializes hardware: pins, display, LED, and input modes.
  */
-void M1ShieldClass::begin(DisplayProvider &provider)
+bool M1ShieldClass::begin(DisplayProvider &provider)
 {
     _displayProvider = &provider;
 
@@ -123,6 +123,8 @@ void M1ShieldClass::begin(DisplayProvider &provider)
     // Initialize display based on the selected type
     _screenWidth = provider.width();
     _screenHeight = provider.height();
+
+    return success;
 }
 
 /**
@@ -181,7 +183,7 @@ uint16_t M1ShieldClass::getScreenHeight() const
 /**
  * Returns a reference to the display provider instance.
  */
-DisplayProvider& M1ShieldClass::getDisplayProvider() const
+DisplayProvider &M1ShieldClass::getDisplayProvider() const
 {
     return *_displayProvider;
 }
@@ -533,75 +535,75 @@ void M1ShieldClass::loop()
         {
             offsetX = JOYSTICK_CENTER_MIN - x;
             offsetY = JOYSTICK_CENTER_MIN - y;
-            action |= JOYSTICK_UP_LEFT;
+            action = static_cast<ActionTaken>(action | JOYSTICK_UP_LEFT);
         }
         else if (x > JOYSTICK_CENTER_MAX && y < JOYSTICK_CENTER_MIN)
         {
             offsetX = x - JOYSTICK_CENTER_MIN;
             offsetY = JOYSTICK_CENTER_MIN - y;
-            action |= JOYSTICK_UP_RIGHT;
+            action = static_cast<ActionTaken>(action | JOYSTICK_UP_RIGHT);
         }
         else if (x < JOYSTICK_CENTER_MIN && y > JOYSTICK_CENTER_MAX)
         {
             offsetX = JOYSTICK_CENTER_MIN - x;
             offsetY = y - JOYSTICK_CENTER_MIN;
-            action |= JOYSTICK_DOWN_LEFT;
+            action = static_cast<ActionTaken>(action | JOYSTICK_DOWN_LEFT);
         }
         else if (x > JOYSTICK_CENTER_MAX && y > JOYSTICK_CENTER_MAX)
         {
             offsetX = x - JOYSTICK_CENTER_MIN;
             offsetY = y - JOYSTICK_CENTER_MIN;
-            action |= JOYSTICK_DOWN_RIGHT;
+            action = static_cast<ActionTaken>(action | JOYSTICK_DOWN_RIGHT);
         }
 
         // Cardinal directions for Joystick
         else if (x < JOYSTICK_CENTER_MIN)
         {
             offsetX = JOYSTICK_CENTER_MIN - x;
-            action |= JOYSTICK_LEFT;
+            action = static_cast<ActionTaken>(action | JOYSTICK_LEFT);
         }
         else if (x > JOYSTICK_CENTER_MAX)
         {
             offsetX = x - JOYSTICK_CENTER_MIN;
-            action |= JOYSTICK_RIGHT;
+            action = static_cast<ActionTaken>(action | JOYSTICK_RIGHT);
         }
         else if (y < JOYSTICK_CENTER_MIN)
         {
             offsetY = JOYSTICK_CENTER_MIN - y;
-            action |= JOYSTICK_UP;
+            action = static_cast<ActionTaken>(action | JOYSTICK_UP);
         }
         else if (y > JOYSTICK_CENTER_MAX)
         {
             offsetY = y - JOYSTICK_CENTER_MIN;
-            action |= JOYSTICK_DOWN;
+            action = static_cast<ActionTaken>(action | JOYSTICK_DOWN);
         }
 
         if (wasJoystickPressed())
         {
-            action |= BUTTON_JOYSTICK;
+            action = static_cast<ActionTaken>(action | BUTTON_JOYSTICK);
         }
     }
 
     // Get button states
     if (wasMenuPressed())
     {
-        action |= BUTTON_MENU;
+        action = static_cast<ActionTaken>(action | BUTTON_MENU);
     }
     if (wasLeftPressed())
     {
-        action |= BUTTON_LEFT;
+        action = static_cast<ActionTaken>(action | BUTTON_LEFT);
     }
     if (wasRightPressed())
     {
-        action |= BUTTON_RIGHT;
+        action = static_cast<ActionTaken>(action | BUTTON_RIGHT);
     }
     if (wasUpPressed())
     {
-        action |= BUTTON_UP;
+        action = static_cast<ActionTaken>(action | BUTTON_UP);
     }
     if (wasDownPressed())
     {
-        action |= BUTTON_DOWN;
+        action = static_cast<ActionTaken>(action | BUTTON_DOWN);
     }
 
     // Was any action taken?

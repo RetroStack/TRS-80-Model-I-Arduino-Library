@@ -174,7 +174,7 @@ public:
      * @note Must be called before any other shield operations
      * @note Safe to call multiple times - subsequent calls return cached result
      */
-    void begin(DisplayProvider &provider);
+    bool begin(DisplayProvider &provider);
 
     /**
      * @brief Activate joystick input
@@ -227,7 +227,7 @@ public:
      *
      * @return Reference to DisplayProvider instance
      */
-    DisplayProvider& getDisplayProvider() const;
+    DisplayProvider &getDisplayProvider() const;
 
     /**
      * @brief Update the display

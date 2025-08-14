@@ -664,8 +664,8 @@ void M1TerminalScreen::_updatePixelLine(Adafruit_GFX &gfx, uint8_t currentPixelL
     for (int16_t x = 0; x < CHAR_WIDTH; x++)
     {
         // Verify pixel is within content area bounds
-        if (terminalX >= 0 && terminalX + x <= _contentWidth &&
-            terminalY >= 0 && terminalY + y <= _contentHeight)
+        if (terminalX >= 0 && static_cast<uint16_t>(terminalX + x) <= _contentWidth &&
+            terminalY >= 0 && static_cast<uint16_t>(terminalY + y) <= _contentHeight)
         {
             // Extract current and previous pixel states (MSB = leftmost)
             bool hasPixel = (currentPixelLine & 0x80);
