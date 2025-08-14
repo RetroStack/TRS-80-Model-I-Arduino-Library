@@ -50,8 +50,8 @@ ConsoleScreen::ConsoleScreen() : ContentScreen()
     _hasExecutedOnce = false;
 
     // Initialize paging management
-    _pagingMode = PAGING_WAIT_TIMEOUT; // Default to timeout-based paging
-    _pagingTimeoutMs = 5000;           // Default 5 second timeout
+    _pagingMode = PAGING_WAIT_BOTH; // Default to button and timeout-based paging
+    _pagingTimeoutMs = 5000;        // Default 5 second timeout
     _isWaitingForPaging = false;
     _pagingWaitStartTime = 0;
     _showPagingPrompt = true; // Show prompts by default
