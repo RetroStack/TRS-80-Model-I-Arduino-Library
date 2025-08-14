@@ -27,7 +27,7 @@ void ExampleScreen::_drawScreen()
 
     // Set text color to white and size
     display.setTextColor(M1Shield.convertColor(0xFFFF));
-    if (_isSmallDisplay())
+    if (isSmallDisplay())
         display.setTextSize(1); // Use smaller text on small displays
     else
         display.setTextSize(2); // Use larger text on bigger displays

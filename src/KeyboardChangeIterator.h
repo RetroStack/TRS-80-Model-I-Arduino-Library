@@ -37,8 +37,8 @@ private:
     uint8_t _bitMask;
     bool _found;
 
-    void advanceToNextChange();
-    uint8_t bitIndex() const;
+    void _advanceToNextChange();
+    uint8_t _bitIndex() const;
 };
 
 #endif /* KEYBOARDCHANGEITERATOR_H */

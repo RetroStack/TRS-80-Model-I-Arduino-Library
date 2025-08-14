@@ -478,15 +478,15 @@ M1TerminalScreen::M1TerminalScreen() : ContentScreen()
     _contentHeight = 0;
 
     // Configure ContentScreen interface
-    _setTitle("TRS-80 Terminal");
-    _setProgressValue(0);
+    setTitle("TRS-80 Terminal");
+    setProgressValue(0);
 
     // Configure control buttons for terminal operations
     const char *buttonItems[2] = {
         "[M] Exit",   // Return to menu
         "[<&>] Font", // Cycle fonts (Left + Right)
     };
-    _setButtonItems(buttonItems, 2);
+    setButtonItems(buttonItems, 2);
 }
 
 /**

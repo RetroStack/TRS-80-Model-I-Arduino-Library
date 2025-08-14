@@ -54,10 +54,10 @@ public:
 LoggerScreen::LoggerScreen(const char *title) : ConsoleScreen(), _loggerAdapter(nullptr)
 {
     // Set the screen title
-    _setTitle(title);
+    setTitle(title);
 
     // Initialize logger settings
-    _showTimestamps = _isSmallDisplay() ? false : true; // Default to no timestamps on small displays
+    _showTimestamps = isSmallDisplay() ? false : true; // Default to no timestamps on small displays
     _useColorCoding = true;
     _startTime = millis();
 
@@ -68,7 +68,7 @@ LoggerScreen::LoggerScreen(const char *title) : ConsoleScreen(), _loggerAdapter(
 
     // Update button labels for logger screen
     const char *buttonItems[1] = {"[M] Close Log"};
-    _setButtonItems(buttonItems, 1);
+    setButtonItems(buttonItems, 1);
 
     // Create the logger adapter
     _loggerAdapter = new LoggerAdapter(this);
@@ -138,7 +138,7 @@ void LoggerScreen::info(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    _logMessage(_isSmallDisplay() ? "I" : "INFO", COLOR_INFO, fmt, args);
+    _logMessage(isSmallDisplay() ? "I" : "INFO", COLOR_INFO, fmt, args);
     va_end(args);
 }
 
@@ -149,7 +149,7 @@ void LoggerScreen::warn(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    _logMessage(_isSmallDisplay() ? "W" : "WARN", COLOR_WARN, fmt, args);
+    _logMessage(isSmallDisplay() ? "W" : "WARN", COLOR_WARN, fmt, args);
     va_end(args);
 }
 
@@ -160,7 +160,7 @@ void LoggerScreen::err(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    _logMessage(_isSmallDisplay() ? "E" : "ERR ", COLOR_ERROR, fmt, args);
+    _logMessage(isSmallDisplay() ? "E" : "ERR ", COLOR_ERROR, fmt, args);
     va_end(args);
 }
 

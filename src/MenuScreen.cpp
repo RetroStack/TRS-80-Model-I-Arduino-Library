@@ -46,7 +46,7 @@ MenuScreen::MenuScreen() : ContentScreen()
     // Set default button labels - can be overridden by derived classes
     const char *buttonItems[2] = {
         "[M/<] Exit ", "[>] Select"};
-    _setButtonItems(buttonItems, 2);
+    setButtonItems(buttonItems, 2);
 }
 
 /**
@@ -57,7 +57,7 @@ MenuScreen::MenuScreen() : ContentScreen()
  */
 MenuScreen::~MenuScreen()
 {
-    _clearMenuItems();
+    clearMenuItems();
 }
 
 /**
@@ -74,7 +74,7 @@ MenuScreen::~MenuScreen()
 uint8_t MenuScreen::_getItemsPerPage() const
 {
     uint16_t contentHeight = _getContentHeight();
-    uint8_t itemsPerPage = contentHeight / (_isSmallDisplay() ? ROW_SMALL_HEIGHT : ROW_HEIGHT);
+    uint8_t itemsPerPage = contentHeight / (isSmallDisplay() ? ROW_SMALL_HEIGHT : ROW_HEIGHT);
 
     // Ensure at least 1 item per page, even with very small screens
     return (itemsPerPage > 0) ? itemsPerPage : 1;
@@ -241,7 +241,7 @@ void MenuScreen::_drawContent()
     uint8_t itemIndex = _currentPage * itemsPerPage;
     uint8_t itemsDrawn = 0;
 
-    bool isSmallDisplay = _isSmallDisplay();
+    bool isSmall = isSmallDisplay();
     uint16_t rowHeight;
     uint16_t textSizeWidth;
     uint16_t textSizeHalfHeight;
@@ -249,7 +249,7 @@ void MenuScreen::_drawContent()
     uint16_t configGap;
     uint16_t rightPadding;
 
-    if (isSmallDisplay)
+    if (isSmall)
     {
         gfx.setTextSize(1);
         rowHeight = ROW_SMALL_HEIGHT;
@@ -317,7 +317,7 @@ void MenuScreen::_drawContent()
 
             // Calculate available space for menu text
             uint16_t menuTextStartX = left + leftPadding;
-            uint16_t selectorWidth = (isSmallDisplay ? 1 : 2) * textSizeWidth; // "> " or "  "
+            uint16_t selectorWidth = (isSmall ? 1 : 2) * textSizeWidth; // "> " or "  "
             uint16_t menuTextX = menuTextStartX + selectorWidth;
             uint16_t availableWidth = width - (menuTextX - left) - configWidth - configGap; // gap between text and config
 
@@ -328,7 +328,7 @@ void MenuScreen::_drawContent()
             if (configValue != nullptr && menuTextWidth > availableWidth)
             {
                 // Calculate how many characters fit with "..."
-                if (isSmallDisplay)
+                if (isSmall)
                 {
                     uint16_t ellipsisWidth = 2 * textSizeWidth;
                     uint16_t maxCharsWidth = availableWidth - ellipsisWidth;
@@ -362,7 +362,7 @@ void MenuScreen::_drawContent()
 
             // Draw selection indicator and menu item text
             gfx.setCursor(menuTextStartX, y + textSizeHalfHeight);
-            if (isSmallDisplay)
+            if (isSmall)
             {
                 gfx.print(itemIndex == _selectedMenuItemIndex ? ">" : " ");
             }
@@ -427,10 +427,10 @@ void MenuScreen::_drawContent()
  * @note Automatically recalculates pagination when items change
  * @note Resets selection to first item when menu changes
  */
-void MenuScreen::_setMenuItems(const char **menuItems, uint8_t menuItemCount)
+void MenuScreen::setMenuItems(const char **menuItems, uint8_t menuItemCount)
 {
     // Clear any existing menu items first
-    _clearMenuItems();
+    clearMenuItems();
 
     if (menuItems == nullptr || menuItemCount == 0)
     {
@@ -548,7 +548,7 @@ uint8_t MenuScreen::_getSelectedMenuItemIndex() const
  * @note Safe to call multiple times or on empty menus
  * @note Automatically triggers display update if menu is active
  */
-void MenuScreen::_clearMenuItems()
+void MenuScreen::clearMenuItems()
 {
     if (_menuItems != nullptr)
     {

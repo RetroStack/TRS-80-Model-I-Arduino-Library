@@ -225,17 +225,17 @@ virtual Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY
 ### Method Responsibilities
 
 - **`_drawScreen()`**: Handle initial setup and full screen rendering
-- **`loop()`**: Process ongoing updates, animations, and time-based logic  
+- **`loop()`**: Process ongoing updates, animations, and time-based logic
 - **`actionTaken()`**: Process input and return navigation result
 
 ## Display Adaptation
 
 ### Adaptive Screen Layouts
 
-The Screen class provides the `_isSmallDisplay()` method to help create adaptive layouts that work well on both large TFT displays and smaller OLED displays.
+The Screen class provides the `isSmallDisplay()` method to help create adaptive layouts that work well on both large TFT displays and smaller OLED displays.
 
 ```cpp
-bool _isSmallDisplay() const
+bool isSmallDisplay() const
 ```
 
 **Returns**: `true` if display height ≤ 128 pixels (typically OLED), `false` for larger displays
@@ -247,13 +247,13 @@ class AdaptiveScreen : public Screen {
 protected:
     void _drawScreen() override {
         Adafruit_GFX& gfx = M1Shield.getGFX();
-        
-        if (_isSmallDisplay()) {
+
+        if (isSmallDisplay()) {
             // Compact layout for OLED displays (128x64)
             gfx.setTextSize(1);
             gfx.setCursor(0, 0);
             gfx.print("Compact Title");
-            
+
             gfx.setCursor(0, 20);
             gfx.print("Brief info");
         } else {
@@ -261,7 +261,7 @@ protected:
             gfx.setTextSize(3);
             gfx.setCursor(10, 10);
             gfx.print("Full Title");
-            
+
             gfx.setTextSize(2);
             gfx.setCursor(10, 50);
             gfx.print("Detailed information");
@@ -274,24 +274,26 @@ protected:
 
 ### Recommended Adaptations
 
-| Display Type | Size | Text Size | Layout Style |
-|--------------|------|-----------|--------------|
-| OLED | 128x64 | 1 | Minimal, essential info only |
-| Small TFT | 160x128 | 1-2 | Compact but readable |
-| Medium TFT | 320x240 | 2-3 | Standard layout |
-| Large TFT | 480x320+ | 2-4 | Rich, detailed layout |
+| Display Type | Size     | Text Size | Layout Style                 |
+| ------------ | -------- | --------- | ---------------------------- |
+| OLED         | 128x64   | 1         | Minimal, essential info only |
+| Small TFT    | 160x128  | 1-2       | Compact but readable         |
+| Medium TFT   | 320x240  | 2-3       | Standard layout              |
+| Large TFT    | 480x320+ | 2-4       | Rich, detailed layout        |
 
 ### Display Updates for OLED Compatibility
 
 **IMPORTANT**: When implementing custom drawing operations in your screen classes, you must call `M1Shield.display()` after drawing operations to ensure OLED displays (SSD1306, SH1106) update properly.
 
 The base `Screen` class automatically calls `M1Shield.display()` in:
+
 - `open()`: After calling `_drawScreen()`
 - `refresh()`: After calling `_drawScreen()`
 
 **Your screen implementations should call `M1Shield.display()` after:**
+
 - Drawing operations in `_drawScreen()`
-- Custom drawing in `loop()` 
+- Custom drawing in `loop()`
 - Drawing operations in response to input in `actionTaken()`
 
 ```cpp
@@ -300,17 +302,17 @@ class CustomScreen : public Screen {
 protected:
     void _drawScreen() override {
         Adafruit_GFX& gfx = M1Shield.getGFX();
-        
+
         // Perform drawing operations
         gfx.fillScreen(M1Shield.convertColor(0x0000));
         gfx.setTextColor(M1Shield.convertColor(0xFFFF));
         gfx.setCursor(10, 10);
         gfx.print("Custom Screen");
-        
+
         // Not needed here - base Screen::open() calls M1Shield.display()
         // But required if you call _drawScreen() manually
     }
-    
+
 public:
     void loop() override {
         // Check for updates that require redrawing
@@ -319,14 +321,14 @@ public:
             gfx.fillRect(10, 50, 200, 20, M1Shield.convertColor(0x0000));
             gfx.setCursor(10, 50);
             gfx.print("Updated data");
-            
+
             // REQUIRED: Push changes to OLED displays
             M1Shield.display();
-            
+
             dataChanged = false;
         }
     }
-    
+
     Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override {
         if (action & BUTTON_RIGHT) {
             // Update display in response to input
@@ -335,7 +337,7 @@ public:
             gfx.setTextColor(M1Shield.convertColor(0x0000));
             gfx.setCursor(10, 100);
             gfx.print("Button pressed");
-            
+
             // REQUIRED: Push changes to OLED displays
             M1Shield.display();
         }

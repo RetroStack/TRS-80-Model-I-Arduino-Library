@@ -56,7 +56,7 @@
  *
  * Derived classes only need to implement `_drawContent()` to render
  * their specific content within the designated area. The base class
- * handles all layout management and decoration. Use `_isSmallDisplay()`
+ * handles all layout management and decoration. Use `isSmallDisplay()`
  * (inherited from Screen) to adapt content for different display sizes.
  *
  * @example Basic ContentScreen Implementation
@@ -71,7 +71,7 @@
  *         uint16_t h = _getContentHeight();
  *
  *         // Adapt layout for display size (inherited from Screen)
- *         if (_isSmallDisplay()) {
+ *         if (isSmallDisplay()) {
  *             _drawText(x, y, "Compact View", 0xFFFF, 1);
  *         } else {
  *             _drawText(x, y, "Full Detail View", 0xFFFF, 2);
@@ -214,74 +214,6 @@ protected:
 
     // Content management methods
 
-    /**
-     * @brief Set the screen title displayed in header
-     * @param title Null-terminated string for title (dynamically allocated copy made)
-     * @note Pass nullptr or empty string to free title memory and clear title
-     */
-    void _setTitle(const char *title);
-
-    /**
-     * @brief Clear the current title
-     *
-     * Frees any dynamically allocated title memory and resets the title
-     * to nullptr. Call this to clear the title without needing to set a new one.
-     */
-    void _clearTitle();
-
-    /**
-     * @brief Get current screen title
-     * @return Current title string, or nullptr if no title is set
-     */
-    const char *_getTitle() const;
-
-    /**
-     * @brief Set progress bar value
-     * @param value Progress percentage (0-100)
-     */
-    void _setProgressValue(int value);
-
-    /**
-     * @brief Get current progress bar value
-     * @return Progress percentage (0-100)
-     */
-    uint8_t _getProgressValue() const;
-
-    /**
-     * @brief Set button labels for footer display with dynamic memory allocation
-     * @param buttonItems Array of string pointers for button labels (dynamically allocated copies made)
-     * @param buttonItemCount Number of strings in the array (no hard limit)
-     * @note Pass nullptr or 0 count to free all button memory and clear labels
-     */
-    void _setButtonItems(const char **buttonItems, uint8_t buttonItemCount);
-
-    /**
-     * @brief Clear all button labels and free allocated memory
-     *
-     * This method frees any dynamically allocated button label memory
-     * and resets the button item count to 0. Call this to clear all
-     * button labels without needing to set new ones.
-     */
-    void _clearButtonItems();
-
-    /**
-     * @brief Clear content area to background color
-     *
-     * Convenience method to clear just the content region while
-     * preserving header, footer, and progress bar areas.
-     */
-    void _clearContentArea();
-
-    /**
-     * @brief Draw text within content area with clipping
-     * @param x X position relative to content area
-     * @param y Y position relative to content area
-     * @param text Text to display
-     * @param color Text color
-     * @param size Text size multiplier
-     */
-    void _drawText(uint16_t x, uint16_t y, const char *text, uint16_t color, uint8_t size = 1);
-
 public:
     /**
      * @brief Constructor
@@ -316,6 +248,74 @@ public:
      * @return Screen navigation result (nullptr = stay, other = navigate)
      */
     virtual Screen *actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) = 0;
+
+    /**
+     * @brief Set the screen title displayed in header
+     * @param title Null-terminated string for title (dynamically allocated copy made)
+     * @note Pass nullptr or empty string to free title memory and clear title
+     */
+    void setTitle(const char *title);
+
+    /**
+     * @brief Clear the current title
+     *
+     * Frees any dynamically allocated title memory and resets the title
+     * to nullptr. Call this to clear the title without needing to set a new one.
+     */
+    void clearTitle();
+
+    /**
+     * @brief Get current screen title
+     * @return Current title string, or nullptr if no title is set
+     */
+    const char *getTitle() const;
+
+    /**
+     * @brief Set progress bar value
+     * @param value Progress percentage (0-100)
+     */
+    void setProgressValue(int value);
+
+    /**
+     * @brief Get current progress bar value
+     * @return Progress percentage (0-100)
+     */
+    uint8_t getProgressValue() const;
+
+    /**
+     * @brief Set button labels for footer display with dynamic memory allocation
+     * @param buttonItems Array of string pointers for button labels (dynamically allocated copies made)
+     * @param buttonItemCount Number of strings in the array (no hard limit)
+     * @note Pass nullptr or 0 count to free all button memory and clear labels
+     */
+    void setButtonItems(const char **buttonItems, uint8_t buttonItemCount);
+
+    /**
+     * @brief Clear all button labels and free allocated memory
+     *
+     * This method frees any dynamically allocated button label memory
+     * and resets the button item count to 0. Call this to clear all
+     * button labels without needing to set new ones.
+     */
+    void clearButtonItems();
+
+    /**
+     * @brief Clear content area to background color
+     *
+     * Convenience method to clear just the content region while
+     * preserving header, footer, and progress bar areas.
+     */
+    void clearContentArea();
+
+    /**
+     * @brief Draw text within content area with clipping
+     * @param x X position relative to content area
+     * @param y Y position relative to content area
+     * @param text Text to display
+     * @param color Text color
+     * @param size Text size multiplier
+     */
+    void drawText(uint16_t x, uint16_t y, const char *text, uint16_t color, uint8_t size = 1);
 };
 
 #endif /* CONTENT_SCREEN_H */

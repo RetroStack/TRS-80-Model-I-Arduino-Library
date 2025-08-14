@@ -66,8 +66,8 @@ ContentScreen::ContentScreen() : Screen()
  */
 ContentScreen::~ContentScreen()
 {
-    _clearTitle();
-    _clearButtonItems();
+    clearTitle();
+    clearButtonItems();
 }
 
 /**
@@ -102,7 +102,7 @@ void ContentScreen::_drawScreen()
     _drawProgressBar();
 
     // Add decorative borders if not a small display
-    if (!_isSmallDisplay())
+    if (!isSmallDisplay())
     {
         // Add decorative borders for visual separation
         uint16_t contentTop = _getContentTop();
@@ -133,7 +133,7 @@ uint16_t ContentScreen::_getHeaderY() const
 uint16_t ContentScreen::_getHeaderHeight() const
 {
     // Use smaller header height for small displays
-    return _isSmallDisplay() ? HEADER_SMALL_HEIGHT : HEADER_HEIGHT;
+    return isSmallDisplay() ? HEADER_SMALL_HEIGHT : HEADER_HEIGHT;
 }
 
 /**
@@ -163,7 +163,7 @@ void ContentScreen::_drawHeader()
     if (_title != nullptr && _title[0] != '\0')
     {
         gfx.setTextColor(M1Shield.convertColor(HEADER_COLOR_FG));
-        if (_isSmallDisplay())
+        if (isSmallDisplay())
         {
             // Calculate centered position for title text
             uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(_title);
@@ -242,7 +242,7 @@ uint16_t ContentScreen::_getFooterY() const
 uint16_t ContentScreen::_getFooterHeight() const
 {
     // Use smaller footer height for small displays
-    return _isSmallDisplay() ? FOOTER_SMALL_HEIGHT : FOOTER_HEIGHT;
+    return isSmallDisplay() ? FOOTER_SMALL_HEIGHT : FOOTER_HEIGHT;
 }
 
 /**
@@ -255,7 +255,7 @@ uint16_t ContentScreen::_getFooterHeight() const
  */
 void ContentScreen::_drawFooter()
 {
-    if (!isActive() || _isSmallDisplay())
+    if (!isActive() || isSmallDisplay())
         return;
 
     uint16_t screenWidth = M1Shield.getScreenWidth();
@@ -307,7 +307,7 @@ uint16_t ContentScreen::_getProgressBarY() const
 uint16_t ContentScreen::_getProgressBarHeight() const
 {
     // Use smaller progress bar height for small displays
-    return _isSmallDisplay() ? PROGRESSBAR_SMALL_HEIGHT : PROGRESSBAR_HEIGHT;
+    return isSmallDisplay() ? PROGRESSBAR_SMALL_HEIGHT : PROGRESSBAR_HEIGHT;
 }
 
 /**
@@ -317,7 +317,7 @@ uint16_t ContentScreen::_getProgressBarHeight() const
 uint8_t ContentScreen::_getPadding() const
 {
     // Use smaller padding for small displays to maximize content area
-    if (_isSmallDisplay())
+    if (isSmallDisplay())
     {
         return 0; // 0 pixel padding for small displays
     }
@@ -344,8 +344,8 @@ void ContentScreen::_drawProgressBar()
     // Draw filled (progress) portion in blue
     uint16_t height = _getProgressBarHeight();
 
-    bool isSmallDisplay = _isSmallDisplay();
-    if (isSmallDisplay)
+    bool isSmall = isSmallDisplay();
+    if (isSmall)
     {
         // Make it even smaller, but add a gap to content
         height--;
@@ -354,7 +354,7 @@ void ContentScreen::_drawProgressBar()
 
     if (progressWidth > 0)
     {
-        gfx.fillRect(0, top, progressWidth, height, M1Shield.convertColor(isSmallDisplay ? PROGRESSBAR_SMALL_COLOR_FG : PROGRESSBAR_COLOR_FG));
+        gfx.fillRect(0, top, progressWidth, height, M1Shield.convertColor(isSmall ? PROGRESSBAR_SMALL_COLOR_FG : PROGRESSBAR_COLOR_FG));
     }
 
     // Draw remaining (empty) portion in black
@@ -378,9 +378,9 @@ void ContentScreen::_drawProgressBar()
  * @note Pass nullptr or 0 count to free all button memory and clear labels
  * @note Automatically triggers footer redraw if screen is active
  */
-void ContentScreen::_setButtonItems(const char **buttonItems, uint8_t buttonItemCount)
+void ContentScreen::setButtonItems(const char **buttonItems, uint8_t buttonItemCount)
 {
-    _clearButtonItems();
+    clearButtonItems();
 
     // Allocate and copy new button labels if provided
     if (buttonItems != nullptr && buttonItemCount > 0)
@@ -431,7 +431,7 @@ void ContentScreen::_setButtonItems(const char **buttonItems, uint8_t buttonItem
  * and resets the button item count to 0. Call this to clear all
  * button labels without needing to set new ones.
  */
-void ContentScreen::_clearButtonItems()
+void ContentScreen::clearButtonItems()
 {
     if (_buttonItems != nullptr)
     {
@@ -471,9 +471,9 @@ void ContentScreen::_clearButtonItems()
  * @note Pass nullptr or empty string to free title memory and clear title
  * @note Automatically triggers header redraw if screen is active
  */
-void ContentScreen::_setTitle(const char *title)
+void ContentScreen::setTitle(const char *title)
 {
-    _clearTitle();
+    clearTitle();
 
     // Allocate and copy new title if provided
     if (title != nullptr && title[0] != '\0')
@@ -503,7 +503,7 @@ void ContentScreen::_setTitle(const char *title)
  * Frees any dynamically allocated title memory and resets the title
  * to nullptr. Call this to clear the title without needing to set a new one.
  */
-void ContentScreen::_clearTitle()
+void ContentScreen::clearTitle()
 {
     if (_title != nullptr)
     {
@@ -526,7 +526,7 @@ void ContentScreen::_clearTitle()
  * @brief Get the current screen title
  * @return Current title string, or nullptr if no title is set
  */
-const char *ContentScreen::_getTitle() const
+const char *ContentScreen::getTitle() const
 {
     return _title; // May be nullptr if no title set
 }
@@ -543,7 +543,7 @@ const char *ContentScreen::_getTitle() const
  * @note Setting value to 0 effectively hides the progress bar
  * @note Values outside 0-100 range are automatically corrected
  */
-void ContentScreen::_setProgressValue(int value)
+void ContentScreen::setProgressValue(int value)
 {
     // Clamp value to valid range (0-100)
     if (value > 100)
@@ -568,7 +568,7 @@ void ContentScreen::_setProgressValue(int value)
  * @brief Get the current progress bar value
  * @return Progress percentage (0-100)
  */
-uint8_t ContentScreen::_getProgressValue() const
+uint8_t ContentScreen::getProgressValue() const
 {
     return _progressValue;
 }
@@ -579,7 +579,7 @@ uint8_t ContentScreen::_getProgressValue() const
  * Convenience method to clear just the content region while
  * preserving header, footer, and progress bar areas.
  */
-void ContentScreen::_clearContentArea()
+void ContentScreen::clearContentArea()
 {
     if (!isActive())
         return;
@@ -614,7 +614,7 @@ void ContentScreen::_clearContentArea()
  * @note Text extending beyond content area will be clipped
  * @note Uses current GFX cursor and color settings from M1Shield
  */
-void ContentScreen::_drawText(uint16_t x, uint16_t y, const char *text, uint16_t color, uint8_t size)
+void ContentScreen::drawText(uint16_t x, uint16_t y, const char *text, uint16_t color, uint8_t size)
 {
     if (!isActive())
         return;

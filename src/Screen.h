@@ -124,20 +124,31 @@ protected:
      */
     virtual void _drawScreen() = 0;
 
+public:
+    /**
+     * @brief Default constructor initializes screen in inactive state
+     */
+    Screen();
+
+    /**
+     * @brief Virtual destructor ensures proper cleanup of derived classes
+     */
+    virtual ~Screen() = default;
+
     /**
      * @brief Check if the current display is considered small (height <= 128 pixels)
-     * 
+     *
      * Small displays typically include OLED screens (128x64) that require more compact
      * layouts compared to larger TFT displays (320x240, 480x320, etc.). This method
      * provides a unified way for all screen implementations to adapt their layouts
      * for different display sizes.
-     * 
+     *
      * @return true if display height is 128 pixels or smaller, false for larger displays
-     * 
+     *
      * @example Adaptive Layout
      * ```cpp
      * void MyScreen::_drawScreen() {
-     *     if (_isSmallDisplay()) {
+     *     if (isSmallDisplay()) {
      *         // Use compact layout for OLED displays
      *         drawCompactHeader();
      *         drawCompactContent();
@@ -149,18 +160,7 @@ protected:
      * }
      * ```
      */
-    bool _isSmallDisplay() const;
-
-public:
-    /**
-     * @brief Default constructor initializes screen in inactive state
-     */
-    Screen();
-
-    /**
-     * @brief Virtual destructor ensures proper cleanup of derived classes
-     */
-    virtual ~Screen() = default;
+    bool isSmallDisplay() const;
 
     /**
      * @brief Check if this screen is currently active

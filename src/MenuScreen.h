@@ -88,36 +88,6 @@ protected:
     void _drawContent();
 
     /**
-     * @brief Set the menu items to be displayed and navigated
-     *
-     * @param menuItems     Array of null-terminated strings for menu items
-     * @param menuItemCount Number of items in the menuItems array
-     *
-     * @note Automatically frees any previously allocated menu items
-     * @note Creates deep copies of all strings - original array can be freed
-     * @note Automatically recalculates pagination when items change
-     * @note Resets selection to first item when menu changes
-     *
-     * @example
-     * @code
-     * const char* items[] = {"New Game", "Load Game", "Settings", "Exit"};
-     * _setMenuItems(items, 4);
-     * @endcode
-     */
-    void _setMenuItems(const char **menuItems, uint8_t menuItemCount);
-
-    /**
-     * @brief Clear and free all dynamically allocated menu items
-     *
-     * Frees all memory associated with menu items and resets the menu
-     * to an empty state. Safe to call multiple times or on empty menus.
-     *
-     * @note Safe to call multiple times or on empty menus
-     * @note Automatically triggers display update if menu is active
-     */
-    void _clearMenuItems();
-
-    /**
      * @brief Set the currently selected menu item by index
      *
      * Updates the selected menu item and automatically handles page switching
@@ -271,6 +241,36 @@ public:
      * - BUTTON_LEFT/JOYSTICK_LEFT/BUTTON_MENU: Return to previous screen (handled by base class)
      */
     Screen *actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override;
+
+    /**
+     * @brief Set the menu items to be displayed and navigated
+     *
+     * @param menuItems     Array of null-terminated strings for menu items
+     * @param menuItemCount Number of items in the menuItems array
+     *
+     * @note Automatically frees any previously allocated menu items
+     * @note Creates deep copies of all strings - original array can be freed
+     * @note Automatically recalculates pagination when items change
+     * @note Resets selection to first item when menu changes
+     *
+     * @example
+     * @code
+     * const char* items[] = {"New Game", "Load Game", "Settings", "Exit"};
+     * _setMenuItems(items, 4);
+     * @endcode
+     */
+    void setMenuItems(const char **menuItems, uint8_t menuItemCount);
+
+    /**
+     * @brief Clear and free all dynamically allocated menu items
+     *
+     * Frees all memory associated with menu items and resets the menu
+     * to an empty state. Safe to call multiple times or on empty menus.
+     *
+     * @note Safe to call multiple times or on empty menus
+     * @note Automatically triggers display update if menu is active
+     */
+    void clearMenuItems();
 };
 
 #endif /* MENU_SCREEN_H */

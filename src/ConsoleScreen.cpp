@@ -61,7 +61,7 @@ ConsoleScreen::ConsoleScreen() : ContentScreen()
 
     // Set default button labels
     const char *buttonItems[1] = {"[M] Back"};
-    _setButtonItems(buttonItems, 1);
+    setButtonItems(buttonItems, 1);
 }
 
 /**
@@ -395,7 +395,7 @@ void ConsoleScreen::setConsoleBackground(uint16_t color)
 void ConsoleScreen::setTextSize(uint8_t size)
 {
     // Only allow small text on very small displays
-    if (_isSmallDisplay())
+    if (isSmallDisplay())
         return;
 
     if (size < 1)

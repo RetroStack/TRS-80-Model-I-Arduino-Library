@@ -55,7 +55,7 @@ KeyboardChangeIterator::KeyboardChangeIterator(const uint8_t *previous, const ui
     memcpy(_previous, previous, 8);
     memcpy(_current, current, 8);
 
-    advanceToNextChange();
+    _advanceToNextChange();
 }
 
 /**
@@ -79,7 +79,7 @@ void KeyboardChangeIterator::next()
         _byteIndex++;
     }
 
-    advanceToNextChange();
+    _advanceToNextChange();
 }
 
 /**
@@ -87,7 +87,7 @@ void KeyboardChangeIterator::next()
  */
 uint8_t KeyboardChangeIterator::keyIndex() const
 {
-    return _byteIndex * 8 + bitIndex();
+    return _byteIndex * 8 + _bitIndex();
 }
 
 /**
@@ -103,7 +103,7 @@ uint8_t KeyboardChangeIterator::row() const
  */
 uint8_t KeyboardChangeIterator::column() const
 {
-    return bitIndex();
+    return _bitIndex();
 }
 
 /**
@@ -166,7 +166,7 @@ bool KeyboardChangeIterator::isShiftPressed() const
 /**
  * Advances to the next changed key by checking the current and previous states.
  */
-void KeyboardChangeIterator::advanceToNextChange()
+void KeyboardChangeIterator::_advanceToNextChange()
 {
     _found = false;
     while (_byteIndex < 8)
@@ -193,7 +193,7 @@ void KeyboardChangeIterator::advanceToNextChange()
 /**
  * Returns the bit index of the current key within its byte.
  */
-uint8_t KeyboardChangeIterator::bitIndex() const
+uint8_t KeyboardChangeIterator::_bitIndex() const
 {
     uint8_t bit = 0;
     uint8_t mask = 0x01;

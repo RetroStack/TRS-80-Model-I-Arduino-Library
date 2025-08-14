@@ -70,7 +70,7 @@ bool Screen::open()
     }
 
     _active = true;
-    _drawScreen(); // Trigger initial rendering
+    _drawScreen();      // Trigger initial rendering
     M1Shield.display(); // Push changes to display
 
     return true;
@@ -139,22 +139,22 @@ void Screen::refresh()
 {
     if (_active)
     {
-        _drawScreen(); // Redraw the screen content
+        _drawScreen();      // Redraw the screen content
         M1Shield.display(); // Push changes to display
     }
 }
 
 /**
  * @brief Check if the current display is considered small (height <= 128 pixels)
- * 
+ *
  * Small displays typically include OLED screens (128x64) that require more compact
  * layouts compared to larger TFT displays (320x240, 480x320, etc.). This method
  * provides a unified way for all screen implementations to adapt their layouts
  * for different display sizes.
- * 
+ *
  * @return true if display height is 128 pixels or smaller, false for larger displays
  */
-bool Screen::_isSmallDisplay() const
+bool Screen::isSmallDisplay() const
 {
     return M1Shield.getScreenHeight() <= 128;
 }
