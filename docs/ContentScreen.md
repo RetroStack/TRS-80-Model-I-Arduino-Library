@@ -25,6 +25,7 @@ The `ContentScreen` class provides a structured layout template for screens with
   - [Content Area Utilities](#content-area-utilities)
     - [clearContentArea](#void-clearcontentarea)
     - [drawText](#void-drawtextuint16_t-x-uint16_t-y-const-char-text-uint16_t-color-uint8_t-size--1)
+    - [drawTextF](#void-drawtextfuint16_t-x-uint16_t-y-const-__flashstringhelper-text-uint16_t-color-uint8_t-size--1)
 - [Layout Regions](#layout-regions)
 - [Implementation Pattern](#implementation-pattern)
 - [Examples](#examples)
@@ -247,6 +248,33 @@ Draws text within the content area with clipping.
 - `color`: Text color
 - `size`: Text size multiplier (default: 1)
 
+#### `void drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper* text, uint16_t color, uint8_t size = 1)`
+
+Draws text within the content area from FlashString (F() macro) for memory efficiency.
+
+**Parameters:**
+
+- `x`: X position relative to content area
+- `y`: Y position relative to content area
+- `text`: FlashString text to display (from F() macro)
+- `color`: Text color
+- `size`: Text size multiplier (default: 1)
+
+**Example:**
+
+```cpp
+// Memory-efficient static text rendering
+drawTextF(10, 20, F("Status: Ready"), M1Shield.GREEN, 1);
+drawTextF(10, 40, F("Memory: 75% free"), M1Shield.YELLOW, 1);
+drawTextF(10, 60, F("Connection: Active"), M1Shield.BLUE, 2);
+```
+
+**Memory Benefits:**
+- **Flash Storage**: Text stored in flash memory instead of RAM
+- **Static Text**: Perfect for UI labels, status messages, and fixed content
+- **Automatic Conversion**: FlashString automatically converted for display
+- **Same Functionality**: Identical behavior to regular `drawText()` method
+
 ## Layout Regions
 
 ### Header Region
@@ -399,16 +427,18 @@ This example demonstrates the memory-efficient FlashString methods using the F()
 class FlashStringDemo : public ContentScreen {
 protected:
     void _drawContent() override {
-        // Draw demonstration content
-        drawText(10, 20, "FlashString Demo", M1Shield.WHITE, 1);
-        drawText(10, 40, "Using F() macro for", M1Shield.YELLOW, 1);
-        drawText(10, 60, "memory efficiency", M1Shield.YELLOW, 1);
-
-        drawText(10, 100, "Title and buttons use", M1Shield.GREEN, 1);
-        drawText(10, 120, "flash memory storage", M1Shield.GREEN, 1);
-    }
-
-public:
+        // Draw demonstration content using FlashString methods
+        drawTextF(10, 20, F("FlashString Demo"), M1Shield.WHITE, 1);
+        drawTextF(10, 40, F("Using F() macro for"), M1Shield.YELLOW, 1);
+        drawTextF(10, 60, F("memory efficiency"), M1Shield.YELLOW, 1);
+        
+        drawTextF(10, 100, F("Title and buttons use"), M1Shield.GREEN, 1);
+        drawTextF(10, 120, F("flash memory storage"), M1Shield.GREEN, 1);
+        
+        // Demonstrate mixed usage with regular drawText for dynamic content
+        String timestamp = "Time: " + String(millis() / 1000) + "s";
+        drawText(10, 140, timestamp.c_str(), M1Shield.CYAN, 1);
+    }public:
     FlashStringDemo() : ContentScreen() {
         // Set title using FlashString - saves RAM
         setTitleF(F("Flash Memory Demo"));
@@ -443,6 +473,12 @@ public:
 
 **Memory Comparison:**
 
-- Regular strings: All text stored in RAM (scarce resource)
-- FlashString (F() macro): Text stored in flash memory (abundant)
-- RAM savings: Significant, especially with multiple buttons and long titles
+- **Regular methods**: All text stored in RAM (scarce resource)
+  - `setTitle("text")`, `setButtonItems()`, `drawText()`
+- **FlashString methods**: Text stored in flash memory (abundant)
+  - `setTitleF(F("text"))`, `setButtonItemsF()`, `drawTextF()`
+- **RAM savings**: Significant, especially with:
+  - Multiple UI labels and status messages (`drawTextF`)
+  - Menu items and button labels (`setButtonItemsF`)
+  - Screen titles and headers (`setTitleF`)
+- **Best practices**: Use FlashString for static text, regular methods for dynamic content

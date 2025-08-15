@@ -742,3 +742,47 @@ void ContentScreen::drawText(uint16_t x, uint16_t y, const char *text, uint16_t 
     gfx.setCursor(absoluteX, absoluteY);
     gfx.print(text);
 }
+
+/**
+ * @brief Draw text in content area from FlashString (F() macro)
+ *
+ * Memory-efficient version of drawText() that accepts FlashString for static text.
+ * Coordinates are relative to the content area, not the full screen.
+ *
+ * @param x X position relative to content area
+ * @param y Y position relative to content area
+ * @param text FlashString text to display (from F() macro)
+ * @param color Text color
+ * @param size Text size multiplier
+ *
+ * @note More memory efficient than regular drawText() for static text
+ * @note FlashString is automatically converted for display
+ * @note Coordinates are relative to content area, not screen
+ * @note Text extending beyond content area will be clipped
+ */
+void ContentScreen::drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper *text, uint16_t color, uint8_t size)
+{
+    if (!isActive())
+        return;
+
+    if (text == nullptr)
+    {
+        return; // Nothing to draw
+    }
+
+    // Convert FlashString to regular string and delegate to existing method
+    size_t len = strlen_P((const char*)text);
+    char* buffer = (char*)malloc(len + 1);
+    if (buffer == nullptr)
+    {
+        return; // Failed allocation
+    }
+    
+    strcpy_P(buffer, (const char*)text);
+    
+    // Delegate to regular drawText method
+    drawText(x, y, buffer, color, size);
+    
+    // Free temporary buffer
+    free(buffer);
+}

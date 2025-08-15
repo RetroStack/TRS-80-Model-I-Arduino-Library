@@ -329,6 +329,31 @@ public:
      * @param size Text size multiplier
      */
     void drawText(uint16_t x, uint16_t y, const char *text, uint16_t color, uint8_t size = 1);
+
+    /**
+     * @brief Draw text in content area from FlashString (F() macro)
+     *
+     * Memory-efficient version of drawText() that accepts FlashString for static text.
+     * Coordinates are relative to the content area, not the full screen.
+     *
+     * @param x X position relative to content area
+     * @param y Y position relative to content area
+     * @param text FlashString text to display (from F() macro)
+     * @param color Text color
+     * @param size Text size multiplier
+     *
+     * @note More memory efficient than regular drawText() for static text
+     * @note FlashString is automatically converted for display
+     * @note Coordinates are relative to content area, not screen
+     * @note Text extending beyond content area will be clipped
+     *
+     * @example
+     * @code
+     * drawTextF(10, 20, F("Status: Ready"), M1Shield.GREEN, 1);
+     * drawTextF(10, 40, F("Memory: 75% free"), M1Shield.YELLOW, 1);
+     * @endcode
+     */
+    void drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper *text, uint16_t color, uint8_t size = 1);
 };
 
 #endif /* CONTENT_SCREEN_H */
