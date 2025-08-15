@@ -16,10 +16,45 @@ public:
     virtual void warn(const char *fmt, ...) = 0;
     virtual void err(const char *fmt, ...) = 0;
 
-    // String versions that call the const char* versions
-    void info(const String &msg) { info("%s", msg.c_str()); }
-    void warn(const String &msg) { warn("%s", msg.c_str()); }
-    void err(const String &msg) { err("%s", msg.c_str()); }
+    // String versions with optional format arguments
+    void info(const String &fmt, ...)
+    {
+        va_list args;
+        va_start(args, fmt);
+        
+        char formatted[256]; // Fixed size buffer to avoid VLA
+        vsnprintf(formatted, sizeof(formatted), fmt.c_str(), args);
+        formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
+        info("%s", formatted);
+        
+        va_end(args);
+    }
+    
+    void warn(const String &fmt, ...)
+    {
+        va_list args;
+        va_start(args, fmt);
+        
+        char formatted[256]; // Fixed size buffer to avoid VLA
+        vsnprintf(formatted, sizeof(formatted), fmt.c_str(), args);
+        formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
+        warn("%s", formatted);
+        
+        va_end(args);
+    }
+    
+    void err(const String &fmt, ...)
+    {
+        va_list args;
+        va_start(args, fmt);
+        
+        char formatted[256]; // Fixed size buffer to avoid VLA
+        vsnprintf(formatted, sizeof(formatted), fmt.c_str(), args);
+        formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
+        err("%s", formatted);
+        
+        va_end(args);
+    }
 
     // F() macro versions with format string support (more memory efficient)
     void infoF(const __FlashStringHelper *fmt, ...)

@@ -10,7 +10,7 @@ The `ILogger` interface provides a standardized logging system for the TRS-80 Mo
 - [Features](#features)
 - [Method Signatures](#method-signatures)
   - [Core Interface (Pure Virtual)](#core-interface-pure-virtual)
-  - [String Convenience Methods](#string-convenience-methods)
+  - [String Methods with Format Support](#string-methods-with-format-support)
   - [F() Macro Support (Flash Strings)](#f-macro-support-flash-strings)
   - [Print Interface](#print-interface)
 - [Usage Examples](#usage-examples)
@@ -47,12 +47,12 @@ virtual void warn(const char *fmt, ...) = 0;
 virtual void err(const char *fmt, ...) = 0;
 ```
 
-### String Convenience Methods
+### String Methods with Format Support
 
 ```cpp
-void info(const String &msg);    // Log String object as info
-void warn(const String &msg);    // Log String object as warning
-void err(const String &msg);     // Log String object as error
+void info(const String &fmt, ...);    // Log String format with arguments as info
+void warn(const String &fmt, ...);    // Log String format with arguments as warning
+void err(const String &fmt, ...);     // Log String format with arguments as error
 ```
 
 ### F() Macro Support (Flash Strings)
@@ -93,11 +93,19 @@ logger->err("Error code: 0x%02X", errorCode);
 ### String Objects
 
 ```cpp
+// Simple String messages (no additional arguments)
 String message = "Dynamic message: " + String(counter);
 logger->info(message);
 
 String errorMsg = "Failed to connect to " + serverName;
 logger->err(errorMsg);
+
+// String format strings with arguments
+String formatStr = "Sensor %d reading: %d°C";
+logger->info(formatStr, sensorId, temperature);
+
+String statusFormat = "Connection to %s: %s";
+logger->warn(statusFormat, serverName.c_str(), connected ? "OK" : "FAILED");
 ```
 
 ### F() Macro (Flash Strings)
@@ -123,11 +131,12 @@ int temperature = 25;
 String sensor = "DHT22";
 
 // All of these work seamlessly:
-logger->info("Temperature sensor initialized");              // const char*
-logger->infoF(F("Reading from sensor..."));                  // F() macro (simple)
-logger->info(String("Sensor: ") + sensor);                   // String object
-logger->info("Current temperature: %d°C", temperature);      // Printf formatting
-logger->infoF(F("Sensor %s reading: %d°C"), sensor.c_str(), temperature); // F() with formatting
+logger->info("Temperature sensor initialized");                    // const char*
+logger->infoF(F("Reading from sensor..."));                        // F() macro (simple)
+logger->info(String("Sensor: ") + sensor);                         // String object (simple)
+logger->info("Current temperature: %d°C", temperature);            // const char* with formatting
+logger->info(String("Sensor %s temp: %d°C"), sensor.c_str(), temperature); // String with formatting
+logger->infoF(F("Sensor %s reading: %d°C"), sensor.c_str(), temperature);  // F() with formatting
 ```
 
 ## Memory Efficiency
