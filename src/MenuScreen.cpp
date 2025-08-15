@@ -416,6 +416,62 @@ void MenuScreen::_drawContent()
 
 // Menu Configuration and State Management
 
+void MenuScreen::setMenuItemsF(const __FlashStringHelper **menuItems, uint8_t menuItemCount)
+{
+    if (menuItems == nullptr || menuItemCount == 0)
+    {
+        clearMenuItems();
+        return;
+    }
+
+    // Create temporary array of const char* pointers
+    const char **tempItems = (const char **)malloc(menuItemCount * sizeof(const char *));
+    if (tempItems == nullptr)
+    {
+        clearMenuItems();
+        return; // Allocation failed
+    }
+
+    // Initialize all pointers to nullptr
+    for (uint8_t i = 0; i < menuItemCount; i++)
+    {
+        tempItems[i] = nullptr;
+    }
+
+    // Convert FlashString items to temporary strings
+    for (uint8_t i = 0; i < menuItemCount; i++)
+    {
+        const __FlashStringHelper *menuItem = menuItems[i];
+        if (menuItem != nullptr)
+        {
+            size_t len = strlen_P((const char *)menuItem);
+            if (len > 0)
+            {
+                char *buffer = (char *)malloc(len + 1);
+                if (buffer != nullptr)
+                {
+                    strcpy_P(buffer, (const char *)menuItem);
+                    buffer[len] = '\0'; // Ensure null termination
+                    tempItems[i] = buffer;
+                }
+            }
+        }
+    }
+
+    // Call setMenuItems to handle the rest (it will make its own copies)
+    setMenuItems(tempItems, menuItemCount);
+
+    // Clean up temporary allocations
+    for (uint8_t i = 0; i < menuItemCount; i++)
+    {
+        if (tempItems[i] != nullptr)
+        {
+            free((void *)tempItems[i]);
+        }
+    }
+    free(tempItems);
+}
+
 /**
  * @brief Set menu items with dynamic memory allocation and string copying
  *

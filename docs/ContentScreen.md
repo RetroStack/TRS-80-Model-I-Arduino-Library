@@ -12,6 +12,7 @@ The `ContentScreen` class provides a structured layout template for screens with
 - [Public Methods](#public-methods)
   - [Title Management](#title-management)
     - [setTitle](#void-settitleconst-char-title)
+    - [setTitleF](#void-settitlefconst-__flashstringhelper-title)
     - [clearTitle](#void-cleartitle)
     - [getTitle](#const-char-gettitle-const)
   - [Progress Control](#progress-control)
@@ -19,6 +20,7 @@ The `ContentScreen` class provides a structured layout template for screens with
     - [getProgressValue](#uint8_t-getprogressvalue-const)
   - [Button Management](#button-management)
     - [setButtonItems](#void-setbuttonitemsconst-char-buttonitems-uint8_t-buttonitemcount)
+    - [setButtonItemsF](#void-setbuttonitemsfconst-__flashstringhelper-buttonitems-uint8_t-buttonitemcount)
     - [clearButtonItems](#void-clearbuttonitems)
   - [Content Area Utilities](#content-area-utilities)
     - [clearContentArea](#void-clearcontentarea)
@@ -113,6 +115,28 @@ setTitle("System Configuration");
 setTitle(nullptr);  // Clear title
 ```
 
+#### `void setTitleF(const __FlashStringHelper* title)`
+
+Sets the title text from FlashString (F() macro) for memory efficiency. The FlashString is converted to a regular string and stored using the same dynamic allocation as `setTitle()`.
+
+**Parameters:**
+
+- `title`: FlashString pointer from F() macro (pass nullptr to clear)
+
+**Example:**
+
+```cpp
+setTitleF(F("System Configuration"));  // More memory efficient
+setTitleF(F("Status: Ready"));
+setTitleF(nullptr);  // Clear title
+```
+
+**Memory Benefits:**
+
+- Stores string literals in flash memory instead of RAM
+- Reduces RAM usage significantly for static text
+- Automatically converted and allocated as needed
+
 #### `void clearTitle()`
 
 Clears the current title and frees any dynamically allocated title memory.
@@ -166,6 +190,38 @@ setButtonItems(buttons, 2);
 // Clear all buttons
 setButtonItems(nullptr, 0);
 ```
+
+#### `void setButtonItemsF(const __FlashStringHelper** buttonItems, uint8_t buttonItemCount)`
+
+Sets button labels from FlashString array (F() macro) for memory efficiency. The FlashStrings are converted to regular strings and stored using the same dynamic allocation as `setButtonItems()`.
+
+**Parameters:**
+
+- `buttonItems`: Array of FlashString pointers from F() macro
+- `buttonItemCount`: Number of FlashStrings in the array
+
+**Example:**
+
+```cpp
+// More memory efficient button definitions
+static const __FlashStringHelper* buttons[] = {
+    F("◄ Back"),
+    F("Select ►"),
+    F("Menu"),
+    F("Exit")
+};
+setButtonItemsF(buttons, 4);
+
+// Clear all buttons
+setButtonItemsF(nullptr, 0);
+```
+
+**Memory Benefits:**
+
+- Stores button text in flash memory instead of RAM
+- Significant RAM savings with multiple buttons
+- Automatically converted and allocated as needed
+- Same dynamic management as regular button items
 
 #### `void clearButtonItems()`
 
@@ -332,3 +388,61 @@ public:
     }
 };
 ```
+
+## FlashString Example
+
+This example demonstrates the memory-efficient FlashString methods using the F() macro:
+
+```cpp
+#include <ContentScreen.h>
+
+class FlashStringDemo : public ContentScreen {
+protected:
+    void _drawContent() override {
+        // Draw demonstration content
+        drawText(10, 20, "FlashString Demo", M1Shield.WHITE, 1);
+        drawText(10, 40, "Using F() macro for", M1Shield.YELLOW, 1);
+        drawText(10, 60, "memory efficiency", M1Shield.YELLOW, 1);
+
+        drawText(10, 100, "Title and buttons use", M1Shield.GREEN, 1);
+        drawText(10, 120, "flash memory storage", M1Shield.GREEN, 1);
+    }
+
+public:
+    FlashStringDemo() : ContentScreen() {
+        // Set title using FlashString - saves RAM
+        setTitleF(F("Flash Memory Demo"));
+
+        // Set button items using FlashString array - very memory efficient
+        static const __FlashStringHelper* flashButtons[] = {
+            F("Memory"),  // Stored in flash, not RAM
+            F("Test"),
+            F("Demo"),
+            F("Exit")
+        };
+        setButtonItemsF(flashButtons, 4);
+    }
+
+    Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override {
+        if (action & BUTTON_MENU) {
+            // Change title dynamically using FlashString
+            setTitleF(F("Menu Pressed!"));
+        }
+        if (action & BUTTON_RIGHT) {
+            // Different button set using FlashString
+            static const __FlashStringHelper* altButtons[] = {
+                F("Home"),
+                F("Settings")
+            };
+            setButtonItemsF(altButtons, 2);
+        }
+        return nullptr;
+    }
+};
+```
+
+**Memory Comparison:**
+
+- Regular strings: All text stored in RAM (scarce resource)
+- FlashString (F() macro): Text stored in flash memory (abundant)
+- RAM savings: Significant, especially with multiple buttons and long titles

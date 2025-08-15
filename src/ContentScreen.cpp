@@ -364,6 +364,65 @@ void ContentScreen::_drawProgressBar()
 }
 
 /**
+ * @brief Set footer button items from FlashString array
+ *
+ * Convenience method for setting button items from FlashString array.
+ * Converts FlashString array to regular string array and delegates to setButtonItems().
+ *
+ * @param buttonItems Array of button labels stored in flash memory
+ * @param buttonItemCount Number of button items in the array
+ *
+ * @note More memory efficient than storing button strings in RAM
+ * @note Follows same allocation and update behavior as setButtonItems()
+ */
+void ContentScreen::setButtonItemsF(const __FlashStringHelper **buttonItems, uint8_t buttonItemCount)
+{
+    if (buttonItems == nullptr || buttonItemCount <= 0)
+    {
+        clearButtonItems();
+        return;
+    }
+
+    // Allocate array of string pointers
+    char **stringArray = (char **)malloc(buttonItemCount * sizeof(char *));
+    if (stringArray == nullptr)
+    {
+        clearButtonItems();
+        return;
+    }
+
+    // Initialize all pointers to nullptr for safe cleanup
+    for (uint8_t i = 0; i < buttonItemCount; i++)
+    {
+        stringArray[i] = nullptr;
+    }
+
+    // Convert each FlashString to regular string
+    for (uint8_t i = 0; i < buttonItemCount; i++)
+    {
+        if (buttonItems[i] != nullptr)
+        {
+            size_t len = strlen_P((const char *)buttonItems[i]);
+            stringArray[i] = (char *)malloc(len + 1);
+            if (stringArray[i] != nullptr)
+            {
+                strcpy_P(stringArray[i], (const char *)buttonItems[i]);
+            }
+        }
+    }
+
+    // Delegate to regular setButtonItems method
+    setButtonItems((const char **)stringArray, buttonItemCount);
+
+    // Free temporary string array
+    for (uint8_t i = 0; i < buttonItemCount; i++)
+    {
+        free(stringArray[i]);
+    }
+    free(stringArray);
+}
+
+/**
  * @brief Set button labels with efficient dynamic memory allocation
  *
  * Allocates exactly the memory needed for each button label string, freeing any
@@ -494,6 +553,44 @@ void ContentScreen::setTitle(const char *title)
         gfx.endWrite();
         M1Shield.display(); // Push changes to display
     }
+}
+
+/**
+ * @brief Set screen title from FlashString
+ *
+ * Convenience method for setting title from FlashString (F() macro).
+ * Converts the FlashString to a regular string and delegates to setTitle().
+ *
+ * @param title Title text stored in flash memory (from F() macro)
+ *
+ * @note More memory efficient than storing title strings in RAM
+ * @note Follows same allocation and update behavior as setTitle()
+ */
+void ContentScreen::setTitleF(const __FlashStringHelper *title)
+{
+    if (title == nullptr)
+    {
+        clearTitle();
+        return;
+    }
+
+    // Get length and allocate buffer
+    size_t len = strlen_P((const char *)title);
+    char *buffer = (char *)malloc(len + 1);
+    if (buffer == nullptr)
+    {
+        clearTitle();
+        return;
+    }
+
+    // Copy from flash to RAM buffer
+    strcpy_P(buffer, (const char *)title);
+
+    // Delegate to regular setTitle method
+    setTitle(buffer);
+
+    // Free temporary buffer
+    free(buffer);
 }
 
 /**

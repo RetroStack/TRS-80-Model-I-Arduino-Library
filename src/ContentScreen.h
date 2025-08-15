@@ -257,6 +257,12 @@ public:
     void setTitle(const char *title);
 
     /**
+     * @brief Set the screen title from FlashString (F() macro)
+     * @param title FlashString for title (automatically converted and copied)
+     */
+    void setTitleF(const __FlashStringHelper *title);
+
+    /**
      * @brief Clear the current title
      *
      * Frees any dynamically allocated title memory and resets the title
@@ -289,6 +295,13 @@ public:
      * @note Pass nullptr or 0 count to free all button memory and clear labels
      */
     void setButtonItems(const char **buttonItems, uint8_t buttonItemCount);
+
+    /**
+     * @brief Set button labels from FlashString array (F() macro)
+     * @param buttonItems Array of FlashString pointers for button labels (automatically converted and copied)
+     * @param buttonItemCount Number of FlashStrings in the array
+     */
+    void setButtonItemsF(const __FlashStringHelper **buttonItems, uint8_t buttonItemCount);
 
     /**
      * @brief Clear all button labels and free allocated memory

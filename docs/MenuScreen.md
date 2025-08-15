@@ -4,20 +4,20 @@ The `MenuScreen` class provides a complete framework for creating navigable menu
 
 ## Table of Contents
 
-- [Constructor](#constructor)  
-- [Destructor](#destructor)  
-- [Menu Management](#menu-management)  
-- [Navigation System](#navigation-system)  
-- [Input Handling](#input-handling)  
-- [Pagination](#pagination)  
-- [Protected Methods](#protected-methods)  
-  - [Abstract Methods](#abstract-methods)  
-  - [Optional Override Methods](#optional-override-methods)  
-  - [Protected Utility Methods](#protected-utility-methods)  
-- [Visual Design](#visual-design)  
-- [Implementation Pattern](#implementation-pattern)  
-- [Memory Management](#memory-management)  
-- [Notes](#notes)  
+- [Constructor](#constructor)
+- [Destructor](#destructor)
+- [Menu Management](#menu-management)
+- [Navigation System](#navigation-system)
+- [Input Handling](#input-handling)
+- [Pagination](#pagination)
+- [Protected Methods](#protected-methods)
+  - [Abstract Methods](#abstract-methods)
+  - [Optional Override Methods](#optional-override-methods)
+  - [Protected Utility Methods](#protected-utility-methods)
+- [Visual Design](#visual-design)
+- [Implementation Pattern](#implementation-pattern)
+- [Memory Management](#memory-management)
+- [Notes](#notes)
 - [Example](#example)
 
 ## Constructor
@@ -41,8 +41,9 @@ Ensures proper cleanup of any dynamically allocated menu items to prevent memory
 
 ## Menu Management
 
-- **`void setMenuItems(const char** menuItems, uint8_t menuItemCount)`** - Set the menu items to be displayed
-- **`void clearMenuItems()`\*\* - Clear and free all dynamically allocated menu items
+- **`void setMenuItems(const char** menuItems, uint8_t menuItemCount)`\*\* - Set the menu items to be displayed
+- **`void setMenuItemsF(const \_\_FlashStringHelper** menuItems, uint8_t menuItemCount)`\*\* - Set menu items from FlashString array (F() macro)
+- **`void clearMenuItems()`** - Clear and free all dynamically allocated menu items
 
 ### Setting Menu Items
 
@@ -59,6 +60,34 @@ The `setMenuItems()` method configures the menu with an array of menu item strin
 const char* items[] = {"New Game", "Load Game", "Settings", "Exit"};
 setMenuItems(items, 4);
 ```
+
+### Setting Menu Items from FlashString
+
+The `setMenuItemsF()` method provides memory-efficient menu configuration using FlashString (F() macro):
+
+- **Flash Storage**: Menu text stored in flash memory instead of RAM
+- **Deep Copy**: Converts FlashStrings to regular strings with automatic allocation
+- **Memory Efficient**: Significant RAM savings for static menu text
+- **Same Behavior**: Identical functionality to `setMenuItems()` with better memory usage
+
+**Example:**
+
+```cpp
+// Memory-efficient menu using FlashString array
+static const __FlashStringHelper* flashItems[] = {
+    F("New Game"),     // Stored in flash, not RAM
+    F("Load Game"),
+    F("Settings"),
+    F("Exit")
+};
+setMenuItemsF(flashItems, 4);
+```
+
+**Memory Benefits:**
+
+- **RAM Savings**: Menu text stored in abundant flash memory instead of scarce RAM
+- **Static Text**: Ideal for fixed menu items that don't change at runtime
+- **Automatic Conversion**: FlashStrings automatically converted and allocated as needed
 
 ## Navigation System
 
@@ -525,3 +554,111 @@ void loop() {
     M1Shield.loop();
 }
 ```
+
+## FlashString Example
+
+This example demonstrates memory-efficient menu creation using FlashString (F() macro):
+
+```cpp
+#include <MenuScreen.h>
+
+class FlashStringMenu : public MenuScreen {
+private:
+    GameScreen* _gameScreen;
+    SettingsScreen* _settingsScreen;
+
+public:
+    FlashStringMenu() {
+        // Create child screens
+        _gameScreen = new GameScreen();
+        _settingsScreen = new SettingsScreen();
+
+        // Configure menu using FlashString - saves significant RAM
+        static const __FlashStringHelper* flashMenuItems[] = {
+            F("New Game"),         // Stored in flash memory
+            F("Continue Game"),    // Not consuming precious RAM
+            F("Settings"),
+            F("High Scores"),
+            F("Credits"),
+            F("Exit")
+        };
+        setMenuItemsF(flashMenuItems, 6);  // Memory-efficient menu setup
+
+        // Title using FlashString
+        setTitleF(F("Main Menu"));
+
+        // Footer buttons using FlashString
+        static const __FlashStringHelper* flashButtons[] = {
+            F("Select"),
+            F("Exit")
+        };
+        setButtonItemsF(flashButtons, 2);
+    }
+
+    ~FlashStringMenu() {
+        delete _gameScreen;
+        delete _settingsScreen;
+    }
+
+protected:
+    Screen* _getSelectedMenuItemScreen(int index) override {
+        switch(index) {
+            case 0:  // New Game
+                _gameScreen->startNewGame();
+                return _gameScreen;
+
+            case 1:  // Continue Game
+                if (_gameScreen->hasSavedGame()) {
+                    _gameScreen->loadSavedGame();
+                    return _gameScreen;
+                } else {
+                    // Could show "No saved game" message
+                    return nullptr;
+                }
+
+            case 2:  // Settings
+                return _settingsScreen;
+
+            case 3:  // High Scores
+                return new HighScoreScreen();
+
+            case 4:  // Credits
+                return new CreditsScreen();
+
+            case 5:  // Exit
+                // Handle application exit
+                return nullptr;
+        }
+        return nullptr;
+    }
+
+    // Dynamic menu updates using FlashString
+    void updateMenuForGameState() {
+        if (_gameScreen->hasSavedGame()) {
+            // Show continue option
+            static const __FlashStringHelper* gameMenuItems[] = {
+                F("New Game"),
+                F("Continue Game"),  // Available
+                F("Settings"),
+                F("Exit")
+            };
+            setMenuItemsF(gameMenuItems, 4);
+        } else {
+            // Hide continue option
+            static const __FlashStringHelper* noGameItems[] = {
+                F("New Game"),
+                F("Settings"),
+                F("Exit")
+            };
+            setMenuItemsF(noGameItems, 3);
+        }
+    }
+};
+```
+
+**FlashString Benefits:**
+
+- **RAM Conservation**: Menu text stored in flash memory instead of scarce RAM
+- **Static Efficiency**: Perfect for fixed menu items that don't change
+- **Easy Conversion**: Simple replacement of regular strings with F() macro
+- **Same Functionality**: Identical behavior to regular string methods

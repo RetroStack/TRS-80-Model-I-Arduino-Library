@@ -262,6 +262,25 @@ public:
     void setMenuItems(const char **menuItems, uint8_t menuItemCount);
 
     /**
+     * @brief Set the menu items to be displayed and navigated (Flash version)
+     *
+     * @param menuItems     Array of flash strings for menu items
+     * @param menuItemCount Number of items in the menuItems array
+     *
+     * @note Automatically frees any previously allocated menu items
+     * @note Creates deep copies of all strings - original array can be freed
+     * @note Automatically recalculates pagination when items change
+     * @note Resets selection to first item when menu changes
+     *
+     * @example
+     * @code
+     * const __FlashStringHelper* items[] = {F("New Game"), F("Load Game"), F("Settings"), F("Exit")};
+     * _setMenuItemsF(items, 4);
+     * @endcode
+     */
+    void setMenuItemsF(const __FlashStringHelper **menuItems, uint8_t menuItemCount);
+
+    /**
      * @brief Clear and free all dynamically allocated menu items
      *
      * Frees all memory associated with menu items and resets the menu
