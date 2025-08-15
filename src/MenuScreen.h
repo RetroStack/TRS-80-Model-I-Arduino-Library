@@ -161,6 +161,35 @@ protected:
     virtual const char *_getMenuItemConfigValue(uint8_t index) { return nullptr; }
 
     /**
+     * @brief Get configuration value FlashString for a menu item (optional override)
+     *
+     * Derived classes can override this method to provide memory-efficient configuration
+     * values using FlashString (F() macro) that will be displayed right-aligned on each
+     * menu row. This is useful for static configuration text that doesn't change.
+     *
+     * @param index Global index of the menu item (0-based)
+     * @return const __FlashStringHelper* FlashString to display, or nullptr for no value
+     *
+     * @note Default implementation returns nullptr (no configuration values)
+     * @note Takes precedence over _getMenuItemConfigValue() if both are overridden
+     * @note More memory efficient for static configuration text
+     * @note Returned FlashStrings should be short to fit within the row width
+     *
+     * @example
+     * @code
+     * const __FlashStringHelper* SettingsMenu::_getMenuItemConfigValueF(uint8_t index) {
+     *     switch(index) {
+     *         case 0: return _soundEnabled ? F("On") : F("Off");    // Flash-stored text
+     *         case 1: return F("Easy");                             // Static difficulty
+     *         case 2: return F("Auto");                             // Static mode
+     *         default: return nullptr;                              // No value for other items
+     *     }
+     * }
+     * @endcode
+     */
+    virtual const __FlashStringHelper *_getMenuItemConfigValueF(uint8_t index) { return nullptr; }
+
+    /**
      * @brief Check if a menu item is enabled/selectable (optional override)
      *
      * Derived classes can override this method to control which menu items are

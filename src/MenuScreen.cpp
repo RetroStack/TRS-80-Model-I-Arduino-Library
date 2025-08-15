@@ -304,7 +304,28 @@ void MenuScreen::_drawContent()
         if (itemIndex < _menuItemCount)
         {
             // Calculate available space for menu text and config value
-            const char *configValue = _getMenuItemConfigValue(itemIndex);
+            // Check FlashString version first, then fall back to regular string
+            const __FlashStringHelper *configValueF = _getMenuItemConfigValueF(itemIndex);
+            const char *configValue = nullptr;
+            char *tempConfigBuffer = nullptr;
+            
+            if (configValueF != nullptr)
+            {
+                // Convert FlashString to regular string for display
+                size_t len = strlen_P((const char*)configValueF);
+                tempConfigBuffer = (char*)malloc(len + 1);
+                if (tempConfigBuffer != nullptr)
+                {
+                    strcpy_P(tempConfigBuffer, (const char*)configValueF);
+                    configValue = tempConfigBuffer;
+                }
+            }
+            else
+            {
+                // Fall back to regular string method
+                configValue = _getMenuItemConfigValue(itemIndex);
+            }
+            
             uint16_t configWidth = 0;
             uint16_t configX = 0;
 
@@ -377,6 +398,12 @@ void MenuScreen::_drawContent()
             {
                 gfx.setCursor(configX, y + textSizeHalfHeight);
                 gfx.print(configValue);
+            }
+            
+            // Clean up temporary buffer if it was allocated for FlashString
+            if (tempConfigBuffer != nullptr)
+            {
+                free(tempConfigBuffer);
             }
         }
 

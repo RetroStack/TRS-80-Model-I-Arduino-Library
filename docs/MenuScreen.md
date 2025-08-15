@@ -172,6 +172,7 @@ Page 1 of 3        Page 2 of 3        Page 3 of 3
 ### Optional Override Methods
 
 - **`virtual const char* _getMenuItemConfigValue(uint8_t index)`** - Get configuration value string for a menu item
+- **`virtual const __FlashStringHelper* _getMenuItemConfigValueF(uint8_t index)`** - Get configuration value FlashString for a menu item
 - **`virtual bool _isMenuItemEnabled(uint8_t index) const`** - Check if a menu item is enabled/selectable
 
 ### Protected Utility Methods
@@ -217,6 +218,41 @@ protected:
     }
 };
 ```
+
+### FlashString Configuration Values (Optional)
+
+```cpp
+virtual const __FlashStringHelper* _getMenuItemConfigValueF(int index)  // Get flash config value for menu item
+```
+
+**Optional override** to display memory-efficient configuration values using FlashString (F() macro). Takes precedence over `_getMenuItemConfigValue()` if both are implemented:
+
+```cpp
+class SettingsMenu : public MenuScreen {
+private:
+    bool _soundEnabled = true;
+    uint8_t _displayMode = 0;
+    bool _autoSave = true;
+
+protected:
+    const __FlashStringHelper* _getMenuItemConfigValueF(int index) override {
+        switch(index) {
+            case 0: return _soundEnabled ? F("On") : F("Off");           // Boolean setting with flash storage
+            case 1: return _displayMode == 0 ? F("LCD") :                // Enum with flash strings
+                          _displayMode == 1 ? F("OLED") : F("CRT");
+            case 2: return _autoSave ? F("Enabled") : F("Disabled");     // Status with flash storage
+            case 3: return F("Default");                                 // Static value in flash
+            default: return nullptr;                                     // No config value
+        }
+    }
+};
+```
+
+**FlashString Benefits:**
+- **Memory Efficient**: Configuration text stored in flash memory instead of RAM
+- **Static Values**: Perfect for fixed configuration options that don't change
+- **Priority**: FlashString version takes precedence over regular string version
+- **Automatic Fallback**: System falls back to `_getMenuItemConfigValue()` if FlashString version returns nullptr
 
 ## Visual Design
 
