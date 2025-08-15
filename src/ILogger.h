@@ -22,9 +22,39 @@ public:
     void err(const String &msg) { err("%s", msg.c_str()); }
 
     // F() macro versions that work directly with flash strings (more memory efficient)
-    void info(const __FlashStringHelper *msg) { info("%s", msg); }
-    void warn(const __FlashStringHelper *msg) { warn("%s", msg); }
-    void err(const __FlashStringHelper *msg) { err("%s", msg); }
+    void info(const __FlashStringHelper *msg)
+    {
+        size_t len = strlen_P((const char *)msg);
+        if (len > 0)
+        {
+            char buffer[len + 1]; // +1 for null terminator
+            strcpy_P(buffer, (const char *)msg);
+            buffer[len] = '\0'; // Ensure null termination
+            info("%s", buffer);
+        }
+    }
+    void warn(const __FlashStringHelper *msg)
+    {
+        size_t len = strlen_P((const char *)msg);
+        if (len > 0)
+        {
+            char buffer[len + 1]; // +1 for null terminator
+            strcpy_P(buffer, (const char *)msg);
+            buffer[len] = '\0'; // Ensure null termination
+            warn("%s", buffer);
+        }
+    }
+    void err(const __FlashStringHelper *msg)
+    {
+        size_t len = strlen_P((const char *)msg);
+        if (len > 0)
+        {
+            char buffer[len + 1]; // +1 for null terminator
+            strcpy_P(buffer, (const char *)msg);
+            buffer[len] = '\0'; // Ensure null termination
+            err("%s", buffer);
+        }
+    }
 
     virtual size_t write(uint8_t ch) = 0;
     virtual size_t write(const uint8_t *buffer, size_t size) = 0;
