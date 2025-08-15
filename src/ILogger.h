@@ -21,39 +21,71 @@ public:
     void warn(const String &msg) { warn("%s", msg.c_str()); }
     void err(const String &msg) { err("%s", msg.c_str()); }
 
-    // F() macro versions that work directly with flash strings (more memory efficient)
-    void info(const __FlashStringHelper *msg)
+    // F() macro versions with format string support (more memory efficient)
+    void infoF(const __FlashStringHelper *fmt, ...)
     {
-        size_t len = strlen_P((const char *)msg);
+        va_list args;
+        va_start(args, fmt);
+
+        size_t len = strlen_P((const char *)fmt);
         if (len > 0)
         {
             char buffer[len + 1]; // +1 for null terminator
-            strcpy_P(buffer, (const char *)msg);
+            strcpy_P(buffer, (const char *)fmt);
             buffer[len] = '\0'; // Ensure null termination
-            info("%s", buffer);
+
+            // Use a temporary buffer for formatted output
+            char formatted[256]; // Fixed size buffer to avoid VLA
+            vsnprintf(formatted, sizeof(formatted), buffer, args);
+            formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
+            info("%s", formatted);
         }
+
+        va_end(args);
     }
-    void warn(const __FlashStringHelper *msg)
+
+    void warnF(const __FlashStringHelper *fmt, ...)
     {
-        size_t len = strlen_P((const char *)msg);
+        va_list args;
+        va_start(args, fmt);
+
+        size_t len = strlen_P((const char *)fmt);
         if (len > 0)
         {
             char buffer[len + 1]; // +1 for null terminator
-            strcpy_P(buffer, (const char *)msg);
+            strcpy_P(buffer, (const char *)fmt);
             buffer[len] = '\0'; // Ensure null termination
-            warn("%s", buffer);
+
+            // Use a temporary buffer for formatted output
+            char formatted[256]; // Fixed size buffer to avoid VLA
+            vsnprintf(formatted, sizeof(formatted), buffer, args);
+            formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
+            warn("%s", formatted);
         }
+
+        va_end(args);
     }
-    void err(const __FlashStringHelper *msg)
+
+    void errF(const __FlashStringHelper *fmt, ...)
     {
-        size_t len = strlen_P((const char *)msg);
+        va_list args;
+        va_start(args, fmt);
+
+        size_t len = strlen_P((const char *)fmt);
         if (len > 0)
         {
             char buffer[len + 1]; // +1 for null terminator
-            strcpy_P(buffer, (const char *)msg);
+            strcpy_P(buffer, (const char *)fmt);
             buffer[len] = '\0'; // Ensure null termination
-            err("%s", buffer);
+
+            // Use a temporary buffer for formatted output
+            char formatted[256]; // Fixed size buffer to avoid VLA
+            vsnprintf(formatted, sizeof(formatted), buffer, args);
+            formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
+            err("%s", formatted);
         }
+
+        va_end(args);
     }
 
     virtual size_t write(uint8_t ch) = 0;

@@ -58,9 +58,9 @@ void err(const String &msg);     // Log String object as error
 ### F() Macro Support (Flash Strings)
 
 ```cpp
-void info(const __FlashStringHelper *msg);    // Log F() string as info
-void warn(const __FlashStringHelper *msg);    // Log F() string as warning
-void err(const __FlashStringHelper *msg);     // Log F() string as error
+void infoF(const __FlashStringHelper *fmt, ...);    // Log F() format string as info
+void warnF(const __FlashStringHelper *fmt, ...);    // Log F() format string as warning
+void errF(const __FlashStringHelper *fmt, ...);     // Log F() format string as error
 ```
 
 ### Print Interface
@@ -103,9 +103,17 @@ logger->err(errorMsg);
 ### F() Macro (Flash Strings)
 
 ```cpp
-logger->info(F("This string is stored in flash memory"));
-logger->warn(F("Low battery warning"));
-logger->err(F("Critical system error"));
+// Simple messages using FlashString
+logger->infoF(F("This string is stored in flash memory"));
+logger->warnF(F("Low battery warning"));
+logger->errF(F("Critical system error"));
+
+// Format strings with arguments (FlashString format in flash, values from RAM)
+int temperature = 25;
+int humidity = 60;
+logger->infoF(F("Temperature: %d°C, Humidity: %d%%"), temperature, humidity);
+logger->warnF(F("Battery level: %d%% remaining"), batteryLevel);
+logger->errF(F("Sensor %d failed with error code: 0x%02X"), sensorId, errorCode);
 ```
 
 ### Mixed Usage
@@ -116,18 +124,26 @@ String sensor = "DHT22";
 
 // All of these work seamlessly:
 logger->info("Temperature sensor initialized");              // const char*
-logger->info(F("Reading from sensor..."));                   // F() macro
+logger->infoF(F("Reading from sensor..."));                  // F() macro (simple)
 logger->info(String("Sensor: ") + sensor);                   // String object
 logger->info("Current temperature: %d°C", temperature);      // Printf formatting
+logger->infoF(F("Sensor %s reading: %d°C"), sensor.c_str(), temperature); // F() with formatting
 ```
 
 ## Memory Efficiency
 
-- **const char\***: No memory overhead, strings in program memory
-- **F() macro**: Strings stored in flash memory, saves RAM
-- **String objects**: Use heap memory, convenient but less efficient
+- **const char\* methods**: No memory overhead, strings in program memory
+- **F() macro methods (`infoF`, `warnF`, `errF`)**: Format strings stored in flash memory, saves RAM significantly
+- **String object methods**: Use heap memory, convenient but less efficient
 
-For memory-constrained applications, prefer `const char*` literals and `F()` macro over `String` objects.
+**Best Practices for Memory Efficiency:**
+
+1. Use `infoF(F("format"), ...)` for format strings - stores format in flash
+2. Use `info("literal")` for simple const char\* literals
+3. Use `info(stringObj)` sparingly for dynamic String objects
+4. Avoid repeated String concatenation in logging calls
+
+For memory-constrained applications, prefer `const char*` literals and `F()` macro methods over `String` objects.
 
 ## Implementation Notes
 
