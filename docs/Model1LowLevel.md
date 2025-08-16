@@ -15,6 +15,7 @@ The `Model1LowLevel` class provides direct, low-level access to all TRS-80 Model
 - [Signal Writers](#signal-writers)
 - [Signal Readers](#signal-readers)
 - [Bus Control Functions](#bus-control-functions)
+- [State Data Functions](#state-data-functions)
 - [Usage Examples](#usage-examples)
 - [Performance Notes](#performance-notes)
 
@@ -160,6 +161,106 @@ if (rasState == HIGH) {
 // Read bus values
 uint16_t address = Model1LowLevel::readAddressBus();
 uint8_t data = Model1LowLevel::readDataBus();
+```
+
+## State Data Functions
+
+- **`static uint64_t getStateData()`** - Get packed state data for efficient access
+- **`static uint64_t getStateConfigData()`** - Get packed configuration state data for pin directions
+
+### getStateData() Bit Layout
+
+The `getStateData()` function returns all TRS-80 system state in a single 64-bit value with byte-aligned boundaries for optimal performance:
+
+```
+Bits 63-48: Address Bus (16 bits)
+Bits 47-40: Data Bus (8 bits)  
+Bits 39-32: Memory Control Signals (8 bits)
+  - Bit 39: RAS (Row Address Strobe)
+  - Bit 38: CAS (Column Address Strobe)
+  - Bit 37: MUX (Address Multiplexer)
+  - Bit 36: RD (Read Signal)
+  - Bit 35: WR (Write Signal)
+  - Bits 34-32: Reserved
+
+Bits 31-24: System Control Signals (8 bits)
+  - Bit 31: IN (Input Signal)
+  - Bit 30: OUT (Output Signal)
+  - Bit 29: INT (Interrupt Signal)
+  - Bit 28: TEST (Test Signal)
+  - Bit 27: WAIT (Wait Signal)
+  - Bit 26: SYS_RES (System Reset)
+  - Bit 25: INT_ACK (Interrupt Acknowledge)
+  - Bit 24: Reserved
+
+Bits 23-0: Reserved for future expansion (24 bits)
+```
+
+**Example:**
+
+```cpp
+// Get complete system state efficiently
+uint64_t state = Model1LowLevel::getStateData();
+
+// Extract individual components using bit shifts
+uint16_t address = (state >> 48) & 0xFFFF;
+uint8_t data = (state >> 40) & 0xFF;
+uint8_t memoryControls = (state >> 32) & 0xFF;
+uint8_t systemSignals = (state >> 24) & 0xFF;
+
+// Extract specific signals
+bool rasActive = (state >> 39) & 1;
+bool casActive = (state >> 38) & 1;
+bool waitActive = (state >> 27) & 1;
+```
+
+### getStateConfigData() Bit Layout
+
+The `getStateConfigData()` function returns all TRS-80 pin configuration states in a single 64-bit value:
+
+```
+Bits 63-48: Address Bus Config (16 bits) - Pin direction for each address line
+Bits 47-40: Data Bus Config (8 bits) - Pin direction for each data line
+Bits 39-32: Memory Control Signal Configs (8 bits)
+  - Bit 39: RAS configuration (0=INPUT, 1=OUTPUT)
+  - Bit 38: CAS configuration (0=INPUT, 1=OUTPUT)
+  - Bit 37: MUX configuration (0=INPUT, 1=OUTPUT)
+  - Bit 36: RD configuration (0=INPUT, 1=OUTPUT)
+  - Bit 35: WR configuration (0=INPUT, 1=OUTPUT)
+  - Bits 34-32: Reserved
+
+Bits 31-24: System Control Signal Configs (8 bits)
+  - Bit 31: IN configuration (0=INPUT, 1=OUTPUT)
+  - Bit 30: OUT configuration (0=INPUT, 1=OUTPUT)
+  - Bit 29: INT configuration (0=INPUT, 1=OUTPUT)
+  - Bit 28: TEST configuration (0=INPUT, 1=OUTPUT)
+  - Bit 27: WAIT configuration (0=INPUT, 1=OUTPUT)
+  - Bit 26: SYS_RES configuration (0=INPUT, 1=OUTPUT)
+  - Bit 25: INT_ACK configuration (0=INPUT, 1=OUTPUT)
+  - Bit 24: Reserved
+
+Bits 23-0: Reserved for future expansion (24 bits)
+```
+
+**Example:**
+
+```cpp
+// Get complete pin configuration state
+uint64_t configState = Model1LowLevel::getStateConfigData();
+
+// Extract bus configurations
+uint16_t addressBusConfig = (configState >> 48) & 0xFFFF;
+uint8_t dataBusConfig = (configState >> 40) & 0xFF;
+uint8_t memoryControlsConfig = (configState >> 32) & 0xFF;
+uint8_t systemSignalsConfig = (configState >> 24) & 0xFF;
+
+// Check specific pin configurations
+bool rasIsOutput = (configState >> 39) & 1;  // 1 = OUTPUT, 0 = INPUT
+bool wrIsInput = !((configState >> 35) & 1); // Inverted check for INPUT
+bool testIsOutput = (configState >> 28) & 1;
+
+// Check if all address pins are configured as outputs
+bool allAddressPinsOutput = (addressBusConfig == 0xFFFF);
 ```
 
 ## Usage Examples

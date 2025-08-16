@@ -117,6 +117,7 @@ public:
     // ---------- State
     char *getState();
     uint64_t getStateData();
+    uint64_t getStateConfigData();
     void logState();
 
     uint8_t getVersionMajor();

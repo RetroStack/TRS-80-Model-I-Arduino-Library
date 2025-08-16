@@ -164,7 +164,12 @@ Controls whether the CPU is held in a wait state.
 
 - **`char* getState()`** - Get current state string (heap-allocated)
 - **`void logState()`** - Log the current state using the configured logger
-- **`uint64_t getStateData()`** - Get packed state data for efficient access
+- **`uint64_t getStateData()`** - Get packed state data for efficient access (delegates to Model1LowLevel)
+- **`uint64_t getStateConfigData()`** - Get packed configuration state data for pin directions (delegates to Model1LowLevel)
+
+### State Data Implementation Notes
+
+Both `getStateData()` and `getStateConfigData()` functions delegate to their respective `Model1LowLevel` implementations to ensure consistency and make Model1LowLevel the authoritative source for low-level state access.
 
 ### getStateData() Bit Layout
 
@@ -217,6 +222,62 @@ bool waitActive = (state >> 27) & 1;
 uint8_t* stateBytes = (uint8_t*)&state;
 uint16_t addressFromBytes = (stateBytes[7] << 8) | stateBytes[6];  // Big-endian
 uint8_t dataFromBytes = stateBytes[5];
+```
+
+### getStateConfigData() Bit Layout
+
+The `getStateConfigData()` function returns all TRS-80 pin configuration states in a single 64-bit value:
+
+```
+Bits 63-48: Address Bus Config (16 bits) - Pin direction for each address line
+Bits 47-40: Data Bus Config (8 bits) - Pin direction for each data line
+Bits 39-32: Memory Control Signal Configs (8 bits)
+  - Bit 39: RAS configuration (0=INPUT, 1=OUTPUT)
+  - Bit 38: CAS configuration (0=INPUT, 1=OUTPUT)
+  - Bit 37: MUX configuration (0=INPUT, 1=OUTPUT)
+  - Bit 36: RD configuration (0=INPUT, 1=OUTPUT)
+  - Bit 35: WR configuration (0=INPUT, 1=OUTPUT)
+  - Bits 34-32: Reserved
+
+Bits 31-24: System Control Signal Configs (8 bits)
+  - Bit 31: IN configuration (0=INPUT, 1=OUTPUT)
+  - Bit 30: OUT configuration (0=INPUT, 1=OUTPUT)
+  - Bit 29: INT configuration (0=INPUT, 1=OUTPUT)
+  - Bit 28: TEST configuration (0=INPUT, 1=OUTPUT)
+  - Bit 27: WAIT configuration (0=INPUT, 1=OUTPUT)
+  - Bit 26: SYS_RES configuration (0=INPUT, 1=OUTPUT)
+  - Bit 25: INT_ACK configuration (0=INPUT, 1=OUTPUT)
+  - Bit 24: Reserved
+
+Bits 23-0: Reserved for future expansion (24 bits)
+```
+
+### Configuration Data Usage Examples
+
+```cpp
+// Get complete pin configuration state
+uint64_t configState = model1.getStateConfigData();
+
+// Extract bus configurations
+uint16_t addressBusConfig = (configState >> 48) & 0xFFFF;
+uint8_t dataBusConfig = (configState >> 40) & 0xFF;
+
+// Check specific pin configurations
+bool rasIsOutput = (configState >> 39) & 1;  // 1 = OUTPUT, 0 = INPUT
+bool wrIsInput = !((configState >> 35) & 1); // Inverted check for INPUT
+
+// Check if entire address bus is configured as output
+bool allAddressPinsOutput = (addressBusConfig == 0xFFFF);
+
+// Combined state and configuration analysis
+uint64_t state = model1.getStateData();
+uint64_t config = model1.getStateConfigData();
+
+// Only read signals from pins configured as inputs
+if (!((config >> 39) & 1)) {  // RAS is configured as INPUT
+    bool rasState = (state >> 39) & 1;
+    // Process RAS input state...
+}
 ```
 
 ## Memory Display

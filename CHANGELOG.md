@@ -80,6 +80,16 @@ This is the initial version written by Ven Reddy
   - Includes address bus (16 bits), data bus (8 bits), memory control signals (8 bits), and system signals (8 bits)
   - 24 bits reserved for future expansion
   - Provides efficient alternative to string-based state reporting
+- **NEW FEATURE**: Added `getStateConfigData()` method for pin configuration state access
+  - Returns complete pin direction configuration in a single 64-bit value
+  - Same bit layout as getStateData() but reports INPUT/OUTPUT pin configurations
+  - Available in both Model1 and Model1LowLevel classes
+  - Enables efficient monitoring of pin direction changes
+- **ARCHITECTURE IMPROVEMENT**: Model1LowLevel is now the authoritative source for state data
+  - Implementation moved from Model1 to Model1LowLevel for consistency
+  - Model1.getStateData() and Model1.getStateConfigData() delegate to Model1LowLevel
+  - Ensures single source of truth for low-level state access
+  - Enhanced Model1LowLevel documentation with comprehensive state data examples
 - **UI IMPROVEMENT**: Updated MenuScreen button behavior for better navigation
   - LEFT button now performs selection action (same as joystick press)
   - MENU button is now the only way to exit menus
