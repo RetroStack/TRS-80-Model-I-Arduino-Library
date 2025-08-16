@@ -19,8 +19,8 @@
 
 // Version constants
 #define M1_VERSION_MAJOR 1
-#define M1_VERSION_MINOR 2
-#define M1_VERSION_REVISION 3
+#define M1_VERSION_MINOR 3
+#define M1_VERSION_REVISION 0
 
 // Define global instance
 Model1Class Model1;
@@ -935,6 +935,52 @@ char *Model1Class::getState()
     delete[] dataStatus;
 
     return buffer;
+}
+
+/**
+ * Returns the current state as packed data
+ *
+ * Bit layout (64-bit):
+ * Bits 63-48: Address (16 bits) - Memory address bus
+ * Bits 47-40: Data (8 bits) - Data bus value
+ * Bits 39-32: Memory control signals (8 bits) - RD, WR, IN, OUT, RAS, CAS, MUX, (1 spare)
+ * Bits 31-24: System signals (8 bits) - SYS_RES, INT_ACK, INT, TEST, WAIT, (3 spare)
+ * Bits 23-0:  Reserved for future use (24 bits)
+ */
+uint64_t Model1Class::getStateData()
+{
+    uint16_t addr = _addressBus.readMemoryAddress();
+    uint8_t data = _dataBus.readData();
+
+    uint64_t state = 0;
+
+    // Pack address (16 bits) in bits 63-48
+    state |= ((uint64_t)addr) << 48;
+
+    // Pack data (8 bits) in bits 47-40
+    state |= ((uint64_t)data) << 40;
+
+    // Pack memory control signals (8 bits) in bits 39-32
+    state |= ((uint64_t)Model1LowLevel::readRD()) << 39;
+    state |= ((uint64_t)Model1LowLevel::readWR()) << 38;
+    state |= ((uint64_t)Model1LowLevel::readIN()) << 37;
+    state |= ((uint64_t)Model1LowLevel::readOUT()) << 36;
+    state |= ((uint64_t)Model1LowLevel::readRAS()) << 35;
+    state |= ((uint64_t)Model1LowLevel::readCAS()) << 34;
+    state |= ((uint64_t)Model1LowLevel::readMUX()) << 33;
+    // Bit 32 reserved for future memory control signal
+
+    // Pack system signals (8 bits) in bits 31-24
+    state |= ((uint64_t)Model1LowLevel::readSYS_RES()) << 31;
+    state |= ((uint64_t)Model1LowLevel::readINT_ACK()) << 30;
+    state |= ((uint64_t)Model1LowLevel::readINT()) << 29;
+    state |= ((uint64_t)Model1LowLevel::readTEST()) << 28;
+    state |= ((uint64_t)Model1LowLevel::readWAIT()) << 27;
+    // Bits 26-24 reserved for future system signals
+
+    // Bits 23-0 reserved for future expansion
+
+    return state;
 }
 
 /**

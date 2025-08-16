@@ -153,6 +153,7 @@ deactivateTestSignal    KEYWORD2
 activateWaitSignal  KEYWORD2
 deactivateWaitSignal    KEYWORD2
 getState    KEYWORD2
+getStateData    KEYWORD2
 logState    KEYWORD2
 is64CharacterMode    KEYWORD2
 set32CharacterMode    KEYWORD2

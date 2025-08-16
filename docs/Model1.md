@@ -164,6 +164,60 @@ Controls whether the CPU is held in a wait state.
 
 - **`char* getState()`** - Get current state string (heap-allocated)
 - **`void logState()`** - Log the current state using the configured logger
+- **`uint64_t getStateData()`** - Get packed state data for efficient access
+
+### getStateData() Bit Layout
+
+The `getStateData()` function returns all TRS-80 system state in a single 64-bit value with byte-aligned boundaries for optimal performance:
+
+```
+Bits 63-48: Address Bus (16 bits)
+Bits 47-40: Data Bus (8 bits)  
+Bits 39-32: Memory Control Signals (8 bits)
+  - Bit 39: RAS (Row Address Strobe)
+  - Bit 38: CAS (Column Address Strobe)
+  - Bit 37: MUX (Address Multiplexer)
+  - Bit 36: RD (Read Signal)
+  - Bit 35: WR (Write Signal)
+  - Bits 34-32: Reserved
+
+Bits 31-24: System Control Signals (8 bits)
+  - Bit 31: IN (Input Signal)
+  - Bit 30: OUT (Output Signal)
+  - Bit 29: INT (Interrupt Signal)
+  - Bit 28: TEST (Test Signal)
+  - Bit 27: WAIT (Wait Signal)
+  - Bit 26: SYS_RES (System Reset)
+  - Bit 25: INT_ACK (Interrupt Acknowledge)
+  - Bit 24: Reserved
+
+Bits 23-0: Reserved for future expansion (24 bits)
+```
+
+### Usage Examples
+
+```cpp
+// Get complete system state
+uint64_t state = model1.getStateData();
+
+// Extract individual components using bit shifts
+uint16_t address = (state >> 48) & 0xFFFF;
+uint8_t data = (state >> 40) & 0xFF;
+uint8_t memoryControls = (state >> 32) & 0xFF;
+uint8_t systemSignals = (state >> 24) & 0xFF;
+
+// Extract specific signals
+bool rasActive = (state >> 39) & 1;
+bool casActive = (state >> 38) & 1;
+bool readActive = (state >> 36) & 1;
+bool writeActive = (state >> 35) & 1;
+bool waitActive = (state >> 27) & 1;
+
+// Use with byte pointers for direct access
+uint8_t* stateBytes = (uint8_t*)&state;
+uint16_t addressFromBytes = (stateBytes[7] << 8) | stateBytes[6];  // Big-endian
+uint8_t dataFromBytes = stateBytes[5];
+```
 
 ## Memory Display
 

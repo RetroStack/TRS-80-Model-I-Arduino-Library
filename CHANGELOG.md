@@ -71,3 +71,16 @@ This is the initial version written by Ven Reddy
 - Added `keyName()` method to KeyboardChangeIterator for human-readable key names
 - Enhanced documentation with FlashString examples and comprehensive method descriptions
 - General code cleanup, warning fixes, and improved method accessibility
+
+## TBD - Updated Release (1.3.0)
+
+- **NEW FEATURE**: Added `getStateData()` method to Model1 class for efficient packed state access
+  - Returns complete TRS-80 system state in a single 64-bit value
+  - Byte-aligned bit layout for optimal performance and accessibility
+  - Includes address bus (16 bits), data bus (8 bits), memory control signals (8 bits), and system signals (8 bits)
+  - 24 bits reserved for future expansion
+  - Provides efficient alternative to string-based state reporting
+- **UI IMPROVEMENT**: Updated MenuScreen button behavior for better navigation
+  - LEFT button now performs selection action (same as joystick press)
+  - MENU button is now the only way to exit menus
+  - Updated all documentation and examples to reflect new button mappings
