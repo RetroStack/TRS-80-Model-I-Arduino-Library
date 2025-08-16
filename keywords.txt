@@ -102,8 +102,13 @@ setLowerCaseMod   KEYWORD2
 convertModel1CharacterToLocal   KEYWORD2
 convertLocalCharacterToModel1   KEYWORD2
 info    KEYWORD2
+infoF   KEYWORD2
 warn    KEYWORD2
+warnF   KEYWORD2
 err KEYWORD2
+errF    KEYWORD2
+debug   KEYWORD2
+debugF  KEYWORD2
 write    KEYWORD2
 mute    KEYWORD2
 unmute  KEYWORD2

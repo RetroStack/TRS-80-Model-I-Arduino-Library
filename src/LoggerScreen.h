@@ -14,8 +14,8 @@
  * @brief A console screen with logging functionality compatible with ILogger
  *
  * LoggerScreen extends ConsoleScreen to provide a visual logging destination that is
- * compatible with the ILogger interface through an adapter pattern. It displays log 
- * messages with formatted prefixes and automatic scrolling, making it perfect for 
+ * compatible with the ILogger interface through an adapter pattern. It displays log
+ * messages with formatted prefixes and automatic scrolling, making it perfect for
  * real-time debugging, system monitoring, and diagnostics on the M1Shield display.
  *
  * Features:
@@ -59,6 +59,7 @@ private:
     static const uint16_t COLOR_INFO = 0xFFFF;      // White for info messages
     static const uint16_t COLOR_WARN = 0xFFE0;      // Yellow for warnings
     static const uint16_t COLOR_ERROR = 0xF800;     // Red for errors
+    static const uint16_t COLOR_DEBUG = 0x07FF;     // Cyan for debug messages
     static const uint16_t COLOR_TIMESTAMP = 0x7BEF; // Light gray for timestamps
 
     /**
@@ -125,6 +126,7 @@ public:
     void info(const char *fmt, ...);
     void warn(const char *fmt, ...);
     void err(const char *fmt, ...);
+    void debug(const char *fmt, ...);
 
     /**
      * @brief Get an ILogger adapter for this LoggerScreen

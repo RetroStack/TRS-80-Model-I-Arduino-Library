@@ -29,7 +29,7 @@ The `SerialLogger` class implements the `ILogger` interface and sends formatted 
 
 ## Features
 
-- **Standard Log Levels**: Info, warning, and error message types with prefixes
+- **Standard Log Levels**: Info, warning, error, and debug message types with prefixes
 - **Printf-style Formatting**: Full support for format strings and variable arguments
 - **String & F() Macro Support**: Inherits convenience methods from `ILogger` interface
 - **Mute/Unmute**: Ability to temporarily disable logging output
@@ -51,6 +51,7 @@ Creates a new SerialLogger instance in unmuted state. No parameters required.
 void info(const char *fmt, ...);     // Info messages with [INFO] prefix
 void warn(const char *fmt, ...);     // Warning messages with [WARN] prefix
 void err(const char *fmt, ...);      // Error messages with [ERR ] prefix
+void debug(const char *fmt, ...);    // Debug messages with [DBUG] prefix
 ```
 
 ### Inherited Convenience Methods
@@ -60,11 +61,13 @@ void err(const char *fmt, ...);      // Error messages with [ERR ] prefix
 void info(const String &msg);
 void warn(const String &msg);
 void err(const String &msg);
+void debug(const String &msg);
 
 // F() macro support (flash strings)
 void info(const __FlashStringHelper *msg);
 void warn(const __FlashStringHelper *msg);
 void err(const __FlashStringHelper *msg);
+void debug(const __FlashStringHelper *msg);
 ```
 
 ### Control Methods
@@ -94,6 +97,7 @@ void setup() {
     logger.info("System initialized");
     logger.warn("Low memory detected");
     logger.err("Failed to initialize sensor");
+    logger.debug("Debug mode enabled");
 }
 ```
 
@@ -107,6 +111,7 @@ const char* status = "OK";
 logger.info("Sensor reading: %d (%.2fV) - %s", sensorValue, voltage, status);
 logger.warn("Temperature: %d°C exceeds threshold", temperature);
 logger.err("Error code: 0x%02X in module %s", errorCode, moduleName);
+logger.debug("Loop iteration %d, state=%s", iteration, currentState);
 ```
 
 ### String Objects and F() Macro
@@ -121,9 +126,11 @@ logger.info(String("Device: ") + deviceName + " ready");
 // F() macro (saves RAM)
 logger.info(F("Starting temperature monitoring..."));
 logger.warn(F("Calibration required"));
+logger.debug(F("Entering debug mode"));
 
 // Mixed usage
 logger.info("Device %s reports %d°C", deviceName.c_str(), reading);
+logger.debug("Variable state: %s=%d", "sensorCount", sensorCount);
 ```
 
 ### Mute/Unmute Control
@@ -147,6 +154,7 @@ Messages are formatted with prefixes for easy identification:
 [INFO] System initialized
 [WARN] Low memory: 512 bytes free
 [ERR ] Connection timeout after 5000ms
+[DBUG] Variable x=42, state=READY
 ```
 
 ## Implementation Details

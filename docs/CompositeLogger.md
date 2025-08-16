@@ -16,6 +16,7 @@ The `CompositeLogger` is a logger implementation that forwards log events to mul
   - [info](#void-infoconst-char-fmt-)
   - [warn](#void-warnconst-char-fmt-)
   - [err](#void-errconst-char-fmt-)
+  - [debug](#void-debugconst-char-fmt-)
   - [write](#size_t-writeuint8_t-ch--size_t-writeconst-uint8_t-buffer-size_t-size)
 - [Configuration](#configuration)
 - [Use Cases](#use-cases)
@@ -30,7 +31,7 @@ The `CompositeLogger` is a logger implementation that forwards log events to mul
 - **Dynamic Management**: Add and remove loggers at runtime
 - **Memory Efficient**: Uses a simple array-based storage system
 - **Type Safety**: Prevents duplicate registrations and null pointer issues
-- **Full ILogger Interface**: Supports all standard logging methods (info, warn, err) and Print functionality
+- **Full ILogger Interface**: Supports all standard logging methods (info, warn, err, debug) and Print functionality
 
 ## Constructor
 
@@ -105,6 +106,7 @@ multiLogger.clearLoggers();
 multiLogger.info("Application started");
 multiLogger.warn("Memory usage: %d%%", memoryUsage);
 multiLogger.err("Critical error in module %s", moduleName);
+multiLogger.debug("State transition: %s -> %s", oldState, newState);
 
 // Print interface also works
 multiLogger.print("Raw output: ");
@@ -144,6 +146,8 @@ Removes all registered loggers from the composite logger.
 ### `void warn(const char *fmt, ...)`
 
 ### `void err(const char *fmt, ...)`
+
+### `void debug(const char *fmt, ...)`
 
 Standard logging methods with printf-style formatting. All calls are forwarded to all registered loggers.
 

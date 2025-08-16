@@ -31,7 +31,7 @@ The `ILogger` interface provides a standardized logging system for the TRS-80 Mo
 
 ## Features
 
-- **Multiple Log Levels**: `info()`, `warn()`, and `err()` methods for different message types
+- **Multiple Log Levels**: `info()`, `warn()`, `err()`, and `debug()` methods for different message types
 - **Printf-style Formatting**: Support for format strings with variable arguments
 - **String Object Support**: Direct logging of Arduino `String` objects
 - **F() Macro Support**: Memory-efficient logging of flash strings using the `F()` macro
@@ -45,22 +45,25 @@ The `ILogger` interface provides a standardized logging system for the TRS-80 Mo
 virtual void info(const char *fmt, ...) = 0;
 virtual void warn(const char *fmt, ...) = 0;
 virtual void err(const char *fmt, ...) = 0;
+virtual void debug(const char *fmt, ...) = 0;
 ```
 
 ### String Methods with Format Support
 
 ```cpp
-void info(const String &fmt, ...);    // Log String format with arguments as info
-void warn(const String &fmt, ...);    // Log String format with arguments as warning
-void err(const String &fmt, ...);     // Log String format with arguments as error
+void info(const String &fmt, ...);     // Log String format with arguments as info
+void warn(const String &fmt, ...);     // Log String format with arguments as warning
+void err(const String &fmt, ...);      // Log String format with arguments as error
+void debug(const String &fmt, ...);    // Log String format with arguments as debug
 ```
 
 ### F() Macro Support (Flash Strings)
 
 ```cpp
-void infoF(const __FlashStringHelper *fmt, ...);    // Log F() format string as info
-void warnF(const __FlashStringHelper *fmt, ...);    // Log F() format string as warning
-void errF(const __FlashStringHelper *fmt, ...);     // Log F() format string as error
+void infoF(const __FlashStringHelper *fmt, ...);     // Log F() format string as info
+void warnF(const __FlashStringHelper *fmt, ...);     // Log F() format string as warning
+void errF(const __FlashStringHelper *fmt, ...);      // Log F() format string as error
+void debugF(const __FlashStringHelper *fmt, ...);    // Log F() format string as debug
 ```
 
 ### Print Interface
@@ -78,6 +81,7 @@ virtual size_t write(const uint8_t *buffer, size_t size) = 0;
 logger->info("System initialized");
 logger->warn("Low memory warning");
 logger->err("Connection failed");
+logger->debug("Variable value: checking state");
 ```
 
 ### Printf-style Formatting
@@ -88,6 +92,7 @@ const char* status = "OK";
 logger->info("Sensor reading: %d, Status: %s", value, status);
 logger->warn("Temperature: %d°C (threshold: %d°C)", temp, threshold);
 logger->err("Error code: 0x%02X", errorCode);
+logger->debug("Debug: variable x=%d, y=%d", x, y);
 ```
 
 ### String Objects
@@ -115,6 +120,7 @@ logger->warn(statusFormat, serverName.c_str(), connected ? "OK" : "FAILED");
 logger->infoF(F("This string is stored in flash memory"));
 logger->warnF(F("Low battery warning"));
 logger->errF(F("Critical system error"));
+logger->debugF(F("Debug: entering function"));
 
 // Format strings with arguments (FlashString format in flash, values from RAM)
 int temperature = 25;
@@ -122,6 +128,7 @@ int humidity = 60;
 logger->infoF(F("Temperature: %d°C, Humidity: %d%%"), temperature, humidity);
 logger->warnF(F("Battery level: %d%% remaining"), batteryLevel);
 logger->errF(F("Sensor %d failed with error code: 0x%02X"), sensorId, errorCode);
+logger->debugF(F("Debug: loop iteration %d, state=%s"), iteration, state);
 ```
 
 ### Mixed Usage

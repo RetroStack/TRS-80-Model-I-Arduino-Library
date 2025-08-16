@@ -91,6 +91,23 @@ void SerialLogger::err(const char *fmt, ...)
     va_end(arguments);
 }
 
+/**
+ * Logs a formatted debug string
+ */
+void SerialLogger::debug(const char *fmt, ...)
+{
+    if (_silent)
+        return;
+
+    va_list arguments;
+    va_start(arguments, fmt);
+
+    Serial.print("[DBUG] ");
+    _log(fmt, arguments);
+
+    va_end(arguments);
+}
+
 void SerialLogger::mute()
 {
     _silent = true;

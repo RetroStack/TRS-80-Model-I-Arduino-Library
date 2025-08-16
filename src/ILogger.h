@@ -15,6 +15,7 @@ public:
     virtual void info(const char *fmt, ...) = 0;
     virtual void warn(const char *fmt, ...) = 0;
     virtual void err(const char *fmt, ...) = 0;
+    virtual void debug(const char *fmt, ...) = 0;
 
     // String versions with optional format arguments
     void info(const String &fmt, ...)
@@ -52,6 +53,19 @@ public:
         vsnprintf(formatted, sizeof(formatted), fmt.c_str(), args);
         formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
         err("%s", formatted);
+        
+        va_end(args);
+    }
+    
+    void debug(const String &fmt, ...)
+    {
+        va_list args;
+        va_start(args, fmt);
+        
+        char formatted[256]; // Fixed size buffer to avoid VLA
+        vsnprintf(formatted, sizeof(formatted), fmt.c_str(), args);
+        formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
+        debug("%s", formatted);
         
         va_end(args);
     }
@@ -118,6 +132,28 @@ public:
             vsnprintf(formatted, sizeof(formatted), buffer, args);
             formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
             err("%s", formatted);
+        }
+
+        va_end(args);
+    }
+
+    void debugF(const __FlashStringHelper *fmt, ...)
+    {
+        va_list args;
+        va_start(args, fmt);
+
+        size_t len = strlen_P((const char *)fmt);
+        if (len > 0)
+        {
+            char buffer[len + 1]; // +1 for null terminator
+            strcpy_P(buffer, (const char *)fmt);
+            buffer[len] = '\0'; // Ensure null termination
+
+            // Use a temporary buffer for formatted output
+            char formatted[256]; // Fixed size buffer to avoid VLA
+            vsnprintf(formatted, sizeof(formatted), buffer, args);
+            formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
+            debug("%s", formatted);
         }
 
         va_end(args);

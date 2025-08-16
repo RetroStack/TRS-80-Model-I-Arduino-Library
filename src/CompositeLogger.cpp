@@ -189,6 +189,30 @@ void CompositeLogger::err(const char *fmt, ...)
 }
 
 /**
+ * Debug a formatted string to all registered loggers
+ */
+void CompositeLogger::debug(const char *fmt, ...)
+{
+    // Create formatted string once
+    const int LEN = 255;
+    char buffer[LEN];
+    
+    va_list arguments;
+    va_start(arguments, fmt);
+    vsnprintf(buffer, LEN, fmt, arguments);
+    va_end(arguments);
+    
+    // Forward formatted string to each registered logger
+    for (uint8_t i = 0; i < _loggerCount; i++)
+    {
+        if (_loggers[i] != nullptr)
+        {
+            _loggers[i]->debug("%s", buffer);
+        }
+    }
+}
+
+/**
  * Write a byte to all registered loggers
  */
 size_t CompositeLogger::write(uint8_t ch)

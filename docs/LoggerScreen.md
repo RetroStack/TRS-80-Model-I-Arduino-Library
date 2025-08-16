@@ -23,6 +23,7 @@ The `LoggerScreen` is a visual logging destination that extends `ConsoleScreen` 
     - [info](#void-infoconst-char-fmt-)
     - [warn](#void-warnconst-char-fmt-)
     - [err](#void-errconst-char-fmt-)
+    - [debug](#void-debugconst-char-fmt-)
   - [Inherited from ConsoleScreen](#inherited-from-consolescreen)
 - [Visual Output Format](#visual-output-format)
 - [Use Cases](#use-cases)
@@ -34,7 +35,7 @@ The `LoggerScreen` is a visual logging destination that extends `ConsoleScreen` 
 
 - **Visual Logging**: Display log messages directly on the M1Shield screen
 - **ILogger Compatibility**: Works with CompositeLogger through adapter pattern
-- **Color-Coded Levels**: Different colors for INFO (white), WARN (yellow), and ERR (red)
+- **Color-Coded Levels**: Different colors for INFO (white), WARN (yellow), ERR (red), and DEBUG (cyan)
 - **Timestamps**: Optional relative timestamps showing elapsed time
 - **Auto-Scrolling**: Automatic screen clearing when full for continuous logging
 - **Print Interface**: Inherited from ConsoleScreen for direct text output
@@ -157,6 +158,8 @@ composite.addLogger(screen->asLogger());  // Use asLogger()
 
 #### `void err(const char *fmt, ...)`
 
+#### `void debug(const char *fmt, ...)`
+
 Standard logging methods with printf-style formatting. Messages are displayed with appropriate formatting and colors.
 
 **Note:** The adapter returned by `asLogger()` also supports String and F() macro overloads through the ILogger interface:
@@ -164,8 +167,9 @@ Standard logging methods with printf-style formatting. Messages are displayed wi
 ```cpp
 ILogger* adapter = screen->asLogger();
 adapter->info("Temperature: %d°C", temp);           // printf-style
-adapter->info(String("Status: ") + statusText);    // String support
-adapter->info(F("System ready"));                  // F() macro support
+adapter->warn(String("Status: ") + statusText);    // String support
+adapter->err(F("System error"));                   // F() macro support
+adapter->debug(F("Debug: state=%s"), currentState); // Debug with format
 ```
 
 ### Inherited from ConsoleScreen
@@ -195,6 +199,7 @@ void setTabSize(uint8_t size)
 [12:34] [INFO] System initialized
 [12:35] [WARN] Low memory: 512 bytes
 [12:36] [ERR ] Sensor timeout on pin 7
+[12:37] [DBUG] Variable x=42, state=READY
 ```
 
 ### Without Timestamps
@@ -203,6 +208,7 @@ void setTabSize(uint8_t size)
 [INFO] System initialized
 [WARN] Low memory: 512 bytes
 [ERR ] Sensor timeout on pin 7
+[DBUG] Variable x=42, state=READY
 ```
 
 ### Color Coding
@@ -210,6 +216,7 @@ void setTabSize(uint8_t size)
 - **INFO**: White text - normal system information
 - **WARN**: Yellow text - warnings and non-critical issues
 - **ERR**: Red text - errors and critical problems
+- **DEBUG**: Cyan text - debug information and detailed tracing
 - **Timestamps**: Light gray text for easy distinction
 
 ## Use Cases

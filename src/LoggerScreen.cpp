@@ -38,6 +38,15 @@ public:
         va_end(args);
     }
 
+    void debug(const char *fmt, ...) override
+    {
+        va_list args;
+        va_start(args, fmt);
+        _parent->_logMessage("DEBUG", _parent->COLOR_DEBUG, fmt, args);
+        va_end(args);
+    }
+
+    using ILogger::debug;
     using ILogger::err;
     using ILogger::info;
     using ILogger::warn;
@@ -166,6 +175,17 @@ void LoggerScreen::err(const char *fmt, ...)
     va_list args;
     va_start(args, fmt);
     _logMessage(isSmallDisplay() ? "E" : "ERR ", COLOR_ERROR, fmt, args);
+    va_end(args);
+}
+
+/**
+ * @brief Log a debug message
+ */
+void LoggerScreen::debug(const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    _logMessage(isSmallDisplay() ? "D" : "DBUG", COLOR_DEBUG, fmt, args);
     va_end(args);
 }
 
