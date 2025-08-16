@@ -41,7 +41,7 @@ constexpr uint16_t FOOTER_COLOR_FG = 0xFFFF; // Footer text color
 constexpr uint16_t PROGRESSBAR_HEIGHT = 10;             // Height of progress bar in pixels
 constexpr uint16_t PROGRESSBAR_SMALL_HEIGHT = 2;        // Height of small progress bar in pixels
 constexpr uint16_t PROGRESSBAR_COLOR_BG = 0x0000;       // Progress bar background
-constexpr uint16_t PROGRESSBAR_COLOR_FG = 0x001F;       // Progress bar foreground (blue)
+constexpr uint16_t PROGRESSBAR_COLOR_FG = 0xFFE0;       // Progress bar foreground (yellow)
 constexpr uint16_t PROGRESSBAR_SMALL_COLOR_FG = 0xFFFF; // Progress bar foreground (white)
 
 /**
@@ -771,18 +771,18 @@ void ContentScreen::drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper 
     }
 
     // Convert FlashString to regular string and delegate to existing method
-    size_t len = strlen_P((const char*)text);
-    char* buffer = (char*)malloc(len + 1);
+    size_t len = strlen_P((const char *)text);
+    char *buffer = (char *)malloc(len + 1);
     if (buffer == nullptr)
     {
         return; // Failed allocation
     }
-    
-    strcpy_P(buffer, (const char*)text);
-    
+
+    strcpy_P(buffer, (const char *)text);
+
     // Delegate to regular drawText method
     drawText(x, y, buffer, color, size);
-    
+
     // Free temporary buffer
     free(buffer);
 }

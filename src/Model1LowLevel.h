@@ -2,10 +2,10 @@
  * Model1LowLevel.h - Class for accessing the TRS-80 Model 1 low-level signals
  * Authors: Ven Reddy, Marcel Erz (RetroStack)
  * Released under the MIT License.
- * 
+ *
  * This class provides direct, low-level access to all TRS-80 Model 1 hardware control signals
  * and buses, bypassing the safety mechanisms of the main Model1 class. Use with caution.
- * 
+ *
  * Features:
  * - Direct pin configuration (INPUT/OUTPUT mode setting)
  * - Pin configuration reading (check current INPUT/OUTPUT state)
@@ -13,10 +13,10 @@
  * - Signal reading (current HIGH/LOW state)
  * - Complete address and data bus control
  * - Static inline functions for maximum performance (zero call overhead)
- * 
+ *
  * Control Signals Available:
  * - RAS (Row Address Strobe)
- * - CAS (Column Address Strobe)  
+ * - CAS (Column Address Strobe)
  * - MUX (Address Multiplexer)
  * - RD (Read signal)
  * - WR (Write signal)
@@ -27,24 +27,24 @@
  * - WAIT (Wait signal)
  * - SYS_RES (System Reset)
  * - INT_ACK (Interrupt Acknowledge)
- * 
+ *
  * Bus Control:
  * - 16-bit Address Bus (ADDR_LOW, ADDR_HIGH)
  * - 8-bit Data Bus (DATA)
- * 
+ *
  * Usage Example:
  *   // Configure RAS pin as output and set it high
  *   Model1LowLevel::configWriteRAS(OUTPUT);
  *   Model1LowLevel::writeRAS(HIGH);
- *   
+ *
  *   // Read current state
  *   uint8_t rasState = Model1LowLevel::readRAS();
  *   uint8_t rasConfig = Model1LowLevel::configReadRAS();
- *   
+ *
  *   // Bus operations
  *   Model1LowLevel::writeAddressBus(0x1234);
  *   Model1LowLevel::writeDataBus(0xFF);
- * 
+ *
  * WARNING: This class bypasses all safety checks and can potentially damage
  * hardware if used incorrectly. Only use if you understand the TRS-80 Model 1
  * hardware architecture and timing requirements.
@@ -63,7 +63,7 @@ public:
     // ========== Control Signal Configuration Functions ==========
     // Configure individual pins as INPUT or OUTPUT
     // Parameters: outputMode - Use OUTPUT or INPUT constants
-    
+
     /** Configure RAS (Row Address Strobe) pin direction */
     static inline void configWriteRAS(uint8_t outputMode)
     {
@@ -165,7 +165,7 @@ public:
     // Set individual pins to HIGH or LOW state
     // Parameters: value - Use HIGH or LOW constants
     // Note: Pin must be configured as OUTPUT before setting
-    
+
     /** Write RAS (Row Address Strobe) signal state */
     static inline void writeRAS(uint8_t value)
     {
@@ -266,7 +266,7 @@ public:
     // ========== Control Signal Configuration Readers ==========
     // Read current pin configuration (INPUT/OUTPUT state)
     // Returns: INPUT (0) or OUTPUT (1)
-    
+
     /** Read RAS pin configuration state */
     static inline uint8_t configReadRAS() { return pinConfigRead(RAS); }
     static inline uint8_t configReadCAS() { return pinConfigRead(CAS); }
@@ -284,7 +284,7 @@ public:
     // ========== Control Signal Readers ==========
     // Read current pin signal state (HIGH/LOW)
     // Returns: HIGH (1) or LOW (0)
-    
+
     /** Read RAS signal current state */
     static inline uint8_t readRAS() { return pinRead(RAS); }
     static inline uint8_t readCAS() { return pinRead(CAS); }
@@ -303,7 +303,7 @@ public:
     // Control 16-bit address bus and 8-bit data bus
     // Address bus: pins 22-37 (ADDR_LOW: 22-29, ADDR_HIGH: 30-37)
     // Data bus: pins 14-21
-    
+
     /** Write complete 16-bit address on address bus */
     static inline void writeAddressBus(uint16_t address)
     {
@@ -348,7 +348,7 @@ public:
     }
 
     // ========== State Data Functions ==========
-    
+
     /**
      * Returns the current state as packed data
      *
@@ -400,7 +400,7 @@ public:
      *
      * Bit layout (64-bit):
      * Bits 63-48: Address Bus Config (16 bits) - Memory address bus pin configurations
-     * Bits 47-40: Data Bus Config (8 bits) - Data bus pin configurations  
+     * Bits 47-40: Data Bus Config (8 bits) - Data bus pin configurations
      * Bits 39-32: Memory control signal configs (8 bits) - RD, WR, IN, OUT, RAS, CAS, MUX, (1 spare)
      * Bits 31-24: System signal configs (8 bits) - SYS_RES, INT_ACK, INT, TEST, WAIT, (3 spare)
      * Bits 23-0:  Reserved for future use (24 bits)
