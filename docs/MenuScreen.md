@@ -99,7 +99,7 @@ Navigation is handled automatically by the base class:
 - **Down Arrow**: Move to next item (wraps to first item)
 - **Page Up**: Jump to first item on previous page
 - **Page Down**: Jump to first item on next page
-- **Select Action**: Typically Menu button or Right arrow
+- **Select Action**: Left, Right arrows, or Joystick button
 
 ### Selection Wrapping
 
@@ -116,8 +116,8 @@ Navigation is handled automatically by the base class:
 The `actionTaken()` method processes user input for menu navigation including:
 
 - Up/Down: Navigate between menu items with wraparound
-- Right/Select: Activate selected menu item
-- Left/Back: Return to previous screen
+- Right/Left/Select: Activate selected menu item
+- Menu: Return to previous screen
 - Page navigation for multi-page menus
 
 ## Navigation System
@@ -130,7 +130,7 @@ Navigation is handled automatically by the base class:
 - **Down Arrow**: Move to next item (wraps to first item)
 - **Page Up**: Jump to first item on previous page
 - **Page Down**: Jump to first item on next page
-- **Select Action**: Typically Menu button or Right arrow
+- **Select Action**: Left, Right arrows, or Joystick button
 
 ### Selection Wrapping
 
@@ -298,7 +298,7 @@ public:
         // Configure layout
         _setTitle("Settings");
 
-        const char* buttons[] = {"◄ Back", "Select ►"};
+        const char* buttons[] = {"[M] Exit", "Select ►"};
         _setFooterButtons(buttons, 2);
 
         // Initialize state

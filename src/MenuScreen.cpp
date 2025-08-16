@@ -159,9 +159,21 @@ Screen *MenuScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t off
         return nullptr;
     }
 
-    // Exit menu - return to previous screen
-    if (action & (BUTTON_MENU | BUTTON_LEFT | JOYSTICK_LEFT) ||
+    // Menu selection - activate the selected item (only if enabled)
+    if (action & (BUTTON_LEFT | JOYSTICK_LEFT) ||
         ((action & (JOYSTICK_UP_LEFT | JOYSTICK_DOWN_LEFT)) && offsetX > offsetY))
+    {
+        uint8_t selectedIndex = _getSelectedMenuItemIndex();
+        if (_isMenuItemEnabled(selectedIndex))
+        {
+            return _getSelectedMenuItemScreen(selectedIndex);
+        }
+        // If current item is disabled, don't activate it
+        return nullptr;
+    }
+
+    // Exit menu - return to previous screen
+    if (action & BUTTON_MENU)
     {
         return _getSelectedMenuItemScreen(-1);
     }
@@ -308,15 +320,15 @@ void MenuScreen::_drawContent()
             const __FlashStringHelper *configValueF = _getMenuItemConfigValueF(itemIndex);
             const char *configValue = nullptr;
             char *tempConfigBuffer = nullptr;
-            
+
             if (configValueF != nullptr)
             {
                 // Convert FlashString to regular string for display
-                size_t len = strlen_P((const char*)configValueF);
-                tempConfigBuffer = (char*)malloc(len + 1);
+                size_t len = strlen_P((const char *)configValueF);
+                tempConfigBuffer = (char *)malloc(len + 1);
                 if (tempConfigBuffer != nullptr)
                 {
-                    strcpy_P(tempConfigBuffer, (const char*)configValueF);
+                    strcpy_P(tempConfigBuffer, (const char *)configValueF);
                     configValue = tempConfigBuffer;
                 }
             }
@@ -325,7 +337,7 @@ void MenuScreen::_drawContent()
                 // Fall back to regular string method
                 configValue = _getMenuItemConfigValue(itemIndex);
             }
-            
+
             uint16_t configWidth = 0;
             uint16_t configX = 0;
 
@@ -399,7 +411,7 @@ void MenuScreen::_drawContent()
                 gfx.setCursor(configX, y + textSizeHalfHeight);
                 gfx.print(configValue);
             }
-            
+
             // Clean up temporary buffer if it was allocated for FlashString
             if (tempConfigBuffer != nullptr)
             {
