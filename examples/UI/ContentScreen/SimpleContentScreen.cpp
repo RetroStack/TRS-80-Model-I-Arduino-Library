@@ -29,14 +29,14 @@ SimpleContentScreen::SimpleContentScreen(const char *title, const char **menuIte
 
     // Tell ContentScreen what title to show in the header
     // The ContentScreen will automatically draw this for us!
-    _setTitle(title);
+    setTitle(title);
 
     // Set up footer buttons (ContentScreen draws these automatically too!)
     const char *buttons[] = {"Back", "Select"}; // Simple button labels
-    _setButtonItems(buttons, 2);                // 2 buttons in the footer
+    setButtonItems(buttons, 2);                 // 2 buttons in the footer
 
     // Set progress bar to 0% initially
-    _setProgressValue(0);
+    setProgressValue(0);
 
     // Turn LED blue to show screen is ready
     M1Shield.setLEDColor(LEDColor::COLOR_BLUE);
@@ -114,7 +114,7 @@ void SimpleContentScreen::loop()
     {
         progress = (_selectedItem * 100) / (_totalItems - 1);
     }
-    _setProgressValue(progress);
+    setProgressValue(progress);
 }
 
 // STEP 5: ACTION TAKEN - Handle button presses

@@ -9,9 +9,16 @@
 #include <M1Shield.h>
 #include <Arduino.h>
 
-// Define the static constexpr members
-constexpr const char *ConfigMenuExample::CONFIG_MENU_ITEMS[8];
-constexpr uint8_t ConfigMenuExample::CONFIG_MENU_COUNT;
+const char *CONFIG_MENU_ITEMS[8] = {
+    "Sound Effects",
+    "Game Difficulty",
+    "Screen Timeout",
+    "Brightness",
+    "Auto Save",
+    "Language",
+    "Reset to Defaults",
+    "Back to Main Menu"};
+const uint8_t CONFIG_MENU_COUNT = 8;
 
 // Constructor: Initialize settings and set up the menu
 ConfigMenuExample::ConfigMenuExample() : MenuScreen()
@@ -25,13 +32,13 @@ ConfigMenuExample::ConfigMenuExample() : MenuScreen()
     _language = 0; // English
 
     // Set up the menu
-    _setTitle("Configuration");
-    _setMenuItems(CONFIG_MENU_ITEMS, CONFIG_MENU_COUNT);
+    setTitle("Configuration");
+    setMenuItems(CONFIG_MENU_ITEMS, CONFIG_MENU_COUNT);
 
     // Set custom footer buttons
     const char *buttonItems[2] = {
         "[M/<] Back", "[>] Change"};
-    _setButtonItems(buttonItems, 2);
+    setButtonItems(buttonItems, 2);
 }
 
 // Return configuration values for display

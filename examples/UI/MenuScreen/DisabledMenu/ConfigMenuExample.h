@@ -29,18 +29,6 @@ private:
     // Buffer for numeric values (shared buffer to save memory)
     char _numericBuffer[12];
 
-    // Menu items that will be displayed
-    static constexpr const char *CONFIG_MENU_ITEMS[8] = {
-        "Sound Effects",
-        "Game Difficulty",
-        "Screen Timeout",
-        "Brightness",
-        "Auto Save",
-        "Language",
-        "Reset to Defaults",
-        "Back to Main Menu"};
-    static constexpr uint8_t CONFIG_MENU_COUNT = 8;
-
 protected:
     // Handle menu item selection
     Screen *_getSelectedMenuItemScreen(int index) override;

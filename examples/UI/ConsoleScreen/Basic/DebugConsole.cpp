@@ -4,7 +4,7 @@
 DebugConsole::DebugConsole()
 {
     // Configure the console appearance
-    _setTitle("Debug Console");
+    setTitle("Debug Console");
     setConsoleBackground(0x0000);
     setTextColor(0x07E0, 0x0000);
     setTextSize(1);

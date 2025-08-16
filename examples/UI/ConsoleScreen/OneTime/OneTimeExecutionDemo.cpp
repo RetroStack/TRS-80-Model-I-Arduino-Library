@@ -42,7 +42,7 @@ void OneTimeExecutionDemo::_executeOnce()
 
 OneTimeExecutionDemo::OneTimeExecutionDemo() : ConsoleScreen()
 {
-    _setTitle("One-Time Exec");
+    setTitle("One-Time Exec");
 
     // Set initial colors and state
     setTextColor(0xFFFF, 0x0000);

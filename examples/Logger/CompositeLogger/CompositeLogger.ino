@@ -16,8 +16,8 @@
  */
 
 // Select your display provider
-#include <Display_ST7789.h>
-Display_ST7789 displayProvider;
+#include <Display_ST7789_320x240.h>
+Display_ST7789_320x240 displayProvider;
 
 #include <M1Shield.h>
 #include <CompositeLogger.h>
@@ -90,7 +90,7 @@ void setup()
 
     Serial.print(F("Total loggers active: "));
     Serial.println(multiLogger.getLoggerCount());
-    
+
     // Activate the screen
     M1Shield.setScreen(screenLogger);
 

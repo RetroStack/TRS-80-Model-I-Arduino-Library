@@ -9,15 +9,25 @@
 #include <M1Shield.h>
 #include <Arduino.h>
 
-// Define the static constexpr members
-constexpr const char *SimpleMenuScreen::MAIN_MENU_ITEMS[11];
-constexpr uint8_t SimpleMenuScreen::MAIN_MENU_COUNT;
+const char *MAIN_MENU_ITEMS[11] = {
+    "Run BASIC",
+    "Load Program",
+    "Save Program",
+    "Font: A/B",
+    "View: Left",
+    "Settings",
+    "Games",
+    "Utilities",
+    "About",
+    "Help",
+    "Exit"};
 
 // Constructor: Set up the menu title, items, and initial progress
 SimpleMenuScreen::SimpleMenuScreen() : MenuScreen()
 {
-    _setTitle("TRS-80 Main Menu");
-    _setMenuItems(MAIN_MENU_ITEMS, MAIN_MENU_COUNT);
+    setTitle("TRS-80 Main Menu");
+
+    setMenuItems(MAIN_MENU_ITEMS, 11);
 }
 
 // Handle menu item selection
@@ -33,7 +43,7 @@ Screen *SimpleMenuScreen::_getSelectedMenuItemScreen(int index)
     }
 
     // Handle valid menu selections
-    if (index >= 0 && index < MAIN_MENU_COUNT)
+    if (index >= 0 && index < 11)
     {
         Serial.print("Selected: ");
         Serial.println(MAIN_MENU_ITEMS[index]);
