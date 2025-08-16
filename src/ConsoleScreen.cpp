@@ -86,9 +86,9 @@ void ConsoleScreen::_updateDimensions()
 /**
  * @brief Main loop processing for console screen updates
  *
- * Handles one-time execution timing, paging wait states, and delegates
- * to ContentScreen for standard screen processing. Override this method
- * in derived classes for custom behavior.
+ * Handles one-time execution timing and delegates to ContentScreen for 
+ * standard screen processing. Override this method in derived classes 
+ * for custom behavior.
  */
 void ConsoleScreen::loop()
 {
@@ -97,14 +97,6 @@ void ConsoleScreen::loop()
     {
         _executeOnce();
         _hasExecutedOnce = true;
-    }
-
-    // Handle paging wait state
-    if (_isWaitingForPaging && _shouldEndPagingWait())
-    {
-        _clearPagingMessage();
-        cls(); // Clear and reset console
-        _isWaitingForPaging = false;
     }
 
     // Call parent loop is not necessary since nothing is defined there
@@ -126,18 +118,6 @@ Screen *ConsoleScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t 
     if (!isActive())
     {
         return nullptr;
-    }
-
-    // Handle right button for paging continuation
-    if ((action & BUTTON_RIGHT) && _isWaitingForPaging)
-    {
-        if (_pagingMode == PAGING_WAIT_BUTTON || _pagingMode == PAGING_WAIT_BOTH)
-        {
-            _clearPagingMessage();
-            cls(); // Clear and reset console
-            _isWaitingForPaging = false;
-        }
-        return nullptr; // Stay on current screen
     }
 
     // Handle back/menu button to exit console
@@ -254,11 +234,8 @@ bool ConsoleScreen::open()
  */
 size_t ConsoleScreen::write(uint8_t c)
 {
-    // If we're waiting for paging action, don't process new characters
-    if (_isWaitingForPaging)
-    {
-        return 0; // Indicate character was not written
-    }
+    // Block execution if we're waiting for paging action
+    _waitForPagingIfNeeded();
 
     _processChar((char)c);
     if (isActive())
@@ -283,6 +260,9 @@ size_t ConsoleScreen::write(const uint8_t *buffer, size_t size)
 {
     if (!isActive() || size == 0)
         return 0;
+
+    // Block execution if we're waiting for paging action
+    _waitForPagingIfNeeded();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
@@ -503,6 +483,54 @@ void ConsoleScreen::_renderChar(char c)
     _currentX += _charWidth;
 }
 
+/**
+ * @brief Block execution until paging wait is resolved
+ *
+ * If the console is currently waiting for paging action, this method
+ * will block until the wait is resolved (by timeout or user action).
+ * This ensures print operations are truly blocked during paging.
+ */
+void ConsoleScreen::_waitForPagingIfNeeded()
+{
+    if (!_isWaitingForPaging)
+        return;
+
+    // Show paging prompt once when we start waiting
+    if (_showPagingPrompt)
+    {
+        _showPagingMessage();
+        M1Shield.display();
+    }
+
+    // Block execution until paging wait is resolved
+    while (_isWaitingForPaging)
+    {
+        // Check for any button press to continue (for button-based modes)
+        if ((_pagingMode == PAGING_WAIT_BUTTON || _pagingMode == PAGING_WAIT_BOTH) && 
+            (M1Shield.wasMenuPressed() || M1Shield.wasLeftPressed() || M1Shield.wasRightPressed() || 
+             M1Shield.wasUpPressed() || M1Shield.wasDownPressed() || M1Shield.wasJoystickPressed()))
+        {
+            _clearPagingMessage();
+            cls(); // Clear and reset console
+            _isWaitingForPaging = false;
+            break;
+        }
+
+        // Check for timeout expiration (for timeout-based modes)
+        if ((_pagingMode == PAGING_WAIT_TIMEOUT || _pagingMode == PAGING_WAIT_BOTH) && 
+            _shouldEndPagingWait())
+        {
+            _clearPagingMessage();
+            cls(); // Clear and reset console
+            _isWaitingForPaging = false;
+            break;
+        }
+        
+        // Small delay to prevent excessive CPU usage
+        delay(10);
+    }
+}
+
 // ========== Paging Management Methods ==========
 
 /**
@@ -539,12 +567,11 @@ bool ConsoleScreen::_handlePaging()
 }
 
 /**
- * @brief Check if paging wait period should end
+ * @brief Check if paging timeout has expired
  *
- * Evaluates timeout and button conditions to determine if
- * the paging wait should be completed.
+ * Evaluates timeout conditions for timeout-based paging modes.
  *
- * @return true if wait period should end and console should clear
+ * @return true if timeout has expired and console should clear
  */
 bool ConsoleScreen::_shouldEndPagingWait()
 {
@@ -553,22 +580,9 @@ bool ConsoleScreen::_shouldEndPagingWait()
 
     unsigned long elapsed = millis() - _pagingWaitStartTime;
 
-    switch (_pagingMode)
-    {
-    case PAGING_WAIT_TIMEOUT:
-        return elapsed >= _pagingTimeoutMs;
-
-    case PAGING_WAIT_BUTTON:
-        // Only button press can end wait (handled in actionTaken)
-        return false;
-
-    case PAGING_WAIT_BOTH:
-        // Either timeout OR button press (button handled in actionTaken)
-        return elapsed >= _pagingTimeoutMs;
-
-    default:
-        return true; // Fallback
-    }
+    // Only check timeout for modes that use it
+    return (_pagingMode == PAGING_WAIT_TIMEOUT || _pagingMode == PAGING_WAIT_BOTH) &&
+           (elapsed >= _pagingTimeoutMs);
 }
 
 /**
@@ -604,11 +618,11 @@ void ConsoleScreen::_showPagingMessage()
         break;
 
     case PAGING_WAIT_BUTTON:
-        gfx.print("Press [>] to continue...");
+        gfx.print("Press any button to continue...");
         break;
 
     case PAGING_WAIT_BOTH:
-        gfx.print("Press [>] or wait ");
+        gfx.print("Press any button or wait ");
         gfx.print((_pagingTimeoutMs - (millis() - _pagingWaitStartTime)) / 1000 + 1);
         gfx.print("s...");
         break;

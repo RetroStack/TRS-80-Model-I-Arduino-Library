@@ -60,10 +60,14 @@ This is the initial version written by Ven Reddy
   - Interactive navigation with UP/DOWN keys
   - Automatic page breaks and scroll indicators
   - Page status display and user prompts
+- **BEHAVIOR CHANGE**: ConsoleScreen paging is now **blocking** for print operations
+  - `print()`, `println()`, and `write()` methods block execution during paging waits
+  - User input continues to be processed during blocked operations
+  - Ensures sequential output order and prevents message loss
+  - **Any button press** can continue paging (all buttons + joystick)
 - **BREAKING CHANGE**: Removed M1TerminalScreen class and comprehensive demo examples
 - **BREAKING CHANGE**: Moved low-level hardware access to dedicated Model1LowLevel class
 - **API IMPROVEMENT**: Made various methods public for better accessibility across Screen classes
 - Added `keyName()` method to KeyboardChangeIterator for human-readable key names
 - Enhanced documentation with FlashString examples and comprehensive method descriptions
-- Updated keywords.txt with new methods and console paging features
 - General code cleanup, warning fixes, and improved method accessibility

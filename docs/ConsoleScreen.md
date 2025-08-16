@@ -82,9 +82,9 @@ ConsoleScreen (implements Print interface)
 - **Configurable Behavior**: Four distinct paging modes for different use cases
 - **User Control**: Optional pause-and-wait functionality when screen fills
 - **Timeout Support**: Configurable automatic continuation after specified delay
-- **Button Integration**: M1Shield right button support for manual continuation
+- **Button Integration**: M1Shield button support for manual continuation (all buttons + joystick)
 - **Visual Feedback**: Clear progress indicators and user prompts
-- **Non-Blocking**: Paging waits don't interrupt other application logic
+- **Blocking Operations**: Print operations pause during paging waits until resolved
 
 ### Simple Text Output
 
@@ -291,6 +291,21 @@ The console automatically wraps when text reaches the bottom, clearing the entir
 
 The `ConsoleScreen` includes a sophisticated auto-paging system that provides user control over how the console behaves when it reaches the bottom of the screen. Instead of immediately clearing and wrapping to the top, you can configure the console to pause and wait for user interaction.
 
+### Blocking Behavior
+
+When using paging modes other than `PAGING_AUTO_CLEAR`, print operations become **blocking** during paging waits:
+
+- **Print Blocking**: Calls to `print()`, `println()`, and `write()` will pause execution until the paging wait is resolved
+- **User Interaction**: The system continues processing user input (button presses) during the block
+- **Timeout Resolution**: Automatic timeouts continue working during blocked operations
+- **Shield Processing**: The M1Shield system continues running, ensuring responsive user interface
+
+This blocking behavior ensures that:
+- Sequential print output maintains proper order
+- Users have full control over output pacing
+- No output is lost or discarded during paging waits
+- Application logic naturally pauses for user reading time
+
 ### Paging Modes
 
 The auto-paging system supports four distinct modes via the `ConsolePagingMode` enum:
@@ -299,7 +314,7 @@ The auto-paging system supports four distinct modes via the `ConsolePagingMode` 
 enum ConsolePagingMode {
     PAGING_AUTO_CLEAR,    // Default: immediately clear and continue (original behavior)
     PAGING_WAIT_TIMEOUT,  // Wait for timeout, then continue
-    PAGING_WAIT_BUTTON,   // Wait for M1Shield right button press to continue
+    PAGING_WAIT_BUTTON,   // Wait for any button/joystick press to continue
     PAGING_WAIT_BOTH      // Wait for either timeout OR button press
 };
 ```
@@ -335,23 +350,23 @@ void continuePaging();        // Programmatically continue from paused state
 - **Use Case**: Automatic progression with user read time
 - **Default Timeout**: 5000ms (5 seconds), configurable
 - **Visual**: Progress indicator showing remaining time
-- **User Interaction**: Optional - can press right button to skip wait
+- **User Interaction**: Optional - can press any button/joystick to skip wait
 
 #### PAGING_WAIT_BUTTON
 
-- **Behavior**: Shows message "--- Press RIGHT button to continue ---", waits indefinitely
+- **Behavior**: Shows message "Press any button to continue...", waits indefinitely
 - **Use Case**: Manual control, debugging, step-through operation
 - **Timeout**: None - waits indefinitely
 - **Visual**: Static message with blinking cursor
-- **User Interaction**: Required - must press M1Shield right button
+- **User Interaction**: Required - must press any M1Shield button or joystick
 
 #### PAGING_WAIT_BOTH
 
-- **Behavior**: Shows message "--- Press RIGHT or wait 5s to continue ---", waits for either
+- **Behavior**: Shows message "Press any button or wait Xs...", waits for either
 - **Use Case**: Flexible operation allowing both manual and automatic progression
 - **Default Timeout**: 5000ms (5 seconds), configurable
 - **Visual**: Progress indicator with button option
-- **User Interaction**: Optional - either button press or timeout
+- **User Interaction**: Optional - either any button/joystick press or timeout
 
 ### Usage Examples
 
@@ -389,7 +404,7 @@ void setup() {
 void loop() {
     if (someCondition()) {
         console.println("Debug message that requires user attention");
-        // Console will pause when full, waiting for right button
+        // Console will pause when full, waiting for any button/joystick
     }
 
     console.loop();  // Essential for button handling
@@ -487,7 +502,7 @@ void loop() {
 
 **Button Behavior:**
 
-- **Right Button**: Continues paging when in wait state
+- **Any Button/Joystick**: Continues paging when in wait state
 - **Button Debouncing**: Handled automatically by M1Shield
 - **State Management**: Paging system tracks button press timing
 - **Non-Interference**: Button only responds during paging wait states
@@ -533,25 +548,29 @@ void conditionalPaging() {
 
 #### Timing Considerations
 
-- **Non-Blocking**: Paging wait states don't block other code execution
-- **Loop Dependency**: Requires regular calls to `console.loop()` for proper operation
+- **Blocking Operations**: Print calls block execution during paging waits until resolved
+- **Automatic Processing**: User input handled automatically during blocked operations
 - **Timeout Accuracy**: Uses millis() for timeout tracking (1ms resolution)
 
 #### Button Responsiveness
 
-- **Immediate Response**: Button presses detected on next `console.loop()` call
+- **Immediate Response**: Button presses detected directly during blocking waits
 - **Debouncing**: Handled by M1Shield system automatically
-- **State Cleanup**: Proper state management prevents missed button presses
+- **No Dependencies**: No special loop calls required for paging to work
 
 ### Best Practices for Paging
 
-#### Essential Loop Call
+#### Automatic Operation
 
 ```cpp
 void loop() {
-    // ALWAYS include these for proper paging operation
-    M1Shield.loop();     // Button detection
-    console.loop();      // Paging state management
+    // No special implementation needed for paging!
+    // Just call M1Shield.loop() as normal for overall system operation
+    M1Shield.loop();
+
+    // Paging is handled automatically during print operations
+    console.print("Your output here");
+    console.println(" - paging just works!");
 
     // Your application code
 }
@@ -670,6 +689,37 @@ void logToAnyStream(Print& stream, const char* message) {
 void somewhereInCode() {
     logToAnyStream(console, "This works!");  // ConsoleScreen is a Print stream
     logToAnyStream(Serial, "This also works!");  // Same function works with Serial
+}
+```
+
+### Blocking Paging Behavior
+
+```cpp
+ConsoleScreen console;
+
+void setup() {
+    // Enable button-wait paging mode
+    console.setPagingMode(PAGING_WAIT_BUTTON);
+}
+
+void loop() {
+    static int counter = 0;
+    
+    // This demonstrates automatic blocking behavior
+    console.print("Message ");
+    console.print(++counter);
+    console.println(" - This output will pause when screen fills");
+    
+    // The print operations above will BLOCK execution here when the console
+    // reaches the bottom, waiting for the user to press any button/joystick
+    
+    console.println("This line prints immediately after the previous ones");
+    console.println("No messages are lost or discarded during paging");
+    
+    delay(500);  // Small delay between messages
+    
+    // No special implementation needed - paging is handled automatically!
+    // User input (button presses) is processed directly during blocking
 }
 ```
 
@@ -837,7 +887,7 @@ protected:
         setTextColor(0xFFFF);
         println("Messages will auto-generate...");
         println("Console will pause when full");
-        println("Press RIGHT button or wait for timeout");
+        println("Press any button/joystick or wait for timeout");
         println("------------------------");
     }
 

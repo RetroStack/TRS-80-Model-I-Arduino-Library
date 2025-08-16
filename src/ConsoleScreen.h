@@ -180,12 +180,11 @@ private:
     bool _handlePaging();
 
     /**
-     * @brief Check if paging wait period should end
+     * @brief Check if paging timeout has expired
      *
-     * Evaluates timeout and button conditions to determine if
-     * the paging wait should be completed.
+     * Evaluates timeout conditions for timeout-based paging modes.
      *
-     * @return true if wait period should end and console should clear
+     * @return true if timeout has expired and console should clear
      */
     bool _shouldEndPagingWait();
 
@@ -203,6 +202,15 @@ private:
      * Removes paging prompt and resets console for continued output.
      */
     void _clearPagingMessage();
+
+    /**
+     * @brief Block execution until paging wait is resolved
+     *
+     * If the console is currently waiting for paging action, this method
+     * will block until the wait is resolved (by timeout or user action).
+     * This ensures print operations are truly blocked during paging.
+     */
+    void _waitForPagingIfNeeded();
 
 protected:
     /**
