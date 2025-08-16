@@ -86,8 +86,8 @@ void ConsoleScreen::_updateDimensions()
 /**
  * @brief Main loop processing for console screen updates
  *
- * Handles one-time execution timing and delegates to ContentScreen for 
- * standard screen processing. Override this method in derived classes 
+ * Handles one-time execution timing and delegates to ContentScreen for
+ * standard screen processing. Override this method in derived classes
  * for custom behavior.
  */
 void ConsoleScreen::loop()
@@ -161,7 +161,7 @@ void ConsoleScreen::_newLine()
     _currentY += _lineHeight;
 
     // Check if we've reached the bottom of the screen
-    if (_currentY + _lineHeight > _contentHeight)
+    if (_currentY + _lineHeight + _lineHeight >= _contentHeight)
     {
         if (!_handlePaging())
         {
@@ -506,8 +506,8 @@ void ConsoleScreen::_waitForPagingIfNeeded()
     while (_isWaitingForPaging)
     {
         // Check for any button press to continue (for button-based modes)
-        if ((_pagingMode == PAGING_WAIT_BUTTON || _pagingMode == PAGING_WAIT_BOTH) && 
-            (M1Shield.wasMenuPressed() || M1Shield.wasLeftPressed() || M1Shield.wasRightPressed() || 
+        if ((_pagingMode == PAGING_WAIT_BUTTON || _pagingMode == PAGING_WAIT_BOTH) &&
+            (M1Shield.wasMenuPressed() || M1Shield.wasLeftPressed() || M1Shield.wasRightPressed() ||
              M1Shield.wasUpPressed() || M1Shield.wasDownPressed() || M1Shield.wasJoystickPressed()))
         {
             _clearPagingMessage();
@@ -517,7 +517,7 @@ void ConsoleScreen::_waitForPagingIfNeeded()
         }
 
         // Check for timeout expiration (for timeout-based modes)
-        if ((_pagingMode == PAGING_WAIT_TIMEOUT || _pagingMode == PAGING_WAIT_BOTH) && 
+        if ((_pagingMode == PAGING_WAIT_TIMEOUT || _pagingMode == PAGING_WAIT_BOTH) &&
             _shouldEndPagingWait())
         {
             _clearPagingMessage();
@@ -525,7 +525,7 @@ void ConsoleScreen::_waitForPagingIfNeeded()
             _isWaitingForPaging = false;
             break;
         }
-        
+
         // Small delay to prevent excessive CPU usage
         delay(10);
     }
