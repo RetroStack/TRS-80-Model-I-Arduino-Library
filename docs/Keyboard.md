@@ -141,6 +141,26 @@ Returns the key code from the lookup tables (ASCII or special code).
 
 **Returns:** ASCII character or special key code
 
+#### `string keyName()`
+
+Returns a human-readable string name for the key.
+
+**Returns:** String representation of the key name
+
+- Special keys return descriptive names: "ENTER", "SHIFT", "SPACE", "CLEAR", etc.
+- ASCII characters return single-character strings: "A", "1", "!", etc.
+- Unknown keys return hex notation: "0x7F", "0xA0", etc.
+
+**Example:**
+```cpp
+KeyboardChangeIterator it = keyboard.changes();
+while (it.hasNext()) {
+    string name = it.keyName();  // e.g., "ENTER", "A", "SPACE"
+    Serial.println("Key: " + name);
+    it.next();
+}
+```
+
 #### `uint8_t keyIndex()`
 
 Returns the linear key index (0-63) in the 8x8 matrix.
@@ -232,8 +252,10 @@ void loop() {
   while (it.hasNext()) {
     if (it.wasJustPressed()) {
       Serial.print("Key pressed: ");
+      Serial.print(it.keyName());        // Human-readable name
+      Serial.print(" (0x");
       Serial.print(it.keyValue(), HEX);
-      Serial.print(" at row ");
+      Serial.print(") at row ");
       Serial.print(it.row());
       Serial.print(", col ");
       Serial.print(it.column());
@@ -246,7 +268,10 @@ void loop() {
 
     if (it.wasReleased()) {
       Serial.print("Key released: ");
-      Serial.println(it.keyValue(), HEX);
+      Serial.print(it.keyName());        // Human-readable name
+      Serial.print(" (0x");
+      Serial.print(it.keyValue(), HEX);
+      Serial.println(")");
     }
 
     it.next();

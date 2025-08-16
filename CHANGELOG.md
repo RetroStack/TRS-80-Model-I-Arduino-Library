@@ -47,3 +47,23 @@ This is the initial version written by Ven Reddy
 - Added Display_ST7789_320x240 (renamed from Display_ST7789) provider for alternative landscape format displays
 - Updated documentation, examples, and library.properties to include all new display providers
 - Updated keywords.txt with new display provider classes
+
+## 16th August 2025 - Updated Release (1.2.3)
+
+- **MAJOR**: Added comprehensive FlashString (F() macro) support across UI classes for memory efficiency
+  - Added FlashString variants for ContentScreen: `setTitleF()`, `setButtonItemsF()`, `drawTextF()`
+  - Added FlashString variants for MenuScreen: `setMenuItemsF()`, `_getMenuItemConfigValueF()`
+  - Enhanced ILogger with FlashString methods: `infoF()`, `warnF()`, `errF()` with variadic format support
+  - Added variadic format support to existing String methods: `info()`, `warn()`, `err()`
+- **MAJOR**: Added comprehensive console paging functionality to ConsoleScreen
+  - New paging modes: AUTO, MANUAL, OFF
+  - Interactive navigation with UP/DOWN keys
+  - Automatic page breaks and scroll indicators
+  - Page status display and user prompts
+- **BREAKING CHANGE**: Removed M1TerminalScreen class and comprehensive demo examples
+- **BREAKING CHANGE**: Moved low-level hardware access to dedicated Model1LowLevel class
+- **API IMPROVEMENT**: Made various methods public for better accessibility across Screen classes
+- Added `keyName()` method to KeyboardChangeIterator for human-readable key names
+- Enhanced documentation with FlashString examples and comprehensive method descriptions
+- Updated keywords.txt with new methods and console paging features
+- General code cleanup, warning fixes, and improved method accessibility

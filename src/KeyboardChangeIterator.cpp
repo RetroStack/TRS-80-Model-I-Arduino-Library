@@ -156,6 +156,53 @@ uint8_t KeyboardChangeIterator::keyValue() const
 }
 
 /**
+ * Returns the name of the current key.
+ */
+String KeyboardChangeIterator::keyName() const
+{
+    uint8_t keyVal = keyValue();
+
+    // Handle special keys
+    switch (keyVal)
+    {
+    case KEY_ENTER:
+        return "ENTER";
+    case KEY_CLEAR:
+        return "CLEAR";
+    case KEY_BREAK:
+        return "BREAK";
+    case KEY_UP:
+        return "UP";
+    case KEY_DOWN:
+        return "DOWN";
+    case KEY_LEFT:
+        return "LEFT";
+    case KEY_RIGHT:
+        return "RIGHT";
+    case KEY_SPACE:
+        return "SPACE";
+    case KEY_SHIFT:
+        return "SHIFT";
+
+    default:
+        // For regular ASCII characters
+        if (keyVal >= 32 && keyVal <= 126)
+        {
+            return String((char)keyVal);
+        }
+        else
+        {
+            // For unknown/special keys, show hex value
+            String hex = "0x";
+            if (keyVal < 16)
+                hex += "0";
+            hex += String(keyVal, HEX);
+            return hex;
+        }
+    }
+}
+
+/**
  * Checks whether the shift key is pressed.
  */
 bool KeyboardChangeIterator::isShiftPressed() const

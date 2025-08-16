@@ -8,6 +8,7 @@
 #define KEYBOARDCHANGEITERATOR_H
 
 #include <Arduino.h>
+#include <string.h>
 
 class KeyboardChangeIterator
 {
@@ -28,6 +29,7 @@ public:
     bool wasReleased() const;
 
     uint8_t keyValue() const;
+    String keyName() const;
     bool isShiftPressed() const;
 
 private:

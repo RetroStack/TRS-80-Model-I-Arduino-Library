@@ -123,6 +123,7 @@ isPressed    KEYWORD2
 wasJustPressed    KEYWORD2
 wasReleased    KEYWORD2
 keyValue    KEYWORD2
+keyName    KEYWORD2
 isShiftPressed    KEYWORD2
 begin    KEYWORD2
 end    KEYWORD2
