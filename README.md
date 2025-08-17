@@ -43,6 +43,30 @@ void setup() {
 }
 ```
 
+### UI Framework with String Support
+
+```cpp
+#include <ContentScreen.h>
+
+class MyScreen : public ContentScreen {
+public:
+    MyScreen() {
+        // Three ways to set titles/text - choose what fits your needs:
+        setTitle("Static Title");                    // Simple C-string
+        setTitle(String("Score: ") + String(score)); // Dynamic Arduino String
+        setTitleF(F("Memory Efficient"));            // Flash string (F-macro)
+    }
+
+protected:
+    void _drawContent() override {
+        // Draw dynamic content easily
+        String playerName = "Alice";
+        drawText(10, 10, String("Player: ") + playerName, WHITE);
+        drawTextF(10, 30, F("Static text"), YELLOW);  // Saves RAM
+    }
+};
+```
+
 ## Key Features
 
 - **Complete TRS-80 Bus Control** - Read/write memory, control signals, interrupts
@@ -50,6 +74,7 @@ void setup() {
 - **Low-Level Access** - Model1LowLevel for advanced users requiring precise control
 - **M1Shield Support** - Hardware abstraction for Arduino shield with display/input
 - **UI Framework** - Screen management system for building interactive applications
+- **Flexible String Support** - All text functions support C-strings, Arduino Strings, and F-strings
 - **Multiple Display Support** - ST7789, ILI9341, ST7796, SSD1306, and more
 - **Arduino Compatible** - Standard Print interface, familiar patterns
 

@@ -2,6 +2,14 @@
 
 The `MenuScreen` class provides a complete framework for creating navigable menu interfaces with automatic pagination, visual selection feedback, and input handling. It extends `ContentScreen` to offer standardized menu functionality while allowing customization of menu items and actions.
 
+**NEW: Comprehensive String Support** - Menu items now support three formats:
+
+- **C-string arrays** (`const char**`) - For simple static menus
+- **String arrays** (`String*`) - For dynamic menus built at runtime
+- **F-string arrays** (`const __FlashStringHelper**`) - For memory-efficient static menus
+
+Plus all inherited ContentScreen string functions (setTitle, notify, alert, confirm, drawText).
+
 ## Table of Contents
 
 - [Constructor](#constructor)
@@ -41,13 +49,60 @@ Ensures proper cleanup of any dynamically allocated menu items to prevent memory
 
 ## Menu Management
 
-- **`void setMenuItems(const char** menuItems, uint8_t menuItemCount)`\*\* - Set the menu items to be displayed
-- **`void setMenuItemsF(const \_\_FlashStringHelper** menuItems, uint8_t menuItemCount)`\*\* - Set menu items from FlashString array (F() macro)
+MenuScreen supports three ways to set menu items for maximum flexibility:
+
+- **`void setMenuItems(const char** menuItems, uint8_t menuItemCount)`\*\* - Set menu items from C-string array
+- **`void setMenuItems(String* menuItems, uint8_t menuItemCount)`** - Set menu items from Arduino String array
+- **`void setMenuItemsF(const \_\_FlashStringHelper** menuItems, uint8_t menuItemCount)`\*\* - Set menu items from F-string array
 - **`void clearMenuItems()`** - Clear and free all dynamically allocated menu items
 
 ### Setting Menu Items
 
-The `setMenuItems()` method configures the menu with an array of menu item strings:
+Choose the method that best fits your use case:
+
+#### Static Menus (C-strings)
+
+For simple, unchanging menu items:
+
+```cpp
+const char* items[] = {"New Game", "Load Game", "Settings", "Exit"};
+setMenuItems(items, 4);
+```
+
+#### Dynamic Menus (Arduino Strings)
+
+For menus with content built at runtime:
+
+```cpp
+String playerName = "Alice";
+int score = 1250;
+
+String items[] = {
+    String("Continue as ") + playerName,
+    String("High Score: ") + String(score),
+    "New Game",
+    "Settings"
+};
+setMenuItems(items, 4);
+```
+
+#### Memory-Efficient Static Menus (F-strings)
+
+For static menus that save RAM:
+
+```cpp
+const __FlashStringHelper* items[] = {
+    F("New Game"),
+    F("Load Game"),
+    F("Settings"),
+    F("Exit")
+};
+setMenuItemsF(items, 4);
+```
+
+### Menu Item Management
+
+All `setMenuItems()` methods:
 
 - **Deep Copy**: Creates copies of all strings - original array can be freed
 - **Dynamic Allocation**: Automatically manages memory for menu items

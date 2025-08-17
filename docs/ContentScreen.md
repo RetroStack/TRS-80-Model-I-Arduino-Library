@@ -2,43 +2,62 @@
 
 The `ContentScreen` class provides a structured layout template for screens with standardized header, content area, footer, and progress bar regions. It extends the basic `Screen` interface with automatic layout management, allowing developers to focus on content-specific functionality while maintaining consistent visual structure.
 
+**NEW: Comprehensive String Support** - All text functions now support three formats:
+
+- **C-strings** (`const char*`) - For simple static text
+- **Arduino Strings** (`String`) - For dynamic content built at runtime
+- **F-strings** (`F()` macro) - For memory-efficient static text stored in Flash
+
 ## Table of Contents
 
 - [Constructor](#constructor)
+- [String Function Overview](#string-function-overview)
 - [Layout Structure](#layout-structure)
 - [Protected Methods](#protected-methods)
   - [\_drawContent](#void-_drawcontent)
   - [Layout Getters](#layout-getters)
 - [Public Methods](#public-methods)
   - [Title Management](#title-management)
-    - [setTitle](#void-settitleconst-char-title)
-    - [setTitleF](#void-settitlefconst-__flashstringhelper-title)
+    - [setTitle](#title-functions)
     - [clearTitle](#void-cleartitle)
     - [getTitle](#const-char-gettitle-const)
   - [Progress Control](#progress-control)
     - [setProgressValue](#void-setprogressvalueint-value)
     - [getProgressValue](#uint8_t-getprogressvalue-const)
   - [Button Management](#button-management)
-    - [setButtonItems](#void-setbuttonitemsconst-char-buttonitems-uint8_t-buttonitemcount)
-    - [setButtonItemsF](#void-setbuttonitemsfconst-__flashstringhelper-buttonitems-uint8_t-buttonitemcount)
+    - [setButtonItems](#button-functions)
     - [clearButtonItems](#void-clearbuttonitems)
   - [Content Area Utilities](#content-area-utilities)
     - [clearContentArea](#void-clearcontentarea)
-    - [drawText](#void-drawtextuint16_t-x-uint16_t-y-const-char-text-uint16_t-color-uint8_t-size--1)
-    - [drawTextF](#void-drawtextfuint16_t-x-uint16_t-y-const-__flashstringhelper-text-uint16_t-color-uint8_t-size--1)
+    - [drawText](#text-drawing-functions)
   - [Notification System](#notification-system)
-    - [notify](#void-notifyconst-char-text-unsigned-long-durationms--3000)
-    - [notifyF](#void-notifyfconst-__flashstringhelper-text-unsigned-long-durationms--3000)
+    - [notify](#notification-functions)
     - [isNotificationActive](#bool-isnotificationactive-const)
     - [dismissNotification](#void-dismissnotification)
   - [Alert and Confirmation System](#alert-and-confirmation-system)
-    - [alert](#void-alertconst-char-text)
-    - [alertF](#void-alertfconst-__flashstringhelper-text)
-    - [confirm](#confirmresult-confirmconst-char-text-const-char-lefttext--cancel-const-char-righttext--ok)
-    - [confirmF](#confirmresult-confirmfconst-__flashstringhelper-text-const-char-lefttext--cancel-const-char-righttext--ok)
+    - [alert](#alert-functions)
+    - [confirm](#confirmation-functions)
 - [Layout Regions](#layout-regions)
 - [Implementation Pattern](#implementation-pattern)
 - [Examples](#examples)
+
+## String Function Overview
+
+All text-related functions in ContentScreen support three string formats for maximum flexibility:
+
+| Function Type     | C-String                        | Arduino String                                      | F-String (Flash)                      |
+| ----------------- | ------------------------------- | --------------------------------------------------- | ------------------------------------- |
+| **Title**         | `setTitle("Text")`              | `setTitle(String("Text"))`                          | `setTitleF(F("Text"))`                |
+| **Drawing**       | `drawText(x, y, "Text", color)` | `drawText(x, y, String("Text"), color)`             | `drawTextF(x, y, F("Text"), color)`   |
+| **Notifications** | `notify("Text")`                | `notify(String("Text"))`                            | `notifyF(F("Text"))`                  |
+| **Alerts**        | `alert("Text")`                 | `alert(String("Text"))`                             | `alertF(F("Text"))`                   |
+| **Confirmations** | `confirm("Text", "L", "R")`     | `confirm(String("Text"), String("L"), String("R"))` | `confirmF(F("Text"), F("L"), F("R"))` |
+
+**When to use each:**
+
+- **C-strings**: Simple static text, constants
+- **Arduino Strings**: Dynamic content, concatenation, runtime-built text
+- **F-strings**: Static text that should be stored in Flash memory to save RAM
 
 ## Constructor
 
@@ -109,37 +128,49 @@ Access content area boundaries for positioning:
 
 ### Title Management
 
-Control the header area display:
+Control the header area display with three convenient methods:
 
-#### `void setTitle(const char* title)`
+#### Title Functions
+
+**C-String Version:**
+
+```cpp
+void setTitle(const char* title)
+```
+
+**Arduino String Version:**
+
+```cpp
+void setTitle(String title)
+```
+
+**F-String Version:**
+
+```cpp
+void setTitleF(const __FlashStringHelper* title)
+```
 
 Sets the title text displayed in the header region. The title is dynamically allocated and automatically freed when changed or when the screen is destroyed.
 
 **Parameters:**
 
-- `title`: Null-terminated string for title (pass nullptr or empty string to clear)
+- `title`: Title text in your preferred format (pass nullptr/empty to clear)
 
-**Example:**
+**Examples:**
 
 ```cpp
+// Static text (simple)
 setTitle("System Configuration");
-setTitle(nullptr);  // Clear title
-```
 
-#### `void setTitleF(const __FlashStringHelper* title)`
+// Dynamic text (convenient)
+String playerName = "Alice";
+setTitle(String("Welcome ") + playerName);
 
-Sets the title text from FlashString (F() macro) for memory efficiency. The FlashString is converted to a regular string and stored using the same dynamic allocation as `setTitle()`.
+// Memory efficient static text
+setTitleF(F("System Configuration"));
 
-**Parameters:**
-
-- `title`: FlashString pointer from F() macro (pass nullptr to clear)
-
-**Example:**
-
-```cpp
-setTitleF(F("System Configuration"));  // More memory efficient
-setTitleF(F("Status: Ready"));
-setTitleF(nullptr);  // Clear title
+// Clear title
+setTitle(nullptr);  // or setTitle("") or setTitleF(nullptr)
 ```
 
 **Memory Benefits:**
