@@ -291,6 +291,36 @@ public:
     void setMenuItems(const char **menuItems, uint8_t menuItemCount);
 
     /**
+     * @brief Set the menu items from an array of String objects
+     *
+     * Convenient version for setting menu items from Arduino String objects.
+     * Useful when menu items are built dynamically at runtime.
+     *
+     * @param menuItems     Array of String objects for menu items
+     * @param menuItemCount Number of items in the menuItems array
+     *
+     * @note Automatically frees any previously allocated menu items
+     * @note Creates deep copies of all strings - original array can be freed
+     * @note Automatically recalculates pagination when items change
+     * @note Resets selection to first item when menu changes
+     *
+     * @example
+     * @code
+     * String items[] = {"New Game", "Load Game", "Settings", "Exit"};
+     * setMenuItems(items, 4);
+     * 
+     * // Or with dynamic content:
+     * String dynamicItems[] = {
+     *     "Player: " + playerName,
+     *     "Score: " + String(score),
+     *     "Level: " + String(level)
+     * };
+     * setMenuItems(dynamicItems, 3);
+     * @endcode
+     */
+    void setMenuItems(String *menuItems, uint8_t menuItemCount);
+
+    /**
      * @brief Set the menu items to be displayed and navigated (Flash version)
      *
      * @param menuItems     Array of flash strings for menu items

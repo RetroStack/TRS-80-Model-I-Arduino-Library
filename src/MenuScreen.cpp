@@ -584,6 +584,73 @@ void MenuScreen::setMenuItems(const char **menuItems, uint8_t menuItemCount)
 }
 
 /**
+ * @brief Set the menu items from an array of String objects
+ * @param menuItems Array of String objects for menu items
+ * @param menuItemCount Number of items in the menuItems array
+ */
+void MenuScreen::setMenuItems(String *menuItems, uint8_t menuItemCount)
+{
+    // Clear any existing menu items first
+    clearMenuItems();
+
+    if (menuItems == nullptr || menuItemCount == 0)
+    {
+        return; // Just clear and exit
+    }
+
+    // Allocate array of string pointers
+    _menuItems = (char **)malloc(menuItemCount * sizeof(char *));
+    if (_menuItems == nullptr)
+    {
+        return; // Allocation failed
+    }
+
+    // Initialize all pointers to nullptr first
+    for (uint8_t i = 0; i < menuItemCount; i++)
+    {
+        _menuItems[i] = nullptr;
+    }
+
+    // Allocate and copy each menu item string
+    uint8_t successCount = 0;
+    for (uint8_t i = 0; i < menuItemCount; i++)
+    {
+        const char *cstr = menuItems[i].c_str();
+        if (cstr != nullptr)
+        {
+            size_t len = strlen(cstr);
+            char *itemCopy = (char *)malloc(len + 1);
+            if (itemCopy != nullptr)
+            {
+                strcpy(itemCopy, cstr);
+                _menuItems[i] = itemCopy;
+                successCount++;
+            }
+        }
+    }
+
+    // Update state
+    _menuItemCount = successCount;
+
+    // Set selection to first enabled item
+    if (successCount > 0)
+    {
+        _selectedMenuItemIndex = _findNextEnabledItem(0, true);
+    }
+    else
+    {
+        _selectedMenuItemIndex = 0;
+    }
+
+    // Update display if active
+    if (isActive())
+    {
+        _drawContent();
+        M1Shield.display();
+    }
+}
+
+/**
  * @brief Set the currently selected menu item and update display
  *
  * Updates the selected menu item index and automatically switches

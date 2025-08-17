@@ -586,6 +586,15 @@ void ContentScreen::setTitle(const char *title)
 }
 
 /**
+ * @brief Set screen title from Arduino String object
+ * @param title String object for title (automatically converted and copied)
+ */
+void ContentScreen::setTitle(String title)
+{
+    setTitle(title.c_str());
+}
+
+/**
  * @brief Set screen title from FlashString
  *
  * Convenience method for setting title from FlashString (F() macro).
@@ -774,6 +783,19 @@ void ContentScreen::drawText(uint16_t x, uint16_t y, const char *text, uint16_t 
 }
 
 /**
+ * @brief Draw text in content area from Arduino String object
+ * @param x X position relative to content area
+ * @param y Y position relative to content area
+ * @param text String object text to display
+ * @param color Text color
+ * @param size Text size multiplier
+ */
+void ContentScreen::drawText(uint16_t x, uint16_t y, String text, uint16_t color, uint8_t size)
+{
+    drawText(x, y, text.c_str(), color, size);
+}
+
+/**
  * @brief Draw text in content area from FlashString (F() macro)
  *
  * Memory-efficient version of drawText() that accepts FlashString for static text.
@@ -852,6 +874,16 @@ void ContentScreen::notify(const char *text, unsigned long durationMs)
     {
         refresh();
     }
+}
+
+/**
+ * @brief Show a notification from Arduino String object
+ * @param text String object notification text (automatically converted and copied)
+ * @param durationMs How long to show notification in milliseconds
+ */
+void ContentScreen::notify(String text, unsigned long durationMs)
+{
+    notify(text.c_str(), durationMs);
 }
 
 /**
@@ -1015,6 +1047,15 @@ void ContentScreen::alert(const char *text)
 }
 
 /**
+ * @brief Show a blocking alert dialog from Arduino String object
+ * @param text String object alert message (automatically converted)
+ */
+void ContentScreen::alert(String text)
+{
+    alert(text.c_str());
+}
+
+/**
  * @brief Show a blocking alert dialog from FlashString (F() macro)
  * @param text FlashString alert message (automatically converted)
  */
@@ -1088,30 +1129,62 @@ ConfirmResult ContentScreen::confirm(const char *text, const char *leftText, con
 }
 
 /**
- * @brief Show a blocking confirmation dialog from FlashString (F() macro)
- * @param text FlashString main message (automatically converted)
+ * @brief Show a blocking confirmation dialog with Arduino String objects
+ * @param text Main confirmation message (center-aligned)
  * @param leftText Left button text (left-aligned)
  * @param rightText Right button text (right-aligned)
  * @return CONFIRM_LEFT if left button pressed, CONFIRM_RIGHT if right button pressed
  */
-ConfirmResult ContentScreen::confirmF(const __FlashStringHelper *text, const char *leftText, const char *rightText)
+ConfirmResult ContentScreen::confirm(String text, String leftText, String rightText)
 {
-    if (text == nullptr)
+    // Delegate to regular confirm method using c_str()
+    return confirm(text.c_str(), leftText.c_str(), rightText.c_str());
+}
+
+/**
+ * @brief Show a blocking confirmation dialog with all F-strings
+ * @param text FlashString main message (automatically converted)
+ * @param leftText FlashString left button text (automatically converted)
+ * @param rightText FlashString right button text (automatically converted)
+ * @return CONFIRM_LEFT if left button pressed, CONFIRM_RIGHT if right button pressed
+ */
+ConfirmResult ContentScreen::confirmF(const __FlashStringHelper *text, const __FlashStringHelper *leftText, const __FlashStringHelper *rightText)
+{
+    if (text == nullptr || leftText == nullptr || rightText == nullptr)
         return CONFIRM_LEFT; // Default to left/cancel for safety
 
-    // Convert FlashString to regular string
-    size_t len = strlen_P((const char *)text);
-    char *buffer = (char *)malloc(len + 1);
-    if (buffer == nullptr)
-        return CONFIRM_LEFT; // Failed allocation, default to left/cancel
+    // Convert all FlashStrings to regular strings
+    size_t textLen = strlen_P((const char *)text);
+    size_t leftLen = strlen_P((const char *)leftText);
+    size_t rightLen = strlen_P((const char *)rightText);
 
-    strcpy_P(buffer, (const char *)text);
+    char *textBuffer = (char *)malloc(textLen + 1);
+    char *leftBuffer = (char *)malloc(leftLen + 1);
+    char *rightBuffer = (char *)malloc(rightLen + 1);
+
+    if (textBuffer == nullptr || leftBuffer == nullptr || rightBuffer == nullptr)
+    {
+        // Free any successfully allocated buffers before returning
+        if (textBuffer)
+            free(textBuffer);
+        if (leftBuffer)
+            free(leftBuffer);
+        if (rightBuffer)
+            free(rightBuffer);
+        return CONFIRM_LEFT; // Failed allocation, default to left/cancel
+    }
+
+    strcpy_P(textBuffer, (const char *)text);
+    strcpy_P(leftBuffer, (const char *)leftText);
+    strcpy_P(rightBuffer, (const char *)rightText);
 
     // Delegate to regular confirm method
-    ConfirmResult result = confirm(buffer, leftText, rightText);
+    ConfirmResult result = confirm(textBuffer, leftBuffer, rightBuffer);
 
-    // Free temporary buffer
-    free(buffer);
+    // Free temporary buffers
+    free(textBuffer);
+    free(leftBuffer);
+    free(rightBuffer);
 
     return result;
 }

@@ -301,6 +301,12 @@ public:
     void setTitle(const char *title);
 
     /**
+     * @brief Set the screen title from Arduino String object
+     * @param title String object for title (automatically converted and copied)
+     */
+    void setTitle(String title);
+
+    /**
      * @brief Set the screen title from FlashString (F() macro)
      * @param title FlashString for title (automatically converted and copied)
      */
@@ -375,6 +381,24 @@ public:
     void drawText(uint16_t x, uint16_t y, const char *text, uint16_t color, uint8_t size = 1);
 
     /**
+     * @brief Draw text in content area from Arduino String object
+     *
+     * Convenient version of drawText() that accepts String objects for dynamic text.
+     * Coordinates are relative to the content area, not the full screen.
+     *
+     * @param x X position relative to content area
+     * @param y Y position relative to content area
+     * @param text String object text to display
+     * @param color Text color
+     * @param size Text size multiplier
+     *
+     * @note Convenient for dynamic text content built at runtime
+     * @note Coordinates are relative to content area, not screen
+     * @note Text extending beyond content area will be clipped
+     */
+    void drawText(uint16_t x, uint16_t y, String text, uint16_t color, uint8_t size = 1);
+
+    /**
      * @brief Draw text in content area from FlashString (F() macro)
      *
      * Memory-efficient version of drawText() that accepts FlashString for static text.
@@ -411,6 +435,14 @@ public:
     void notify(const char *text, unsigned long durationMs = 3000);
 
     /**
+     * @brief Show a notification from Arduino String object
+     * @param text String object notification text (automatically converted and copied)
+     * @param durationMs How long to show notification in milliseconds
+     * @note Convenient for dynamic notification content built at runtime
+     */
+    void notify(String text, unsigned long durationMs = 3000);
+
+    /**
      * @brief Show a notification from FlashString (F() macro)
      * @param text FlashString notification text (automatically converted and copied)
      * @param durationMs How long to show notification in milliseconds
@@ -442,6 +474,14 @@ public:
     void alert(const char *text);
 
     /**
+     * @brief Show a blocking alert dialog from Arduino String object
+     * @param text String object alert message (automatically converted)
+     * @note Convenient for dynamic alert content built at runtime
+     * @note Blocks execution until LEFT or RIGHT button is pressed
+     */
+    void alert(String text);
+
+    /**
      * @brief Show a blocking alert dialog from FlashString (F() macro)
      * @param text FlashString alert message (automatically converted)
      * @note More memory efficient than alert() for static text
@@ -461,14 +501,25 @@ public:
     ConfirmResult confirm(const char *text, const char *leftText = "Cancel", const char *rightText = "OK");
 
     /**
-     * @brief Show a blocking confirmation dialog from FlashString (F() macro)
-     * @param text FlashString main message (automatically converted)
-     * @param leftText Left button text (default: "Cancel", left-aligned)
-     * @param rightText Right button text (default: "OK", right-aligned)
+     * @brief Show a blocking confirmation dialog with Arduino String objects
+     * @param text Main confirmation message (center-aligned)
+     * @param leftText Left button text (left-aligned)
+     * @param rightText Right button text (right-aligned)
      * @return CONFIRM_LEFT if left button pressed, CONFIRM_RIGHT if right button pressed
-     * @note More memory efficient than confirm() for static text
+     * @note Convenient for dynamic string content built at runtime
+     * @note Dialog is displayed with magenta background and black text
      */
-    ConfirmResult confirmF(const __FlashStringHelper *text, const char *leftText = "Cancel", const char *rightText = "OK");
+    ConfirmResult confirm(String text, String leftText, String rightText);
+
+    /**
+     * @brief Show a blocking confirmation dialog with all F-strings
+     * @param text FlashString main message (automatically converted)
+     * @param leftText FlashString left button text (automatically converted)
+     * @param rightText FlashString right button text (automatically converted)
+     * @return CONFIRM_LEFT if left button pressed, CONFIRM_RIGHT if right button pressed
+     * @note Fully memory efficient version with all parameters as F-strings
+     */
+    ConfirmResult confirmF(const __FlashStringHelper *text, const __FlashStringHelper *leftText, const __FlashStringHelper *rightText);
 };
 
 #endif /* CONTENT_SCREEN_H */
