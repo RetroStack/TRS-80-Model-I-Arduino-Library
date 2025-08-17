@@ -32,7 +32,7 @@ constexpr uint16_t HEADER_COLOR_BG = 0x07E0; // Header background (bright green)
 constexpr uint16_t HEADER_COLOR_FG = 0x0000; // Header text color (black on green)
 
 // Footer region styling
-constexpr uint16_t FOOTER_HEIGHT = 23;       // Height of footer region in pixels
+constexpr uint16_t FOOTER_HEIGHT = 10;       // Height of footer region in pixels
 constexpr uint16_t FOOTER_SMALL_HEIGHT = 0;  // Height of small footer region in pixels
 constexpr uint16_t FOOTER_COLOR_BG = 0x0000; // Footer background color
 constexpr uint16_t FOOTER_COLOR_FG = 0xFFFF; // Footer text color
@@ -282,7 +282,7 @@ void ContentScreen::_drawFooter()
                 uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(_buttonItems[i]);
                 uint16_t xPos = xDistance * (i + 1) - (textWidth / 2);
 
-                gfx.setCursor(xPos, top + TEXT_SIZE_1_HALF_HEIGHT);
+                gfx.setCursor(xPos, top + TEXT_SIZE_1_HALF_HEIGHT - 1);
                 gfx.print(_buttonItems[i]);
             }
         }
