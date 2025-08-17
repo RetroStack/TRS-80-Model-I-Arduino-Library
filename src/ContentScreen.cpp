@@ -45,7 +45,7 @@ constexpr uint16_t PROGRESSBAR_COLOR_FG = 0xFFE0;       // Progress bar foregrou
 constexpr uint16_t PROGRESSBAR_SMALL_COLOR_FG = 0xFFFF; // Progress bar foreground (white)
 
 // Notification styling
-constexpr uint16_t NOTIFICATION_COLOR_BG = 0xF81F;      // Notification background (magenta)
+constexpr uint16_t NOTIFICATION_COLOR_BG = 0x07FF;      // Notification background (cyan)
 constexpr uint16_t NOTIFICATION_COLOR_FG = 0x0000;      // Notification text color (black)
 
 /**
@@ -913,10 +913,10 @@ void ContentScreen::_drawNotification()
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
-    // Draw notification background (magenta)
+    // Draw notification background (cyan)
     gfx.fillRect(0, top, screenWidth, height, M1Shield.convertColor(NOTIFICATION_COLOR_BG));
 
-    // Draw notification text (black on magenta)
+    // Draw notification text (black on cyan)
     gfx.setTextColor(M1Shield.convertColor(NOTIFICATION_COLOR_FG));
     gfx.setTextSize(1);
 

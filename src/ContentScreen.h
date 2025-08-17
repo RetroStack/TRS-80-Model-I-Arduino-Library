@@ -382,7 +382,7 @@ public:
      * @brief Show a notification that temporarily replaces the footer
      * @param text Notification text to display (dynamically allocated copy made)
      * @param durationMs How long to show notification in milliseconds
-     * @note Notification is displayed with magenta background and black text
+     * @note Notification is displayed with cyan background and black text
      * @note Previous footer will be restored when notification expires
      */
     void notify(const char *text, unsigned long durationMs = 3000);

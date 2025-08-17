@@ -294,7 +294,7 @@ Shows a notification that temporarily replaces the footer area.
 - `durationMs`: How long to show notification in milliseconds (default: 3000ms)
 
 **Visual Appearance:**
-- **Background**: Magenta color for high visibility
+- **Background**: Cyan color for high visibility and call-to-action consistency
 - **Text Color**: Black text for maximum contrast
 - **Positioning**: Replaces footer area temporarily
 - **Duration**: Configurable timeout with automatic restoration
