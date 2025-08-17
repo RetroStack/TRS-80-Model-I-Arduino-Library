@@ -79,26 +79,57 @@ enum ConfirmResult
  *         uint16_t w = _getContentWidth();
  *         uint16_t h = _getContentHeight();
  *
+ *         // Three ways to draw text - choose based on your needs:
+ *
+ *         // 1. Static text (memory efficient)
+ *         drawTextF(x, y, F("Status: Ready"), 0xFFFF, 1);
+ *
+ *         // 2. Dynamic text (convenient)
+ *         String status = "Player: " + playerName;
+ *         drawText(x, y + 20, status, 0xFFFF, 1);
+ *
+ *         // 3. Simple static text
+ *         drawText(x, y + 40, "Press any key", 0xFFFF, 1);
+ *
  *         // Adapt layout for display size (inherited from Screen)
  *         if (isSmallDisplay()) {
- *             _drawText(x, y, "Compact View", 0xFFFF, 1);
+ *             drawTextF(x, y + 60, F("Compact View"), 0xFFFF, 1);
  *         } else {
- *             _drawText(x, y, "Full Detail View", 0xFFFF, 2);
+ *             drawTextF(x, y + 60, F("Full Detail View"), 0xFFFF, 2);
  *         }
  *     }
  *
  * public:
  *     MyContentScreen() : ContentScreen() {
- *         _setTitle("My Screen");
- *         _setProgressValue(75);  // Optional progress (0 = default)
+ *         // Three ways to set title:
+ *         setTitle("My Screen");                    // Simple static
+ *         setTitle(String("Score: ") + String(100)); // Dynamic
+ *         setTitleF(F("High Scores"));              // Memory efficient
+ *
+ *         setProgressValue(75);  // Optional progress (0 = default)
  *     }
  *
  *     void loop() override {
  *         // Update content as needed
+ *         if (someCondition) {
+ *             // Three ways to show notifications:
+ *             notify("Game saved!");                     // Simple
+ *             notify(String("Score: ") + String(score)); // Dynamic
+ *             notifyF(F("Level complete!"));             // Memory efficient
+ *         }
  *     }
  *
  *     Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override {
- *         // Handle input and may be return a new screen
+ *         if (action & BUTTON_MENU) {
+ *             // Three ways to show confirmations:
+ *             ConfirmResult result = confirm("Exit game?", "No", "Yes");
+ *             // Or: confirm(String("Save ") + fileName + "?", "Cancel", "Save");
+ *             // Or: confirmF(F("Delete all data?"), F("Cancel"), F("Delete"));
+ *
+ *             if (result == CONFIRM_RIGHT) {
+ *                 return previousScreen;
+ *             }
+ *         }
  *         return nullptr;
  *     }
  * };

@@ -28,14 +28,15 @@
  *
  * @note This is an abstract class - derived classes must implement _getSelectedMenuItemScreen()
  *
- * @example
+ * @example Static Menu Items
  * @code
  * class SettingsMenu : public MenuScreen {
  * public:
  *     SettingsMenu() {
+ *         // Option 1: Simple static items (C-strings)
  *         const char* items[] = {"Display", "Sound", "Input", "About"};
- *         _setMenuItems(items, 4);
- *         _setTitle("Settings");
+ *         setMenuItems(items, 4);
+ *         setTitle("Settings");
  *     }
  *
  * protected:
@@ -45,6 +46,62 @@
  *             case 1: return new SoundSettings();
  *             // ...
  *         }
+ *         return nullptr;
+ *     }
+ * };
+ * @endcode
+ *
+ * @example Dynamic Menu Items
+ * @code
+ * class PlayerMenu : public MenuScreen {
+ * private:
+ *     String playerName;
+ *     int playerScore;
+ *     int playerLevel;
+ *
+ * public:
+ *     PlayerMenu(String name, int score, int level)
+ *         : playerName(name), playerScore(score), playerLevel(level) {
+ *
+ *         // Option 2: Dynamic items (String objects)
+ *         String items[] = {
+ *             String("Continue as ") + playerName,
+ *             String("Score: ") + String(playerScore),
+ *             String("Level: ") + String(playerLevel),
+ *             "New Game",
+ *             "Exit"
+ *         };
+ *         setMenuItems(items, 5);
+ *         setTitle(String("Welcome ") + playerName);
+ *     }
+ *
+ * protected:
+ *     Screen* _getSelectedMenuItemScreen(int index) override {
+ *         // Handle menu selection...
+ *         return nullptr;
+ *     }
+ * };
+ * @endcode
+ *
+ * @example Memory-Efficient Menu Items
+ * @code
+ * class StaticMenu : public MenuScreen {
+ * public:
+ *     StaticMenu() {
+ *         // Option 3: Memory-efficient static items (F-strings)
+ *         const __FlashStringHelper* items[] = {
+ *             F("New Game"),
+ *             F("Load Game"),
+ *             F("Settings"),
+ *             F("Exit")
+ *         };
+ *         setMenuItemsF(items, 4);
+ *         setTitleF(F("Main Menu"));
+ *     }
+ *
+ * protected:
+ *     Screen* _getSelectedMenuItemScreen(int index) override {
+ *         // Handle menu selection...
  *         return nullptr;
  *     }
  * };
@@ -308,7 +365,7 @@ public:
      * @code
      * String items[] = {"New Game", "Load Game", "Settings", "Exit"};
      * setMenuItems(items, 4);
-     * 
+     *
      * // Or with dynamic content:
      * String dynamicItems[] = {
      *     "Player: " + playerName,
