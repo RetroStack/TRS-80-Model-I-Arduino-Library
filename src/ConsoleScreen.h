@@ -132,6 +132,7 @@ private:
     bool _isWaitingForPaging;           // True when console is full and waiting
     unsigned long _pagingWaitStartTime; // When the paging wait period started
     bool _showPagingPrompt;             // Whether to show paging prompt message
+    bool _pagingPaused;                 // True when paging timeout is paused by LEFT button
 
     /**
      * @brief Update cached screen dimensions from ContentScreen

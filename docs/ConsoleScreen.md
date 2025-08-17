@@ -305,6 +305,7 @@ When using paging modes other than `PAGING_AUTO_CLEAR`, print operations become 
 - **Shield Processing**: The M1Shield system continues running, ensuring responsive user interface
 
 This blocking behavior ensures that:
+
 - Sequential print output maintains proper order
 - Users have full control over output pacing
 - No output is lost or discarded during paging waits
@@ -350,27 +351,36 @@ void continuePaging();        // Programmatically continue from paused state
 
 #### PAGING_WAIT_TIMEOUT
 
-- **Behavior**: Shows message "--- Press RIGHT or wait 5s to continue ---", waits for timeout
-- **Use Case**: Automatic progression with user read time
+- **Behavior**: Shows message "Auto in Xs | LEFT:pause RIGHT:skip", waits for timeout
+- **Use Case**: Automatic progression with user read time and pause control
 - **Default Timeout**: 5000ms (5 seconds), configurable
-- **Visual**: Progress indicator showing remaining time
-- **User Interaction**: Optional - can press any button/joystick to skip wait
+- **Visual**: Progress indicator showing remaining time with pause/skip options
+- **User Interaction**:
+  - **LEFT button**: Pauses the timeout - display shows "PAUSED - Press RIGHT to continue"
+  - **RIGHT button**: Immediately skips to next page
+  - **While paused**: Only RIGHT button resumes/continues
+- **Pause Feature**: Timeout can be paused indefinitely, allowing extended reading time
 
 #### PAGING_WAIT_BUTTON
 
-- **Behavior**: Shows message "Press any button to continue...", waits indefinitely
+- **Behavior**: Shows message "Press MENU/UP/DOWN/JOYSTICK to continue", waits indefinitely
 - **Use Case**: Manual control, debugging, step-through operation
 - **Timeout**: None - waits indefinitely
-- **Visual**: Static message with blinking cursor
-- **User Interaction**: Required - must press any M1Shield button or joystick
+- **Visual**: Static message
+- **User Interaction**: Required - must press MENU, UP, DOWN, or JOYSTICK button (LEFT/RIGHT reserved for timeout modes)
 
 #### PAGING_WAIT_BOTH
 
-- **Behavior**: Shows message "Press any button or wait Xs...", waits for either
-- **Use Case**: Flexible operation allowing both manual and automatic progression
+- **Behavior**: Shows message "Auto Xs | Any button or L:pause R:skip", waits for either
+- **Use Case**: Flexible operation allowing both manual and automatic progression with pause control
 - **Default Timeout**: 5000ms (5 seconds), configurable
-- **Visual**: Progress indicator with button option
-- **User Interaction**: Optional - either any button/joystick press or timeout
+- **Visual**: Progress indicator with button options and pause/skip controls
+- **User Interaction**:
+  - **MENU/UP/DOWN/JOYSTICK**: Immediately continue to next page
+  - **LEFT button**: Pauses the timeout - display shows "PAUSED - Press RIGHT or MENU/UP/DOWN"
+  - **RIGHT button**: Immediately skips to next page
+  - **While paused**: Any button continues/resumes
+- **Pause Feature**: Timeout can be paused indefinitely, allowing extended reading time
 
 ### Usage Examples
 
@@ -467,6 +477,65 @@ void loop() {
     }
 }
 ```
+
+### Pause/Resume Feature
+
+The timeout-based paging modes (`PAGING_WAIT_TIMEOUT` and `PAGING_WAIT_BOTH`) include a sophisticated pause/resume system that allows users to extend reading time indefinitely:
+
+#### How Pause/Resume Works
+
+1. **LEFT Button**: Pauses the automatic timeout countdown
+
+   - Timer stops counting down
+   - Display updates to show paused state
+   - Countdown is suspended indefinitely
+
+2. **RIGHT Button**:
+
+   - When **not paused**: Immediately skips to next page
+   - When **paused**: Resumes the timeout countdown from the current time
+
+3. **Other Buttons** (in `PAGING_WAIT_BOTH` mode):
+   - MENU/UP/DOWN/JOYSTICK continue immediately regardless of pause state
+
+#### Pause/Resume Example
+
+```cpp
+ConsoleScreen console;
+
+void setup() {
+    console.setPagingMode(PAGING_WAIT_TIMEOUT);
+    console.setPagingTimeout(10000);  // 10 second timeout
+}
+
+void loop() {
+    static int messageCount = 0;
+
+    // Output that fills the screen
+    for (int i = 0; i < 5; i++) {
+        console.print("Long message line ");
+        console.print(messageCount++);
+        console.println(" with detailed information that users might want to read carefully");
+    }
+
+    console.loop();
+
+    // When screen fills:
+    // 1. Shows "Auto in 10s | LEFT:pause RIGHT:skip"
+    // 2. User presses LEFT -> "PAUSED - Press RIGHT to continue"
+    // 3. User can take unlimited time to read
+    // 4. User presses RIGHT -> countdown resumes from 10s
+    // 5. User can press RIGHT again to skip immediately
+}
+```
+
+#### Use Cases for Pause/Resume
+
+- **Educational Content**: Allow students extra time to read complex information
+- **Debugging Output**: Pause to analyze specific log entries without time pressure
+- **Documentation Display**: Give users control over reading pace
+- **Data Analysis**: Pause to study detailed numerical output or tables
+- **Error Messages**: Ensure critical information can be read thoroughly
 
 ### Visual Feedback System
 
@@ -613,6 +682,7 @@ if (!console.isWaitingForPaging()) {
 The `ConsoleScreen` includes an auto-forward feature that can automatically navigate to the next screen after the `_executeOnce()` method completes and a configurable delay passes. This feature is useful for creating automated sequences or demos where screens should advance without user intervention.
 
 **⚠️ Important Notes:**
+
 - Auto-forward is **disabled by default** and must be explicitly enabled
 - Auto-forward only triggers after `_executeOnce()` completes, not immediately when the screen opens
 - If the user interacts with the screen (any button press), auto-forward is cancelled
@@ -621,6 +691,7 @@ The `ConsoleScreen` includes an auto-forward feature that can automatically navi
 ### Auto-Forward Configuration
 
 #### setAutoForward
+
 ```cpp
 void setAutoForward(bool enabled, unsigned long delayMs = 5000);
 ```
@@ -628,10 +699,12 @@ void setAutoForward(bool enabled, unsigned long delayMs = 5000);
 Enable or disable auto-forward functionality with optional delay configuration.
 
 **Parameters:**
+
 - `enabled`: true to enable auto-forward, false to disable
 - `delayMs`: Delay in milliseconds after `_executeOnce()` completion (default: 5000ms = 5 seconds)
 
 **Example:**
+
 ```cpp
 // Enable auto-forward with 3 second delay
 console.setAutoForward(true, 3000);
@@ -644,6 +717,7 @@ console.setAutoForward(false);
 ```
 
 #### isAutoForwardEnabled
+
 ```cpp
 bool isAutoForwardEnabled() const;
 ```
@@ -653,6 +727,7 @@ Check if auto-forward is currently enabled.
 **Returns:** true if auto-forward is enabled, false otherwise
 
 #### getAutoForwardDelay
+
 ```cpp
 unsigned long getAutoForwardDelay() const;
 ```
@@ -671,6 +746,7 @@ Get the current auto-forward delay in milliseconds.
 ### Auto-Forward Examples
 
 #### Basic Auto-Forward Console
+
 ```cpp
 class AutoProgressConsole : public ConsoleScreen {
 protected:
@@ -692,16 +768,17 @@ void setup() {
 ```
 
 #### Conditional Auto-Forward
+
 ```cpp
 class SmartConsole : public ConsoleScreen {
 private:
     bool systemOk = false;
-    
+
 protected:
     void _executeOnce() override {
         println("Running diagnostics...");
         systemOk = runSystemCheck();
-        
+
         if (systemOk) {
             println("System OK - auto-advancing...");
             setAutoForward(true, 2000);  // Quick advance for success
@@ -714,19 +791,20 @@ protected:
 ```
 
 #### Demo Sequence Console
+
 ```cpp
 class DemoConsole : public ConsoleScreen {
 protected:
     void _executeOnce() override {
         println("=== FEATURE DEMONSTRATION ===");
-        
+
         for (int i = 1; i <= 5; i++) {
             print("Demo step ");
             print(i);
             println(" complete");
             delay(500);
         }
-        
+
         println("");
         println("Demo complete!");
         println("Advancing to next demo...");
@@ -841,20 +919,20 @@ void setup() {
 
 void loop() {
     static int counter = 0;
-    
+
     // This demonstrates automatic blocking behavior
     console.print("Message ");
     console.print(++counter);
     console.println(" - This output will pause when screen fills");
-    
+
     // The print operations above will BLOCK execution here when the console
     // reaches the bottom, waiting for the user to press any button/joystick
-    
+
     console.println("This line prints immediately after the previous ones");
     console.println("No messages are lost or discarded during paging");
-    
+
     delay(500);  // Small delay between messages
-    
+
     // No special implementation needed - paging is handled automatically!
     // User input (button presses) is processed directly during blocking
 }

@@ -61,6 +61,7 @@ ConsoleScreen::ConsoleScreen() : ContentScreen()
     _isWaitingForPaging = false;
     _pagingWaitStartTime = 0;
     _showPagingPrompt = true; // Show prompts by default
+    _pagingPaused = false;    // Paging timeout not paused initially
 
     // Initialize bulk write optimization
     _inBulkWrite = false;
@@ -89,6 +90,9 @@ bool ConsoleScreen::open()
     // Reset auto-forward tracking
     _executeOnceCompleteTime = 0;
     _autoForwardTriggered = false;
+
+    // Reset paging state
+    _pagingPaused = false;
 
     return result;
 }
@@ -137,7 +141,7 @@ void ConsoleScreen::loop()
             // Set flag and trigger auto-forward by calling actionTaken with BUTTON_MENU
             _autoForwardTriggered = true;
             _executeOnceCompleteTime = 0; // Prevent repeated triggering
-            
+
             // Call actionTaken and handle the result properly
             Screen *newScreen = actionTaken(BUTTON_MENU, 0, 0);
             if (newScreen != nullptr)
@@ -549,7 +553,28 @@ void ConsoleScreen::_waitForPagingIfNeeded()
     // Block execution until paging wait is resolved
     while (_isWaitingForPaging)
     {
-        // Check for any button press to continue (for button-based modes)
+        // Check for pause/resume with LEFT/RIGHT buttons (for timeout-based modes)
+        if ((_pagingMode == PAGING_WAIT_TIMEOUT || _pagingMode == PAGING_WAIT_BOTH))
+        {
+            if (M1Shield.wasLeftPressed() && !_pagingPaused)
+            {
+                // LEFT button pauses the timeout
+                _pagingPaused = true;
+                _showPagingMessage(); // Update the message to show paused state
+                M1Shield.display();
+            }
+            else if (M1Shield.wasRightPressed())
+            {
+                _pagingPaused = false;
+                // RIGHT button continues immediately when not paused
+                _clearPagingMessage();
+                cls(); // Clear and reset console
+                _isWaitingForPaging = false;
+                break;
+            }
+        }
+
+        // Check for other button presses to continue (for button-based modes)
         if ((_pagingMode == PAGING_WAIT_BUTTON || _pagingMode == PAGING_WAIT_BOTH) &&
             (M1Shield.wasMenuPressed() || M1Shield.wasLeftPressed() || M1Shield.wasRightPressed() ||
              M1Shield.wasUpPressed() || M1Shield.wasDownPressed() || M1Shield.wasJoystickPressed()))
@@ -614,12 +639,13 @@ bool ConsoleScreen::_handlePaging()
  * @brief Check if paging timeout has expired
  *
  * Evaluates timeout conditions for timeout-based paging modes.
+ * Respects the paused state - timeout does not advance when paused.
  *
  * @return true if timeout has expired and console should clear
  */
 bool ConsoleScreen::_shouldEndPagingWait()
 {
-    if (!_isWaitingForPaging)
+    if (!_isWaitingForPaging || _pagingPaused)
         return false;
 
     unsigned long elapsed = millis() - _pagingWaitStartTime;
@@ -656,19 +682,33 @@ void ConsoleScreen::_showPagingMessage()
     switch (_pagingMode)
     {
     case PAGING_WAIT_TIMEOUT:
-        gfx.print("Auto-continue in ");
-        gfx.print((_pagingTimeoutMs - (millis() - _pagingWaitStartTime)) / 1000 + 1);
-        gfx.print("s...");
+        if (_pagingPaused)
+        {
+            gfx.print("PAUSED - Press RIGHT to continue");
+        }
+        else
+        {
+            gfx.print("Auto in ");
+            gfx.print((_pagingTimeoutMs - (millis() - _pagingWaitStartTime)) / 1000 + 1);
+            gfx.print("s | LEFT:pause RIGHT:skip");
+        }
         break;
 
     case PAGING_WAIT_BUTTON:
-        gfx.print("Press any button to continue...");
+        gfx.print("Press MENU/UP/DOWN/JOYSTICK to continue");
         break;
 
     case PAGING_WAIT_BOTH:
-        gfx.print("Press any button or wait ");
-        gfx.print((_pagingTimeoutMs - (millis() - _pagingWaitStartTime)) / 1000 + 1);
-        gfx.print("s...");
+        if (_pagingPaused)
+        {
+            gfx.print("PAUSED - Press RIGHT to continue");
+        }
+        else
+        {
+            gfx.print("Auto ");
+            gfx.print((_pagingTimeoutMs - (millis() - _pagingWaitStartTime)) / 1000 + 1);
+            gfx.print("s | LEFT:pause RIGHT:skip");
+        }
         break;
 
     default:
