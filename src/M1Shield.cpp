@@ -42,6 +42,12 @@ constexpr int8_t PIN_TFT_CS = 9;   // Chip Select
 constexpr int8_t PIN_TFT_DC = 8;   // Data/Command
 constexpr int8_t PIN_TFT_RST = -1; // Reset pin (-1 if not used)
 
+// Cassette interface pins
+constexpr uint8_t PIN_CR1 = 2;        // Cassette Remote 1 (configurable input/output)
+constexpr uint8_t PIN_CR2 = 3;        // Cassette Remote 2 (configurable input/output)
+constexpr uint8_t PIN_CASS_IN = A14;  // Cassette input from the perspective of the Model 1
+constexpr uint8_t PIN_CASS_OUT = A15; // Cassette output from the perspective of the Model 1
+
 // Define global instance
 M1ShieldClass M1Shield;
 
@@ -498,6 +504,78 @@ uint8_t M1ShieldClass::getJoystickX() const
 uint8_t M1ShieldClass::getJoystickY() const
 {
     return analogRead(PIN_JOYSTICK_Y) >> 2;
+}
+
+// ========== Cassette Interface Implementation ==========
+
+/**
+ * Configure CR1 pin as input or output.
+ * WARNING: If CR1 and CR2 are connected, setting them both to write can damage your Arduino!
+ */
+void M1ShieldClass::setCR1Mode(bool isOutput) const
+{
+    pinMode(PIN_CR1, isOutput ? OUTPUT : INPUT);
+}
+
+/**
+ * Configure CR2 pin as input or output.
+ * WARNING: If CR1 and CR2 are connected, setting them both to write can damage your Arduino!
+ */
+void M1ShieldClass::setCR2Mode(bool isOutput) const
+{
+    pinMode(PIN_CR2, isOutput ? OUTPUT : INPUT);
+}
+
+/**
+ * Write digital value to CR1 pin (when configured as output).
+ */
+void M1ShieldClass::writeCR1(bool value) const
+{
+    digitalWrite(PIN_CR1, value ? HIGH : LOW);
+}
+
+/**
+ * Write digital value to CR2 pin (when configured as output).
+ */
+void M1ShieldClass::writeCR2(bool value) const
+{
+    digitalWrite(PIN_CR2, value ? HIGH : LOW);
+}
+
+/**
+ * Read digital value from CR1 pin (when configured as input).
+ */
+bool M1ShieldClass::readCR1() const
+{
+    return digitalRead(PIN_CR1) == HIGH;
+}
+
+/**
+ * Read digital value from CR2 pin (when configured as input).
+ */
+bool M1ShieldClass::readCR2() const
+{
+    return digitalRead(PIN_CR2) == HIGH;
+}
+
+/**
+ * Write analog value to Model 1 cassette input (A14).
+ * This pin sends data TO the Model 1 (Model 1's cassette input).
+ * From Arduino perspective: output pin, From Model 1 perspective: input pin.
+ */
+void M1ShieldClass::writeCassetteIn(uint8_t value) const
+{
+    analogWrite(PIN_CASS_IN, value);
+}
+
+/**
+ * Read analog value from Model 1 cassette output (A15).
+ * This pin receives data FROM the Model 1 (Model 1's cassette output).
+ * From Arduino perspective: input pin, From Model 1 perspective: output pin.
+ */
+uint16_t M1ShieldClass::readCassetteOut() const
+{
+    return analogRead(PIN_CASS_OUT);
 }
 
 /**

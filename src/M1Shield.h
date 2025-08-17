@@ -386,6 +386,78 @@ public:
      */
     uint8_t getJoystickY() const;
 
+    // ========== Cassette Interface Methods ==========
+    // WARNING: Incorrect usage can damage your Arduino!
+    // CR1 and CR2 may be connected together on some systems.
+
+    /**
+     * @brief Configure CR1 pin as input or output
+     *
+     * @param isOutput true to set as output, false for input
+     * @warning If CR1 and CR2 are connected, setting one as output and one as input
+     *          can cause short circuits and permanent damage to your Arduino!
+     */
+    void setCR1Mode(bool isOutput) const;
+
+    /**
+     * @brief Configure CR2 pin as input or output
+     *
+     * @param isOutput true to set as output, false for input
+     * @warning If CR1 and CR2 are connected, setting one as output and one as input
+     *          can cause short circuits and permanent damage to your Arduino!
+     */
+    void setCR2Mode(bool isOutput) const;
+
+    /**
+     * @brief Write digital value to CR1 pin (when configured as output)
+     *
+     * @param value true for HIGH, false for LOW
+     * @warning Only call when CR1 is configured as output via setCR1Mode(true)
+     */
+    void writeCR1(bool value) const;
+
+    /**
+     * @brief Write digital value to CR2 pin (when configured as output)
+     *
+     * @param value true for HIGH, false for LOW
+     * @warning Only call when CR2 is configured as output via setCR2Mode(true)
+     */
+    void writeCR2(bool value) const;
+
+    /**
+     * @brief Read digital value from CR1 pin (when configured as input)
+     *
+     * @return true if HIGH, false if LOW
+     * @warning Only call when CR1 is configured as input via setCR1Mode(false)
+     */
+    bool readCR1() const;
+
+    /**
+     * @brief Read digital value from CR2 pin (when configured as input)
+     *
+     * @return true if HIGH, false if LOW
+     * @warning Only call when CR2 is configured as input via setCR2Mode(false)
+     */
+    bool readCR2() const;
+
+    /**
+     * @brief Write analog value to Model 1 cassette input (A14)
+     *
+     * @param value Analog output value (0-255)
+     * @note This pin sends data TO the Model 1 (Model 1's cassette input)
+     * @note From Arduino perspective: output pin, From Model 1 perspective: input pin
+     */
+    void writeCassetteIn(uint8_t value) const;
+
+    /**
+     * @brief Read analog value from Model 1 cassette output (A15)
+     *
+     * @return Analog input value (0-1023)
+     * @note This pin receives data FROM the Model 1 (Model 1's cassette output)
+     * @note From Arduino perspective: input pin, From Model 1 perspective: output pin
+     */
+    uint16_t readCassetteOut() const;
+
     /**
      * @brief Main update loop for shield operations
      *

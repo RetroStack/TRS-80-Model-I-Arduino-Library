@@ -314,3 +314,11 @@ writeDataBus  KEYWORD2
 readDataBus KEYWORD2
 configWriteDataBus   KEYWORD2
 configReadDataBus   KEYWORD2
+setCR1Mode  KEYWORD2
+setCR2Mode  KEYWORD2
+writeCR1    KEYWORD2
+writeCR2    KEYWORD2
+readCR1 KEYWORD2
+readCR2 KEYWORD2
+writeCassetteIn KEYWORD2
+readCassetteOut KEYWORD2

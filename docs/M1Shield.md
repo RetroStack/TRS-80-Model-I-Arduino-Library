@@ -17,6 +17,7 @@ The `M1Shield` class provides a comprehensive hardware abstraction layer for the
   - [Joystick Input](#joystick-input)
 - [LED Control](#led-control)
 - [Screen Management](#screen-management)
+- [Cassette Interface](#cassette-interface)
 - [Main Loop](#main-loop)
 - [Hardware Status](#hardware-status)
 - [Notes](#notes)
@@ -341,6 +342,142 @@ void setup() {
     M1Shield.setScreen(new MyScreen());
 }
 ```
+
+## Cassette Interface
+
+⚠️ **ADVANCED FEATURE: Incorrect usage can permanently damage your Arduino!**
+
+The M1Shield provides direct access to the TRS-80 Model I cassette interface, including cassette remote control (CR1/CR2) and audio interface. This is an advanced feature that requires careful understanding of both TRS-80 and Arduino hardware limitations.
+
+### ⚠️ Critical Safety Warning
+
+**CR1 and CR2 pins may be electrically connected on some Model I systems!**
+
+- Setting one as OUTPUT and the other as INPUT while connected will create a short circuit
+- This can cause permanent damage to your Arduino
+- Always test with a multimeter to verify if CR1 and CR2 are connected before use
+- When in doubt, configure both pins the same way (both INPUT or both OUTPUT)
+
+### Pin Assignments
+
+| Arduino Pin | Function                | Direction    | Model I Connection      |
+| ----------- | ----------------------- | ------------ | ----------------------- |
+| Pin 2       | CR1 (Cassette Remote 1) | Configurable | Cassette Remote Control |
+| Pin 3       | CR2 (Cassette Remote 2) | Configurable | Cassette Remote Control |
+| A14         | Cassette Input          | Output       | Model I Cassette Input  |
+| A15         | Cassette Output         | Input        | Model I Cassette Output |
+
+### Cassette Remote Control (CR1/CR2)
+
+#### Configuration Methods
+
+- **`void setCR1Mode(bool isOutput)`** - Configure CR1 as input (false) or output (true)
+- **`void setCR2Mode(bool isOutput)`** - Configure CR2 as input (false) or output (true)
+
+#### Digital I/O Methods
+
+- **`void writeCR1(bool value)`** - Write HIGH/LOW to CR1 (when configured as output)
+- **`void writeCR2(bool value)`** - Write HIGH/LOW to CR2 (when configured as output)
+- **`bool readCR1()`** - Read HIGH/LOW from CR1 (when configured as input)
+- **`bool readCR2()`** - Read HIGH/LOW from CR2 (when configured as input)
+
+#### Safe Usage Example
+
+```cpp
+void setup() {
+    M1Shield.begin(displayProvider);
+
+    // Test if CR1 and CR2 are connected (IMPORTANT!)
+    testCRConnection();
+
+    // Configure based on your specific Model I
+    M1Shield.setCR1Mode(true);   // CR1 as output for remote control
+    M1Shield.setCR2Mode(false);  // CR2 as input (only if separate from CR1!)
+}
+
+void controlCassette() {
+    M1Shield.writeCR1(true);     // Start cassette
+    delay(1000);
+    M1Shield.writeCR1(false);    // Stop cassette
+}
+
+// Critical: Test CR1/CR2 connectivity before use
+void testCRConnection() {
+    M1Shield.setCR1Mode(true);   // CR1 as output
+    M1Shield.setCR2Mode(false);  // CR2 as input
+
+    M1Shield.writeCR1(true);
+    delay(10);
+    bool highTest = M1Shield.readCR2();
+
+    M1Shield.writeCR1(false);
+    delay(10);
+    bool lowTest = M1Shield.readCR2();
+
+    if (highTest && !lowTest) {
+        Serial.println("WARNING: CR1 and CR2 are connected!");
+        Serial.println("Use only one as output to prevent damage!");
+    } else {
+        Serial.println("CR1 and CR2 appear to be separate");
+    }
+
+    // Reset to safe state
+    M1Shield.setCR1Mode(false);
+    M1Shield.setCR2Mode(false);
+}
+```
+
+### Model I Audio Interface
+
+#### Audio Methods
+
+- **`void writeCassetteIn(uint8_t value)`** - Send audio data TO Model I (0-255)
+- **`uint16_t readCassetteOut()`** - Read audio data FROM Model I (0-1023)
+
+**Note**: Method names are from the Model I's perspective:
+
+- `writeCassetteIn()` - Arduino writes TO Model I's cassette input
+- `readCassetteOut()` - Arduino reads FROM Model I's cassette output
+
+#### Audio Interface Example
+
+```cpp
+// Send audio sample to Model I
+void sendAudioSample(uint8_t sample) {
+    M1Shield.writeCassetteIn(sample);  // 0-255 analog value
+}
+
+// Generate a simple tone for Model I
+void generateTone(uint16_t frequency, uint16_t duration) {
+    uint32_t halfPeriod = 500000 / frequency;  // microseconds
+    uint32_t cycles = (uint32_t)frequency * duration / 1000;
+
+    for (uint32_t i = 0; i < cycles; i++) {
+        M1Shield.writeCassetteIn(255);  // High
+        delayMicroseconds(halfPeriod);
+        M1Shield.writeCassetteIn(0);    // Low
+        delayMicroseconds(halfPeriod);
+    }
+}
+
+// Read audio from Model I
+void monitorAudio() {
+    uint16_t level = M1Shield.readCassetteOut();  // 0-1023
+
+    if (level > 512) {
+        Serial.println("Audio signal detected from Model I");
+    }
+}
+```
+
+### Hardware Considerations
+
+- Use appropriate pull-up/pull-down resistors for input pins
+- Consider signal conditioning for audio applications
+- Implement proper grounding between Arduino and Model I
+- Use shielded cables for audio connections to reduce noise
+- Add protection diodes if connecting to external circuits
+- Test with multimeter before connecting any external devices
 
 ## Main Loop
 

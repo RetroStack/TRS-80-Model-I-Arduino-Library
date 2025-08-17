@@ -70,10 +70,8 @@ The library is organized into several key areas:
 
 The M1Shield provides a safe, reliable connection method with integrated display and user interface:
 
-- [**M1Shield**](M1Shield.md) — Main shield interface for display, input controls, LED indicators, and screen management.
+- [**M1Shield**](M1Shield.md) — Main shield interface for display, input controls, LED indicators, screen management, and cassette interface (⚠️ Advanced).
 - [**DisplayProvider**](DisplayProvider.md) — Adaptive display system supporting multiple controller types (TFT: ST7789, ST7735, ILI9341, ST7796, HX8357, ILI9325; OLED: SSD1306, SH1106).
-
-### User Interface Framework
 
 ### User Interface Framework
 
