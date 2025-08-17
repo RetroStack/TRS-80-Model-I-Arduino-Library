@@ -255,6 +255,9 @@ getPagingMode   KEYWORD2
 getPagingTimeout    KEYWORD2
 isWaitingForPaging  KEYWORD2
 continuePaging  KEYWORD2
+setAutoForward  KEYWORD2
+isAutoForwardEnabled    KEYWORD2
+getAutoForwardDelay KEYWORD2
 configWriteRAS   KEYWORD2
 configWriteCAS   KEYWORD2
 configWriteMUX   KEYWORD2

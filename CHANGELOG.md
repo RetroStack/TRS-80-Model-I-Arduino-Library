@@ -90,6 +90,12 @@ This is the initial version written by Ven Reddy
   - Model1.getStateData() and Model1.getStateConfigData() delegate to Model1LowLevel
   - Ensures single source of truth for low-level state access
   - Enhanced Model1LowLevel documentation with comprehensive state data examples
+- **NEW FEATURE**: Added auto-forward functionality to ConsoleScreen for automated navigation
+  - Auto-forward automatically triggers actionTaken(BUTTON_MENU) after _executeOnce() completes
+  - Configurable delay (default 5 seconds) before auto-forward activates
+  - User interaction cancels pending auto-forward to maintain user control
+  - Disabled by default - must be explicitly enabled with setAutoForward()
+  - Perfect for demos, automated sequences, and kiosk-style applications
 - **UI IMPROVEMENT**: Updated MenuScreen button behavior for better navigation
   - LEFT button now performs selection action (same as joystick press)
   - MENU button is now the only way to exit menus

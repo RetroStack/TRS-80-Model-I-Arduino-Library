@@ -120,6 +120,12 @@ private:
     unsigned long _screenOpenTime; // Timestamp when screen was opened
     bool _hasExecutedOnce;         // Whether _executeOnce() has been called
 
+    // Auto-forward functionality
+    bool _autoForwardEnabled;          // Whether auto-forward is enabled
+    unsigned long _autoForwardDelayMs; // Delay in milliseconds before auto-forward triggers
+    unsigned long _executeOnceCompleteTime; // Timestamp when _executeOnce() completed
+    bool _autoForwardTriggered;        // Flag indicating auto-forward should activate
+
     // Auto-paging management
     ConsolePagingMode _pagingMode;      // Current paging behavior mode
     uint16_t _pagingTimeoutMs;          // Timeout in milliseconds for auto-paging
@@ -462,6 +468,41 @@ public:
      * @return true if console is full and waiting for user action or timeout
      */
     bool isWaitingForPaging() const;
+
+    /**
+     * @brief Enable or disable auto-forward functionality
+     *
+     * When enabled, the console will automatically trigger actionTaken(BUTTON_MENU)
+     * after _executeOnce() completes and the specified delay has passed.
+     * This allows for automatic progression to the next screen without user intervention.
+     *
+     * @param enabled true to enable auto-forward, false to disable
+     * @param delayMs Delay in milliseconds after _executeOnce() completion (default: 5000ms = 5 seconds)
+     *
+     * @note Auto-forward is disabled by default and must be explicitly enabled
+     * @note The delay starts counting after _executeOnce() completes, not when the screen opens
+     * @note Minimum recommended delay is 1000ms (1 second)
+     * @note Auto-forward will not trigger if the user interacts with the screen before the delay expires
+     *
+     * @example
+     * @code
+     * setAutoForward(true, 3000);  // Auto-forward after 3 seconds
+     * setAutoForward(false);       // Disable auto-forward
+     * @endcode
+     */
+    void setAutoForward(bool enabled, unsigned long delayMs = 5000);
+
+    /**
+     * @brief Check if auto-forward is currently enabled
+     * @return true if auto-forward is enabled
+     */
+    bool isAutoForwardEnabled() const;
+
+    /**
+     * @brief Get current auto-forward delay
+     * @return unsigned long Current delay in milliseconds
+     */
+    unsigned long getAutoForwardDelay() const;
 
     /**
      * @brief Manually trigger page continuation

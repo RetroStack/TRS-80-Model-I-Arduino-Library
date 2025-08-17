@@ -27,6 +27,10 @@ The `ConsoleScreen` class provides a scrollable terminal-like interface for text
   - [getPagingTimeout](#paging-modes)
   - [isWaitingForPaging](#paging-modes)
   - [continuePaging](#paging-modes)
+- [Auto-Forward Feature](#auto-forward-feature)
+  - [setAutoForward](#auto-forward-configuration)
+  - [isAutoForwardEnabled](#auto-forward-configuration)
+  - [getAutoForwardDelay](#auto-forward-configuration)
 - [One-Time Execution](#one-time-execution)
 - [Examples](#examples)
 - [Technical Details](#technical-details)
@@ -601,6 +605,139 @@ if (timeoutValue < 1000) {
 // Verify paging state before critical operations
 if (!console.isWaitingForPaging()) {
     console.println("Critical system message");
+}
+```
+
+## Auto-Forward Feature
+
+The `ConsoleScreen` includes an auto-forward feature that can automatically navigate to the next screen after the `_executeOnce()` method completes and a configurable delay passes. This feature is useful for creating automated sequences or demos where screens should advance without user intervention.
+
+**⚠️ Important Notes:**
+- Auto-forward is **disabled by default** and must be explicitly enabled
+- Auto-forward only triggers after `_executeOnce()` completes, not immediately when the screen opens
+- If the user interacts with the screen (any button press), auto-forward is cancelled
+- Auto-forward simulates a `BUTTON_MENU` action to trigger navigation
+
+### Auto-Forward Configuration
+
+#### setAutoForward
+```cpp
+void setAutoForward(bool enabled, unsigned long delayMs = 5000);
+```
+
+Enable or disable auto-forward functionality with optional delay configuration.
+
+**Parameters:**
+- `enabled`: true to enable auto-forward, false to disable
+- `delayMs`: Delay in milliseconds after `_executeOnce()` completion (default: 5000ms = 5 seconds)
+
+**Example:**
+```cpp
+// Enable auto-forward with 3 second delay
+console.setAutoForward(true, 3000);
+
+// Enable auto-forward with default 5 second delay
+console.setAutoForward(true);
+
+// Disable auto-forward
+console.setAutoForward(false);
+```
+
+#### isAutoForwardEnabled
+```cpp
+bool isAutoForwardEnabled() const;
+```
+
+Check if auto-forward is currently enabled.
+
+**Returns:** true if auto-forward is enabled, false otherwise
+
+#### getAutoForwardDelay
+```cpp
+unsigned long getAutoForwardDelay() const;
+```
+
+Get the current auto-forward delay in milliseconds.
+
+**Returns:** Current delay in milliseconds
+
+### Auto-Forward Behavior
+
+1. **Timing**: Auto-forward countdown starts when `_executeOnce()` completes, not when the screen opens
+2. **User Interaction**: Any user input (button press, joystick movement) cancels pending auto-forward
+3. **Navigation**: Auto-forward triggers `actionTaken(BUTTON_MENU)` to follow normal navigation flow
+4. **Reset**: Auto-forward state resets each time the screen is opened
+
+### Auto-Forward Examples
+
+#### Basic Auto-Forward Console
+```cpp
+class AutoProgressConsole : public ConsoleScreen {
+protected:
+    void _executeOnce() override {
+        println("=== SYSTEM STATUS ===");
+        println("Checking components...");
+        delay(1000);
+        println("All systems operational");
+        println("Auto-advancing in 3 seconds...");
+        // Auto-forward will trigger 3 seconds after this method completes
+    }
+};
+
+void setup() {
+    AutoProgressConsole* console = new AutoProgressConsole();
+    console->setAutoForward(true, 3000);  // Auto-advance after 3 seconds
+    // ... add to screen system
+}
+```
+
+#### Conditional Auto-Forward
+```cpp
+class SmartConsole : public ConsoleScreen {
+private:
+    bool systemOk = false;
+    
+protected:
+    void _executeOnce() override {
+        println("Running diagnostics...");
+        systemOk = runSystemCheck();
+        
+        if (systemOk) {
+            println("System OK - auto-advancing...");
+            setAutoForward(true, 2000);  // Quick advance for success
+        } else {
+            println("System issues detected - manual review required");
+            setAutoForward(false);  // Disable auto-forward for problems
+        }
+    }
+};
+```
+
+#### Demo Sequence Console
+```cpp
+class DemoConsole : public ConsoleScreen {
+protected:
+    void _executeOnce() override {
+        println("=== FEATURE DEMONSTRATION ===");
+        
+        for (int i = 1; i <= 5; i++) {
+            print("Demo step ");
+            print(i);
+            println(" complete");
+            delay(500);
+        }
+        
+        println("");
+        println("Demo complete!");
+        println("Advancing to next demo...");
+        // Will auto-advance after 5 seconds
+    }
+};
+
+void setupDemo() {
+    DemoConsole* demo = new DemoConsole();
+    demo->setAutoForward(true, 5000);  // 5 second delay for reading
+    // ... configure screen navigation
 }
 ```
 

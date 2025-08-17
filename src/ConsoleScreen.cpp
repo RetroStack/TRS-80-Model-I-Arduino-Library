@@ -49,6 +49,12 @@ ConsoleScreen::ConsoleScreen() : ContentScreen()
     _screenOpenTime = 0;
     _hasExecutedOnce = false;
 
+    // Initialize auto-forward functionality (disabled by default)
+    _autoForwardEnabled = false;
+    _autoForwardDelayMs = 5000; // Default 5 second delay
+    _executeOnceCompleteTime = 0;
+    _autoForwardTriggered = false;
+
     // Initialize paging management
     _pagingMode = PAGING_WAIT_BOTH; // Default to button and timeout-based paging
     _pagingTimeoutMs = 5000;        // Default 5 second timeout
@@ -62,6 +68,29 @@ ConsoleScreen::ConsoleScreen() : ContentScreen()
     // Set default button labels
     const char *buttonItems[1] = {"[M] Back"};
     setButtonItems(buttonItems, 1);
+}
+
+/**
+ * @brief Initialize console when screen becomes active
+ *
+ * Resets the one-time execution tracking and auto-forward state when
+ * the console becomes active. This ensures _executeOnce() will be called
+ * 1 second after opening, even if the console was previously opened and closed.
+ */
+bool ConsoleScreen::open()
+{
+    // Call parent implementation first
+    bool result = ContentScreen::open();
+
+    // Reset one-time execution tracking
+    _screenOpenTime = millis();
+    _hasExecutedOnce = false;
+
+    // Reset auto-forward tracking
+    _executeOnceCompleteTime = 0;
+    _autoForwardTriggered = false;
+
+    return result;
 }
 
 /**
@@ -86,9 +115,9 @@ void ConsoleScreen::_updateDimensions()
 /**
  * @brief Main loop processing for console screen updates
  *
- * Handles one-time execution timing and delegates to ContentScreen for
- * standard screen processing. Override this method in derived classes
- * for custom behavior.
+ * Handles one-time execution timing, auto-forward functionality, and delegates
+ * to ContentScreen for standard screen processing. Override this method in
+ * derived classes for custom behavior.
  */
 void ConsoleScreen::loop()
 {
@@ -97,6 +126,19 @@ void ConsoleScreen::loop()
     {
         _executeOnce();
         _hasExecutedOnce = true;
+        _executeOnceCompleteTime = millis(); // Capture completion timestamp for auto-forward
+    }
+
+    // Check for auto-forward trigger (after executeOnce completes and delay passes)
+    if (_autoForwardEnabled && _hasExecutedOnce && _executeOnceCompleteTime > 0)
+    {
+        if (millis() - _executeOnceCompleteTime >= _autoForwardDelayMs)
+        {
+            // Set flag and trigger auto-forward by calling actionTaken with BUTTON_MENU
+            _autoForwardTriggered = true;
+            _executeOnceCompleteTime = 0;   // Prevent repeated triggering
+            actionTaken(BUTTON_MENU, 0, 0); // Directly call actionTaken to simulate menu press
+        }
     }
 
     // Call parent loop is not necessary since nothing is defined there
@@ -118,6 +160,21 @@ Screen *ConsoleScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t 
     if (!isActive())
     {
         return nullptr;
+    }
+
+    // Check if auto-forward was triggered (no user action)
+    if (_autoForwardTriggered)
+    {
+        _autoForwardTriggered = false; // Reset flag
+        // Continue processing the BUTTON_MENU action (already set when called from loop)
+    }
+    else
+    {
+        // If this is a user-initiated action, cancel pending auto-forward
+        if (_executeOnceCompleteTime > 0)
+        {
+            _executeOnceCompleteTime = 0; // Cancel pending auto-forward
+        }
     }
 
     // Handle back/menu button to exit console
@@ -199,25 +256,6 @@ void ConsoleScreen::_processTab()
     {
         _newLine();
     }
-}
-
-/**
- * @brief Override Screen::open() to initialize timing for one-time execution
- *
- * Resets the one-time execution tracking when the console becomes active.
- * This ensures _executeOnce() will be called 1 second after opening,
- * even if the console was previously opened and closed.
- */
-bool ConsoleScreen::open()
-{
-    // Call parent implementation first
-    bool result = ContentScreen::open();
-
-    // Reset one-time execution tracking
-    _screenOpenTime = millis();
-    _hasExecutedOnce = false;
-
-    return result;
 }
 
 // Print Interface Implementation
@@ -702,4 +740,36 @@ void ConsoleScreen::continuePaging()
         cls();
         _isWaitingForPaging = false;
     }
+}
+
+/**
+ * @brief Enable or disable auto-forward functionality
+ */
+void ConsoleScreen::setAutoForward(bool enabled, unsigned long delayMs)
+{
+    _autoForwardEnabled = enabled;
+    _autoForwardDelayMs = delayMs;
+
+    // If disabling auto-forward, cancel any pending auto-forward
+    if (!enabled)
+    {
+        _executeOnceCompleteTime = 0;
+        _autoForwardTriggered = false;
+    }
+}
+
+/**
+ * @brief Check if auto-forward is currently enabled
+ */
+bool ConsoleScreen::isAutoForwardEnabled() const
+{
+    return _autoForwardEnabled;
+}
+
+/**
+ * @brief Get current auto-forward delay
+ */
+unsigned long ConsoleScreen::getAutoForwardDelay() const
+{
+    return _autoForwardDelayMs;
 }
