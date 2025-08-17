@@ -91,7 +91,7 @@ This is the initial version written by Ven Reddy
   - Ensures single source of truth for low-level state access
   - Enhanced Model1LowLevel documentation with comprehensive state data examples
 - **NEW FEATURE**: Added auto-forward functionality to ConsoleScreen for automated navigation
-  - Auto-forward automatically triggers actionTaken(BUTTON_MENU) after _executeOnce() completes
+  - Auto-forward automatically triggers actionTaken(BUTTON_MENU) after \_executeOnce() completes
   - Configurable delay (default 5 seconds) before auto-forward activates
   - User interaction cancels pending auto-forward to maintain user control
   - Disabled by default - must be explicitly enabled with setAutoForward()
@@ -107,3 +107,18 @@ This is the initial version written by Ven Reddy
   - **SAFETY WARNING**: Incorrect usage can damage Arduino - CR1/CR2 may be connected on some systems
   - Comprehensive documentation with safety guidelines, testing procedures, and usage examples
   - Pin assignments: CR1 (pin 2), CR2 (pin 3), Cassette Input (A14), Cassette Output (A15)
+- **UI ENHANCEMENT**: Added paging pause/resume functionality to ConsoleScreen
+  - **LEFT button**: Pauses automatic timeout countdown indefinitely for extended reading time
+  - **RIGHT button**: Immediately skips to next page, or resumes from pause state
+  - **Smart messages**: Context-aware prompts show available actions based on current state
+  - **Pause persistence**: Timeout can be paused indefinitely until user resumes
+  - **Enhanced accessibility**: Perfect for educational content, debugging, and data analysis
+  - Works in both `PAGING_WAIT_TIMEOUT` and `PAGING_WAIT_BOTH` modes
+- **NEW FEATURE**: Added notification system to ContentScreen for user feedback
+  - **Temporary messages**: Notifications replace footer area with magenta background and black text
+  - **Auto-expiration**: Configurable duration (default 3 seconds) with automatic footer restoration
+  - **Memory efficient**: `notify()` for dynamic text, `notifyF()` for FlashString static text
+  - **Manual control**: `isNotificationActive()` to check state, `dismissNotification()` for early dismissal
+  - **Smart display**: Notifications automatically hidden on small displays (OLED) to preserve space
+  - **Use cases**: Success messages, warnings, errors, and status updates
+  - Complete API: `notify()`, `notifyF()`, `isNotificationActive()`, `dismissNotification()`

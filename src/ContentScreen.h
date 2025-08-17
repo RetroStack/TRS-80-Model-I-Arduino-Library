@@ -105,6 +105,12 @@ private:
     uint8_t _buttonItemCount; // Number of button labels currently set
     uint8_t _progressValue;   // Progress bar value (0-100)
 
+    // Notification system
+    char *_notificationText;         // Dynamic notification text buffer
+    unsigned long _notificationStartTime; // When notification was shown
+    unsigned long _notificationDuration;  // How long to show notification (ms)
+    bool _notificationActive;        // Whether notification is currently active
+
     /**
      * @brief Draw the header region with title
      */
@@ -125,6 +131,21 @@ private:
      * @return Padding in pixels
      */
     uint8_t _getPadding() const;
+
+    /**
+     * @brief Draw notification overlay in place of footer
+     */
+    void _drawNotification();
+
+    /**
+     * @brief Update notification state and check for expiration
+     */
+    void _updateNotification();
+
+    /**
+     * @brief Clear notification text and free memory
+     */
+    void _clearNotification();
 
 protected:
     /**
@@ -354,6 +375,37 @@ public:
      * @endcode
      */
     void drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper *text, uint16_t color, uint8_t size = 1);
+
+    // Notification system methods
+
+    /**
+     * @brief Show a notification that temporarily replaces the footer
+     * @param text Notification text to display (dynamically allocated copy made)
+     * @param durationMs How long to show notification in milliseconds
+     * @note Notification is displayed with magenta background and black text
+     * @note Previous footer will be restored when notification expires
+     */
+    void notify(const char *text, unsigned long durationMs = 3000);
+
+    /**
+     * @brief Show a notification from FlashString (F() macro)
+     * @param text FlashString notification text (automatically converted and copied)
+     * @param durationMs How long to show notification in milliseconds
+     * @note More memory efficient than notify() for static text
+     */
+    void notifyF(const __FlashStringHelper *text, unsigned long durationMs = 3000);
+
+    /**
+     * @brief Check if a notification is currently active
+     * @return true if notification is being displayed, false otherwise
+     */
+    bool isNotificationActive() const;
+
+    /**
+     * @brief Manually dismiss current notification
+     * @note Notification will be cleared and footer will be restored immediately
+     */
+    void dismissNotification();
 };
 
 #endif /* CONTENT_SCREEN_H */

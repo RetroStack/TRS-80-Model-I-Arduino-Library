@@ -26,6 +26,11 @@ The `ContentScreen` class provides a structured layout template for screens with
     - [clearContentArea](#void-clearcontentarea)
     - [drawText](#void-drawtextuint16_t-x-uint16_t-y-const-char-text-uint16_t-color-uint8_t-size--1)
     - [drawTextF](#void-drawtextfuint16_t-x-uint16_t-y-const-__flashstringhelper-text-uint16_t-color-uint8_t-size--1)
+  - [Notification System](#notification-system)
+    - [notify](#void-notifyconst-char-text-unsigned-long-durationms--3000)
+    - [notifyF](#void-notifyfconst-__flashstringhelper-text-unsigned-long-durationms--3000)
+    - [isNotificationActive](#bool-isnotificationactive-const)
+    - [dismissNotification](#void-dismissnotification)
 - [Layout Regions](#layout-regions)
 - [Implementation Pattern](#implementation-pattern)
 - [Examples](#examples)
@@ -275,6 +280,98 @@ drawTextF(10, 60, F("Connection: Active"), M1Shield.BLUE, 2);
 - **Automatic Conversion**: FlashString automatically converted for display
 - **Same Functionality**: Identical behavior to regular `drawText()` method
 
+### Notification System
+
+The notification system provides a way to temporarily display important messages to the user by replacing the footer area with a highlighted notification banner.
+
+#### `void notify(const char* text, unsigned long durationMs = 3000)`
+
+Shows a notification that temporarily replaces the footer area.
+
+**Parameters:**
+
+- `text`: Notification text to display (dynamically allocated copy made)
+- `durationMs`: How long to show notification in milliseconds (default: 3000ms)
+
+**Visual Appearance:**
+- **Background**: Magenta color for high visibility
+- **Text Color**: Black text for maximum contrast
+- **Positioning**: Replaces footer area temporarily
+- **Duration**: Configurable timeout with automatic restoration
+
+**Example:**
+
+```cpp
+// Show a 3-second notification
+notify("File saved successfully!", 3000);
+
+// Show a 5-second warning
+notify("Warning: Low battery", 5000);
+
+// Show with default 3-second duration
+notify("Operation completed");
+```
+
+#### `void notifyF(const __FlashStringHelper* text, unsigned long durationMs = 3000)`
+
+Shows a notification from FlashString (F() macro) for memory efficiency.
+
+**Parameters:**
+
+- `text`: FlashString notification text (automatically converted and copied)
+- `durationMs`: How long to show notification in milliseconds (default: 3000ms)
+
+**Example:**
+
+```cpp
+// Memory-efficient notification
+notifyF(F("System initialized"), 2000);
+notifyF(F("Configuration updated"), 4000);
+```
+
+#### `bool isNotificationActive() const`
+
+Checks if a notification is currently being displayed.
+
+**Returns:** `true` if notification is active, `false` otherwise
+
+**Example:**
+
+```cpp
+if (!isNotificationActive()) {
+    notify("Ready for new operation");
+}
+```
+
+#### `void dismissNotification()`
+
+Manually dismisses the current notification immediately.
+
+**Example:**
+
+```cpp
+// Dismiss notification on user action
+if (M1Shield.wasMenuPressed() && isNotificationActive()) {
+    dismissNotification();
+}
+```
+
+#### Notification Behavior
+
+- **Automatic Expiration**: Notifications automatically disappear after the specified duration
+- **Footer Restoration**: Original footer content is restored when notification expires
+- **Single Notification**: Only one notification can be active at a time (new ones replace existing)
+- **Memory Management**: Notification text is dynamically allocated and automatically freed
+- **Screen Updates**: Calling `notify()` automatically triggers a screen refresh if the screen is active
+- **Small Display Handling**: Notifications are not shown on small displays (OLED) to preserve space
+
+#### Use Cases
+
+- **Success Messages**: "File saved successfully", "Connection established"
+- **Warnings**: "Low battery", "Network timeout", "Invalid input"
+- **Status Updates**: "Processing...", "Upload complete", "System ready"
+- **Error Notifications**: "Operation failed", "File not found", "Access denied"
+
 ## Layout Regions
 
 ### Header Region
@@ -482,3 +579,92 @@ protected:
   - Menu items and button labels (`setButtonItemsF`)
   - Screen titles and headers (`setTitleF`)
 - **Best practices**: Use FlashString for static text, regular methods for dynamic content
+
+## Notification System Example
+
+This example demonstrates the notification system for user feedback:
+
+```cpp
+class NotificationExampleScreen : public ContentScreen {
+private:
+    int _operationCount;
+    unsigned long _lastOperation;
+
+public:
+    NotificationExampleScreen() : ContentScreen() {
+        setTitleF(F("Notification Demo"));
+        
+        const char* buttons[] = {"Save", "Load", "Reset", "Exit"};
+        setButtonItems(buttons, 4);
+        
+        _operationCount = 0;
+        _lastOperation = 0;
+    }
+
+protected:
+    void _drawContent() override {
+        // Draw some content
+        drawTextF(10, 10, F("Press buttons to see notifications:"), M1Shield.WHITE, 1);
+        
+        drawText(10, 30, "Operations completed: ", M1Shield.WHITE, 1);
+        drawText(160, 30, String(_operationCount).c_str(), M1Shield.YELLOW, 1);
+        
+        if (isNotificationActive()) {
+            drawTextF(10, 50, F("Notification is active"), M1Shield.GREEN, 1);
+        } else {
+            drawTextF(10, 50, F("No notification"), M1Shield.RED, 1);
+        }
+    }
+
+public:
+    void loop() override {
+        // Update content periodically
+        if (millis() - _lastOperation > 100) {
+            refresh();
+            _lastOperation = millis();
+        }
+    }
+
+    Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override {
+        if (action & BUTTON_LEFT) {
+            // Save operation
+            _operationCount++;
+            notify("File saved successfully!", 2000);
+        }
+        else if (action & BUTTON_RIGHT) {
+            // Load operation
+            _operationCount++;
+            notifyF(F("File loaded"), 3000);
+        }
+        else if (action & BUTTON_UP) {
+            // Reset operation with warning
+            _operationCount = 0;
+            notify("System reset - all data cleared", 4000);
+        }
+        else if (action & BUTTON_DOWN) {
+            // Manual dismiss
+            if (isNotificationActive()) {
+                dismissNotification();
+                notify("Notification dismissed", 1500);
+            } else {
+                notify("No notification to dismiss", 2000);
+            }
+        }
+        else if (action & BUTTON_MENU) {
+            // Exit
+            return nullptr; // Return to previous screen
+        }
+
+        return this; // Stay on this screen
+    }
+};
+```
+
+**Key Features Demonstrated:**
+
+- **Success Messages**: Confirming save operations
+- **Memory-Efficient Notifications**: Using `notifyF()` with FlashString
+- **Warning Messages**: Reset confirmation with longer duration
+- **Manual Control**: Dismissing notifications with button press
+- **Status Checking**: Using `isNotificationActive()` to adapt UI
+- **Automatic Expiration**: Different durations for different message types

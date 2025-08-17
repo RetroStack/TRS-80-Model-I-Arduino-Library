@@ -232,6 +232,10 @@ _setButtonItems KEYWORD2
 _clearButtonItems   KEYWORD2
 _clearContentArea   KEYWORD2
 _drawText   KEYWORD2
+notify  KEYWORD2
+notifyF KEYWORD2
+isNotificationActive    KEYWORD2
+dismissNotification KEYWORD2
 _setMenuItems   KEYWORD2
 _clearMenuItems KEYWORD2
 _setSelectedMenuItemIndex   KEYWORD2

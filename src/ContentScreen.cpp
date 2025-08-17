@@ -44,6 +44,10 @@ constexpr uint16_t PROGRESSBAR_COLOR_BG = 0x0000;       // Progress bar backgrou
 constexpr uint16_t PROGRESSBAR_COLOR_FG = 0xFFE0;       // Progress bar foreground (yellow)
 constexpr uint16_t PROGRESSBAR_SMALL_COLOR_FG = 0xFFFF; // Progress bar foreground (white)
 
+// Notification styling
+constexpr uint16_t NOTIFICATION_COLOR_BG = 0xF81F;      // Notification background (magenta)
+constexpr uint16_t NOTIFICATION_COLOR_FG = 0x0000;      // Notification text color (black)
+
 /**
  * @brief Constructor initializes ContentScreen with default values
  *
@@ -56,6 +60,12 @@ ContentScreen::ContentScreen() : Screen()
     _buttonItems = nullptr; // No button storage allocated initially
     _buttonItemCount = 0;
     _progressValue = 0;
+    
+    // Initialize notification system
+    _notificationText = nullptr;
+    _notificationStartTime = 0;
+    _notificationDuration = 0;
+    _notificationActive = false;
 }
 
 /**
@@ -68,6 +78,7 @@ ContentScreen::~ContentScreen()
 {
     clearTitle();
     clearButtonItems();
+    _clearNotification();
 }
 
 /**
@@ -94,10 +105,23 @@ void ContentScreen::_drawScreen()
     Adafruit_GFX &gfx = M1Shield.getGFX();
     gfx.fillScreen(M1Shield.convertColor(SCREEN_COLOR_BG));
 
+    // Update notification state before drawing
+    _updateNotification();
+
     // Render all layout regions in order
     _drawHeader();
     _drawContent(); // Implemented by derived class
-    _drawFooter();
+    
+    // Draw either notification or footer
+    if (_notificationActive)
+    {
+        _drawNotification();
+    }
+    else
+    {
+        _drawFooter();
+    }
+    
     _drawProgressBar();
 
     // Add decorative borders if not a small display
@@ -785,4 +809,156 @@ void ContentScreen::drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper 
 
     // Free temporary buffer
     free(buffer);
+}
+
+// =====================================================================================
+// Notification System Implementation
+// =====================================================================================
+
+/**
+ * @brief Show a notification that temporarily replaces the footer
+ * @param text Notification text to display (dynamically allocated copy made)
+ * @param durationMs How long to show notification in milliseconds
+ */
+void ContentScreen::notify(const char *text, unsigned long durationMs)
+{
+    if (text == nullptr)
+        return;
+
+    // Clear any existing notification
+    _clearNotification();
+
+    // Allocate and copy notification text
+    size_t len = strlen(text);
+    _notificationText = (char *)malloc(len + 1);
+    if (_notificationText == nullptr)
+        return; // Failed allocation
+
+    strcpy(_notificationText, text);
+
+    // Set notification timing
+    _notificationStartTime = millis();
+    _notificationDuration = durationMs;
+    _notificationActive = true;
+
+    // Trigger immediate redraw to show notification
+    if (isActive())
+    {
+        refresh();
+    }
+}
+
+/**
+ * @brief Show a notification from FlashString (F() macro)
+ * @param text FlashString notification text (automatically converted and copied)
+ * @param durationMs How long to show notification in milliseconds
+ */
+void ContentScreen::notifyF(const __FlashStringHelper *text, unsigned long durationMs)
+{
+    if (text == nullptr)
+        return;
+
+    // Convert FlashString to regular string
+    size_t len = strlen_P((const char *)text);
+    char *buffer = (char *)malloc(len + 1);
+    if (buffer == nullptr)
+        return; // Failed allocation
+
+    strcpy_P(buffer, (const char *)text);
+
+    // Delegate to regular notify method
+    notify(buffer, durationMs);
+
+    // Free temporary buffer
+    free(buffer);
+}
+
+/**
+ * @brief Check if a notification is currently active
+ * @return true if notification is being displayed, false otherwise
+ */
+bool ContentScreen::isNotificationActive() const
+{
+    return _notificationActive;
+}
+
+/**
+ * @brief Manually dismiss current notification
+ */
+void ContentScreen::dismissNotification()
+{
+    if (_notificationActive)
+    {
+        _clearNotification();
+        
+        // Trigger redraw to restore footer
+        if (isActive())
+        {
+            refresh();
+        }
+    }
+}
+
+/**
+ * @brief Draw notification overlay in place of footer
+ */
+void ContentScreen::_drawNotification()
+{
+    if (!isActive() || !_notificationActive || _notificationText == nullptr || isSmallDisplay())
+        return;
+
+    uint16_t screenWidth = M1Shield.getScreenWidth();
+    uint16_t top = _getFooterY();
+    uint16_t height = _getFooterHeight();
+
+    Adafruit_GFX &gfx = M1Shield.getGFX();
+
+    // Draw notification background (magenta)
+    gfx.fillRect(0, top, screenWidth, height, M1Shield.convertColor(NOTIFICATION_COLOR_BG));
+
+    // Draw notification text (black on magenta)
+    gfx.setTextColor(M1Shield.convertColor(NOTIFICATION_COLOR_FG));
+    gfx.setTextSize(1);
+
+    // Center text horizontally
+    uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(_notificationText);
+    uint16_t xPos = (screenWidth - textWidth) / 2;
+
+    // Center text vertically in footer area
+    uint16_t yPos = top + (height - 8) / 2; // 8 is approximate height of size-1 text
+
+    gfx.setCursor(xPos, yPos);
+    gfx.print(_notificationText);
+}
+
+/**
+ * @brief Update notification state and check for expiration
+ */
+void ContentScreen::_updateNotification()
+{
+    if (!_notificationActive)
+        return;
+
+    // Check if notification has expired
+    unsigned long currentTime = millis();
+    if (currentTime - _notificationStartTime >= _notificationDuration)
+    {
+        _clearNotification();
+    }
+}
+
+/**
+ * @brief Clear notification text and free memory
+ */
+void ContentScreen::_clearNotification()
+{
+    if (_notificationText != nullptr)
+    {
+        free(_notificationText);
+        _notificationText = nullptr;
+    }
+    
+    _notificationActive = false;
+    _notificationStartTime = 0;
+    _notificationDuration = 0;
 }
