@@ -166,7 +166,7 @@ Standard logging methods with printf-style formatting. Messages are displayed wi
 
 ```cpp
 ILogger* adapter = screen->asLogger();
-adapter->info("Temperature: %d°C", temp);           // printf-style
+adapter->info("Temperature: %dC", temp);           // printf-style
 adapter->warn(String("Status: ") + statusText);    // String support
 adapter->err(F("System error"));                   // F() macro support
 adapter->debug(F("Debug: state=%s"), currentState); // Debug with format
@@ -259,9 +259,9 @@ void loop() {
     }
 
     if (tempC > 75) {
-        monitor->err("High temperature: %d°C", tempC);
+        monitor->err("High temperature: %dC", tempC);
     } else {
-        monitor->info("Status OK - Temp: %d°C, Mem: %d", tempC, memFree);
+        monitor->info("Status OK - Temp: %dC, Mem: %d", tempC, memFree);
     }
 
     delay(5000);

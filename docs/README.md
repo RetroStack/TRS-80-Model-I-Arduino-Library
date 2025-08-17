@@ -46,23 +46,23 @@ The library is organized into several key areas:
 
 ### Core TRS-80 Interface
 
-- [**Model1**](Model1.md) — High-level interface for memory access, bus control, and system management. Start here for most applications.
-- [**Model1LowLevel**](Model1LowLevel.md) — Direct hardware control for advanced users requiring precise signal timing (⚠️ Expert level).
-- [**Cassette**](Cassette.md) — Cassette tape interface emulation and video mode control for authentic TRS-80 operation.
-- [**Keyboard**](Keyboard.md) — Matrix keyboard reading with change detection and key mapping.
-- [**Video**](Video.md) — Video memory manipulation, text display, and character encoding with viewport support.
-- [**ROM**](ROM.md) — ROM analysis tools including reading, checksumming, and automatic identification of known ROM versions.
+- [**Model1**](Model1.md) - High-level interface for memory access, bus control, and system management. Start here for most applications.
+- [**Model1LowLevel**](Model1LowLevel.md) - Direct hardware control for advanced users requiring precise signal timing (WARNING: Expert level).
+- [**Cassette**](Cassette.md) - Cassette tape interface emulation and video mode control for authentic TRS-80 operation.
+- [**Keyboard**](Keyboard.md) - Matrix keyboard reading with change detection and key mapping.
+- [**Video**](Video.md) - Video memory manipulation, text display, and character encoding with viewport support.
+- [**ROM**](ROM.md) - ROM analysis tools including reading, checksumming, and automatic identification of known ROM versions.
 
 ### Hardware Integration
 
-- [**Pin Mapping**](PinMapping.md) — Complete wiring guide for direct Arduino-to-TRS-80 connections with safety procedures and testing.
-- [**TEST Signal Modification**](TESTMod.md) — Essential hardware fix for TRS-80 bus timing issues that can cause crashes during external access.
+- [**Pin Mapping**](PinMapping.md) - Complete wiring guide for direct Arduino-to-TRS-80 connections with safety procedures and testing.
+- [**TEST Signal Modification**](TESTMod.md) - Essential hardware fix for TRS-80 bus timing issues that can cause crashes during external access.
 
 ### Development & Debugging
 
-- [**ILogger**](ILogger.md) — Unified logging interface supporting multiple output formats and destinations.
-- [**SerialLogger**](SerialLogger.md) — Serial port logging with formatted output and mute/unmute control.
-- [**CompositeLogger**](CompositeLogger.md) — Multi-destination logging for simultaneous output to serial, display, and file systems.
+- [**ILogger**](ILogger.md) - Unified logging interface supporting multiple output formats and destinations.
+- [**SerialLogger**](SerialLogger.md) - Serial port logging with formatted output and mute/unmute control.
+- [**CompositeLogger**](CompositeLogger.md) - Multi-destination logging for simultaneous output to serial, display, and file systems.
 
 ### M1Shield Support
 
@@ -70,18 +70,18 @@ The library is organized into several key areas:
 
 The M1Shield provides a safe, reliable connection method with integrated display and user interface:
 
-- [**M1Shield**](M1Shield.md) — Main shield interface for display, input controls, LED indicators, screen management, and cassette interface (⚠️ Advanced).
-- [**DisplayProvider**](DisplayProvider.md) — Adaptive display system supporting multiple controller types (TFT: ST7789, ST7735, ILI9341, ST7796, HX8357, ILI9325; OLED: SSD1306, SH1106).
+- [**M1Shield**](M1Shield.md) - Main shield interface for display, input controls, LED indicators, screen management, and cassette interface (WARNING: Advanced).
+- [**DisplayProvider**](DisplayProvider.md) - Adaptive display system supporting multiple controller types (TFT: ST7789, ST7735, ILI9341, ST7796, HX8357, ILI9325; OLED: SSD1306, SH1106).
 
 ### User Interface Framework
 
 A complete screen management system for building interactive applications:
 
-- [**Screen**](Screen.md) — Abstract base class providing lifecycle management, input handling, and navigation for all UI screens.
-- [**ContentScreen**](ContentScreen.md) — Structured layout template with header, content area, footer, and progress indicators for organized displays.
-- [**ConsoleScreen**](ConsoleScreen.md) — Terminal-style scrolling text interface ideal for debugging, logging, and command-line applications.
-- [**LoggerScreen**](LoggerScreen.md) — Visual logging destination with color-coded messages, timestamps, and ILogger compatibility.
-- [**MenuScreen**](MenuScreen.md) — Intelligent menu system with automatic pagination, navigation, and selection handling.
+- [**Screen**](Screen.md) - Abstract base class providing lifecycle management, input handling, and navigation for all UI screens.
+- [**ContentScreen**](ContentScreen.md) - Structured layout template with header, content area, footer, and progress indicators for organized displays.
+- [**ConsoleScreen**](ConsoleScreen.md) - Terminal-style scrolling text interface ideal for debugging, logging, and command-line applications.
+- [**LoggerScreen**](LoggerScreen.md) - Visual logging destination with color-coded messages, timestamps, and ILogger compatibility.
+- [**MenuScreen**](MenuScreen.md) - Intelligent menu system with automatic pagination, navigation, and selection handling.
 
 ## Quick Start Guide
 

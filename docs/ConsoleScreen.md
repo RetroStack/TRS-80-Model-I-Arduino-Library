@@ -56,7 +56,7 @@ The `ConsoleScreen` class provides a scrollable terminal-like interface for text
 - Inherits from `Print` class for full Arduino ecosystem compatibility
 - Automatic support for all data types: int, long, float, double, char, String
 - Base conversion support: print(value, HEX), print(value, BIN), print(value, OCT)
-- Precision control for floating point: print(3.14159, 2) → "3.14"
+- Precision control for floating point: print(3.14159, 2) -> "3.14"
 - Can be used anywhere a Print stream is expected
 - Compatible with stream operators and printf-style libraries
 
@@ -64,9 +64,9 @@ The `ConsoleScreen` class provides a scrollable terminal-like interface for text
 
 ```
 Screen
-    ↓
+    v
 ContentScreen
-    ↓
+    v
 ConsoleScreen (implements Print interface)
 ```
 
@@ -140,8 +140,8 @@ ConsoleScreen console;
 
 console.print("Temperature: ");
 console.print(25.6, 1);
-console.print("°C");
-// Output: "Temperature: 25.6°C"
+console.print("C");
+// Output: "Temperature: 25.6C"
 ```
 
 ### Println Methods (With Newline)
@@ -158,7 +158,7 @@ void println();  // Print newline only
 
 ```cpp
 console.println("=== SYSTEM STATUS ===");
-console.println("CPU Temp: 45°C");
+console.println("CPU Temp: 45C");
 console.println("Memory: 75% used");
 console.println();  // Blank line
 ```
@@ -264,7 +264,7 @@ uint8_t getTabSize();
 ```cpp
 console.setTabSize(8);        // Set 8-character tab stops
 console.print("Name:\tValue\n");
-console.print("Temp:\t25.6°C\n");
+console.print("Temp:\t25.6C\n");
 ```
 
 ## Screen Management
@@ -681,7 +681,7 @@ if (!console.isWaitingForPaging()) {
 
 The `ConsoleScreen` includes an auto-forward feature that can automatically navigate to the next screen after the `_executeOnce()` method completes and a configurable delay passes. This feature is useful for creating automated sequences or demos where screens should advance without user intervention.
 
-**⚠️ Important Notes:**
+**WARNING: Important Notes:**
 
 - Auto-forward is **disabled by default** and must be explicitly enabled
 - Auto-forward only triggers after `_executeOnce()` completes, not immediately when the screen opens
@@ -883,7 +883,7 @@ void loop() {
         float temperature = 23.456;
         console.print("Temp: ");
         console.print(temperature, 1);      // 1 decimal place: "23.5"
-        console.println("°C");
+        console.println("C");
 
         // Show hex values
         console.print("Status: 0x");
@@ -1077,10 +1077,10 @@ public:
 
         // Status indicators
         setTextColor(0x07E0);
-        println("✓ System operational");
-        println("✓ Sensors active");
+        println("* System operational");
+        println("* Sensors active");
         setTextColor(0xFFE0);
-        println("⚠ Low memory warning");
+        println("WARNING: Low memory warning");
         setTextColor(0xFFFF);
     }
 };

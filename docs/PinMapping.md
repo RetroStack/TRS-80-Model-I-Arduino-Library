@@ -32,7 +32,7 @@ The TRS-80 Model I uses a 40-pin edge connector to interface with external devic
 
 ## Safety Warnings
 
-⚠️ **CRITICAL SAFETY INFORMATION:**
+WARNING: **CRITICAL SAFETY INFORMATION:**
 
 1. **Power Sequence:** Always power on the TRS-80 Model I first and let it fully boot before connecting or powering the Arduino
 2. **Signal Levels:** Both systems operate at 5V logic levels, but ensure proper ground connections
@@ -112,11 +112,11 @@ TRS-80 Model I Edge Connector (40-pin)
 =====================================
 
       A Side (Component Side)           B Side (Solder Side)
-   +5V  A40 ●●●●●●●●●●●●●●●●●●●● A01  A0     +5V  B40 ●●●●●●●●●●●●●●●●●●●● B01  D0
-   +5V  A39 ●●●●●●●●●●●●●●●●●●●● A02  A1     GND  B39 ●●●●●●●●●●●●●●●●●●●● B02  D1
-   GND  A38 ●●●●●●●●●●●●●●●●●●●● A03  A2     GND  B38 ●●●●●●●●●●●●●●●●●●●● B03  D2
+   +5V  A40 -------------------- A01  A0     +5V  B40 -------------------- B01  D0
+   +5V  A39 -------------------- A02  A1     GND  B39 -------------------- B02  D1
+   GND  A38 -------------------- A03  A2     GND  B38 -------------------- B03  D2
         ...                     ...              ...                     ...
-        A20 ●●●●●●●●●●●●●●●●●●●● A17 /MREQ      B12 ●●●●●●●●●●●●●●●●●●●● B09 /WAIT
+        A20 -------------------- A17 /MREQ      B12 -------------------- B09 /WAIT
 ```
 
 **Pin Numbering:**

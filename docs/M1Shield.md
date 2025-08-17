@@ -345,11 +345,11 @@ void setup() {
 
 ## Cassette Interface
 
-⚠️ **ADVANCED FEATURE: Incorrect usage can permanently damage your Arduino!**
+WARNING: **ADVANCED FEATURE: Incorrect usage can permanently damage your Arduino!**
 
 The M1Shield provides direct access to the TRS-80 Model I cassette interface, including cassette remote control (CR1/CR2) and audio interface. This is an advanced feature that requires careful understanding of both TRS-80 and Arduino hardware limitations.
 
-### ⚠️ Critical Safety Warning
+### WARNING: Critical Safety Warning
 
 **CR1 and CR2 pins may be electrically connected on some Model I systems!**
 
@@ -597,10 +597,10 @@ void setup() {
 | `Display_ST7789_320x170` | ST7789             | 320x170           | Wide displays              |
 | `Display_ST7789_320x240` | ST7789             | 320x240           | Landscape displays         |
 | `Display_ST7735`         | ST7735             | 128x160           | Smaller displays           |
-| `Display_ILI9341`        | ILI9341            | 240x320 → 320x240 | Alternative common display |
-| `Display_ST7796`         | ST7796             | 320x480 → 480x320 | Large displays, landscape  |
+| `Display_ILI9341`        | ILI9341            | 240x320 -> 320x240 | Alternative common display |
+| `Display_ST7796`         | ST7796             | 320x480 -> 480x320 | Large displays, landscape  |
 | `Display_HX8357`         | HX8357             | 320x480           | Large displays, portrait   |
-| `Display_ILI9325`        | ILI9325            | 240x320 → 320x240 | Parallel interface         |
+| `Display_ILI9325`        | ILI9325            | 240x320 -> 320x240 | Parallel interface         |
 | `Display_SSD1306`        | SSD1306            | 128x64            | OLED monochrome display    |
 | `Display_SH1106`         | SH1106             | 128x64            | OLED monochrome display    |
 

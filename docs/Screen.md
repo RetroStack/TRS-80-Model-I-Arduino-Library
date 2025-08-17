@@ -238,7 +238,7 @@ The Screen class provides the `isSmallDisplay()` method to help create adaptive 
 bool isSmallDisplay() const
 ```
 
-**Returns**: `true` if display height ≤ 128 pixels (typically OLED), `false` for larger displays
+**Returns**: `true` if display height <= 128 pixels (typically OLED), `false` for larger displays
 
 ### Usage Examples
 

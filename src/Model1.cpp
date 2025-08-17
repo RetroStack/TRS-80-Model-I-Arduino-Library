@@ -5,16 +5,16 @@
 // Refresh trigger
 //
 // Fasted possible with current code:
-//   (71+1) × 62.5ns = 4.5µs -> 4.5µs * 128 rows => 0.576ms
+//   (71+1) x 62.5ns = 4.5us -> 4.5us * 128 rows => 0.576ms
 //
 // Reasonable:
-//   (89+1) × 62.5ns = 5.625µs -> 5.625µs * 128 rows => 0.720ms
+//   (89+1) x 62.5ns = 5.625us -> 5.625us * 128 rows => 0.720ms
 //
 // Reasonable:
-//   (100+1) × 62.5ns = 6.3125µs -> 6.3125µs * 128 rows => 0.808ms
+//   (100+1) x 62.5ns = 6.3125us -> 6.3125us * 128 rows => 0.808ms
 //
 // Minimum needed:
-//   (124+1) × 62.5ns = 7.8125µs -> 7.8125µs * 128 rows => 1.0ms
+//   (124+1) x 62.5ns = 7.8125us -> 7.8125us * 128 rows => 1.0ms
 #define CTC_TRIGGER 89
 
 // Version constants

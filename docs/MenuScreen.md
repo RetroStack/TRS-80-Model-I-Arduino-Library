@@ -155,9 +155,9 @@ Pagination is handled automatically by the MenuScreen system:
 ```
 Page 1 of 3        Page 2 of 3        Page 3 of 3
 -----------        -----------        -----------
-► New Game         ► Options          ► Credits
+> New Game         > Options          > Credits
   Load Game          Graphics           About
-  Quick Start        Audio            ► Exit
+  Quick Start        Audio            > Exit
   Tutorial           Controls
 ```
 
@@ -249,6 +249,7 @@ protected:
 ```
 
 **FlashString Benefits:**
+
 - **Memory Efficient**: Configuration text stored in flash memory instead of RAM
 - **Static Values**: Perfect for fixed configuration options that don't change
 - **Priority**: FlashString version takes precedence over regular string version
@@ -298,7 +299,7 @@ public:
         // Configure layout
         _setTitle("Settings");
 
-        const char* buttons[] = {"[M] Exit", "Select ►"};
+        const char* buttons[] = {"[M] Exit", "Select >"};`
         _setFooterButtons(buttons, 2);
 
         // Initialize state

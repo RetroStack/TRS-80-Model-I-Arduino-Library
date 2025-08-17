@@ -63,8 +63,8 @@ char busStatus(uint8_t value)
 //      wait=4: ~1032 ns total delay (15 cycles + call overhead)
 //      wait=5: ~1292 ns total delay (19 cycles + call overhead)
 //
-// - To get ~1 µs delay, use wait=4.
-// - To get ~2 µs delay, use wait=8.
+// - To get ~1 us delay, use wait=4.
+// - To get ~2 us delay, use wait=8.
 //
 // Example usage:
 //     asmWait(3); // ~772 ns delay including overhead
@@ -117,32 +117,32 @@ void asmWait(uint16_t wait)
  *      outer=1, inner=2:
  *          innerLoopCycles = 7
  *          totalCycles = 7 + 3 = 10 cycles
- *          delay = (10 * 62.5 ns) + 375 ns = 1.0 µs
+ *          delay = (10 * 62.5 ns) + 375 ns = 1.0 us
  *
  *      outer=1, inner=3:
  *          innerLoopCycles = 11
  *          totalCycles = 11 + 3 = 14 cycles
- *          delay = (14 * 62.5 ns) + 375 ns = 1.25 µs
+ *          delay = (14 * 62.5 ns) + 375 ns = 1.25 us
  *
  *      outer=1, inner=4:
  *          innerLoopCycles = 15
  *          totalCycles = 15 + 3 = 18 cycles
- *          delay = (18 * 62.5 ns) + 375 ns = 1.5 µs
+ *          delay = (18 * 62.5 ns) + 375 ns = 1.5 us
  *
  *      outer=2, inner=1:
  *          innerLoopCycles = 3
  *          totalCycles = (1)*(3+4) + (3+3) = (7) + (6) =13 cycles
- *          delay = (13 * 62.5 ns) + 375 ns =1.1875 µs
+ *          delay = (13 * 62.5 ns) + 375 ns =1.1875 us
  *
  *      outer=3, inner=1:
  *          innerLoopCycles = 3
  *          totalCycles = (2)*(3+4) + (3+3) = (2*7) +6 =14+6=20 cycles
- *          delay = (20 *62.5 ns) +375 ns =1.625 µs
+ *          delay = (20 *62.5 ns) +375 ns =1.625 us
  *
  *      outer=10, inner=10:
  *          innerLoopCycles = (10-1)*4 +3 =39
  *          totalCycles = (9)*(39+4) + (39+3) = (9*43) +42 =387+42=429 cycles
- *          delay = (429*62.5 ns)+375 ns =26.8 µs +375 ns ≈27.2 µs
+ *          delay = (429*62.5 ns)+375 ns =26.8 us +375 ns ~27.2 us
  *
  * Use this function for precise longer delays.
  */

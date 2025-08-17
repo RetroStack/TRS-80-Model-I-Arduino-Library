@@ -4,7 +4,7 @@
 
 The `Model1LowLevel` class provides direct, low-level access to all TRS-80 Model 1 hardware control signals and buses. This class bypasses the safety mechanisms of the main `Model1` class and should be used with extreme caution.
 
-**⚠️ WARNING:** This class provides direct hardware access that can potentially damage your Arduino or connected hardware if used incorrectly. Only use if you fully understand the TRS-80 Model 1 hardware architecture.
+**WARNING: WARNING:** This class provides direct hardware access that can potentially damage your Arduino or connected hardware if used incorrectly. Only use if you fully understand the TRS-80 Model 1 hardware architecture.
 
 ## Table of Contents
 

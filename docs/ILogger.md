@@ -90,7 +90,7 @@ logger->debug("Variable value: checking state");
 int value = 42;
 const char* status = "OK";
 logger->info("Sensor reading: %d, Status: %s", value, status);
-logger->warn("Temperature: %d°C (threshold: %d°C)", temp, threshold);
+logger->warn("Temperature: %dC (threshold: %dC)", temp, threshold);
 logger->err("Error code: 0x%02X", errorCode);
 logger->debug("Debug: variable x=%d, y=%d", x, y);
 ```
@@ -106,7 +106,7 @@ String errorMsg = "Failed to connect to " + serverName;
 logger->err(errorMsg);
 
 // String format strings with arguments
-String formatStr = "Sensor %d reading: %d°C";
+String formatStr = "Sensor %d reading: %dC";
 logger->info(formatStr, sensorId, temperature);
 
 String statusFormat = "Connection to %s: %s";
@@ -125,7 +125,7 @@ logger->debugF(F("Debug: entering function"));
 // Format strings with arguments (FlashString format in flash, values from RAM)
 int temperature = 25;
 int humidity = 60;
-logger->infoF(F("Temperature: %d°C, Humidity: %d%%"), temperature, humidity);
+logger->infoF(F("Temperature: %dC, Humidity: %d%%"), temperature, humidity);
 logger->warnF(F("Battery level: %d%% remaining"), batteryLevel);
 logger->errF(F("Sensor %d failed with error code: 0x%02X"), sensorId, errorCode);
 logger->debugF(F("Debug: loop iteration %d, state=%s"), iteration, state);
@@ -141,9 +141,9 @@ String sensor = "DHT22";
 logger->info("Temperature sensor initialized");                    // const char*
 logger->infoF(F("Reading from sensor..."));                        // F() macro (simple)
 logger->info(String("Sensor: ") + sensor);                         // String object (simple)
-logger->info("Current temperature: %d°C", temperature);            // const char* with formatting
-logger->info(String("Sensor %s temp: %d°C"), sensor.c_str(), temperature); // String with formatting
-logger->infoF(F("Sensor %s reading: %d°C"), sensor.c_str(), temperature);  // F() with formatting
+logger->info("Current temperature: %dC", temperature);            // const char* with formatting
+logger->info(String("Sensor %s temp: %dC"), sensor.c_str(), temperature); // String with formatting
+logger->infoF(F("Sensor %s reading: %dC"), sensor.c_str(), temperature);  // F() with formatting
 ```
 
 ## Memory Efficiency

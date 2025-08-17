@@ -92,9 +92,9 @@ This is the initial version written by Ven Reddy
   - LEFT button now performs selection action (same as joystick press and RIGHT)
   - MENU button is now the only way to exit menus (no more RIGHT accepted for it)
 - **NEW FEATURE**: Added TRS-80 Model I cassette interface support to M1Shield
-  - **⚠️ ADVANCED FEATURE**: Direct access to cassette remote control (CR1/CR2) and audio interface
+  - **WARNING: ADVANCED FEATURE**: Direct access to cassette remote control (CR1/CR2) and audio interface
   - Cassette remote methods: `setCR1Mode()`, `setCR2Mode()`, `writeCR1()`, `writeCR2()`, `readCR1()`, `readCR2()`
-  - Audio interface methods: `writeCassetteIn()` (Arduino→Model I), `readCassetteOut()` (Model I→Arduino)
+  - Audio interface methods: `writeCassetteIn()` (Arduino>Model I), `readCassetteOut()` (Model I>Arduino)
   - **SAFETY WARNING**: Incorrect usage can damage Arduino - CR1/CR2 may be connected. Setting them both to write in different values (HIGH/LOW) may result in a short.
   - Pin assignments: CR1 (pin 2), CR2 (pin 3), Cassette Input (A14), Cassette Output (A15)
 - **UI ENHANCEMENT**: Added paging pause/resume functionality to ConsoleScreen

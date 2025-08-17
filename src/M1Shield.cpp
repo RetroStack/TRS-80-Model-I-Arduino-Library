@@ -491,7 +491,7 @@ bool M1ShieldClass::isJoystickCentered() const
 }
 
 /**
- * Returns the current X-axis value of the joystick (0–255).
+ * Returns the current X-axis value of the joystick (0-255).
  */
 uint8_t M1ShieldClass::getJoystickX() const
 {
@@ -499,7 +499,7 @@ uint8_t M1ShieldClass::getJoystickX() const
 }
 
 /**
- * Returns the current Y-axis value of the joystick (0–255).
+ * Returns the current Y-axis value of the joystick (0-255).
  */
 uint8_t M1ShieldClass::getJoystickY() const
 {

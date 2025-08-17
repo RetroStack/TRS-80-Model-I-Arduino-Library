@@ -109,7 +109,7 @@ _You need to provide a logger for this function._
 
 ## Notes
 
-- Valid ROM indices are 0–3 (corresponding to ROMs A, B, C, D)
+- Valid ROM indices are 0-3 (corresponding to ROMs A, B, C, D)
 - Always call `Model1.activateTestSignal()` before using these methods
 - Remember to call `Model1.deactivateTestSignal()` when finished
 - ROM identification is based on a database of known ROM checksums

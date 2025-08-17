@@ -29,21 +29,21 @@ enum ConfirmResult
  * ## Layout Structure
  *
  * ```
- * ┌─────────────────────────────┐
- * │ Header (Title)              │
- * ├─────────────────────────────┤
- * │                             │
- * │                             │
- * │     Content Area            │
- * │   (implemented by           │
- * │    derived classes)         │
- * │                             │
- * │                             │
- * ├─────────────────────────────┤
- * │ Footer (Buttons/Status)     │
- * ├─────────────────────────────┤
- * │ Progress Bar                │
- * └─────────────────────────────┘
+ * +-----------------------------+
+ * | Header (Title)              |
+ * +-----------------------------+
+ * |                             |
+ * |                             |
+ * |     Content Area            |
+ * |   (implemented by           |
+ * |    derived classes)         |
+ * |                             |
+ * |                             |
+ * +-----------------------------+
+ * | Footer (Buttons/Status)     |
+ * +-----------------------------+
+ * | Progress Bar                |
+ * +-----------------------------+
  * ```
  *
  * ## Layout Regions

@@ -234,13 +234,13 @@ void setup() {
 
 **SPI Pin Connections:**
 
-- CS (Chip Select) → Digital pin 9
-- DC (Data/Command) → Digital pin 8
-- RST (Reset) → Not used (-1)
-- SCK → SPI Clock (pin 13 on Arduino Uno)
-- SDA/MOSI → SPI Data (pin 11 on Arduino Uno)
-- VCC → 3.3V or 5V
-- GND → Ground
+- CS (Chip Select) > Digital pin 9
+- DC (Data/Command) > Digital pin 8
+- RST (Reset) -> Not used (-1)
+- SCK -> SPI Clock (pin 13 on Arduino Uno)
+- SDA/MOSI -> SPI Data (pin 11 on Arduino Uno)
+- VCC -> 3.3V or 5V
+- GND -> Ground
 
 ### I2C Communication
 
@@ -261,11 +261,11 @@ void setup() {
 
 **I2C Pin Connections:**
 
-- SDA → I2C Data (A4 on Arduino Uno, GPIO 21 on ESP32)
-- SCL → I2C Clock (A5 on Arduino Uno, GPIO 22 on ESP32)
-- RST → Digital pin (optional, can be -1)
-- VCC → 3.3V or 5V
-- GND → Ground
+- SDA -> I2C Data (A4 on Arduino Uno, GPIO 21 on ESP32)
+- SCL -> I2C Clock (A5 on Arduino Uno, GPIO 22 on ESP32)
+- RST -> Digital pin (optional, can be -1)
+- VCC -> 3.3V or 5V
+- GND -> Ground
 
 ### I2C Address Configuration
 
@@ -300,10 +300,10 @@ The SSD1306 provider includes intelligent color conversion from RGB565 to monoch
 
 ```cpp
 // The display automatically converts colors to black/white
-gfx.fillScreen(M1Shield.convertColor(0xF800));     // Red → White
-gfx.fillScreen(M1Shield.convertColor(0x0000));     // Black → Black
-gfx.setTextColor(M1Shield.convertColor(0xFFFF));   // White → White
-gfx.setTextColor(M1Shield.convertColor(0x07E0));   // Green → White (bright)
+gfx.fillScreen(M1Shield.convertColor(0xF800));     // Red -> White
+gfx.fillScreen(M1Shield.convertColor(0x0000));     // Black -> Black
+gfx.setTextColor(M1Shield.convertColor(0xFFFF));   // White -> White
+gfx.setTextColor(M1Shield.convertColor(0x07E0));   // Green -> White (bright)
 ```
 
 **Conversion Algorithm:**
@@ -390,13 +390,13 @@ void setup() {
 
 **SPI Wiring:**
 
-- VCC → 3.3V/5V
-- GND → GND
-- CLK → SPI Clock (SCK)
-- MOSI → SPI Data (MOSI)
-- CS → Digital pin (specified in M1Shield.begin())
-- DC → Digital pin (specified in M1Shield.begin())
-- RST → Digital pin (optional, can be -1)
+- VCC -> 3.3V/5V
+- GND -> GND
+- CLK -> SPI Clock (SCK)
+- MOSI -> SPI Data (MOSI)
+- CS -> Digital pin (specified in M1Shield.begin())
+- DC -> Digital pin (specified in M1Shield.begin())
+- RST -> Digital pin (optional, can be -1)
 
 ### I2C Mode
 
@@ -418,11 +418,11 @@ void setup() {
 
 **I2C Wiring:**
 
-- VCC → 3.3V/5V
-- GND → GND
-- SDA → I2C Data (SDA)
-- SCL → I2C Clock (SCL)
-- RST → Digital pin (optional, can be -1)
+- VCC -> 3.3V/5V
+- GND -> GND
+- SDA -> I2C Data (SDA)
+- SCL -> I2C Clock (SCL)
+- RST -> Digital pin (optional, can be -1)
 
 ### Communication Protocol Benefits
 

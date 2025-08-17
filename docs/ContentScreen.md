@@ -58,21 +58,21 @@ Creates a new `ContentScreen` instance with default layout settings:
 ContentScreen organizes the display into four distinct regions:
 
 ```
-┌─────────────────────────────┐
-│ Header (Title)              │
-├─────────────────────────────┤
-│                             │
-│                             │
-│     Content Area            │
-│   (implemented by           │
-│    derived classes)         │
-│                             │
-│                             │
-├─────────────────────────────┤
-│ Footer (Buttons/Status)     │
-├─────────────────────────────┤
-│ Progress Bar                │
-└─────────────────────────────┘
++-----------------------------+
+| Header (Title)              |
++-----------------------------+
+|                             |
+|                             |
+|     Content Area            |
+|   (implemented by           |
+|    derived classes)         |
+|                             |
+|                             |
++-----------------------------+
+| Footer (Buttons/Status)     |
++-----------------------------+
+| Progress Bar                |
++-----------------------------+
 ```
 
 ## Protected Methods
@@ -195,7 +195,7 @@ Sets button labels displayed in the footer region with dynamic memory allocation
 **Example:**
 
 ```cpp
-const char* buttons[] = {"◄ Back", "Select ►"};
+const char* buttons[] = {"< Back", "Select >"};
 setButtonItems(buttons, 2);
 
 // Clear all buttons
@@ -216,8 +216,8 @@ Sets button labels from FlashString array (F() macro) for memory efficiency. The
 ```cpp
 // More memory efficient button definitions
 static const __FlashStringHelper* buttons[] = {
-    F("◄ Back"),
-    F("Select ►"),
+    F("< Back"),
+    F("Select >"),
     F("Menu"),
     F("Exit")
 };
@@ -578,7 +578,7 @@ public:
     MyContentScreen() : ContentScreen() {
         setTitle("My Screen");
 
-        const char* buttons[] = {"◄ Back", "Select ►"};
+        const char* buttons[] = {"< Back", "Select >"};
         setButtonItems(buttons, 2);
 
         setProgressValue(0);  // Hide progress bar
@@ -637,7 +637,7 @@ public:
     StatusScreen() : ContentScreen() {
         setTitle("Device Status");
 
-        const char* buttons[] = {"◄ Back", "Refresh"};
+        const char* buttons[] = {"< Back", "Refresh"};
         setButtonItems(buttons, 2);
 
         _batteryLevel = 85;

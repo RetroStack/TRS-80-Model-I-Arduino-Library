@@ -10,14 +10,14 @@
 #include <Arduino.h>
 
 /**
- * Wait for exactly 1 CPU cycles (1× nop), total delay:
+ * Wait for exactly 1 CPU cycles (1x nop), total delay:
  *   - 16 MHz CPU: 62.5 ns
  *   - Each nop = 62.5 ns
  */
 #define asmShortNoop() __asm__ __volatile__("nop")
 
 /**
- * Wait for exactly 2 CPU cycles (2× nop), total delay:
+ * Wait for exactly 2 CPU cycles (2x nop), total delay:
  *   - 16 MHz CPU: 125 ns
  *   - Each nop = 62.5 ns
  */

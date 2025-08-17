@@ -64,7 +64,7 @@ The `Video` class provides comprehensive control over the TRS-80 Model I video R
 Video()
 ```
 
-Creates a Video instance using the full 64×16 screen viewport. The cursor starts at position (0,0), auto-scroll is enabled, and lowercase modification is disabled by default.
+Creates a Video instance using the full 64x16 screen viewport. The cursor starts at position (0,0), auto-scroll is enabled, and lowercase modification is disabled by default.
 
 ## Configuration Methods
 
@@ -216,7 +216,7 @@ Returns the viewport height in characters.
 
 Returns the total number of characters in the viewport.
 
-**Returns:** Total character capacity (width × height)
+**Returns:** Total character capacity (width x height)
 
 ## Address Calculation
 
@@ -388,7 +388,7 @@ _By default, all Print methods use `convertLocalCharacterToModel1` automatically
 ## Notes
 
 - Always call `activateTestSignal()` on the `Model1` instance before using these methods.
-- `ViewPort` coordinates and sizes must be within the 64×16 bounds.
+- `ViewPort` coordinates and sizes must be within the 64x16 bounds.
 
 ## Example
 

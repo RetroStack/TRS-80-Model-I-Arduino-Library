@@ -9,7 +9,7 @@ The `Model1` class provides the main interface for interacting with the TRS-80 M
 - Controlling the WAIT signal.
 - Logging system state.
 
-> ⚠️ **Important:** Only one `Model1` instance should be active at a time, as the class manages exclusive control.
+> WARNING: **Important:** Only one `Model1` instance should be active at a time, as the class manages exclusive control.
 
 ## Table of Contents
 

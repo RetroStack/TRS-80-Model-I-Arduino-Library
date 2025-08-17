@@ -64,7 +64,7 @@ void setup() {
 **M1Shield (Recommended):** Clean, safe connection with built-in display and controls  
 **Direct Wiring:** Connect via jumper wires using our [pin mapping guide](docs/PinMapping.md)
 
-⚠️ **See [TEST Signal Fix](docs/TESTMod.md)** for hardware reliability improvement
+**WARNING:** **See [TEST Signal Fix](docs/TESTMod.md)** for hardware reliability improvement
 
 ## Documentation
 
@@ -80,4 +80,4 @@ RetroStack is passionate about exploring and preserving the legacy of older comp
 
 ## License
 
-This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

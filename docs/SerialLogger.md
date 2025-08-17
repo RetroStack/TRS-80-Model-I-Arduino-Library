@@ -109,7 +109,7 @@ float voltage = 3.3;
 const char* status = "OK";
 
 logger.info("Sensor reading: %d (%.2fV) - %s", sensorValue, voltage, status);
-logger.warn("Temperature: %d°C exceeds threshold", temperature);
+logger.warn("Temperature: %dC exceeds threshold", temperature);
 logger.err("Error code: 0x%02X in module %s", errorCode, moduleName);
 logger.debug("Loop iteration %d, state=%s", iteration, currentState);
 ```
@@ -129,7 +129,7 @@ logger.warn(F("Calibration required"));
 logger.debug(F("Entering debug mode"));
 
 // Mixed usage
-logger.info("Device %s reports %d°C", deviceName.c_str(), reading);
+logger.info("Device %s reports %dC", deviceName.c_str(), reading);
 logger.debug("Variable state: %s=%d", "sensorCount", sensorCount);
 ```
 
