@@ -136,8 +136,14 @@ void ConsoleScreen::loop()
         {
             // Set flag and trigger auto-forward by calling actionTaken with BUTTON_MENU
             _autoForwardTriggered = true;
-            _executeOnceCompleteTime = 0;   // Prevent repeated triggering
-            actionTaken(BUTTON_MENU, 0, 0); // Directly call actionTaken to simulate menu press
+            _executeOnceCompleteTime = 0; // Prevent repeated triggering
+            
+            // Call actionTaken and handle the result properly
+            Screen *newScreen = actionTaken(BUTTON_MENU, 0, 0);
+            if (newScreen != nullptr)
+            {
+                M1Shield.setScreen(newScreen);
+            }
         }
     }
 
