@@ -31,6 +31,11 @@ The `ContentScreen` class provides a structured layout template for screens with
     - [notifyF](#void-notifyfconst-__flashstringhelper-text-unsigned-long-durationms--3000)
     - [isNotificationActive](#bool-isnotificationactive-const)
     - [dismissNotification](#void-dismissnotification)
+  - [Alert and Confirmation System](#alert-and-confirmation-system)
+    - [alert](#void-alertconst-char-text)
+    - [alertF](#void-alertfconst-__flashstringhelper-text)
+    - [confirm](#confirmresult-confirmconst-char-text-const-char-lefttext--cancel-const-char-righttext--ok)
+    - [confirmF](#confirmresult-confirmfconst-__flashstringhelper-text-const-char-lefttext--cancel-const-char-righttext--ok)
 - [Layout Regions](#layout-regions)
 - [Implementation Pattern](#implementation-pattern)
 - [Examples](#examples)
@@ -275,6 +280,7 @@ drawTextF(10, 60, F("Connection: Active"), M1Shield.BLUE, 2);
 ```
 
 **Memory Benefits:**
+
 - **Flash Storage**: Text stored in flash memory instead of RAM
 - **Static Text**: Perfect for UI labels, status messages, and fixed content
 - **Automatic Conversion**: FlashString automatically converted for display
@@ -294,7 +300,8 @@ Shows a notification that temporarily replaces the footer area.
 - `durationMs`: How long to show notification in milliseconds (default: 3000ms)
 
 **Visual Appearance:**
-- **Background**: Cyan color for high visibility and call-to-action consistency
+
+- **Background**: Yellow color for high visibility and informational content
 - **Text Color**: Black text for maximum contrast
 - **Positioning**: Replaces footer area temporarily
 - **Duration**: Configurable timeout with automatic restoration
@@ -371,6 +378,153 @@ if (M1Shield.wasMenuPressed() && isNotificationActive()) {
 - **Warnings**: "Low battery", "Network timeout", "Invalid input"
 - **Status Updates**: "Processing...", "Upload complete", "System ready"
 - **Error Notifications**: "Operation failed", "File not found", "Access denied"
+
+### Alert and Confirmation System
+
+The alert and confirmation system provides blocking dialog functionality for critical user interactions. Unlike notifications, these dialogs block execution until the user responds, ensuring important messages are acknowledged and decisions are made.
+
+#### `void alert(const char* text)`
+
+Shows a blocking alert dialog that halts execution until acknowledged.
+
+**Parameters:**
+
+- `text`: Alert message to display (center-aligned)
+
+**Visual Appearance:**
+
+- **Background**: Cyan color for high attention and urgency
+- **Text Color**: Black text for maximum contrast
+- **Positioning**: Replaces footer area during display
+- **Blocking**: Execution halts until LEFT or RIGHT button is pressed
+
+**Example:**
+
+```cpp
+// Show critical alert
+alert("System error detected!");
+
+// Execution continues only after user presses LEFT or RIGHT
+notify("Alert acknowledged", 2000);
+```
+
+#### `void alertF(const __FlashStringHelper* text)`
+
+Shows a blocking alert dialog from FlashString (F() macro) for memory efficiency.
+
+**Parameters:**
+
+- `text`: FlashString alert message (automatically converted)
+
+**Example:**
+
+```cpp
+// Memory-efficient alert
+alertF(F("Low battery warning!"));
+alertF(F("File save failed"));
+```
+
+#### `ConfirmResult confirm(const char* text, const char* leftText = "Cancel", const char* rightText = "OK")`
+
+Shows a blocking confirmation dialog that requires user choice.
+
+**Parameters:**
+
+- `text`: Main confirmation message (center-aligned)
+- `leftText`: Left button text (default: "Cancel", left-aligned)
+- `rightText`: Right button text (default: "OK", right-aligned)
+
+**Returns:**
+
+- `CONFIRM_LEFT` if left button was pressed
+- `CONFIRM_RIGHT` if right button was pressed
+
+**Visual Layout:**
+
+```
+[Cancel]        Delete all files?        [Delete]
+```
+
+**Example:**
+
+```cpp
+// Basic confirmation
+ConfirmResult result = confirm("Delete file?");
+if (result == CONFIRM_RIGHT) {
+    // User chose OK/right option
+    deleteFile();
+    notify("File deleted", 2000);
+} else {
+    // User chose Cancel/left option
+    notify("Operation cancelled", 2000);
+}
+
+// Custom button labels
+ConfirmResult choice = confirm("Save changes?", "Discard", "Save");
+if (choice == CONFIRM_RIGHT) {
+    saveChanges();
+}
+```
+
+#### `ConfirmResult confirmF(const __FlashStringHelper* text, const char* leftText = "Cancel", const char* rightText = "OK")`
+
+Shows a blocking confirmation dialog from FlashString (F() macro).
+
+**Parameters:**
+
+- `text`: FlashString main message (automatically converted)
+- `leftText`: Left button text (default: "Cancel")
+- `rightText`: Right button text (default: "OK")
+
+**Returns:** `CONFIRM_LEFT` or `CONFIRM_RIGHT`
+
+**Example:**
+
+```cpp
+// Memory-efficient confirmation
+ConfirmResult result = confirmF(F("Format disk?"), "Cancel", "Format");
+if (result == CONFIRM_RIGHT) {
+    formatDisk();
+}
+```
+
+#### Alert/Confirmation Behavior
+
+- **Blocking Execution**: Functions do not return until user responds
+- **Button Response**: Only LEFT and RIGHT buttons are active during dialogs
+- **M1Shield Processing**: `M1Shield.loop()` continues during blocking to maintain system responsiveness
+- **Screen Restoration**: Original screen content is automatically restored after dialog dismissal
+- **Conflict Prevention**: Any active notifications are cleared before showing dialogs
+- **Small Display Handling**: Dialogs are not shown on small displays (OLED) and return safely
+- **Memory Management**: All text is properly allocated and freed automatically
+
+#### Multi-Step Confirmations
+
+Alert and confirmation dialogs can be chained for complex decision workflows:
+
+```cpp
+// Multi-step critical operation
+ConfirmResult step1 = confirm("Format drive?", "Cancel", "Continue");
+if (step1 == CONFIRM_RIGHT) {
+    ConfirmResult step2 = confirm("This will erase ALL data!", "Cancel", "Format");
+    if (step2 == CONFIRM_RIGHT) {
+        ConfirmResult step3 = confirm("Are you ABSOLUTELY sure?", "No", "Yes");
+        if (step3 == CONFIRM_RIGHT) {
+            alert("Formatting started...");
+            performFormat();
+            notify("Format complete!", 3000);
+        }
+    }
+}
+```
+
+#### Use Cases
+
+- **Critical Alerts**: System errors, low battery, connection failures
+- **Delete Confirmations**: File deletion, data clearing, factory reset
+- **Save Dialogs**: Unsaved changes, export operations, configuration updates
+- **Action Verification**: Irreversible operations, dangerous commands
+- **Multi-Step Processes**: Complex workflows requiring multiple confirmations
 
 ## Layout Regions
 
@@ -528,10 +682,10 @@ protected:
         drawTextF(10, 20, F("FlashString Demo"), M1Shield.WHITE, 1);
         drawTextF(10, 40, F("Using F() macro for"), M1Shield.YELLOW, 1);
         drawTextF(10, 60, F("memory efficiency"), M1Shield.YELLOW, 1);
-        
+
         drawTextF(10, 100, F("Title and buttons use"), M1Shield.GREEN, 1);
         drawTextF(10, 120, F("flash memory storage"), M1Shield.GREEN, 1);
-        
+
         // Demonstrate mixed usage with regular drawText for dynamic content
         String timestamp = "Time: " + String(millis() / 1000) + "s";
         drawText(10, 140, timestamp.c_str(), M1Shield.CYAN, 1);
@@ -593,10 +747,10 @@ private:
 public:
     NotificationExampleScreen() : ContentScreen() {
         setTitleF(F("Notification Demo"));
-        
+
         const char* buttons[] = {"Save", "Load", "Reset", "Exit"};
         setButtonItems(buttons, 4);
-        
+
         _operationCount = 0;
         _lastOperation = 0;
     }
@@ -605,10 +759,10 @@ protected:
     void _drawContent() override {
         // Draw some content
         drawTextF(10, 10, F("Press buttons to see notifications:"), M1Shield.WHITE, 1);
-        
+
         drawText(10, 30, "Operations completed: ", M1Shield.WHITE, 1);
         drawText(160, 30, String(_operationCount).c_str(), M1Shield.YELLOW, 1);
-        
+
         if (isNotificationActive()) {
             drawTextF(10, 50, F("Notification is active"), M1Shield.GREEN, 1);
         } else {

@@ -11,6 +11,15 @@
 #include "Screen.h"
 
 /**
+ * @brief Result values for confirmation dialogs
+ */
+enum ConfirmResult
+{
+    CONFIRM_LEFT, // Left button was pressed (typically "Cancel")
+    CONFIRM_RIGHT // Right button was pressed (typically "OK")
+};
+
+/**
  * @brief Template base class providing structured screen layouts
  *
  * ContentScreen extends the basic Screen interface with a standardized
@@ -106,10 +115,10 @@ private:
     uint8_t _progressValue;   // Progress bar value (0-100)
 
     // Notification system
-    char *_notificationText;         // Dynamic notification text buffer
+    char *_notificationText;              // Dynamic notification text buffer
     unsigned long _notificationStartTime; // When notification was shown
     unsigned long _notificationDuration;  // How long to show notification (ms)
-    bool _notificationActive;        // Whether notification is currently active
+    bool _notificationActive;             // Whether notification is currently active
 
     /**
      * @brief Draw the header region with title
@@ -146,6 +155,20 @@ private:
      * @brief Clear notification text and free memory
      */
     void _clearNotification();
+
+    /**
+     * @brief Draw alert dialog overlay in place of footer
+     * @param text Alert message to display
+     */
+    void _drawAlert(const char *text);
+
+    /**
+     * @brief Draw confirm dialog overlay in place of footer
+     * @param text Main message to display
+     * @param leftText Left button text (left-aligned)
+     * @param rightText Right button text (right-aligned)
+     */
+    void _drawConfirm(const char *text, const char *leftText, const char *rightText);
 
 protected:
     /**
@@ -382,7 +405,7 @@ public:
      * @brief Show a notification that temporarily replaces the footer
      * @param text Notification text to display (dynamically allocated copy made)
      * @param durationMs How long to show notification in milliseconds
-     * @note Notification is displayed with cyan background and black text
+     * @note Notification is displayed with yellow background and black text
      * @note Previous footer will be restored when notification expires
      */
     void notify(const char *text, unsigned long durationMs = 3000);
@@ -406,6 +429,46 @@ public:
      * @note Notification will be cleared and footer will be restored immediately
      */
     void dismissNotification();
+
+    // Alert and Confirmation system methods
+
+    /**
+     * @brief Show a blocking alert dialog with cyan background
+     * @param text Alert message to display (center-aligned)
+     * @note Blocks execution until LEFT or RIGHT button is pressed
+     * @note Alert is displayed with cyan background and black text
+     * @note Function returns when either LEFT or RIGHT button is pressed
+     */
+    void alert(const char *text);
+
+    /**
+     * @brief Show a blocking alert dialog from FlashString (F() macro)
+     * @param text FlashString alert message (automatically converted)
+     * @note More memory efficient than alert() for static text
+     * @note Blocks execution until LEFT or RIGHT button is pressed
+     */
+    void alertF(const __FlashStringHelper *text);
+
+    /**
+     * @brief Show a blocking confirmation dialog with magenta background
+     * @param text Main confirmation message (center-aligned)
+     * @param leftText Left button text (default: "Cancel", left-aligned)
+     * @param rightText Right button text (default: "OK", right-aligned)
+     * @return CONFIRM_LEFT if left button pressed, CONFIRM_RIGHT if right button pressed
+     * @note Blocks execution until LEFT or RIGHT button is pressed
+     * @note Dialog is displayed with magenta background and black text
+     */
+    ConfirmResult confirm(const char *text, const char *leftText = "Cancel", const char *rightText = "OK");
+
+    /**
+     * @brief Show a blocking confirmation dialog from FlashString (F() macro)
+     * @param text FlashString main message (automatically converted)
+     * @param leftText Left button text (default: "Cancel", left-aligned)
+     * @param rightText Right button text (default: "OK", right-aligned)
+     * @return CONFIRM_LEFT if left button pressed, CONFIRM_RIGHT if right button pressed
+     * @note More memory efficient than confirm() for static text
+     */
+    ConfirmResult confirmF(const __FlashStringHelper *text, const char *leftText = "Cancel", const char *rightText = "OK");
 };
 
 #endif /* CONTENT_SCREEN_H */

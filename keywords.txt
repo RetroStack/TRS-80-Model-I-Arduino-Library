@@ -236,6 +236,13 @@ notify  KEYWORD2
 notifyF KEYWORD2
 isNotificationActive    KEYWORD2
 dismissNotification KEYWORD2
+alert   KEYWORD2
+alertF  KEYWORD2
+confirm KEYWORD2
+confirmF    KEYWORD2
+ConfirmResult   KEYWORD1
+CONFIRM_LEFT    LITERAL1
+CONFIRM_RIGHT   LITERAL1
 _setMenuItems   KEYWORD2
 _clearMenuItems KEYWORD2
 _setSelectedMenuItemIndex   KEYWORD2

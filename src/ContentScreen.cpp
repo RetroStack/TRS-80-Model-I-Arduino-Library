@@ -45,8 +45,14 @@ constexpr uint16_t PROGRESSBAR_COLOR_FG = 0xFFE0;       // Progress bar foregrou
 constexpr uint16_t PROGRESSBAR_SMALL_COLOR_FG = 0xFFFF; // Progress bar foreground (white)
 
 // Notification styling
-constexpr uint16_t NOTIFICATION_COLOR_BG = 0x07FF;      // Notification background (cyan)
-constexpr uint16_t NOTIFICATION_COLOR_FG = 0x0000;      // Notification text color (black)
+constexpr uint16_t NOTIFICATION_COLOR_BG = 0xFFE0; // Notification background (yellow)
+constexpr uint16_t NOTIFICATION_COLOR_FG = 0x0000; // Notification text color (black)
+
+// Alert and Confirmation styling
+constexpr uint16_t ALERT_COLOR_BG = 0x07FF;   // Alert background (cyan)
+constexpr uint16_t ALERT_COLOR_FG = 0x0000;   // Alert text color (black)
+constexpr uint16_t CONFIRM_COLOR_BG = 0xF81F; // Confirm background (magenta)
+constexpr uint16_t CONFIRM_COLOR_FG = 0x0000; // Confirm text color (black)
 
 /**
  * @brief Constructor initializes ContentScreen with default values
@@ -60,7 +66,7 @@ ContentScreen::ContentScreen() : Screen()
     _buttonItems = nullptr; // No button storage allocated initially
     _buttonItemCount = 0;
     _progressValue = 0;
-    
+
     // Initialize notification system
     _notificationText = nullptr;
     _notificationStartTime = 0;
@@ -111,7 +117,7 @@ void ContentScreen::_drawScreen()
     // Render all layout regions in order
     _drawHeader();
     _drawContent(); // Implemented by derived class
-    
+
     // Draw either notification or footer
     if (_notificationActive)
     {
@@ -121,7 +127,7 @@ void ContentScreen::_drawScreen()
     {
         _drawFooter();
     }
-    
+
     _drawProgressBar();
 
     // Add decorative borders if not a small display
@@ -890,11 +896,15 @@ void ContentScreen::dismissNotification()
     if (_notificationActive)
     {
         _clearNotification();
-        
-        // Trigger redraw to restore footer
+
+        // Restore footer efficiently (no need for full screen refresh)
         if (isActive())
         {
-            refresh();
+            Adafruit_GFX &gfx = M1Shield.getGFX();
+            gfx.startWrite();
+            _drawFooter();
+            gfx.endWrite();
+            M1Shield.display();
         }
     }
 }
@@ -913,10 +923,10 @@ void ContentScreen::_drawNotification()
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
-    // Draw notification background (cyan)
+    // Draw notification background (yellow)
     gfx.fillRect(0, top, screenWidth, height, M1Shield.convertColor(NOTIFICATION_COLOR_BG));
 
-    // Draw notification text (black on cyan)
+    // Draw notification text (black on yellow)
     gfx.setTextColor(M1Shield.convertColor(NOTIFICATION_COLOR_FG));
     gfx.setTextSize(1);
 
@@ -957,8 +967,234 @@ void ContentScreen::_clearNotification()
         free(_notificationText);
         _notificationText = nullptr;
     }
-    
+
     _notificationActive = false;
     _notificationStartTime = 0;
     _notificationDuration = 0;
+}
+
+// =====================================================================================
+// Alert and Confirmation System Implementation
+// =====================================================================================
+
+/**
+ * @brief Show a blocking alert dialog with magenta background
+ * @param text Alert message to display (center-aligned)
+ */
+void ContentScreen::alert(const char *text)
+{
+    if (!isActive() || text == nullptr || isSmallDisplay())
+        return;
+
+    // Clear any existing notification to prevent conflicts
+    _clearNotification();
+
+    // Draw the alert dialog
+    _drawAlert(text);
+    M1Shield.display();
+
+    // Block execution until LEFT or RIGHT button is pressed
+    while (true)
+    {
+        M1Shield.loop(); // Keep the shield processing
+
+        if (M1Shield.wasLeftPressed() || M1Shield.wasRightPressed())
+        {
+            break; // Exit on either button press
+        }
+
+        delay(10); // Small delay to prevent excessive CPU usage
+    }
+
+    // Restore the footer efficiently (no need for full screen refresh)
+    Adafruit_GFX &gfx = M1Shield.getGFX();
+    gfx.startWrite();
+    _drawFooter();
+    gfx.endWrite();
+    M1Shield.display();
+}
+
+/**
+ * @brief Show a blocking alert dialog from FlashString (F() macro)
+ * @param text FlashString alert message (automatically converted)
+ */
+void ContentScreen::alertF(const __FlashStringHelper *text)
+{
+    if (text == nullptr)
+        return;
+
+    // Convert FlashString to regular string
+    size_t len = strlen_P((const char *)text);
+    char *buffer = (char *)malloc(len + 1);
+    if (buffer == nullptr)
+        return; // Failed allocation
+
+    strcpy_P(buffer, (const char *)text);
+
+    // Delegate to regular alert method
+    alert(buffer);
+
+    // Free temporary buffer
+    free(buffer);
+}
+
+/**
+ * @brief Show a blocking confirmation dialog with magenta background
+ * @param text Main confirmation message (center-aligned)
+ * @param leftText Left button text (left-aligned)
+ * @param rightText Right button text (right-aligned)
+ * @return CONFIRM_LEFT if left button pressed, CONFIRM_RIGHT if right button pressed
+ */
+ConfirmResult ContentScreen::confirm(const char *text, const char *leftText, const char *rightText)
+{
+    if (!isActive() || text == nullptr || isSmallDisplay())
+        return CONFIRM_LEFT; // Default to left/cancel for safety
+
+    // Clear any existing notification to prevent conflicts
+    _clearNotification();
+
+    // Draw the confirmation dialog
+    _drawConfirm(text, leftText, rightText);
+    M1Shield.display();
+
+    // Block execution until LEFT or RIGHT button is pressed
+    while (true)
+    {
+        M1Shield.loop(); // Keep the shield processing
+
+        if (M1Shield.wasLeftPressed())
+        {
+            // Restore the footer efficiently and return left choice
+            Adafruit_GFX &gfx = M1Shield.getGFX();
+            gfx.startWrite();
+            _drawFooter();
+            gfx.endWrite();
+            M1Shield.display();
+            return CONFIRM_LEFT;
+        }
+        else if (M1Shield.wasRightPressed())
+        {
+            // Restore the footer efficiently and return right choice
+            Adafruit_GFX &gfx = M1Shield.getGFX();
+            gfx.startWrite();
+            _drawFooter();
+            gfx.endWrite();
+            M1Shield.display();
+            return CONFIRM_RIGHT;
+        }
+
+        delay(10); // Small delay to prevent excessive CPU usage
+    }
+}
+
+/**
+ * @brief Show a blocking confirmation dialog from FlashString (F() macro)
+ * @param text FlashString main message (automatically converted)
+ * @param leftText Left button text (left-aligned)
+ * @param rightText Right button text (right-aligned)
+ * @return CONFIRM_LEFT if left button pressed, CONFIRM_RIGHT if right button pressed
+ */
+ConfirmResult ContentScreen::confirmF(const __FlashStringHelper *text, const char *leftText, const char *rightText)
+{
+    if (text == nullptr)
+        return CONFIRM_LEFT; // Default to left/cancel for safety
+
+    // Convert FlashString to regular string
+    size_t len = strlen_P((const char *)text);
+    char *buffer = (char *)malloc(len + 1);
+    if (buffer == nullptr)
+        return CONFIRM_LEFT; // Failed allocation, default to left/cancel
+
+    strcpy_P(buffer, (const char *)text);
+
+    // Delegate to regular confirm method
+    ConfirmResult result = confirm(buffer, leftText, rightText);
+
+    // Free temporary buffer
+    free(buffer);
+
+    return result;
+}
+
+/**
+ * @brief Draw alert dialog overlay in place of footer
+ * @param text Alert message to display
+ */
+void ContentScreen::_drawAlert(const char *text)
+{
+    if (!isActive() || text == nullptr || isSmallDisplay())
+        return;
+
+    uint16_t screenWidth = M1Shield.getScreenWidth();
+    uint16_t top = _getFooterY();
+    uint16_t height = _getFooterHeight();
+
+    Adafruit_GFX &gfx = M1Shield.getGFX();
+
+    // Draw alert background (cyan)
+    gfx.fillRect(0, top, screenWidth, height, M1Shield.convertColor(ALERT_COLOR_BG));
+
+    // Draw alert text (black on cyan)
+    gfx.setTextColor(M1Shield.convertColor(ALERT_COLOR_FG));
+    gfx.setTextSize(1);
+
+    // Center text horizontally
+    uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(text);
+    uint16_t xPos = (screenWidth - textWidth) / 2;
+
+    // Center text vertically in footer area
+    uint16_t yPos = top + (height - 8) / 2; // 8 is approximate height of size-1 text
+
+    gfx.setCursor(xPos, yPos);
+    gfx.print(text);
+}
+
+/**
+ * @brief Draw confirm dialog overlay in place of footer
+ * @param text Main message to display
+ * @param leftText Left button text (left-aligned)
+ * @param rightText Right button text (right-aligned)
+ */
+void ContentScreen::_drawConfirm(const char *text, const char *leftText, const char *rightText)
+{
+    if (!isActive() || text == nullptr || isSmallDisplay())
+        return;
+
+    uint16_t screenWidth = M1Shield.getScreenWidth();
+    uint16_t top = _getFooterY();
+    uint16_t height = _getFooterHeight();
+
+    Adafruit_GFX &gfx = M1Shield.getGFX();
+
+    // Draw confirm background (magenta)
+    gfx.fillRect(0, top, screenWidth, height, M1Shield.convertColor(CONFIRM_COLOR_BG));
+
+    // Draw confirm text (black on magenta)
+    gfx.setTextColor(M1Shield.convertColor(CONFIRM_COLOR_FG));
+    gfx.setTextSize(1);
+
+    // Calculate positions for three text elements
+    uint16_t textY = top + (height - 8) / 2; // Vertically center all text
+
+    // Left button text (left-aligned)
+    if (leftText != nullptr && leftText[0] != '\0')
+    {
+        gfx.setCursor(2, textY); // Small margin from left edge
+        gfx.print(leftText);
+    }
+
+    // Main message (center-aligned)
+    uint16_t mainTextWidth = TEXT_SIZE_1_WIDTH * strlen(text);
+    uint16_t mainTextX = (screenWidth - mainTextWidth) / 2;
+    gfx.setCursor(mainTextX, textY);
+    gfx.print(text);
+
+    // Right button text (right-aligned)
+    if (rightText != nullptr && rightText[0] != '\0')
+    {
+        uint16_t rightTextWidth = TEXT_SIZE_1_WIDTH * strlen(rightText);
+        uint16_t rightTextX = screenWidth - rightTextWidth - 2; // Small margin from right edge
+        gfx.setCursor(rightTextX, textY);
+        gfx.print(rightText);
+    }
 }

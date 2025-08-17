@@ -104,8 +104,19 @@ This is the initial version written by Ven Reddy
   - **Pause persistence**: Timeout can be paused indefinitely until user resumes
   - Works in both `PAGING_WAIT_TIMEOUT` and `PAGING_WAIT_BOTH` modes
 - **NEW FEATURE**: Added notification system to ContentScreen for user feedback
-  - **Temporary messages**: Notifications replace footer area with cyan background and black text
+  - **Temporary messages**: Notifications replace footer area with yellow background and black text
   - **Auto-expiration**: Configurable duration (default 3 seconds) with automatic footer restoration
   - **Memory efficient**: `notify()` for dynamic text, `notifyF()` for FlashString static text
   - **Manual control**: `isNotificationActive()` to check state, `dismissNotification()` for early dismissal
   - Complete API: `notify()`, `notifyF()`, `isNotificationActive()`, `dismissNotification()`
+- **NEW FEATURE**: Added blocking alert and confirmation dialog system to ContentScreen
+  - **Alert dialogs**: `alert()` and `alertF()` for critical messages requiring acknowledgment (cyan background)
+  - **Confirmation dialogs**: `confirm()` and `confirmF()` for user decision prompts (magenta background)
+  - **Blocking execution**: Functions halt program flow until user responds with LEFT/RIGHT buttons
+  - **Visual design**: Magenta background with black text for high attention and urgency
+  - **Custom button labels**: Configurable left/right button text (default: "Cancel"/"OK")
+  - **Return values**: `CONFIRM_LEFT`/`CONFIRM_RIGHT` enum for decision handling
+  - **Memory efficient**: FlashString variants available for static text
+  - **Multi-step workflows**: Chainable dialogs for complex confirmation sequences
+  - **Safe defaults**: Graceful handling on small displays and allocation failures
+  - **Performance optimized**: Only redraws footer area when dialogs close (not entire screen)
