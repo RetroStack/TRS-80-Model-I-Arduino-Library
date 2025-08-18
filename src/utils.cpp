@@ -6,9 +6,6 @@
 
 #include "utils.h"
 
-/**
- * Converts an 8-bit value to a string
- */
 char *uint8ToBinary(uint8_t value, char *buffer)
 {
   for (int i = 7; i >= 0; i--)
@@ -19,9 +16,6 @@ char *uint8ToBinary(uint8_t value, char *buffer)
   return buffer;
 }
 
-/**
- * Converts an 16-bit value to a string
- */
 char *uint16ToBinary(uint16_t value, char *buffer)
 {
   for (int i = 15; i >= 0; i--)
@@ -32,9 +26,6 @@ char *uint16ToBinary(uint16_t value, char *buffer)
   return buffer;
 }
 
-/**
- * Returns the pin status
- */
 char pinStatus(bool value)
 {
   return value ? 'o' : 'i';
@@ -55,23 +46,19 @@ char busStatus(uint8_t value)
   }
 }
 
-// This assumes ATMega running at 16 MHz:
-// - 1 cycle = 62.5 ns
-// - Each iteration of the loop takes 4 cycles, except the final iteration, which takes 3 cycles.
-// - Total cycles = (wait - 1)*4 + 3 = 4*wait -1 cycles.
-// - Calling overhead is 190ns
-// - So, for example:
-//      wait=1: ~252 ns total delay (3 cycles + call overhead)
-//      wait=2: ~512 ns total delay (7 cycles + call overhead)
-//      wait=3: ~772 ns total delay (11 cycles + call overhead)
-//      wait=4: ~1032 ns total delay (15 cycles + call overhead)
-//      wait=5: ~1292 ns total delay (19 cycles + call overhead)
-//
-// - To get ~1 us delay, use wait=4.
-// - To get ~2 us delay, use wait=8.
-//
-// Example usage:
-//     asmWait(3); // ~772 ns delay including overhead
+// Precise nanosecond delay using inline assembly for 16MHz ATMega
+// 1 cycle = 62.5 ns, each loop iteration = 4 cycles except final (3 cycles)
+// Total cycles = (wait - 1)*4 + 3 = 4*wait -1 cycles
+// Calling overhead is 190ns
+// Examples:
+//   wait=1: ~252 ns total delay (3 cycles + call overhead)
+//   wait=2: ~512 ns total delay (7 cycles + call overhead)
+//   wait=3: ~772 ns total delay (11 cycles + call overhead)
+//   wait=4: ~1032 ns total delay (15 cycles + call overhead)
+//   wait=5: ~1292 ns total delay (19 cycles + call overhead)
+// To get ~1 us delay, use wait=4
+// To get ~2 us delay, use wait=8
+// Usage: asmWait(3); // ~772 ns delay including overhead
 void asmWait(uint16_t wait)
 {
   if (wait == 0)

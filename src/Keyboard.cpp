@@ -18,25 +18,16 @@ Keyboard::Keyboard()
   memset(_previousState, 0, sizeof(_previousState));
 }
 
-/**
- * Sets a logger being used.
- */
 void Keyboard::setLogger(ILogger &logger)
 {
   _logger = &logger;
 }
 
-/**
- * Checks whether any key is pressed at the moment
- */
 bool Keyboard::isKeyPressed() const
 {
   return Model1.readMemory(KEYBOARD_ALL_ADDRESS) > 0;
 }
 
-/**
- * Reads the current state of the keyboard, dismissing all changes.
- */
 void Keyboard::update()
 {
   for (int i = 0; i < 8; i++)
@@ -46,9 +37,6 @@ void Keyboard::update()
   }
 }
 
-/**
- * Scans the keyboard and returns an iterator for the changed keys.
- */
 KeyboardChangeIterator Keyboard::changes()
 {
   uint8_t keyboardState[8];
@@ -65,10 +53,6 @@ KeyboardChangeIterator Keyboard::changes()
   return it;
 }
 
-/**
- * Scans the keyboard and returns the value of the first pressed key.
- * If no key is pressed, it returns 0.
- */
 uint8_t Keyboard::getFirstJustPressedKey()
 {
   KeyboardChangeIterator it = changes();

@@ -21,16 +21,25 @@ private:
   bool _checkROMNumber(uint8_t rom) const;
 
 public:
+  // Constructor
   ROM();
 
+  // Set logger for debugging output
   void setLogger(ILogger &logger);
 
+  // Get starting memory address for specified ROM number
   uint16_t getROMStartAddress(uint8_t rom);
+
+  // Get byte length of specified ROM
   uint16_t getROMLength(uint8_t rom);
 
+  // Calculate checksum for specified ROM
   uint32_t getChecksum(uint8_t rom);
+
+  // Identify ROM contents and return description string
   const __FlashStringHelper *identifyROM();
 
+  // Print ROM contents with specified formatting options
   void printROMContents(uint8_t rom, PRINT_STYLE style = BOTH, bool relative = true, uint16_t bytesPerLine = 32);
 };
 

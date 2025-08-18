@@ -22,18 +22,12 @@
 
 #define CASSETTE_DEFAULT_STATE 0
 
-/**
- * Initializes the cassette interface
- */
 Cassette::Cassette()
 {
     _logger = nullptr;
     _state = CASSETTE_DEFAULT_STATE;
 }
 
-/**
- * Reads the value of the IO device
- */
 uint8_t Cassette::_read()
 {
     // Initialize the result
@@ -51,17 +45,11 @@ uint8_t Cassette::_read()
     return result;
 }
 
-/**
- * Writes a value to the cassette I/O port
- */
 void Cassette::_write(uint8_t data)
 {
     Model1.writeIO(CASSETTE_PORT, data);
 }
 
-/**
- * Updates the cassette I/O state
- */
 void Cassette::update()
 {
     uint8_t data = _read();
@@ -91,9 +79,6 @@ void Cassette::update()
     _state = data;
 }
 
-/**
- * Writes a raw value to the cassette output
- */
 void Cassette::writeRaw(bool value1, bool value2)
 {
     if (value1)
@@ -117,9 +102,6 @@ void Cassette::writeRaw(bool value1, bool value2)
     _write(_state);
 }
 
-/**
- * Reads the raw data on cassette-in
- */
 bool Cassette::readRaw()
 {
     uint8_t input = Model1.readIO(CASSETTE_PORT);
@@ -137,9 +119,6 @@ bool Cassette::readRaw()
     }
 }
 
-/**
- * Plays a tone at a given frequency for a specified time
- */
 void Cassette::play(uint16_t frequency, uint32_t durationMs)
 {
     update();
@@ -155,11 +134,6 @@ void Cassette::play(uint16_t frequency, uint32_t durationMs)
     }
 }
 
-/**
- * Plays a song by providing the melody, the durations of each tone,
- * the number of notes in both melody and duration (need to be the same),
- * and the beats per minute.
- */
 void Cassette::playSong(int *melody, float *durations, size_t numNotes, int bpm)
 {
     // Compute duration of a whole note in milliseconds
@@ -182,11 +156,6 @@ void Cassette::playSong(int *melody, float *durations, size_t numNotes, int bpm)
     }
 }
 
-/**
- * Plays a song stored in PROGMEM using the provided melody and durations arrays.
- * Each note is played for the duration given by the durations array multiplied
- * by the beats per minute.
- */
 void Cassette::playSongPGM(const int *melody, const float *durations, size_t numNotes, int bpm)
 {
     // Compute duration of a whole note in milliseconds
@@ -210,9 +179,6 @@ void Cassette::playSongPGM(const int *melody, const float *durations, size_t num
     }
 }
 
-/**
- * Activates the remote motor
- */
 void Cassette::activateRemote()
 {
     update();
@@ -220,9 +186,6 @@ void Cassette::activateRemote()
     _write(_state);
 }
 
-/**
- * Deactivates the remote motor
- */
 void Cassette::deactivateRemote()
 {
     update();
@@ -230,11 +193,6 @@ void Cassette::deactivateRemote()
     _write(_state);
 }
 
-/**
- * Selects Character Generator A
- *
- * NOTE: This is only possible if the JP4 and JP5 are set C->1 and C->2 respectively.
- */
 void Cassette::setCharGenA()
 {
     update();
@@ -242,11 +200,6 @@ void Cassette::setCharGenA()
     _write(_state);
 }
 
-/**
- * Selects Character Generator B
- *
- * NOTE: This is only possible if the JP4 and JP5 are set C->1 and C->2 respectively.
- */
 void Cassette::setCharGenB()
 {
     update();
@@ -254,18 +207,12 @@ void Cassette::setCharGenB()
     _write(_state);
 }
 
-/**
- * Checks whether video mode is in 64 characters
- */
 bool Cassette::is64CharacterMode()
 {
     update();
     return !bitRead(_state, CASSETTE_BIT_MODESEL_INV);
 }
 
-/**
- * Changes the video mode to 32 characters
- */
 void Cassette::set32CharacterMode()
 {
     update();
@@ -273,9 +220,6 @@ void Cassette::set32CharacterMode()
     _write(_state);
 }
 
-/**
- * Changes the video mode to 64 characters
- */
 void Cassette::set64CharacterMode()
 {
     update();
@@ -283,9 +227,6 @@ void Cassette::set64CharacterMode()
     _write(_state);
 }
 
-/**
- * Sets a logger being used.
- */
 void Cassette::setLogger(ILogger &logger)
 {
     _logger = &logger;

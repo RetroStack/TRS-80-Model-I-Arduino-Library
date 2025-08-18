@@ -52,9 +52,6 @@ const uint8_t lookupTableShift[8][8] PROGMEM = {
     {KEY_SHIFT, KEY_UNUSED_6, KEY_UNUSED_7, KEY_UNUSED_8, KEY_UNUSED_9, KEY_UNUSED_10, KEY_UNUSED_11, KEY_UNUSED_12}, // 3860
 };
 
-/**
- * Initializes the iterator with the previous and current keyboard states.
- */
 KeyboardChangeIterator::KeyboardChangeIterator(const uint8_t *previous, const uint8_t *current)
     : _byteIndex(0), _bitMask(1), _found(false)
 {
@@ -64,17 +61,11 @@ KeyboardChangeIterator::KeyboardChangeIterator(const uint8_t *previous, const ui
     _advanceToNextChange();
 }
 
-/**
- * Checks whether there are more changed keys to iterate over.
- */
 bool KeyboardChangeIterator::hasNext() const
 {
     return _found;
 }
 
-/**
- * Moves to the next changed key.
- */
 void KeyboardChangeIterator::next()
 {
     _bitMask <<= 1;
@@ -88,65 +79,41 @@ void KeyboardChangeIterator::next()
     _advanceToNextChange();
 }
 
-/**
- * Returns the flat index (0-63) of the current key.
- */
 uint8_t KeyboardChangeIterator::keyIndex() const
 {
     return _byteIndex * 8 + _bitIndex();
 }
 
-/**
- * Returns the row of the current key.
- */
 uint8_t KeyboardChangeIterator::row() const
 {
     return _byteIndex;
 }
 
-/**
- * Returns the column of the current key.
- */
 uint8_t KeyboardChangeIterator::column() const
 {
     return _bitIndex();
 }
 
-/**
- * Returns whether the key was pressed in the previous state.
- */
 bool KeyboardChangeIterator::wasPressed() const
 {
     return (_previous[_byteIndex] & _bitMask) != 0;
 }
 
-/**
- * Returns whether the key is pressed now.
- */
 bool KeyboardChangeIterator::isPressed() const
 {
     return (_current[_byteIndex] & _bitMask) != 0;
 }
 
-/**
- * True if the key went from released to pressed.
- */
 bool KeyboardChangeIterator::wasJustPressed() const
 {
     return !wasPressed() && isPressed();
 }
 
-/**
- * True if the key went from pressed to released.
- */
 bool KeyboardChangeIterator::wasReleased() const
 {
     return wasPressed() && !isPressed();
 }
 
-/**
- * Returns the bit index of the current key within its byte.
- */
 uint8_t KeyboardChangeIterator::keyValue() const
 {
     uint8_t r = row();
@@ -161,9 +128,6 @@ uint8_t KeyboardChangeIterator::keyValue() const
     }
 }
 
-/**
- * Returns the name of the current key.
- */
 String KeyboardChangeIterator::keyName() const
 {
     uint8_t keyVal = keyValue();
@@ -208,17 +172,11 @@ String KeyboardChangeIterator::keyName() const
     }
 }
 
-/**
- * Checks whether the shift key is pressed.
- */
 bool KeyboardChangeIterator::isShiftPressed() const
 {
     return (_current[7] & 0x01) > 0;
 }
 
-/**
- * Advances to the next changed key by checking the current and previous states.
- */
 void KeyboardChangeIterator::_advanceToNextChange()
 {
     _found = false;
@@ -243,9 +201,6 @@ void KeyboardChangeIterator::_advanceToNextChange()
     }
 }
 
-/**
- * Returns the bit index of the current key within its byte.
- */
 uint8_t KeyboardChangeIterator::_bitIndex() const
 {
     uint8_t bit = 0;

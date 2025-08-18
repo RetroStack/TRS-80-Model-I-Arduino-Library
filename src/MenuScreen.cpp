@@ -34,13 +34,6 @@ constexpr uint16_t DISABLED_ROW_COLOR_FG2 = 0x7BEF;       // Foreground color fo
 constexpr uint16_t NEXT_PAGE_INDICATOR_COLOR_FG = 0xFFFF; // Color for next page indicator text
 constexpr uint16_t TABLE_COLOR_BG = 0x0000;               // Color for table background
 
-/**
- * @brief Initialize menu screen with default configuration
- *
- * Sets up the menu screen with initial state including page counters,
- * empty menu item list, and default button labels for navigation.
- * Derived classes should call _setMenuItems() and _setTitle() to configure.
- */
 MenuScreen::MenuScreen() : ContentScreen()
 {
     _currentPage = 0;
@@ -55,28 +48,11 @@ MenuScreen::MenuScreen() : ContentScreen()
     setButtonItems(buttonItems, 2);
 }
 
-/**
- * @brief Destructor frees dynamically allocated menu items
- *
- * Ensures proper cleanup of any dynamically allocated menu items
- * to prevent memory leaks when menu screens are destroyed.
- */
 MenuScreen::~MenuScreen()
 {
     clearMenuItems();
 }
 
-/**
- * @brief Calculate maximum items that can fit on one page based on available content height
- *
- * Dynamically calculates how many menu items can be displayed on one page
- * by dividing the available content area height by the row height.
- *
- * @return Number of menu items that can be displayed per page (minimum 1)
- *
- * @note Ensures at least 1 item per page even if content area is very small
- * @note Recalculated whenever screen layout changes
- */
 uint8_t MenuScreen::_getItemsPerPage() const
 {
     uint16_t contentHeight = _getContentHeight();
@@ -86,13 +62,6 @@ uint8_t MenuScreen::_getItemsPerPage() const
     return (itemsPerPage > 0) ? itemsPerPage : 1;
 }
 
-/**
- * @brief Find the next enabled menu item starting from a given index
- *
- * @param startIndex Index to start searching from (inclusive)
- * @param forward True to search forward, false to search backward
- * @return Index of next enabled item, or startIndex if none found
- */
 uint8_t MenuScreen::_findNextEnabledItem(uint8_t startIndex, bool forward) const
 {
     if (_menuItemCount == 0)
@@ -131,20 +100,6 @@ uint8_t MenuScreen::_findNextEnabledItem(uint8_t startIndex, bool forward) const
 
 // Input Handling and Navigation
 
-/**
- * @brief Process user input actions for menu navigation and selection
- *
- * Handles all menu navigation including item selection, directional movement,
- * and exit actions. Supports both button and joystick input with intelligent
- * diagonal movement handling.
- *
- * @param action  Input action flags indicating what input occurred
- * @param offsetX Horizontal joystick offset for diagonal detection
- * @param offsetY Vertical joystick offset for diagonal detection
- * @return Screen* Screen to navigate to, or nullptr to stay on current screen
- *
- * @note Diagonal joystick movements prioritize the dominant axis
- */
 Screen *MenuScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)
 {
     if (!isActive())
@@ -227,18 +182,6 @@ Screen *MenuScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t off
 
 // Menu Content Rendering
 
-/**
- * @brief Render the menu content area with paginated items and selection highlighting
- *
- * Draws the current page of menu items with alternating row colors and
- * highlights the currently selected item. Handles pagination automatically
- * and ensures proper visual feedback for navigation.
- *
- * @note Called automatically by ContentScreen's rendering system
- * @note Uses dynamic calculation to determine how many items to show per page
- * @note Selected item uses distinct colors for clear visual feedback
- * @note Shows pixel-based "..." indicator when additional pages exist
- */
 void MenuScreen::_drawContent()
 {
     if (!isActive())
@@ -517,17 +460,6 @@ void MenuScreen::setMenuItemsF(const __FlashStringHelper **menuItems, uint8_t me
     free(tempItems);
 }
 
-/**
- * @brief Set menu items with dynamic memory allocation and string copying
- *
- * @param menuItems     Array of null-terminated strings for menu items
- * @param menuItemCount Number of items in the menuItems array
- *
- * @note Automatically frees any previously allocated menu items
- * @note Creates deep copies of all strings - original array can be freed
- * @note Automatically recalculates pagination when items change
- * @note Resets selection to first item when menu changes
- */
 void MenuScreen::setMenuItems(const char **menuItems, uint8_t menuItemCount)
 {
     // Clear any existing menu items first
@@ -589,11 +521,6 @@ void MenuScreen::setMenuItems(const char **menuItems, uint8_t menuItemCount)
     }
 }
 
-/**
- * @brief Set the menu items from an array of String objects
- * @param menuItems Array of String objects for menu items
- * @param menuItemCount Number of items in the menuItems array
- */
 void MenuScreen::setMenuItems(String *menuItems, uint8_t menuItemCount)
 {
     // Clear any existing menu items first
@@ -656,18 +583,6 @@ void MenuScreen::setMenuItems(String *menuItems, uint8_t menuItemCount)
     }
 }
 
-/**
- * @brief Set the currently selected menu item and update display
- *
- * Updates the selected menu item index and automatically switches
- * to the appropriate page if the selected item is not on the current page.
- * Triggers a redraw if the menu is currently active.
- *
- * @param index Global menu item index to select (0-based)
- *
- * @note Automatically calculates and switches to the correct page
- * @note Triggers immediate redraw if menu is active
- */
 void MenuScreen::_setSelectedMenuItemIndex(uint8_t index)
 {
     if (index >= _menuItemCount)
@@ -694,28 +609,11 @@ void MenuScreen::_setSelectedMenuItemIndex(uint8_t index)
     }
 }
 
-/**
- * @brief Get the currently selected menu item index
- *
- * Returns the global index of the currently selected menu item
- * across all pages of the menu.
- *
- * @return uint8_t Current selected menu item index (0-based)
- */
 uint8_t MenuScreen::_getSelectedMenuItemIndex() const
 {
     return _selectedMenuItemIndex;
 }
 
-/**
- * @brief Clear and free all dynamically allocated menu items
- *
- * Frees all memory associated with menu items and resets the menu
- * to an empty state. Safe to call multiple times or on empty menus.
- *
- * @note Safe to call multiple times or on empty menus
- * @note Automatically triggers display update if menu is active
- */
 void MenuScreen::clearMenuItems()
 {
     if (_menuItems != nullptr)

@@ -22,13 +22,7 @@ constexpr uint16_t DEFAULT_TEXT_COLOR = 0xFFFF;
 constexpr uint16_t DEFAULT_TEXT_BG_COLOR = 0x0000;
 constexpr uint16_t DEFAULT_CONSOLE_BG_COLOR = 0x0000;
 
-/**
- * @brief Constructor - initialize console with default settings
- *
- * Sets up the console with default text size, colors, cursor position,
- * and timing for one-time execution. The console starts at the top-left
- * of the content area.
- */
+// Constructor - initialize console with default settings
 ConsoleScreen::ConsoleScreen() : ContentScreen()
 {
     // Initialize text settings
@@ -77,13 +71,7 @@ ConsoleScreen::ConsoleScreen() : ContentScreen()
     setButtonItems(buttonItems, 1);
 }
 
-/**
- * @brief Initialize console when screen becomes active
- *
- * Resets the one-time execution tracking and auto-forward state when
- * the console becomes active. This ensures _executeOnce() will be called
- * 1 second after opening, even if the console was previously opened and closed.
- */
+// Initialize console when screen becomes active
 bool ConsoleScreen::open()
 {
     // Call parent implementation first
@@ -103,17 +91,13 @@ bool ConsoleScreen::open()
     return result;
 }
 
-/**
- * @brief Destructor
- */
+// Destructor
 ConsoleScreen::~ConsoleScreen()
 {
     // Base class handles cleanup
 }
 
-/**
- * @brief Update cached screen dimensions from ContentScreen
- */
+// Update cached screen dimensions from ContentScreen
 void ConsoleScreen::_updateDimensions()
 {
     _contentLeft = _getContentLeft();
@@ -122,13 +106,7 @@ void ConsoleScreen::_updateDimensions()
     _contentHeight = _getContentHeight();
 }
 
-/**
- * @brief Main loop processing for console screen updates
- *
- * Handles one-time execution timing, auto-forward functionality, and delegates
- * to ContentScreen for standard screen processing. Override this method in
- * derived classes for custom behavior.
- */
+// Main loop processing for console screen updates
 void ConsoleScreen::loop()
 {
     // Check for one-time execution
@@ -160,17 +138,7 @@ void ConsoleScreen::loop()
     // Call parent loop is not necessary since nothing is defined there
 }
 
-/**
- * @brief Handle user input actions
- *
- * Base implementation provides standard navigation.
- * Override in derived classes for custom input handling.
- *
- * @param action  The input action that occurred
- * @param offsetX Horizontal offset for analog input
- * @param offsetY Vertical offset for analog input
- * @return Screen* Pointer to screen to navigate to, or nullptr to stay current
- */
+// Handle user input actions
 Screen *ConsoleScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)
 {
     if (!isActive())
@@ -203,12 +171,7 @@ Screen *ConsoleScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t 
     return nullptr;
 }
 
-/**
- * @brief Draw the console content area
- *
- * Fills the console background and handles the rendering area setup.
- * Called automatically by ContentScreen's rendering system.
- */
+// Draw the console content area
 void ConsoleScreen::_drawContent()
 {
     _updateDimensions();
@@ -219,13 +182,7 @@ void ConsoleScreen::_drawContent()
     gfx.fillRect(_contentLeft, _contentTop, _contentWidth, _contentHeight, M1Shield.convertColor(_consoleBgColor));
 }
 
-/**
- * @brief Move to the next line (newline operation)
- *
- * Advances the cursor to the beginning of the next line.
- * If at the bottom of the screen, handles paging behavior based
- * on current paging mode settings.
- */
+// Move to the next line (newline operation)
 void ConsoleScreen::_newLine()
 {
     _updateDimensions();
@@ -245,13 +202,7 @@ void ConsoleScreen::_newLine()
     }
 }
 
-/**
- * @brief Process tab character - move to next tab stop
- *
- * Advances cursor to the next tab stop position based on
- * the configured tab size. If the tab would exceed the line
- * width, moves to the next line instead.
- */
+// Process tab character - move to next tab stop
 void ConsoleScreen::_processTab()
 {
     _updateDimensions();
@@ -276,16 +227,7 @@ void ConsoleScreen::_processTab()
 
 // Print Interface Implementation
 
-/**
- * @brief Write a single character to the console (Print interface)
- *
- * This method implements the required Print interface method, enabling
- * all Arduino Print functionality automatically. It processes and renders
- * a single character to the console.
- *
- * @param c Character to write to console
- * @return size_t Number of bytes written (1 if successful, 0 if failed)
- */
+// Write a single character to the console (Print interface)
 size_t ConsoleScreen::write(uint8_t c)
 {
     // Block execution if we're waiting for paging action
@@ -299,17 +241,7 @@ size_t ConsoleScreen::write(uint8_t c)
     return 1; // Always successful since _processChar handles all characters
 }
 
-/**
- * @brief Write buffer of characters to console (Print interface optimization)
- *
- * Optimized bulk write method for better performance when writing
- * multiple characters at once. Uses startWrite/endWrite for maximum
- * performance on SPI displays.
- *
- * @param buffer Pointer to character buffer
- * @param size Number of characters to write
- * @return size_t Number of bytes successfully written
- */
+// Write buffer of characters to console (Print interface optimization)
 size_t ConsoleScreen::write(const uint8_t *buffer, size_t size)
 {
     if (!isActive() || size == 0)
@@ -355,12 +287,7 @@ size_t ConsoleScreen::write(const uint8_t *buffer, size_t size)
 
 // Console Control Methods
 
-/**
- * @brief Clear screen and reset cursor to top-left
- *
- * Clears the entire console area and positions the cursor
- * at the top-left corner. Equivalent to calling refresh().
- */
+// Clear screen and reset cursor to top-left
 void ConsoleScreen::cls()
 {
     _updateDimensions();
@@ -380,12 +307,6 @@ void ConsoleScreen::cls()
     M1Shield.display(); // Push changes to display
 }
 
-/**
- * @brief Refresh screen and reset cursor to top-left
- *
- * Clears the console area and resets the cursor position.
- * Same functionality as cls() - provided for API consistency.
- */
 void ConsoleScreen::refresh()
 {
     cls();
@@ -393,39 +314,17 @@ void ConsoleScreen::refresh()
 
 // Console Configuration Methods
 
-/**
- * @brief Set text color for subsequent output
- *
- * @param foreground Text foreground color (RGB565 format)
- * @param background Text background color (RGB565 format, optional)
- */
 void ConsoleScreen::setTextColor(uint16_t foreground, uint16_t background)
 {
     _textColor = M1Shield.convertColor(foreground);
     _textBgColor = M1Shield.convertColor(background);
 }
 
-/**
- * @brief Set console background color
- *
- * Sets the background color for the entire console area.
- * Takes effect on next refresh() or cls() call.
- *
- * @param color Background color (RGB565 format)
- */
 void ConsoleScreen::setConsoleBackground(uint16_t color)
 {
     _consoleBgColor = M1Shield.convertColor(color);
 }
 
-/**
- * @brief Set text size for subsequent output
- *
- * @param size Text size multiplier (1=smallest, 2=medium, 3=large, etc.)
- *
- * @note Changing text size affects line height and character width
- * @note Cursor position is maintained but may need adjustment
- */
 void ConsoleScreen::setTextSize(uint8_t size)
 {
     // Only allow small text on very small displays
@@ -459,11 +358,6 @@ void ConsoleScreen::setTextSize(uint8_t size)
     }
 }
 
-/**
- * @brief Set tab size in characters
- *
- * @param size Number of characters per tab stop (default: 4)
- */
 void ConsoleScreen::setTabSize(uint8_t size)
 {
     if (size < 1)
@@ -471,14 +365,6 @@ void ConsoleScreen::setTabSize(uint8_t size)
     _tabSize = size;
 }
 
-/**
- * @brief Process a single character for output
- *
- * Handles special characters like newline (\n) and tab (\t),
- * and renders printable characters to the screen.
- *
- * @param c Character to process and potentially render
- */
 void ConsoleScreen::_processChar(char c)
 {
     if (c == '\n')
@@ -496,14 +382,6 @@ void ConsoleScreen::_processChar(char c)
     // Ignore other control characters
 }
 
-/**
- * @brief Render a single character at the current cursor position
- *
- * Draws the character with current color settings and advances
- * the cursor position. Handles line wrapping automatically.
- *
- * @param c Character to render (must be printable)
- */
 void ConsoleScreen::_renderChar(char c)
 {
     _updateDimensions();
@@ -537,13 +415,6 @@ void ConsoleScreen::_renderChar(char c)
     _currentX += _charWidth;
 }
 
-/**
- * @brief Block execution until paging wait is resolved
- *
- * If the console is currently waiting for paging action, this method
- * will block until the wait is resolved (by timeout or user action).
- * This ensures print operations are truly blocked during paging.
- */
 void ConsoleScreen::_waitForPagingIfNeeded()
 {
     if (!_isWaitingForPaging)
@@ -608,14 +479,6 @@ void ConsoleScreen::_waitForPagingIfNeeded()
 
 // ========== Paging Management Methods ==========
 
-/**
- * @brief Check if console has reached the bottom and handle paging
- *
- * Called when text would exceed the console area. Handles the paging
- * behavior based on current paging mode settings.
- *
- * @return true if console was cleared and can continue, false if waiting
- */
 bool ConsoleScreen::_handlePaging()
 {
     switch (_pagingMode)
@@ -641,14 +504,6 @@ bool ConsoleScreen::_handlePaging()
     return true; // Default fallback
 }
 
-/**
- * @brief Check if paging timeout has expired
- *
- * Evaluates timeout conditions for timeout-based paging modes.
- * Respects the paused state - timeout does not advance when paused.
- *
- * @return true if timeout has expired and console should clear
- */
 bool ConsoleScreen::_shouldEndPagingWait()
 {
     if (!_isWaitingForPaging || _pagingPaused)
@@ -661,12 +516,6 @@ bool ConsoleScreen::_shouldEndPagingWait()
            (elapsed >= _pagingTimeoutMs);
 }
 
-/**
- * @brief Display paging prompt message
- *
- * Shows appropriate message based on paging mode to inform
- * user how to continue.
- */
 void ConsoleScreen::_showPagingMessage()
 {
     Adafruit_GFX &gfx = M1Shield.getGFX();
@@ -726,11 +575,6 @@ void ConsoleScreen::_showPagingMessage()
     gfx.setTextSize(savedTextSize);
 }
 
-/**
- * @brief Clear paging prompt and prepare for new content
- *
- * Removes paging prompt and resets console for continued output.
- */
 void ConsoleScreen::_clearPagingMessage()
 {
     // Simply clear the prompt area by filling with background color
@@ -741,49 +585,31 @@ void ConsoleScreen::_clearPagingMessage()
 
 // ========== Paging Configuration Methods ==========
 
-/**
- * @brief Set console paging behavior mode
- */
 void ConsoleScreen::setPagingMode(ConsolePagingMode mode)
 {
     _pagingMode = mode;
 }
 
-/**
- * @brief Set paging timeout duration
- */
 void ConsoleScreen::setPagingTimeout(uint16_t timeoutMs)
 {
     _pagingTimeoutMs = timeoutMs;
 }
 
-/**
- * @brief Get current paging mode
- */
 ConsolePagingMode ConsoleScreen::getPagingMode() const
 {
     return _pagingMode;
 }
 
-/**
- * @brief Get current paging timeout
- */
 uint16_t ConsoleScreen::getPagingTimeout() const
 {
     return _pagingTimeoutMs;
 }
 
-/**
- * @brief Check if console is currently waiting for paging action
- */
 bool ConsoleScreen::isWaitingForPaging() const
 {
     return _isWaitingForPaging;
 }
 
-/**
- * @brief Manually trigger page continuation
- */
 void ConsoleScreen::continuePaging()
 {
     if (_isWaitingForPaging)
@@ -794,9 +620,6 @@ void ConsoleScreen::continuePaging()
     }
 }
 
-/**
- * @brief Enable or disable auto-forward functionality
- */
 void ConsoleScreen::setAutoForward(bool enabled, unsigned long delayMs)
 {
     _autoForwardEnabled = enabled;
@@ -810,17 +633,11 @@ void ConsoleScreen::setAutoForward(bool enabled, unsigned long delayMs)
     }
 }
 
-/**
- * @brief Check if auto-forward is currently enabled
- */
 bool ConsoleScreen::isAutoForwardEnabled() const
 {
     return _autoForwardEnabled;
 }
 
-/**
- * @brief Get current auto-forward delay
- */
 unsigned long ConsoleScreen::getAutoForwardDelay() const
 {
     return _autoForwardDelayMs;

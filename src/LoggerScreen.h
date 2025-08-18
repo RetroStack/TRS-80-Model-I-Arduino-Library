@@ -10,44 +10,7 @@
 #include "ConsoleScreen.h"
 #include "ILogger.h"
 
-/**
- * @brief A console screen with logging functionality compatible with ILogger
- *
- * LoggerScreen extends ConsoleScreen to provide a visual logging destination that is
- * compatible with the ILogger interface through an adapter pattern. It displays log
- * messages with formatted prefixes and automatic scrolling, making it perfect for
- * real-time debugging, system monitoring, and diagnostics on the M1Shield display.
- *
- * Features:
- * - ILogger-compatible logging interface (info, warn, err)
- * - Formatted log prefixes with timestamps and levels
- * - Color-coded log levels for easy visual distinction
- * - Automatic scrolling when screen fills
- * - Standard ConsoleScreen functionality (Print interface, text control)
- * - Compatible with CompositeLogger for multi-destination logging
- * - Real-time visual feedback for debugging and monitoring
- *
- * Usage Examples:
- * @code
- * // Basic logger screen usage
- * LoggerScreen* logScreen = new LoggerScreen("System Log");
- * M1Shield.setScreen(logScreen);
- *
- * // Use as a logger
- * logScreen->info("System initialized");
- * logScreen->warn("Low memory: %d bytes", freeMemory);
- * logScreen->err("Sensor failure on pin %d", sensorPin);
- *
- * // Use with CompositeLogger
- * CompositeLogger multiLogger;
- * SerialLogger serialLogger;
- * multiLogger.addLogger(&serialLogger);
- * multiLogger.addLogger(logScreen->asLogger());  // Use asLogger() method
- *
- * // Now logs go to both Serial and screen
- * multiLogger.info("Logged to both destinations");
- * @endcode
- */
+// A console screen with logging functionality compatible with ILogger
 class LoggerScreen : public ConsoleScreen
 {
 private:
@@ -62,65 +25,24 @@ private:
     static const uint16_t COLOR_DEBUG = 0x07FF;     // Cyan for debug messages
     static const uint16_t COLOR_TIMESTAMP = 0x7BEF; // Light gray for timestamps
 
-    /**
-     * @brief Internal helper to format and display log messages
-     * @param level Log level string (e.g., "INFO", "WARN", "ERR ")
-     * @param color Color to use for the log level
-     * @param fmt Printf-style format string
-     * @param args Variable argument list
-     */
-    void _logMessage(const char *level, uint16_t color, const char *fmt, va_list args);
+    void _logMessage(const char *level, uint16_t color, const char *fmt, va_list args); // Internal helper to format and display log messages
 
-    /**
-     * @brief Get current timestamp string for logging
-     * @param buffer Buffer to store timestamp string
-     * @param bufferSize Size of the buffer
-     */
-    void _getTimestamp(char *buffer, size_t bufferSize);
+    void _getTimestamp(char *buffer, size_t bufferSize); // Get current timestamp string for logging
 
 public:
-    /**
-     * @brief Constructor - create logger screen with optional title
-     * @param title Screen title (optional, defaults to "Logger")
-     */
-    LoggerScreen(const char *title = "Logger");
+    LoggerScreen(const char *title = "Logger"); // Constructor - create logger screen with optional title
 
-    /**
-     * @brief Destructor
-     */
-    virtual ~LoggerScreen();
+    virtual ~LoggerScreen(); // Destructor
 
-    /**
-     * @brief Enable or disable timestamp display in log messages
-     * @param enabled true to show timestamps, false to hide them
-     */
-    void setTimestampEnabled(bool enabled);
+    void setTimestampEnabled(bool enabled); // Enable or disable timestamp display in log messages
 
-    /**
-     * @brief Check if timestamps are enabled
-     * @return true if timestamps are enabled, false otherwise
-     */
-    bool isTimestampEnabled() const;
+    bool isTimestampEnabled() const; // Check if timestamps are enabled
 
-    /**
-     * @brief Enable or disable color coding for different log levels
-     * @param enabled true to use color coding, false for monochrome
-     */
-    void setColorCodingEnabled(bool enabled);
+    void setColorCodingEnabled(bool enabled); // Enable or disable color coding for different log levels
 
-    /**
-     * @brief Check if color coding is enabled
-     * @return true if color coding is enabled, false otherwise
-     */
-    bool isColorCodingEnabled() const;
+    bool isColorCodingEnabled() const; // Check if color coding is enabled
 
-    /**
-     * @brief Reset the timestamp reference point to current time
-     *
-     * This resets the relative timestamp counter, useful when starting
-     * a new logging session or after a system reset.
-     */
-    void resetTimestamp();
+    void resetTimestamp(); // Reset the timestamp reference point to current time
 
     // Logging interface (compatible with ILogger but not inheriting)
     void info(const char *fmt, ...);
@@ -128,18 +50,7 @@ public:
     void err(const char *fmt, ...);
     void debug(const char *fmt, ...);
 
-    /**
-     * @brief Get an ILogger adapter for this LoggerScreen
-     * @return ILogger* that forwards calls to this LoggerScreen
-     *
-     * Use this to add the LoggerScreen to a CompositeLogger:
-     * @code
-     * LoggerScreen screen("Debug");
-     * CompositeLogger composite;
-     * composite.addLogger(screen.asLogger());
-     * @endcode
-     */
-    ILogger *asLogger();
+    ILogger *asLogger(); // Get an ILogger adapter for this LoggerScreen
 
     // Print interface is inherited from ConsoleScreen
 

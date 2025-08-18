@@ -113,26 +113,49 @@ private:
     void _write(uint8_t data);
 
 public:
+    // Constructor
     Cassette();
 
+    // Update cassette interface state
     void update();
+
+    // Set logger for debugging output
     void setLogger(ILogger &logger);
 
+    // Write raw boolean values to cassette output
     void writeRaw(bool value1, bool value2);
+
+    // Read raw boolean value from cassette input
     bool readRaw();
 
+    // Play tone with specified frequency and duration
     void play(uint16_t frequency, uint32_t duration);
+
+    // Play melody from arrays in RAM
     void playSong(int *melody, float *durations, size_t numNotes, int bpm);
+
+    // Play melody from arrays in program memory (PROGMEM)
     void playSongPGM(const int *melody, const float *durations, size_t numNotes, int bpm);
 
+    // Activate cassette recorder remote control
     void activateRemote();
+
+    // Deactivate cassette recorder remote control
     void deactivateRemote();
 
+    // Set character generator to A variant
     void setCharGenA();
+
+    // Set character generator to B variant
     void setCharGenB();
 
+    // Check if display is in 64-character mode
     bool is64CharacterMode();
+
+    // Set display to 32-character mode
     void set32CharacterMode();
+
+    // Set display to 64-character mode
     void set64CharacterMode();
 };
 

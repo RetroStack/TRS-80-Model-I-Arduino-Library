@@ -8,58 +8,37 @@
 #include "utils.h"
 #include "Model1LowLevel.h"
 
-/**
- * Configures the port used
- */
 void AddressBus::_configurePort(uint16_t config)
 {
     Model1LowLevel::configWriteAddressBus(config);
 }
 
-/**
- * Initializes the Bus Access
- */
 AddressBus::AddressBus()
 {
     _logger = nullptr;
     _writable = false;
 }
 
-/**
- * Hardware initialization
- */
 void AddressBus::begin()
 {
     setAsReadable();
 }
 
-/**
- * Puts ports into a stable mode
- */
 void AddressBus::end()
 {
     setAsReadable();
 }
 
-/**
- * Sets a logger being used.
- */
 void AddressBus::setLogger(ILogger &logger)
 {
     _logger = &logger;
 }
 
-/**
- * Reads from the data bus
- */
 uint16_t AddressBus::readMemoryAddress()
 {
     return Model1LowLevel::readAddressBus();
 }
 
-/**
- * Writes to the bus
- */
 void AddressBus::writeMemoryAddress(uint16_t address)
 {
     if (!_writable)
@@ -71,27 +50,16 @@ void AddressBus::writeMemoryAddress(uint16_t address)
     Model1LowLevel::writeAddressBus(address);
 }
 
-/**
- * Writes a refresh address to the bus
- *
- * NOTE: Careful when using this directly as it doesn't make any checks to improve performance.
- */
 void AddressBus::writeRefreshAddress(uint8_t address)
 {
     Model1LowLevel::writeAddressBus(address);
 }
 
-/**
- * Reads from the IO address bus
- */
 uint8_t AddressBus::readIOAddress()
 {
     return Model1LowLevel::readAddressBus() & 0xFF;
 }
 
-/**
- * Writes to the IO address bus
- */
 void AddressBus::writeIOAddress(uint8_t address)
 {
     if (!_writable)
@@ -103,41 +71,26 @@ void AddressBus::writeIOAddress(uint8_t address)
     Model1LowLevel::writeAddressBus(address);
 }
 
-/**
- * Checks whether the bus is readable
- */
 bool AddressBus::isReadable()
 {
     return !_writable;
 }
 
-/**
- * Checks whether the bus is writable
- */
 bool AddressBus::isWritable()
 {
     return _writable;
 }
 
-/**
- * Sets the address bus to be readable
- */
 void AddressBus::setAsReadable()
 {
     _setBus(false);
 }
 
-/**
- * Sets the address bus to be writable
- */
 void AddressBus::setAsWritable()
 {
     _setBus(true);
 }
 
-/**
- * Returns the current state as string
- */
 char *AddressBus::getState()
 {
     const int LEN = 31;
@@ -155,9 +108,6 @@ char *AddressBus::getState()
     return buffer;
 }
 
-/**
- * Sets the data bus direction
- */
 void AddressBus::_setBus(bool writableOption)
 {
     if (_writable == writableOption)

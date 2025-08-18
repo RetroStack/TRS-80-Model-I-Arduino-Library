@@ -18,20 +18,33 @@ private:
     void _log(const char *fmt, va_list arguments);
 
 public:
+    // Log informational message to serial output
     void info(const char *fmt, ...);
+
+    // Log warning message to serial output
     void warn(const char *fmt, ...);
+
+    // Log error message to serial output
     void err(const char *fmt, ...);
+
+    // Log debug message to serial output
     void debug(const char *fmt, ...);
 
+    using ILogger::debug;
     using ILogger::err;
     using ILogger::info;
     using ILogger::warn;
-    using ILogger::debug;
 
+    // Write single character to serial output
     size_t write(uint8_t ch) override;
+
+    // Write buffer of characters to serial output
     size_t write(const uint8_t *buffer, size_t size) override;
 
+    // Disable all logging output (silent mode)
     void mute();
+
+    // Re-enable logging output
     void unmute();
 
     using Print::print;

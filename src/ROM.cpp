@@ -72,25 +72,16 @@ const ROMSignature signatures[] PROGMEM = {
     {DIAG_ROM, 0xAE31, 0x0000, 0x0000, 0x0000},
 };
 
-/**
- * Constructor for the ROM class
- */
 ROM::ROM()
 {
   _logger = nullptr;
 }
 
-/**
- * Sets a logger being used.
- */
 void ROM::setLogger(ILogger &logger)
 {
   _logger = &logger;
 }
 
-/**
- * Returns the start address of a ROM
- */
 uint16_t ROM::getROMStartAddress(uint8_t rom)
 {
   if (!_checkROMNumber(rom))
@@ -99,9 +90,6 @@ uint16_t ROM::getROMStartAddress(uint8_t rom)
   return ROM_START + (ROM_4K_LENGTH * rom);
 }
 
-/**
- * Returns the length of the ROM in bytes
- */
 uint16_t ROM::getROMLength(uint8_t rom)
 {
   if (!_checkROMNumber(rom))
@@ -114,9 +102,6 @@ uint16_t ROM::getROMLength(uint8_t rom)
   return ROM_4K_LENGTH;
 }
 
-/**
- * Calculates the checksum of a ROM
- */
 uint32_t ROM::getChecksum(uint8_t rom)
 {
   if (!_checkROMNumber(rom))
@@ -137,9 +122,6 @@ uint32_t ROM::getChecksum(uint8_t rom)
   return checksum;
 }
 
-/**
- * Identifies the ROM based on its checksums
- */
 const __FlashStringHelper *ROM::identifyROM()
 {
   uint16_t a = getChecksum(0);
@@ -167,9 +149,6 @@ const __FlashStringHelper *ROM::identifyROM()
   return nullptr;
 }
 
-/**
- * Prints the contents of a ROM in a human-readable format
- */
 void ROM::printROMContents(uint8_t rom, PRINT_STYLE style, bool relative, uint16_t bytesPerLine)
 {
   if (!_logger)
@@ -183,9 +162,6 @@ void ROM::printROMContents(uint8_t rom, PRINT_STYLE style, bool relative, uint16
   Model1.printMemoryContents(*_logger, addr, size, style, relative, bytesPerLine);
 }
 
-/**
- * Checks if the ROM number is valid (0-3)
- */
 bool ROM::_checkROMNumber(uint8_t rom) const
 {
   if (rom < 0 || rom > 3)

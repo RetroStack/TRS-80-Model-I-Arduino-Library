@@ -6,9 +6,6 @@
 
 #include "SerialLogger.h"
 
-/**
- * Logs a formatted string to the serial interface
- */
 void SerialLogger::_log(const char *fmt, va_list arguments)
 {
     const int LEN = 255;
@@ -18,9 +15,6 @@ void SerialLogger::_log(const char *fmt, va_list arguments)
     Serial.println(buffer);
 }
 
-/**
- * Write a byte to the serial logger and return byte written.
- */
 size_t SerialLogger::write(uint8_t ch)
 {
     if (ch == '\n')
@@ -33,9 +27,6 @@ size_t SerialLogger::write(uint8_t ch)
     }
 }
 
-/**
- * Write a list of bytes to the serial logger and returns the number of bytes written.
- */
 size_t SerialLogger::write(const uint8_t *buffer, size_t size)
 {
     size_t result = 0;
@@ -46,9 +37,6 @@ size_t SerialLogger::write(const uint8_t *buffer, size_t size)
     return result;
 }
 
-/**
- * Logs a formatted info string
- */
 void SerialLogger::info(const char *fmt, ...)
 {
     if (_silent)
@@ -63,9 +51,6 @@ void SerialLogger::info(const char *fmt, ...)
     va_end(arguments);
 }
 
-/**
- * Logs a formatted warning string
- */
 void SerialLogger::warn(const char *fmt, ...)
 {
     if (_silent)
@@ -80,9 +65,6 @@ void SerialLogger::warn(const char *fmt, ...)
     va_end(arguments);
 }
 
-/**
- * Logs a formatted error string
- */
 void SerialLogger::err(const char *fmt, ...)
 {
     if (_silent)
@@ -97,9 +79,6 @@ void SerialLogger::err(const char *fmt, ...)
     va_end(arguments);
 }
 
-/**
- * Logs a formatted debug string
- */
 void SerialLogger::debug(const char *fmt, ...)
 {
     if (_silent)

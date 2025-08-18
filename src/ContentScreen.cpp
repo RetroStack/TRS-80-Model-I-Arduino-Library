@@ -51,12 +51,6 @@ constexpr uint16_t ALERT_COLOR_FG = 0x0000;   // Alert text color (black)
 constexpr uint16_t CONFIRM_COLOR_BG = 0xF81F; // Confirm background (magenta)
 constexpr uint16_t CONFIRM_COLOR_FG = 0x0000; // Confirm text color (black)
 
-/**
- * @brief Constructor initializes ContentScreen with default values
- *
- * Sets up the screen with no title, no button items, and zero progress.
- * The screen is created in inactive state and must be opened to display.
- */
 ContentScreen::ContentScreen() : Screen()
 {
     _title = nullptr;       // No title allocated initially
@@ -71,12 +65,6 @@ ContentScreen::ContentScreen() : Screen()
     _notificationActive = false;
 }
 
-/**
- * @brief Destructor frees all dynamically allocated memory
- *
- * Cleans up title buffer and button label buffers to prevent memory leaks.
- * This ensures proper resource cleanup when screens are destroyed.
- */
 ContentScreen::~ContentScreen()
 {
     clearTitle();
@@ -84,20 +72,6 @@ ContentScreen::~ContentScreen()
     _clearNotification();
 }
 
-/**
- * @brief Implement Screen's _drawScreen() to orchestrate layout rendering
- *
- * Manages the complete screen redraw by coordinating all layout regions:
- * 1. Clear screen to background color
- * 2. Draw header with title
- * 3. Draw content area (delegated to derived class)
- * 4. Draw footer with button labels
- * 5. Draw progress bar
- * 6. Add decorative borders
- *
- * This method implements the template pattern - the layout structure is
- * fixed, but content rendering is customizable via _drawContent().
- */
 void ContentScreen::_drawScreen()
 {
     if (!isActive())
@@ -141,37 +115,17 @@ void ContentScreen::_drawScreen()
     }
 }
 
-/**
- * @brief Get Y coordinate of header region start
- * @return Always 0 (header starts at top of screen)
- */
 uint16_t ContentScreen::_getHeaderY() const
 {
     return 0;
 }
 
-/**
- * @brief Get height of header region
- * @return Height in pixels of header area
- *
- * Returns the standard header height, or a smaller height for small displays.
- */
 uint16_t ContentScreen::_getHeaderHeight() const
 {
     // Use smaller header height for small displays
     return isSmallDisplay() ? HEADER_SMALL_HEIGHT : HEADER_HEIGHT;
 }
 
-/**
- * @brief Draw the header region with title and styling
- *
- * Renders the header area with:
- * - Green background for visibility
- * - Centered title text in large font (size 3)
- * - Black text on green background for contrast
- *
- * @note Only draws if a title has been set via _setTitle()
- */
 void ContentScreen::_drawHeader()
 {
     if (!isActive())
@@ -209,48 +163,28 @@ void ContentScreen::_drawHeader()
     }
 }
 
-/**
- * @brief Get Y coordinate of content area start
- * @return Pixel position
- */
 uint16_t ContentScreen::_getContentTop() const
 {
     uint8_t padding = _getPadding();
     return _getHeaderHeight() + padding;
 }
 
-/**
- * @brief Get X coordinate of content area start
- * @return Pixel position
- */
 uint16_t ContentScreen::_getContentLeft() const
 {
     return 1;
 }
 
-/**
- * @brief Calculate available height for content area
- * @return Height in pixels
- */
 uint16_t ContentScreen::_getContentHeight() const
 {
     uint8_t padding = _getPadding();
     return M1Shield.getScreenHeight() - _getHeaderHeight() - padding - _getFooterHeight() - padding - _getProgressBarHeight() - padding;
 }
 
-/**
- * @brief Get available width for content area
- * @return Width in pixels
- */
 uint16_t ContentScreen::_getContentWidth() const
 {
     return M1Shield.getScreenWidth() - 2;
 }
 
-/**
- * @brief Calculate Y coordinate of footer region start
- * @return Pixel position of footer, accounting for progress bar below
- */
 uint16_t ContentScreen::_getFooterY() const
 {
     uint16_t screenHeight = M1Shield.getScreenHeight();
@@ -259,26 +193,12 @@ uint16_t ContentScreen::_getFooterY() const
     return bottom - _getFooterHeight();
 }
 
-/**
- * @brief Get height of footer region
- * @return Height in pixels of footer area
- *
- * Returns the standard footer height, or a smaller height for small displays.
- */
 uint16_t ContentScreen::_getFooterHeight() const
 {
     // Use smaller footer height for small displays
     return isSmallDisplay() ? FOOTER_SMALL_HEIGHT : FOOTER_HEIGHT;
 }
 
-/**
- * @brief Draw the footer region with button labels from internal buffers
- *
- * Renders button labels stored in internal buffers, distributing them
- * evenly across the footer width. Only draws labels that are non-empty.
- *
- * @note Only draws if button count > 0 and buffers contain valid strings
- */
 void ContentScreen::_drawFooter()
 {
     if (!isActive() || isSmallDisplay())
@@ -316,30 +236,18 @@ void ContentScreen::_drawFooter()
     }
 }
 
-/**
- * @brief Calculate Y coordinate of progress bar region start
- * @return Pixel position
- */
 uint16_t ContentScreen::_getProgressBarY() const
 {
     uint16_t screenHeight = M1Shield.getScreenHeight();
     return screenHeight - _getProgressBarHeight();
 }
 
-/**
- * @brief Get height of progress bar region
- * @return Height in pixels of progress bar area
- */
 uint16_t ContentScreen::_getProgressBarHeight() const
 {
     // Use smaller progress bar height for small displays
     return isSmallDisplay() ? PROGRESSBAR_SMALL_HEIGHT : PROGRESSBAR_HEIGHT;
 }
 
-/**
- * @brief Gets the padding between areas
- * @return Padding in pixels
- */
 uint8_t ContentScreen::_getPadding() const
 {
     // Use smaller padding for small displays to maximize content area
@@ -351,9 +259,6 @@ uint8_t ContentScreen::_getPadding() const
     return 2; // 2 pixels padding between regions
 }
 
-/**
- * @brief Draw the progress bar with current value
- */
 void ContentScreen::_drawProgressBar()
 {
     if (!isActive())
@@ -390,18 +295,6 @@ void ContentScreen::_drawProgressBar()
     }
 }
 
-/**
- * @brief Set footer button items from FlashString array
- *
- * Convenience method for setting button items from FlashString array.
- * Converts FlashString array to regular string array and delegates to setButtonItems().
- *
- * @param buttonItems Array of button labels stored in flash memory
- * @param buttonItemCount Number of button items in the array
- *
- * @note More memory efficient than storing button strings in RAM
- * @note Follows same allocation and update behavior as setButtonItems()
- */
 void ContentScreen::setButtonItemsF(const __FlashStringHelper **buttonItems, uint8_t buttonItemCount)
 {
     if (buttonItems == nullptr || buttonItemCount <= 0)
@@ -449,20 +342,6 @@ void ContentScreen::setButtonItemsF(const __FlashStringHelper **buttonItems, uin
     free(stringArray);
 }
 
-/**
- * @brief Set button labels with efficient dynamic memory allocation
- *
- * Allocates exactly the memory needed for each button label string, freeing any
- * previously allocated button memory. This minimizes memory usage while
- * ensuring labels remain valid regardless of source string lifetime.
- *
- * @param buttonItems Array of string pointers for button labels (can be temporary)
- * @param buttonItemCount Number of strings in the array (no hard limit)
- *
- * @note Memory is allocated dynamically - only uses space needed for each string
- * @note Pass nullptr or 0 count to free all button memory and clear labels
- * @note Automatically triggers footer redraw if screen is active
- */
 void ContentScreen::setButtonItems(const char **buttonItems, uint8_t buttonItemCount)
 {
     clearButtonItems();
@@ -509,13 +388,6 @@ void ContentScreen::setButtonItems(const char **buttonItems, uint8_t buttonItemC
     }
 }
 
-/**
- * @brief Clear all button labels and free allocated memory
- *
- * This method frees any dynamically allocated button label memory
- * and resets the button item count to 0. Call this to clear all
- * button labels without needing to set new ones.
- */
 void ContentScreen::clearButtonItems()
 {
     if (_buttonItems != nullptr)
@@ -543,19 +415,6 @@ void ContentScreen::clearButtonItems()
     }
 }
 
-/**
- * @brief Set the screen title with efficient dynamic memory allocation
- *
- * Allocates exactly the memory needed for the title string, freeing any
- * previously allocated title memory. This minimizes memory usage while
- * ensuring the title remains valid regardless of source string lifetime.
- *
- * @param title Null-terminated string for title display (can be temporary)
- *
- * @note Memory is allocated dynamically - only uses space needed for the string
- * @note Pass nullptr or empty string to free title memory and clear title
- * @note Automatically triggers header redraw if screen is active
- */
 void ContentScreen::setTitle(const char *title)
 {
     clearTitle();
@@ -582,26 +441,11 @@ void ContentScreen::setTitle(const char *title)
     }
 }
 
-/**
- * @brief Set screen title from Arduino String object
- * @param title String object for title (automatically converted and copied)
- */
 void ContentScreen::setTitle(String title)
 {
     setTitle(title.c_str());
 }
 
-/**
- * @brief Set screen title from FlashString
- *
- * Convenience method for setting title from FlashString (F() macro).
- * Converts the FlashString to a regular string and delegates to setTitle().
- *
- * @param title Title text stored in flash memory (from F() macro)
- *
- * @note More memory efficient than storing title strings in RAM
- * @note Follows same allocation and update behavior as setTitle()
- */
 void ContentScreen::setTitleF(const __FlashStringHelper *title)
 {
     if (title == nullptr)
@@ -629,12 +473,6 @@ void ContentScreen::setTitleF(const __FlashStringHelper *title)
     free(buffer);
 }
 
-/**
- * @brief Clear the current title
- *
- * Frees any dynamically allocated title memory and resets the title
- * to nullptr. Call this to clear the title without needing to set a new one.
- */
 void ContentScreen::clearTitle()
 {
     if (_title != nullptr)
@@ -654,27 +492,11 @@ void ContentScreen::clearTitle()
     }
 }
 
-/**
- * @brief Get the current screen title
- * @return Current title string, or nullptr if no title is set
- */
 const char *ContentScreen::getTitle() const
 {
     return _title; // May be nullptr if no title set
 }
 
-/**
- * @brief Set progress bar value with immediate update and bounds checking
- *
- * Updates the progress bar value and immediately redraws the progress
- * bar if the screen is currently active. The value is automatically
- * clamped to the valid range of 0-100.
- *
- * @param value Progress percentage (0-100, automatically clamped)
- *
- * @note Setting value to 0 effectively hides the progress bar
- * @note Values outside 0-100 range are automatically corrected
- */
 void ContentScreen::setProgressValue(int value)
 {
     // Clamp value to valid range (0-100)
@@ -696,21 +518,11 @@ void ContentScreen::setProgressValue(int value)
     }
 }
 
-/**
- * @brief Get the current progress bar value
- * @return Progress percentage (0-100)
- */
 uint8_t ContentScreen::getProgressValue() const
 {
     return _progressValue;
 }
 
-/**
- * @brief Clear content area to background color
- *
- * Convenience method to clear just the content region while
- * preserving header, footer, and progress bar areas.
- */
 void ContentScreen::clearContentArea()
 {
     if (!isActive())
@@ -729,23 +541,6 @@ void ContentScreen::clearContentArea()
     M1Shield.display(); // Push changes to display
 }
 
-/**
- * @brief Draw text within content area with clipping
- *
- * Renders text at the specified position within the content area.
- * Coordinates are relative to the content area, not the full screen.
- * Text that would extend beyond content bounds is clipped.
- *
- * @param x X position relative to content area start
- * @param y Y position relative to content area start
- * @param text Null-terminated string to display
- * @param color Text color (RGB565 format)
- * @param size Text size multiplier (1=normal, 2=double, etc.)
- *
- * @note Coordinates are relative to content area, not screen
- * @note Text extending beyond content area will be clipped
- * @note Uses current GFX cursor and color settings from M1Shield
- */
 void ContentScreen::drawText(uint16_t x, uint16_t y, const char *text, uint16_t color, uint8_t size)
 {
     if (!isActive())
@@ -779,36 +574,11 @@ void ContentScreen::drawText(uint16_t x, uint16_t y, const char *text, uint16_t 
     gfx.print(text);
 }
 
-/**
- * @brief Draw text in content area from Arduino String object
- * @param x X position relative to content area
- * @param y Y position relative to content area
- * @param text String object text to display
- * @param color Text color
- * @param size Text size multiplier
- */
 void ContentScreen::drawText(uint16_t x, uint16_t y, String text, uint16_t color, uint8_t size)
 {
     drawText(x, y, text.c_str(), color, size);
 }
 
-/**
- * @brief Draw text in content area from FlashString (F() macro)
- *
- * Memory-efficient version of drawText() that accepts FlashString for static text.
- * Coordinates are relative to the content area, not the full screen.
- *
- * @param x X position relative to content area
- * @param y Y position relative to content area
- * @param text FlashString text to display (from F() macro)
- * @param color Text color
- * @param size Text size multiplier
- *
- * @note More memory efficient than regular drawText() for static text
- * @note FlashString is automatically converted for display
- * @note Coordinates are relative to content area, not screen
- * @note Text extending beyond content area will be clipped
- */
 void ContentScreen::drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper *text, uint16_t color, uint8_t size)
 {
     if (!isActive())
@@ -840,11 +610,6 @@ void ContentScreen::drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper 
 // Notification System Implementation
 // =====================================================================================
 
-/**
- * @brief Show a notification that temporarily replaces the footer
- * @param text Notification text to display (dynamically allocated copy made)
- * @param durationMs How long to show notification in milliseconds
- */
 void ContentScreen::notify(const char *text, unsigned long durationMs)
 {
     if (text == nullptr)
@@ -873,21 +638,11 @@ void ContentScreen::notify(const char *text, unsigned long durationMs)
     }
 }
 
-/**
- * @brief Show a notification from Arduino String object
- * @param text String object notification text (automatically converted and copied)
- * @param durationMs How long to show notification in milliseconds
- */
 void ContentScreen::notify(String text, unsigned long durationMs)
 {
     notify(text.c_str(), durationMs);
 }
 
-/**
- * @brief Show a notification from FlashString (F() macro)
- * @param text FlashString notification text (automatically converted and copied)
- * @param durationMs How long to show notification in milliseconds
- */
 void ContentScreen::notifyF(const __FlashStringHelper *text, unsigned long durationMs)
 {
     if (text == nullptr)
@@ -908,18 +663,11 @@ void ContentScreen::notifyF(const __FlashStringHelper *text, unsigned long durat
     free(buffer);
 }
 
-/**
- * @brief Check if a notification is currently active
- * @return true if notification is being displayed, false otherwise
- */
 bool ContentScreen::isNotificationActive() const
 {
     return _notificationActive;
 }
 
-/**
- * @brief Manually dismiss current notification
- */
 void ContentScreen::dismissNotification()
 {
     if (_notificationActive)
@@ -938,9 +686,6 @@ void ContentScreen::dismissNotification()
     }
 }
 
-/**
- * @brief Draw notification overlay in place of footer
- */
 void ContentScreen::_drawNotification()
 {
     if (!isActive() || !_notificationActive || _notificationText == nullptr || isSmallDisplay())
@@ -970,9 +715,6 @@ void ContentScreen::_drawNotification()
     gfx.print(_notificationText);
 }
 
-/**
- * @brief Update notification state and check for expiration
- */
 void ContentScreen::_updateNotification()
 {
     if (!_notificationActive)
@@ -986,9 +728,6 @@ void ContentScreen::_updateNotification()
     }
 }
 
-/**
- * @brief Clear notification text and free memory
- */
 void ContentScreen::_clearNotification()
 {
     if (_notificationText != nullptr)
@@ -1006,10 +745,6 @@ void ContentScreen::_clearNotification()
 // Alert and Confirmation System Implementation
 // =====================================================================================
 
-/**
- * @brief Show a blocking alert dialog with magenta background
- * @param text Alert message to display (center-aligned)
- */
 void ContentScreen::alert(const char *text)
 {
     if (!isActive() || text == nullptr || isSmallDisplay())
@@ -1043,19 +778,11 @@ void ContentScreen::alert(const char *text)
     M1Shield.display();
 }
 
-/**
- * @brief Show a blocking alert dialog from Arduino String object
- * @param text String object alert message (automatically converted)
- */
 void ContentScreen::alert(String text)
 {
     alert(text.c_str());
 }
 
-/**
- * @brief Show a blocking alert dialog from FlashString (F() macro)
- * @param text FlashString alert message (automatically converted)
- */
 void ContentScreen::alertF(const __FlashStringHelper *text)
 {
     if (text == nullptr)
@@ -1076,13 +803,6 @@ void ContentScreen::alertF(const __FlashStringHelper *text)
     free(buffer);
 }
 
-/**
- * @brief Show a blocking confirmation dialog with magenta background
- * @param text Main confirmation message (center-aligned)
- * @param leftText Left button text (left-aligned)
- * @param rightText Right button text (right-aligned)
- * @return CONFIRM_LEFT if left button pressed, CONFIRM_RIGHT if right button pressed
- */
 ConfirmResult ContentScreen::confirm(const char *text, const char *leftText, const char *rightText)
 {
     if (!isActive() || text == nullptr || isSmallDisplay())
@@ -1125,26 +845,12 @@ ConfirmResult ContentScreen::confirm(const char *text, const char *leftText, con
     }
 }
 
-/**
- * @brief Show a blocking confirmation dialog with Arduino String objects
- * @param text Main confirmation message (center-aligned)
- * @param leftText Left button text (left-aligned)
- * @param rightText Right button text (right-aligned)
- * @return CONFIRM_LEFT if left button pressed, CONFIRM_RIGHT if right button pressed
- */
 ConfirmResult ContentScreen::confirm(String text, String leftText, String rightText)
 {
     // Delegate to regular confirm method using c_str()
     return confirm(text.c_str(), leftText.c_str(), rightText.c_str());
 }
 
-/**
- * @brief Show a blocking confirmation dialog with all F-strings
- * @param text FlashString main message (automatically converted)
- * @param leftText FlashString left button text (automatically converted)
- * @param rightText FlashString right button text (automatically converted)
- * @return CONFIRM_LEFT if left button pressed, CONFIRM_RIGHT if right button pressed
- */
 ConfirmResult ContentScreen::confirmF(const __FlashStringHelper *text, const __FlashStringHelper *leftText, const __FlashStringHelper *rightText)
 {
     if (text == nullptr || leftText == nullptr || rightText == nullptr)
@@ -1186,10 +892,6 @@ ConfirmResult ContentScreen::confirmF(const __FlashStringHelper *text, const __F
     return result;
 }
 
-/**
- * @brief Draw alert dialog overlay in place of footer
- * @param text Alert message to display
- */
 void ContentScreen::_drawAlert(const char *text)
 {
     if (!isActive() || text == nullptr || isSmallDisplay())
@@ -1219,12 +921,6 @@ void ContentScreen::_drawAlert(const char *text)
     gfx.print(text);
 }
 
-/**
- * @brief Draw confirm dialog overlay in place of footer
- * @param text Main message to display
- * @param leftText Left button text (left-aligned)
- * @param rightText Right button text (right-aligned)
- */
 void ContentScreen::_drawConfirm(const char *text, const char *leftText, const char *rightText)
 {
     if (!isActive() || text == nullptr || isSmallDisplay())

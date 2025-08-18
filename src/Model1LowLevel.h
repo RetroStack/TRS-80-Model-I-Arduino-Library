@@ -75,6 +75,7 @@ public:
             pinConfigWrite(RAS, INPUT);
     }
 
+    /** Configure CAS (Column Address Strobe) pin direction */
     static inline void configWriteCAS(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
@@ -83,6 +84,7 @@ public:
             pinConfigWrite(CAS, INPUT);
     }
 
+    /** Configure MUX (Address Multiplexer) pin direction */
     static inline void configWriteMUX(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
@@ -91,6 +93,7 @@ public:
             pinConfigWrite(MUX, INPUT);
     }
 
+    /** Configure RD (Read signal) pin direction */
     static inline void configWriteRD(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
@@ -99,6 +102,7 @@ public:
             pinConfigWrite(RD, INPUT);
     }
 
+    /** Configure WR (Write signal) pin direction */
     static inline void configWriteWR(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
@@ -107,6 +111,7 @@ public:
             pinConfigWrite(WR, INPUT);
     }
 
+    /** Configure IN (Input signal) pin direction */
     static inline void configWriteIN(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
@@ -115,6 +120,7 @@ public:
             pinConfigWrite(IN, INPUT);
     }
 
+    /** Configure OUT (Output signal) pin direction */
     static inline void configWriteOUT(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)

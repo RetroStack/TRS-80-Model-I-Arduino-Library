@@ -6,9 +6,6 @@
 
 #include "CompositeLogger.h"
 
-/**
- * Constructor - initializes empty composite logger
- */
 CompositeLogger::CompositeLogger() : _loggerCount(0)
 {
     // Initialize logger array to null pointers
@@ -18,9 +15,6 @@ CompositeLogger::CompositeLogger() : _loggerCount(0)
     }
 }
 
-/**
- * Add a logger to the composite logger
- */
 bool CompositeLogger::addLogger(ILogger* logger)
 {
     // Check for null pointer
@@ -48,9 +42,6 @@ bool CompositeLogger::addLogger(ILogger* logger)
     return true;
 }
 
-/**
- * Remove a specific logger from the composite logger
- */
 bool CompositeLogger::removeLogger(ILogger* logger)
 {
     // Check for null pointer
@@ -81,9 +72,6 @@ bool CompositeLogger::removeLogger(ILogger* logger)
     return false; // Logger not found
 }
 
-/**
- * Remove all registered loggers
- */
 void CompositeLogger::clearLoggers()
 {
     for (uint8_t i = 0; i < MAX_LOGGERS; i++)
@@ -93,17 +81,11 @@ void CompositeLogger::clearLoggers()
     _loggerCount = 0;
 }
 
-/**
- * Get the number of currently registered loggers
- */
 uint8_t CompositeLogger::getLoggerCount() const
 {
     return _loggerCount;
 }
 
-/**
- * Check if a specific logger is registered
- */
 bool CompositeLogger::hasLogger(ILogger* logger) const
 {
     if (logger == nullptr)
@@ -122,9 +104,6 @@ bool CompositeLogger::hasLogger(ILogger* logger) const
     return false;
 }
 
-/**
- * Logs a formatted info string to all registered loggers
- */
 void CompositeLogger::info(const char *fmt, ...)
 {
     // Create formatted string once
@@ -146,9 +125,6 @@ void CompositeLogger::info(const char *fmt, ...)
     }
 }
 
-/**
- * Logs a formatted warning string to all registered loggers
- */
 void CompositeLogger::warn(const char *fmt, ...)
 {
     // Create formatted string once
@@ -170,9 +146,6 @@ void CompositeLogger::warn(const char *fmt, ...)
     }
 }
 
-/**
- * Logs a formatted error string to all registered loggers
- */
 void CompositeLogger::err(const char *fmt, ...)
 {
     // Create formatted string once
@@ -194,9 +167,6 @@ void CompositeLogger::err(const char *fmt, ...)
     }
 }
 
-/**
- * Debug a formatted string to all registered loggers
- */
 void CompositeLogger::debug(const char *fmt, ...)
 {
     // Create formatted string once
@@ -218,9 +188,6 @@ void CompositeLogger::debug(const char *fmt, ...)
     }
 }
 
-/**
- * Write a byte to all registered loggers
- */
 size_t CompositeLogger::write(uint8_t ch)
 {
     size_t totalWritten = 0;
@@ -237,9 +204,6 @@ size_t CompositeLogger::write(uint8_t ch)
     return totalWritten;
 }
 
-/**
- * Write a buffer to all registered loggers
- */
 size_t CompositeLogger::write(const uint8_t *buffer, size_t size)
 {
     size_t totalWritten = 0;

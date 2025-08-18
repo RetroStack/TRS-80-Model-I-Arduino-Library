@@ -8,9 +8,6 @@
 #include "M1Shield.h"
 #include <Arduino.h>
 
-/**
- * @brief Internal adapter class that implements ILogger and forwards to LoggerScreen
- */
 class LoggerScreen::LoggerAdapter : public ILogger
 {
 private:
@@ -68,9 +65,6 @@ public:
     }
 };
 
-/**
- * @brief Constructor - create logger screen with optional title
- */
 LoggerScreen::LoggerScreen(const char *title) : ConsoleScreen(), _loggerAdapter(nullptr)
 {
     // Set the screen title
@@ -94,66 +88,42 @@ LoggerScreen::LoggerScreen(const char *title) : ConsoleScreen(), _loggerAdapter(
     _loggerAdapter = new LoggerAdapter(this);
 }
 
-/**
- * @brief Destructor
- */
 LoggerScreen::~LoggerScreen()
 {
     delete _loggerAdapter;
     // Base class handles cleanup
 }
 
-/**
- * @brief Get an ILogger adapter for this LoggerScreen
- */
 ILogger *LoggerScreen::asLogger()
 {
     return _loggerAdapter;
 }
 
-/**
- * @brief Enable or disable timestamp display in log messages
- */
 void LoggerScreen::setTimestampEnabled(bool enabled)
 {
     _showTimestamps = enabled;
 }
 
-/**
- * @brief Check if timestamps are enabled
- */
 bool LoggerScreen::isTimestampEnabled() const
 {
     return _showTimestamps;
 }
 
-/**
- * @brief Enable or disable color coding for different log levels
- */
 void LoggerScreen::setColorCodingEnabled(bool enabled)
 {
     _useColorCoding = enabled;
 }
 
-/**
- * @brief Check if color coding is enabled
- */
 bool LoggerScreen::isColorCodingEnabled() const
 {
     return _useColorCoding;
 }
 
-/**
- * @brief Reset the timestamp reference point to current time
- */
 void LoggerScreen::resetTimestamp()
 {
     _startTime = millis();
 }
 
-/**
- * @brief Log an informational message
- */
 void LoggerScreen::info(const char *fmt, ...)
 {
     va_list args;
@@ -162,9 +132,6 @@ void LoggerScreen::info(const char *fmt, ...)
     va_end(args);
 }
 
-/**
- * @brief Log a warning message
- */
 void LoggerScreen::warn(const char *fmt, ...)
 {
     va_list args;
@@ -173,9 +140,6 @@ void LoggerScreen::warn(const char *fmt, ...)
     va_end(args);
 }
 
-/**
- * @brief Log an error message
- */
 void LoggerScreen::err(const char *fmt, ...)
 {
     va_list args;
@@ -184,9 +148,6 @@ void LoggerScreen::err(const char *fmt, ...)
     va_end(args);
 }
 
-/**
- * @brief Log a debug message
- */
 void LoggerScreen::debug(const char *fmt, ...)
 {
     va_list args;
@@ -195,9 +156,6 @@ void LoggerScreen::debug(const char *fmt, ...)
     va_end(args);
 }
 
-/**
- * @brief Internal helper to format and display log messages
- */
 void LoggerScreen::_logMessage(const char *level, uint16_t color, const char *fmt, va_list args)
 {
     if (!isActive())
@@ -248,9 +206,6 @@ void LoggerScreen::_logMessage(const char *level, uint16_t color, const char *fm
     }
 }
 
-/**
- * @brief Get current timestamp string for logging
- */
 void LoggerScreen::_getTimestamp(char *buffer, size_t bufferSize)
 {
     unsigned long elapsed = millis() - _startTime;

@@ -19,14 +19,22 @@ private:
   uint8_t _previousState[8];
 
 public:
+  // Constructor
   Keyboard();
 
+  // Set logger for debugging output
   void setLogger(ILogger &logger);
 
+  // Check if any key is currently pressed
   bool isKeyPressed() const;
+
+  // Update keyboard state by reading current values
   void update();
 
+  // Get iterator for keyboard state changes since last update
   KeyboardChangeIterator changes();
+
+  // Get first key that was just pressed (0 if none)
   uint8_t getFirstJustPressedKey();
 };
 

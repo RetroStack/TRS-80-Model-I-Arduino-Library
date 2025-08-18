@@ -31,9 +31,6 @@
 // Define global instance
 Model1Class Model1;
 
-/**
- * Constructor for accessing the Model 1
- */
 Model1Class::Model1Class()
 {
     _logger = nullptr;
@@ -46,9 +43,6 @@ Model1Class::Model1Class()
     deactivateMemoryRefresh();
 }
 
-/**
- * Hardware initialization
- */
 void Model1Class::begin(int refreshTimer)
 {
     _addressBus.begin();
@@ -79,9 +73,6 @@ void Model1Class::begin(int refreshTimer)
     }
 }
 
-/**
- * Hardware deinitialization
- */
 void Model1Class::end()
 {
     _addressBus.end();
@@ -93,9 +84,6 @@ void Model1Class::end()
     deactivateMemoryRefresh();
 }
 
-/**
- * Sets a logger being used.
- */
 void Model1Class::setLogger(ILogger &logger)
 {
     _logger = &logger;
@@ -107,65 +95,41 @@ void Model1Class::setLogger(ILogger &logger)
 // ---------- Address Space
 // ----------------------------------------
 
-/**
- * Checks whether an address is in the ROM address space
- */
 bool Model1Class::isROMAddress(uint16_t address)
 {
     return (address <= 0x2FFF);
 }
 
-/**
- * Checks whether an address is in the unused address space
- */
 bool Model1Class::isUnusedAddress(uint16_t address)
 {
     return (address >= 0x3000 && address <= 0x37DF);
 }
 
-/**
- * Checks whether an address is in the memory-mapped IO address space
- */
 bool Model1Class::isMemoryMappedIOAddress(uint16_t address)
 {
     return (address >= 0x37E0 && address <= 0x37FF);
 }
 
-/**
- * Checks whether an address is in the keyboard address space
- */
 bool Model1Class::isKeyboardAddress(uint16_t address)
 {
     return (address >= 0x3800 && address <= 0x3BFF); // memory space is shadowed from 0x3900 to 0x3BFF (3x)
 }
 
-/**
- * Checks whether an address is in the video address space
- */
 bool Model1Class::isVideoAddress(uint16_t address)
 {
     return (address >= 0x3C00 && address <= 0x3FFF);
 }
 
-/**
- * Checks whether an address is in the system address space
- */
 bool Model1Class::isSystemAddress(uint16_t address)
 {
     return (address >= 0x4000 && address <= 0x41FF);
 }
 
-/**
- * Checks whether an address is in the lower memory address space
- */
 bool Model1Class::isLowerMemoryAddress(uint16_t address)
 {
     return (address >= 0x4200 && address <= 0x7FFF);
 }
 
-/**
- * Checks whether an address is in the higher memory address space
- */
 bool Model1Class::isHigherMemoryAddress(uint16_t address)
 {
     return (address >= 0x8000 && address <= 0xFFFF);
@@ -175,41 +139,26 @@ bool Model1Class::isHigherMemoryAddress(uint16_t address)
 // ---------- Mutability
 // ----------------------------------------
 
-/**
- * Marks bus systems and signals as mutable
- */
 void Model1Class::_setMutable()
 {
     _setMutability(true);
 }
 
-/**
- * Marks bus systems and signals as immutable
- */
 void Model1Class::_setImmutable()
 {
     _setMutability(false);
 }
 
-/**
- * Sets the mutability of the bus systems and signals
- */
 void Model1Class::_setMutability(bool value)
 {
     _mutability = value;
 }
 
-/**
- * Checks whether the system is mutable
- */
 bool Model1Class::_isMutable()
 {
     return _mutability;
 }
 
-/**
- * Runs a check whether the system is mutable.
- */
 bool Model1Class::_checkMutability()
 {
     bool mutability = _isMutable();
@@ -225,9 +174,6 @@ bool Model1Class::_checkMutability()
 // ---------- Refresh
 // ----------------------------------------
 
-/**
- * Sets up a predefined memory refresh interrupt for Timer 1
- */
 void Model1Class::_setupMemoryRefreshTimer1()
 {
     uint8_t oldSREG = SREG;
@@ -247,9 +193,6 @@ void Model1Class::_setupMemoryRefreshTimer1()
     SREG = oldSREG;
 }
 
-/**
- * Sets up a predefined memory refresh interrupt for Timer 2
- */
 void Model1Class::_setupMemoryRefreshTimer2()
 {
     uint8_t oldSREG = SREG;
@@ -269,9 +212,6 @@ void Model1Class::_setupMemoryRefreshTimer2()
     SREG = oldSREG;
 }
 
-/**
- * Activates the refresh timer
- */
 void Model1Class::activateMemoryRefresh()
 {
     _activeRefresh = true;
@@ -287,9 +227,6 @@ void Model1Class::activateMemoryRefresh()
     }
 }
 
-/**
- * Deactivates the refresh timer
- */
 void Model1Class::deactivateMemoryRefresh()
 {
     if (_timer == 1)
@@ -303,19 +240,11 @@ void Model1Class::deactivateMemoryRefresh()
     _activeRefresh = false;
 }
 
-/**
- * Executing the next update for the model 1
- */
 void Model1Class::nextUpdate()
 {
     _refreshNextMemoryRow();
 }
 
-/**
- * Refreshes the next row-address for dynamic RAM.
- *
- * NOTE: The function keeps track of the address counting. Make sure the bus is mutable before calling this.
- */
 void Model1Class::_refreshNextMemoryRow()
 {
     // This function expects mutibility as well as that the refresh is activated
@@ -341,9 +270,6 @@ void Model1Class::_refreshNextMemoryRow()
 // ---------- Memory
 // ----------------------------------------
 
-/**
- * Reads from a memory address
- */
 uint8_t Model1Class::readMemory(uint16_t address)
 {
     // Verification of access
@@ -377,9 +303,6 @@ uint8_t Model1Class::readMemory(uint16_t address)
     return data;
 }
 
-/**
- * Writes to a memory address
- */
 void Model1Class::writeMemory(uint16_t address, uint8_t data)
 {
     // Verification of access
@@ -416,9 +339,6 @@ void Model1Class::writeMemory(uint16_t address, uint8_t data)
     SREG = oldSREG;
 }
 
-/**
- * Reads a block of data from a memory address
- */
 uint8_t *Model1Class::readMemory(uint16_t address, uint16_t length)
 {
     if (length == 0)
@@ -433,17 +353,11 @@ uint8_t *Model1Class::readMemory(uint16_t address, uint16_t length)
     return buffer;
 }
 
-/**
- * Writes a block of data to a memory address
- */
 void Model1Class::writeMemory(uint16_t address, uint8_t *data, uint16_t length)
 {
     writeMemory(address, data, length, 0);
 }
 
-/**
- * Writes a block of data to a memory address by providing an offset of the original data
- */
 void Model1Class::writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint16_t offset)
 {
     for (uint16_t i = 0; i < length; i++)
@@ -452,9 +366,6 @@ void Model1Class::writeMemory(uint16_t address, uint8_t *data, uint16_t length, 
     }
 }
 
-/**
- * Copy a block of memory from a source to destination by providing the length of data to be copied
- */
 void Model1Class::copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length)
 {
     if (length == 0)
@@ -468,9 +379,6 @@ void Model1Class::copyMemory(uint16_t src_address, uint16_t dst_address, uint16_
     }
 }
 
-/**
- * Fill a specific block of memory with a byte
- */
 void Model1Class::fillMemory(uint8_t fill_data, uint16_t address, uint16_t length)
 {
     for (uint16_t i = 0; i < length; i++)
@@ -479,9 +387,6 @@ void Model1Class::fillMemory(uint8_t fill_data, uint16_t address, uint16_t lengt
     }
 }
 
-/**
- * Fill a specific block of memory with a byte-array, repeated until the end address
- */
 void Model1Class::fillMemory(uint8_t *fill_data, uint16_t length, uint16_t address, uint16_t address_length)
 {
     for (uint16_t i = 0; i < address_length; i += length)
@@ -501,9 +406,6 @@ void Model1Class::fillMemory(uint8_t *fill_data, uint16_t length, uint16_t addre
 // ---------- IO
 // ----------------------------------------
 
-/**
- * Reads from an IO address
- */
 uint8_t Model1Class::readIO(uint8_t address)
 {
     // Verification of access
@@ -534,9 +436,6 @@ uint8_t Model1Class::readIO(uint8_t address)
     return data;
 }
 
-/**
- * Writes to an IO address
- */
 void Model1Class::writeIO(uint8_t address, uint8_t data)
 {
     // Verification of access
@@ -572,11 +471,6 @@ void Model1Class::writeIO(uint8_t address, uint8_t data)
 // ---------- System Control Signals
 // ----------------------------------------
 
-/**
- * Initializes the system control signals
- *
- * These are read-only signals.
- */
 void Model1Class::_initSystemControlSignals()
 {
     Model1LowLevel::writeSYS_RES(LOW);
@@ -586,17 +480,11 @@ void Model1Class::_initSystemControlSignals()
     Model1LowLevel::configWriteINT_ACK(INPUT);
 }
 
-/**
- * Reads whether a system reset has occurred.
- */
 bool Model1Class::readSystemResetSignal()
 {
     return Model1LowLevel::readSYS_RES() == LOW ? true : false;
 }
 
-/**
- * Reads whether the CPU has acknowledged an interrupt request.
- */
 bool Model1Class::readInterruptAcknowledgeSignal()
 {
     return Model1LowLevel::readINT_ACK() == LOW ? true : false;
@@ -606,9 +494,6 @@ bool Model1Class::readInterruptAcknowledgeSignal()
 // ---------- Memory Control Signals
 // ----------------------------------------
 
-/**
- * Activates bus control signals
- */
 void Model1Class::_activateBusControlSignals()
 {
     _resetBusControlSignals();
@@ -618,9 +503,6 @@ void Model1Class::_activateBusControlSignals()
     Model1LowLevel::configWriteCAS(OUTPUT);
 }
 
-/**
- * Deactivates bus control signals
- */
 void Model1Class::_deactivateBusControlSignals()
 {
     Model1LowLevel::configWriteRAS(INPUT);
@@ -628,9 +510,6 @@ void Model1Class::_deactivateBusControlSignals()
     Model1LowLevel::configWriteCAS(INPUT);
 }
 
-/**
- * Resets the bus control signals to the default configuration
- */
 void Model1Class::_resetBusControlSignals()
 {
     Model1LowLevel::writeRAS(HIGH);
@@ -642,9 +521,6 @@ void Model1Class::_resetBusControlSignals()
 // ---------- Memory Access Signals
 // ----------------------------------------
 
-/**
- * Activates the bus access signals
- */
 void Model1Class::_activateBusAccessSignals()
 {
     _resetBusAccessSignals();
@@ -656,9 +532,6 @@ void Model1Class::_activateBusAccessSignals()
     Model1LowLevel::configWriteOUT(OUTPUT);
 }
 
-/**
- * Deactivates the bus access signals
- */
 void Model1Class::_deactivateBusAccessSignals()
 {
     Model1LowLevel::configWriteRD(INPUT);
@@ -668,9 +541,6 @@ void Model1Class::_deactivateBusAccessSignals()
     Model1LowLevel::configWriteOUT(INPUT);
 }
 
-/**
- * Resets the bus access signals to default
- */
 void Model1Class::_resetBusAccessSignals()
 {
     Model1LowLevel::writeRD(HIGH);
@@ -683,11 +553,6 @@ void Model1Class::_resetBusAccessSignals()
 // ---------- External Control Signals
 // ----------------------------------------
 
-/**
- * Initializes the external control signals
- *
- * These are write-only signals.
- */
 void Model1Class::_initExternalControlSignals()
 {
     Model1LowLevel::writeINT(HIGH);
@@ -701,19 +566,11 @@ void Model1Class::_initExternalControlSignals()
 
 // ---------- Interrupt Request Signal
 
-/**
- * Sets the interrupt request signal
- */
 void Model1Class::_setInterruptRequestSignal(bool value)
 {
     Model1LowLevel::writeINT(value ? LOW : HIGH);
 }
 
-/**
- * Triggers an interrupt within the Model 1
- *
- * NOTE: The timeout unit is in about microseconds.
- */
 bool Model1Class::triggerInterrupt(uint8_t interrupt, uint16_t timeout)
 {
     activateInterruptRequestSignal();
@@ -741,9 +598,6 @@ bool Model1Class::triggerInterrupt(uint8_t interrupt, uint16_t timeout)
     return false; // CPU did not respond within timeout
 }
 
-/**
- * Activates the interrupt request signal
- */
 void Model1Class::activateInterruptRequestSignal()
 {
     if (Model1LowLevel::readINT() == LOW)
@@ -756,9 +610,6 @@ void Model1Class::activateInterruptRequestSignal()
     _setInterruptRequestSignal(true);
 }
 
-/**
- * Deactivates the interrupt request signal
- */
 void Model1Class::deactivateInterruptRequestSignal()
 {
     if (Model1LowLevel::readINT() == HIGH)
@@ -773,25 +624,16 @@ void Model1Class::deactivateInterruptRequestSignal()
 
 // ---------- Test Signal
 
-/**
- * Sets *TEST system to define control of the Model 1
- */
 void Model1Class::_setTestSignal(bool value)
 {
     Model1LowLevel::writeTEST(value ? LOW : HIGH);
 }
 
-/**
- * Returns wether the test signal is active
- */
 bool Model1Class::hasActiveTestSignal()
 {
     return Model1LowLevel::readTEST() == LOW;
 }
 
-/**
- * Activates the *TEST signal and let's this system take over.
- */
 void Model1Class::activateTestSignal()
 {
     if (Model1LowLevel::readTEST() == LOW)
@@ -823,9 +665,6 @@ void Model1Class::activateTestSignal()
     }
 }
 
-/**
- * Deactivates the *TEST signal and hands the system back to the CPU.
- */
 void Model1Class::deactivateTestSignal()
 {
     if (Model1LowLevel::readTEST() == HIGH)
@@ -859,17 +698,11 @@ void Model1Class::deactivateTestSignal()
 
 // ---------- Wait Signal
 
-/**
- * Sets the *WAIT signal to hold CPU
- */
 void Model1Class::_setWaitSignal(bool value)
 {
     Model1LowLevel::writeWAIT(value ? LOW : HIGH);
 }
 
-/**
- * Activates the *WAIT signal to hold the CPU
- */
 void Model1Class::activateWaitSignal()
 {
     if (Model1LowLevel::readWAIT() == LOW)
@@ -882,9 +715,6 @@ void Model1Class::activateWaitSignal()
     _setWaitSignal(true);
 }
 
-/**
- * Deactivates the *WAIT signal, giving the CPU a "full-speed-ahead"
- */
 void Model1Class::deactivateWaitSignal()
 {
     if (Model1LowLevel::readWAIT() == HIGH)
@@ -899,9 +729,6 @@ void Model1Class::deactivateWaitSignal()
 
 // ---------- State
 
-/**
- * Returns the current state as string
- */
 char *Model1Class::getState()
 {
     char *addrStatus = _addressBus.getState();
@@ -943,41 +770,16 @@ char *Model1Class::getState()
     return buffer;
 }
 
-/**
- * Returns the current state as packed data
- *
- * Bit layout (64-bit):
- * Bits 63-48: Address (16 bits) - Memory address bus
- * Bits 47-40: Data (8 bits) - Data bus value
- * Bits 39-32: Memory control signals (8 bits) - RD, WR, IN, OUT, RAS, CAS, MUX, (1 spare)
- * Bits 31-24: System signals (8 bits) - SYS_RES, INT_ACK, INT, TEST, WAIT, (3 spare)
- * Bits 23-0:  Reserved for future use (24 bits)
- */
 uint64_t Model1Class::getStateData()
 {
     return Model1LowLevel::getStateData();
 }
 
-/**
- * Returns the current configuration state as packed data
- *
- * Bit layout (64-bit):
- * Bits 63-48: Address Bus Config (16 bits) - Memory address bus pin configurations
- * Bits 47-40: Data Bus Config (8 bits) - Data bus pin configurations
- * Bits 39-32: Memory control signal configs (8 bits) - RD, WR, IN, OUT, RAS, CAS, MUX, (1 spare)
- * Bits 31-24: System signal configs (8 bits) - SYS_RES, INT_ACK, INT, TEST, WAIT, (3 spare)
- * Bits 23-0:  Reserved for future use (24 bits)
- *
- * Note: Configuration values represent pin direction (INPUT=0, OUTPUT=1)
- */
 uint64_t Model1Class::getStateConfigData()
 {
     return Model1LowLevel::getStateConfigData();
 }
 
-/**
- * Logs the current state
- */
 void Model1Class::logState()
 {
     if (_logger)
@@ -990,33 +792,21 @@ void Model1Class::logState()
 
 // ---------- Version
 
-/**
- * Gets the major version number
- */
 uint8_t Model1Class::getVersionMajor()
 {
     return M1_VERSION_MAJOR;
 }
 
-/**
- * Gets the minor version number
- */
 uint8_t Model1Class::getVersionMinor()
 {
     return M1_VERSION_MINOR;
 }
 
-/**
- * Gets the revision version number
- */
 uint8_t Model1Class::getVersionRevision()
 {
     return M1_VERSION_REVISION;
 }
 
-/**
- * Returns a version string
- */
 char *Model1Class::getVersion()
 {
     const int LEN = 255;
@@ -1031,9 +821,6 @@ char *Model1Class::getVersion()
     return buffer;
 }
 
-/**
- * Prints memory contents in a human readable format
- */
 void Model1Class::printMemoryContents(uint16_t start, uint16_t length, PRINT_STYLE style, bool relative, uint16_t bytesPerLine)
 {
     if (!_logger)
@@ -1042,9 +829,6 @@ void Model1Class::printMemoryContents(uint16_t start, uint16_t length, PRINT_STY
     printMemoryContents(*_logger, start, length, style, relative, bytesPerLine);
 }
 
-/**
- * Prints the contents of a memory location in a human-readable format
- */
 void Model1Class::printMemoryContents(Print &output, uint16_t start, uint16_t length, PRINT_STYLE style, bool relative, uint16_t bytesPerLine)
 {
     if (bytesPerLine == 0 || bytesPerLine > 60)

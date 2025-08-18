@@ -58,75 +58,75 @@ private:
     void _setWaitSignal(bool value);
 
 public:
-    Model1Class();
+    Model1Class(); // Constructor
 
-    void begin(int refreshTimer = -1);
-    void end();
+    void begin(int refreshTimer = -1); // Initialize Model 1 interface
+    void end();                        // Shutdown Model 1 interface
 
-    void setLogger(ILogger &logger);
+    void setLogger(ILogger &logger); // Set logger for debugging output
 
-    void activateMemoryRefresh();
-    void deactivateMemoryRefresh();
+    void activateMemoryRefresh();   // Enable memory refresh cycles
+    void deactivateMemoryRefresh(); // Disable memory refresh cycles
 
     // ---------- Address Space
-    bool isROMAddress(uint16_t address);
-    bool isUnusedAddress(uint16_t address);
-    bool isMemoryMappedIOAddress(uint16_t address);
-    bool isKeyboardAddress(uint16_t address);
-    bool isVideoAddress(uint16_t address);
-    bool isSystemAddress(uint16_t address);
-    bool isLowerMemoryAddress(uint16_t address);
-    bool isHigherMemoryAddress(uint16_t address);
+    bool isROMAddress(uint16_t address);            // Check if address is in ROM space
+    bool isUnusedAddress(uint16_t address);         // Check if address is unused
+    bool isMemoryMappedIOAddress(uint16_t address); // Check if address is memory-mapped I/O
+    bool isKeyboardAddress(uint16_t address);       // Check if address is keyboard interface
+    bool isVideoAddress(uint16_t address);          // Check if address is video memory
+    bool isSystemAddress(uint16_t address);         // Check if address is system space
+    bool isLowerMemoryAddress(uint16_t address);    // Check if address is lower memory
+    bool isHigherMemoryAddress(uint16_t address);   // Check if address is higher memory
 
     // ---------- Update
-    void nextUpdate();
+    void nextUpdate(); // Process next update cycle
 
     // ---------- Memory
-    uint8_t readMemory(uint16_t address);
-    void writeMemory(uint16_t address, uint8_t data);
+    uint8_t readMemory(uint16_t address);             // Read byte from memory
+    void writeMemory(uint16_t address, uint8_t data); // Write byte to memory
     // Returns a newly allocated buffer; caller must delete[] the result
-    uint8_t *readMemory(uint16_t address, uint16_t length);
-    void writeMemory(uint16_t address, uint8_t *data, uint16_t length);
-    void writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint16_t offset);
-    void copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length);
-    void fillMemory(uint8_t fill_data, uint16_t address, uint16_t length);
-    void fillMemory(uint8_t *fill_data, uint16_t length, uint16_t start_address, uint16_t end_address);
+    uint8_t *readMemory(uint16_t address, uint16_t length);                                             // Read memory block
+    void writeMemory(uint16_t address, uint8_t *data, uint16_t length);                                 // Write memory block
+    void writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint16_t offset);                // Write memory block with offset
+    void copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length);                       // Copy memory between addresses
+    void fillMemory(uint8_t fill_data, uint16_t address, uint16_t length);                              // Fill memory with byte value
+    void fillMemory(uint8_t *fill_data, uint16_t length, uint16_t start_address, uint16_t end_address); // Fill memory with pattern
 
     // ---------- IO
-    uint8_t readIO(uint8_t address);
-    void writeIO(uint8_t address, uint8_t data);
+    uint8_t readIO(uint8_t address);             // Read from I/O port
+    void writeIO(uint8_t address, uint8_t data); // Write to I/O port
 
     // ---------- System Control Signals
-    bool readSystemResetSignal();
-    bool readInterruptAcknowledgeSignal();
+    bool readSystemResetSignal();          // Read system reset signal state
+    bool readInterruptAcknowledgeSignal(); // Read interrupt acknowledge signal state
 
     // ---------- Interrupt Request Signal
-    bool triggerInterrupt(uint8_t interrupt, uint16_t timeout = 1000);
-    void activateInterruptRequestSignal();
-    void deactivateInterruptRequestSignal();
+    bool triggerInterrupt(uint8_t interrupt, uint16_t timeout = 1000); // Trigger interrupt with timeout
+    void activateInterruptRequestSignal();                             // Activate interrupt request signal
+    void deactivateInterruptRequestSignal();                           // Deactivate interrupt request signal
 
     // ---------- Test Signal
-    bool hasActiveTestSignal();
-    void activateTestSignal();
-    void deactivateTestSignal();
+    bool hasActiveTestSignal();  // Check if test signal is active
+    void activateTestSignal();   // Activate test signal
+    void deactivateTestSignal(); // Deactivate test signal
 
     // ---------- Wait Signal
-    void activateWaitSignal();
-    void deactivateWaitSignal();
+    void activateWaitSignal();   // Activate wait signal
+    void deactivateWaitSignal(); // Deactivate wait signal
 
     // ---------- State
-    char *getState();
-    uint64_t getStateData();
-    uint64_t getStateConfigData();
-    void logState();
+    char *getState();              // Get current state as string
+    uint64_t getStateData();       // Get state data as 64-bit value
+    uint64_t getStateConfigData(); // Get configuration state data
+    void logState();               // Log current state to logger
 
-    uint8_t getVersionMajor();
-    uint8_t getVersionMinor();
-    uint8_t getVersionRevision();
-    char *getVersion();
+    uint8_t getVersionMajor();    // Get major version number
+    uint8_t getVersionMinor();    // Get minor version number
+    uint8_t getVersionRevision(); // Get revision number
+    char *getVersion();           // Get full version string
 
-    void printMemoryContents(uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32);
-    void printMemoryContents(Print &output, uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32);
+    void printMemoryContents(uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32);                // Print memory contents to serial
+    void printMemoryContents(Print &output, uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32); // Print memory contents to output
 };
 
 extern Model1Class Model1;

@@ -1,5 +1,5 @@
 /*
- * M1Shield.h - Hardware abstraction layer for TRS-80 Model I Arduino Shield
+ * M1Shield.h - Hardware abstraction layer for TRS-80 Model    unsigne    bool begin();                                       // Initialize shield hardware and displaynceButton(uint8_t pin, unsigned long &pressedState); // Internal debouncing helper for button state detectionino Shield
  * Authors: Marcel Erz (RetroStack)
  * Released under the MIT License.
  */
@@ -12,12 +12,7 @@
 #include "Screen.h"
 #include "DisplayProvider.h"
 
-/**
- * @brief RGB LED color enumeration for status indication
- *
- * Predefined color combinations for the onboard RGB status LED.
- * Colors are used to indicate system states, errors, and user feedback.
- */
+// RGB LED color enumeration for status indication
 enum LEDColor
 {
     COLOR_OFF,     // LED turned off
@@ -30,12 +25,7 @@ enum LEDColor
     COLOR_WHITE,   // White color - maximum brightness
 };
 
-/**
- * @brief Analog joystick direction enumeration
- *
- * Possible directional states read from the analog joystick.
- * Diagonal directions are supported through combination detection.
- */
+// Analog joystick direction enumeration
 enum JoystickDirection
 {
     CENTER,    // Joystick at rest position (center)
@@ -49,70 +39,7 @@ enum JoystickDirection
     DOWN_RIGHT // Joystick moved diagonally down-right
 };
 
-/**
- * @brief Hardware abstraction layer for the TRS-80 Model I Arduino Shield
- *
- * M1ShieldClass provides a unified interface to all hardware components on the
- * TRS-80 Model I shield, including input devices, display, and status indicators.
- * It manages the complete hardware lifecycle and provides a clean API for
- * screen-based applications.
- *
- * ## Hardware Components
- *
- * - **TFT Display**: Configurable support for ST7789, ST7735, ILI9341, ILI9488, HX8357, ILI9325, ST7796
- * - **Input Controls**: 5 digital buttons + analog joystick with center press
- * - **RGB Status LED**: Full-color status indication
- * - **Screen Management**: Automatic screen lifecycle and navigation
- *
- * ## Display Support
- *
- * The shield supports multiple TFT display types through compile-time configuration:
- * ```cpp
- * #define USE_ST7789   // For ST7789 displays (default)
- * #define USE_ST7789_240x240   // For ST7789 displays (240x240 resolution)
- * #define USE_ST7735   // For ST7735 displays
- * #define USE_ILI9341  // For ILI9341 displays
- * #define USE_HX8357  // For HX8357 displays
- * #define USE_ILI9325  // For ILI9325 displays
- * #define USE_ST7796  // For ST7796 displays
- * ```
- *
- * ## Input System
- *
- * - **Digital Buttons**: Menu, Left, Right, Up, Down
- * - **Analog Joystick**: 8-directional movement + center press
- * - **Debouncing**: Built-in 50ms debouncing for all inputs
- * - **Multi-input**: Simultaneous input detection using bit flags
- *
- * ## Screen Management
- *
- * The M1Shield manages screen lifecycle automatically:
- * 1. Current screen receives input via `actionTaken()`
- * 2. Screen returns new screen pointer for navigation
- * 3. M1Shield handles screen transitions (close old, open new)
- * 4. Only one screen active at a time for memory efficiency
- *
- * ## Error Handling
- *
- * - Invalid screen pointers are handled gracefully
- * - Display operations include error recovery
- *
- * @example Basic Usage
- * ```cpp
- * void setup() {
- *     M1Shield.begin();
- *     M1Shield.setScreen(new MyScreen());
- *     M1Shield.setLED(COLOR_GREEN);  // Ready indicator
- * }
- *
- * void loop() {
- *     M1Shield.loop();  // Handle input and screen updates
- * }
- * ```
- *
- * @see Screen For screen implementation details
- * @see LEDColor For status indication options
- */
+// Hardware abstraction layer for the TRS-80 Model I Arduino Shield
 class M1ShieldClass
 {
 private:
@@ -133,375 +60,99 @@ private:
 
     bool _activeJoystick; // True if joystick is currently active
 
-    /**
-     * @brief Internal debouncing helper for button state detection
-     * @param pin GPIO pin number to read
-     * @param pressedState Reference to timestamp for this button
-     * @return Latest timestamp (0 = released, any other is pressed)
-     */
+    // Internal debouncing helper for button state detection
     unsigned long _getDebouncedState(int pin, unsigned long pressedState) const;
 
-    /**
-     * @brief Set shield to active state (internal)
-     */
-    void _active() const;
-
-    /**
-     * @brief Set shield to inactive state (internal)
-     */
-    void _inactive() const;
+    void _active() const;   // Set shield to active state (internal)
+    void _inactive() const; // Set shield to inactive state (internal)
 
 public:
-    /**
-     * @brief Default constructor initializes shield in uninitialized state
-     */
-    M1ShieldClass();
+    M1ShieldClass(); // Default constructor initializes shield in uninitialized state
 
-    /**
-     * @brief Destructor performs cleanup of display and screen resources
-     */
-    ~M1ShieldClass();
+    ~M1ShieldClass(); // Destructor performs cleanup of display and screen resources
 
-    /**
-     * @brief Initialize shield hardware and display
-     *
-     * Performs complete hardware initialization including:
-     * - TFT display setup and configuration
-     * - GPIO pin configuration for buttons and LED
-     * - Screen dimension detection
-     * - Hardware validation
-     *
-     * @note Must be called before any other shield operations
-     * @note Safe to call multiple times - subsequent calls return cached result
-     */
-    bool begin(DisplayProvider &provider);
+    bool begin();                          // Initialize shield hardware and display
+    bool begin(DisplayProvider &provider); // Initialize shield with custom display provider
 
-    /**
-     * @brief Activate joystick input
-     *
-     * Enables joystick input handling for the shield.
-     */
-    void activateJoystick();
+    void activateJoystick(); // Activate joystick input
 
-    /**
-     * @brief Deactivate joystick input
-     *
-     * Disables joystick input handling for the shield.
-     */
-    void deactivateJoystick();
+    void deactivateJoystick(); // Deactivate joystick input
 
-    /**
-     * @brief Check if display hardware was successfully initialized
-     * @return true if display is ready for use
-     */
-    bool isDisplayInitialized() const;
+    bool isDisplayInitialized() const; // Check if display hardware was successfully initialized
 
-    /**
-     * @brief Get reference to underlying graphics context
-     *
-     * Provides direct access to Adafruit_GFX for advanced drawing operations.
-     * Use this for custom graphics that bypass the screen system.
-     *
-     * @return Reference to Adafruit_GFX instance
-     * @note Direct graphics operations may interfere with active screens
-     */
-    Adafruit_GFX &getGFX();
+    Adafruit_GFX &getGFX(); // Get reference to underlying graphics context
 
-    /**
-     * @brief Get display width in pixels
-     * @return Display width, or 0 if not initialized
-     */
-    uint16_t getScreenWidth() const;
+    uint16_t getScreenWidth() const; // Get display width in pixels
 
-    /**
-     * @brief Get display height in pixels
-     * @return Display height, or 0 if not initialized
-     */
-    uint16_t getScreenHeight() const;
+    uint16_t getScreenHeight() const; // Get display height in pixels
 
-    /**
-     * @brief Get reference to the display provider
-     *
-     * Provides access to the DisplayProvider instance managing the display hardware.
-     * Use this to access display-specific features or configuration.
-     *
-     * @return Reference to DisplayProvider instance
-     */
-    DisplayProvider &getDisplayProvider() const;
+    DisplayProvider &getDisplayProvider() const; // Get reference to the display provider
 
-    /**
-     * @brief Update the display
-     *
-     * Calls the display provider's display() method to refresh the screen.
-     * For OLED displays, this pushes the framebuffer to the screen.
-     * For TFT displays, this typically returns true immediately since they update in real-time.
-     *
-     * @return true if display update was successful, false otherwise
-     */
-    bool display();
+    bool display(); // Update the display
 
-    /**
-     * @brief Convert a color value for the current display type
-     *
-     * Converts a 16-bit RGB565 color value to the appropriate format for the current display.
-     * For TFT displays, this returns the color unchanged.
-     * For OLED displays, this converts to monochrome (black/white).
-     *
-     * @param color 16-bit RGB565 color value to convert
-     * @return Converted color value appropriate for the current display
-     */
-    uint16_t convertColor(uint16_t color);
+    uint16_t convertColor(uint16_t color); // Convert a color value for the current display type
 
-    /**
-     * @brief Set the active screen and perform transition
-     *
-     * Changes the currently active screen, handling proper lifecycle:
-     * 1. Close current screen if one exists
-     * 2. Set new screen as active
-     * 3. Open new screen for display
-     *
-     * @param screen Pointer to new screen to activate, or nullptr to clear
-     * @return true if screen transition successful
-     *
-     * @note Previous screen is closed but not deleted - caller retains ownership
-     * @note New screen must remain valid while active
-     */
-    bool setScreen(Screen *screen);
+    bool setScreen(Screen *screen); // Set the active screen and perform transition
 
-    /**
-     * @brief Set RGB LED color using individual channel control
-     * @param r Red channel intensity (0-255)
-     * @param g Green channel intensity (0-255)
-     * @param b Blue channel intensity (0-255)
-     */
-    void setLEDColor(uint8_t r, uint8_t g, uint8_t b) const;
+    void setLEDColor(uint8_t r, uint8_t g, uint8_t b) const; // Set RGB LED color using individual channel control
 
-    /**
-     * @brief Set RGB LED color using predefined color enumeration
-     * @param color Predefined color from LEDColor enumeration
-     * @see LEDColor For available color options
-     */
-    void setLEDColor(LEDColor color, uint8_t intensity = 255) const;
+    void setLEDColor(LEDColor color, uint8_t intensity = 255) const; // Set RGB LED color using predefined color enumeration
 
     // Button state detection methods
 
-    /**
-     * @brief Check current menu button state (non-consuming)
-     * @return true if menu button is currently pressed
-     */
-    bool isMenuPressed() const;
+    bool isMenuPressed() const; // Check current menu button state (non-consuming)
+    bool wasMenuPressed();      // Check and consume menu button press event
 
-    /**
-     * @brief Check and consume menu button press event
-     * @return true if button was pressed since last call (one-shot)
-     */
-    bool wasMenuPressed();
+    bool isLeftPressed() const; // Check current left button state (non-consuming)
+    bool wasLeftPressed();      // Check and consume left button press event
 
-    /**
-     * @brief Check current left button state (non-consuming)
-     * @return true if left button is currently pressed
-     */
-    bool isLeftPressed() const;
+    bool isRightPressed() const; // Check current right button state (non-consuming)
+    bool wasRightPressed();      // Check and consume right button press event
 
-    /**
-     * @brief Check and consume left button press event
-     * @return true if button was pressed since last call (one-shot)
-     */
-    bool wasLeftPressed();
+    bool isUpPressed() const; // Check current up button state (non-consuming)
+    bool wasUpPressed();      // Check and consume up button press event
 
-    /**
-     * @brief Check current right button state (non-consuming)
-     * @return true if right button is currently pressed
-     */
-    bool isRightPressed() const;
+    bool isDownPressed() const; // Check current down button state (non-consuming)
+    bool wasDownPressed();      // Check and consume down button press event
 
-    /**
-     * @brief Check and consume right button press event
-     * @return true if button was pressed since last call (one-shot)
-     */
-    bool wasRightPressed();
+    bool isJoystickPressed() const; // Check current joystick button state (non-consuming)
+    bool wasJoystickPressed();      // Check and consume joystick button press event
 
-    /**
-     * @brief Check current up button state (non-consuming)
-     * @return true if up button is currently pressed
-     */
-    bool isUpPressed() const;
+    JoystickDirection getJoystickDirection() const; // Get current joystick directional state
 
-    /**
-     * @brief Check and consume up button press event
-     * @return true if button was pressed since last call (one-shot)
-     */
-    bool wasUpPressed();
+    bool isJoystickCentered() const; // Check if joystick is in center (rest) position
 
-    /**
-     * @brief Check current down button state (non-consuming)
-     * @return true if down button is currently pressed
-     */
-    bool isDownPressed() const;
+    uint8_t getJoystickX() const; // Get raw joystick X-axis position
 
-    /**
-     * @brief Check and consume down button press event
-     * @return true if button was pressed since last call (one-shot)
-     */
-    bool wasDownPressed();
-
-    /**
-     * @brief Check current joystick button state (non-consuming)
-     * @return true if joystick center button is currently pressed
-     */
-    bool isJoystickPressed() const;
-
-    /**
-     * @brief Check and consume joystick button press event
-     * @return true if button was pressed since last call (one-shot)
-     */
-    bool wasJoystickPressed();
-
-    /**
-     * @brief Get current joystick directional state
-     *
-     * Reads analog joystick position and returns the primary direction.
-     * Supports 8-directional movement including diagonal directions.
-     *
-     * @return JoystickDirection Current direction or CENTER if at rest
-     * @see JoystickDirection For possible return values
-     */
-    JoystickDirection getJoystickDirection() const;
-
-    /**
-     * @brief Check if joystick is in center (rest) position
-     * @return true if joystick is centered within deadzone
-     */
-    bool isJoystickCentered() const;
-
-    /**
-     * @brief Get raw joystick X-axis position
-     * @return X-axis analog value (0-255, 128 = center)
-     */
-    uint8_t getJoystickX() const;
-
-    /**
-     * @brief Get raw joystick Y-axis position
-     * @return Y-axis analog value (0-255, 128 = center)
-     */
-    uint8_t getJoystickY() const;
+    uint8_t getJoystickY() const; // Get raw joystick Y-axis position
 
     // ========== Cassette Interface Methods ==========
     // WARNING: Incorrect usage can damage your Arduino!
     // CR1 and CR2 may be connected together on some systems.
 
-    /**
-     * @brief Configure CR1 pin as input or output
-     *
-     * @param isOutput true to set as output, false for input
-     * @warning If CR1 and CR2 are connected, setting one as output and one as input
-     *          can cause short circuits and permanent damage to your Arduino!
-     */
-    void setCR1Mode(bool isOutput) const;
+    void setCR1Mode(bool isOutput) const; // Configure CR1 pin as input or output
 
-    /**
-     * @brief Configure CR2 pin as input or output
-     *
-     * @param isOutput true to set as output, false for input
-     * @warning If CR1 and CR2 are connected, setting one as output and one as input
-     *          can cause short circuits and permanent damage to your Arduino!
-     */
-    void setCR2Mode(bool isOutput) const;
+    void setCR2Mode(bool isOutput) const; // Configure CR2 pin as input or output
 
-    /**
-     * @brief Write digital value to CR1 pin (when configured as output)
-     *
-     * @param value true for HIGH, false for LOW
-     * @warning Only call when CR1 is configured as output via setCR1Mode(true)
-     */
-    void writeCR1(bool value) const;
+    void writeCR1(bool value) const; // Write digital value to CR1 pin (when configured as output)
 
-    /**
-     * @brief Write digital value to CR2 pin (when configured as output)
-     *
-     * @param value true for HIGH, false for LOW
-     * @warning Only call when CR2 is configured as output via setCR2Mode(true)
-     */
-    void writeCR2(bool value) const;
+    void writeCR2(bool value) const; // Write digital value to CR2 pin (when configured as output)
 
-    /**
-     * @brief Read digital value from CR1 pin (when configured as input)
-     *
-     * @return true if HIGH, false if LOW
-     * @warning Only call when CR1 is configured as input via setCR1Mode(false)
-     */
-    bool readCR1() const;
+    bool readCR1() const; // Read digital value from CR1 pin (when configured as input)
 
-    /**
-     * @brief Read digital value from CR2 pin (when configured as input)
-     *
-     * @return true if HIGH, false if LOW
-     * @warning Only call when CR2 is configured as input via setCR2Mode(false)
-     */
-    bool readCR2() const;
+    bool readCR2() const; // Read digital value from CR2 pin (when configured as input)
 
-    /**
-     * @brief Write analog value to Model 1 cassette input (A14)
-     *
-     * @param value Analog output value (0-255)
-     * @note This pin sends data TO the Model 1 (Model 1's cassette input)
-     * @note From Arduino perspective: output pin, From Model 1 perspective: input pin
-     */
-    void writeCassetteIn(uint8_t value) const;
+    void writeCassetteIn(uint8_t value) const; // Write analog value to Model 1 cassette input (A14)
 
-    /**
-     * @brief Read analog value from Model 1 cassette output (A15)
-     *
-     * @return Analog input value (0-1023)
-     * @note This pin receives data FROM the Model 1 (Model 1's cassette output)
-     * @note From Arduino perspective: input pin, From Model 1 perspective: output pin
-     */
-    uint16_t readCassetteOut() const;
+    uint16_t readCassetteOut() const; // Read analog value from Model 1 cassette output (A15)
 
-    /**
-     * @brief Main update loop for shield operations
-     *
-     * Handles all shield operations including:
-     * - Input polling and debouncing
-     * - Screen update calls
-     * - Input event processing and screen navigation
-     * - Hardware state management
-     *
-     * @note Must be called regularly from main Arduino loop()
-     * @note Automatically manages screen lifecycle and transitions
-     */
-    void loop();
+    void loop(); // Main update loop for shield operations
 
-    /**
-     * @brief Disable copy constructor - shield manages hardware resources
-     *
-     * Hardware resources cannot be safely shared between instances.
-     */
-    M1ShieldClass(const M1ShieldClass &) = delete;
-
-    /**
-     * @brief Disable copy assignment - shield manages hardware resources
-     *
-     * Hardware resources cannot be safely shared between instances.
-     */
-    M1ShieldClass &operator=(const M1ShieldClass &) = delete;
+private:
+    M1ShieldClass(const M1ShieldClass &) = delete;            // Disable copy constructor - shield manages hardware resources
+    M1ShieldClass &operator=(const M1ShieldClass &) = delete; // Disable copy assignment - shield manages hardware resources
 };
 
-/**
- * @brief Global M1Shield instance for hardware access
- *
- * Singleton instance providing system-wide access to shield hardware.
- * Use this instance for all shield operations rather than creating
- * additional instances.
- *
- * @example
- * ```cpp
- * void setup() {
- *     M1Shield.begin();
- *     M1Shield.setScreen(&myScreen);
- * }
- * ```
- */
-extern M1ShieldClass M1Shield;
+extern M1ShieldClass M1Shield; // Global M1Shield instance for hardware access
 
 #endif /* M1SHIELD_H */

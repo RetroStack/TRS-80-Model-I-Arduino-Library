@@ -13,23 +13,43 @@
 class KeyboardChangeIterator
 {
 public:
+    // Constructor with previous and current keyboard states
     KeyboardChangeIterator(const uint8_t *previous, const uint8_t *current);
 
+    // Check if there are more changes to iterate
     bool hasNext() const;
+
+    // Advance to next change
     void next();
 
+    // Get linear key index (0-63)
     uint8_t keyIndex() const;
+
+    // Get keyboard row (0-7)
     uint8_t row() const;
+
+    // Get keyboard column (0-7)
     uint8_t column() const;
 
+    // Check if key was pressed in previous state
     bool wasPressed() const;
+
+    // Check if key is pressed in current state
     bool isPressed() const;
 
+    // Check if key was just pressed (transition from released to pressed)
     bool wasJustPressed() const;
+
+    // Check if key was just released (transition from pressed to released)
     bool wasReleased() const;
 
+    // Get TRS-80 key value/scan code
     uint8_t keyValue() const;
+
+    // Get human-readable key name
     String keyName() const;
+
+    // Check if shift key is currently pressed
     bool isShiftPressed() const;
 
 private:

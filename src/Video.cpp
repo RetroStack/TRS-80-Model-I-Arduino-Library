@@ -13,9 +13,6 @@ const uint16_t VIDEO_MEM_START = 0x3C00;
 
 const uint8_t SPACE_CHARACTER = 0x20;
 
-/**
- * Initializes the TRS-80 Model 1 Video Subsystem
- */
 Video::Video()
 {
   _logger = nullptr;
@@ -32,17 +29,11 @@ Video::Video()
   _viewPort.height = VIDEO_ROWS;
 }
 
-/**
- * Sets a logger being used.
- */
 void Video::setLogger(ILogger &logger)
 {
   _logger = &logger;
 }
 
-/**
- * Sets the view port
- */
 void Video::setViewPort(ViewPort viewPort)
 {
   // Validate and auto-correct viewport
@@ -74,48 +65,27 @@ void Video::setViewPort(ViewPort viewPort)
   _viewPort = viewPort;
 }
 
-/**
- * Calculates the physical address of the row
- *
- * NOTE: No overflow is checked.
- */
 uint16_t Video::getRowAddress(uint8_t y)
 {
   return VIDEO_MEM_START + ((_viewPort.y + y) * VIDEO_COLS);
 }
 
-/**
- * Calculates the physical address of the column
- *
- * NOTE: No overflow is checked.
- */
 uint16_t Video::getColumnAddress(uint16_t rowAddress, uint8_t x)
 {
   return rowAddress + _viewPort.x + x;
 }
 
-/**
- * Calculates the physical address for x and y coordinate
- *
- * NOTE: No overflow is checked.
- */
 uint16_t Video::getAddress(uint8_t x, uint8_t y)
 {
   uint16_t rowAddress = getRowAddress(y);
   return getColumnAddress(rowAddress, x);
 }
 
-/**
- * Gets the current x coordinate within the viewport
- */
 uint8_t Video::getX()
 {
   return _cursorPositionX;
 }
 
-/**
- * Sets the cursor to a specified x coordinate
- */
 void Video::setX(uint8_t x)
 {
   if (x > _viewPort.width)
@@ -128,17 +98,11 @@ void Video::setX(uint8_t x)
   }
 }
 
-/**
- * Gets the current y coordinate within the viewport
- */
 uint8_t Video::getY()
 {
   return _cursorPositionY;
 }
 
-/**
- * Sets the cursor to a specified y coordinate
- */
 void Video::setY(uint8_t y)
 {
   if (y > _viewPort.height)
@@ -151,117 +115,75 @@ void Video::setY(uint8_t y)
   }
 }
 
-/**
- * Sets the cursor to a specified x & y coordinate
- */
 void Video::setXY(uint8_t x, uint8_t y)
 {
   setX(x);
   setY(y);
 }
 
-/**
- * Gets the absolute horizontal start position of viewport
- */
 uint8_t Video::getStartX()
 {
   return _viewPort.x;
 }
 
-/**
- * Gets the absolute horizontal end position of viewport
- */
 uint8_t Video::getEndX()
 {
   return _viewPort.x + _viewPort.width;
 }
 
-/**
- * Gets the absolute vertical start position of viewport
- */
 uint8_t Video::getStartY()
 {
   return _viewPort.y;
 }
 
-/**
- * Gets the absolute vertical end position of viewport
- */
 uint8_t Video::getEndY()
 {
   return _viewPort.y + _viewPort.height;
 }
 
-/**
- * Gets the width of the viewport
- */
 uint8_t Video::getWidth()
 {
   return _viewPort.width;
 }
 
-/**
- * Gets the height of the viewport
- */
 uint8_t Video::getHeight()
 {
   return _viewPort.height;
 }
 
-/**
- * Gets the total size of the viewport
- */
 uint16_t Video::getSize()
 {
   return _viewPort.width * _viewPort.height;
 }
 
-/**
- * Gets the absolute X coordinate when given the viewport x coordinate
- */
 uint8_t Video::getAbsoluteX(uint8_t x)
 {
   int xCoord = _viewPort.x + x;
   return xCoord > VIDEO_COLS ? VIDEO_COLS : xCoord;
 }
 
-/**
- * Gets the absolute Y coordinate when given the viewport y coordinate
- */
 uint8_t Video::getAbsoluteY(uint8_t y)
 {
   int yCoord = _viewPort.y + y;
   return yCoord > VIDEO_ROWS ? VIDEO_ROWS : yCoord;
 }
 
-/**
- * Clears the screen, filling it with space characters
- */
 void Video::cls()
 {
   cls(SPACE_CHARACTER);
 }
 
-/**
- * Clears the screen, filling it with a specific character
- */
 void Video::cls(char character)
 {
   cls(&character, 1);
 }
 
-/**
- * Clears the screen, filling it with a specific string
- */
 void Video::cls(char *characters)
 {
   uint16_t length = strlen(characters);
   cls(characters, length);
 }
 
-/**
- * Clears the screen, filling it with a specific string
- */
 void Video::cls(char *characters, uint16_t length)
 {
   int i = 0;
@@ -278,17 +200,11 @@ void Video::cls(char *characters, uint16_t length)
   _cursorPositionY = 0;
 }
 
-/**
- * Scrolls the screen by 1 row, including the cursor
- */
 void Video::scroll()
 {
   scroll(1);
 }
 
-/**
- * Scrolls the screen by x rows, including the cursor
- */
 void Video::scroll(uint8_t rows)
 {
   if (rows == 0)
@@ -329,9 +245,6 @@ void Video::scroll(uint8_t rows)
   }
 }
 
-/**
- * Reads a string from the video memory at a specific location and length
- */
 char *Video::read(uint8_t x, uint8_t y, uint16_t length, bool raw)
 {
   uint8_t *buffer = new uint8_t[length + 1];
@@ -372,18 +285,12 @@ char *Video::read(uint8_t x, uint8_t y, uint16_t length, bool raw)
   return (char *)buffer;
 }
 
-/**
- * Write a byte to the viewport and count.
- */
 size_t Video::write(uint8_t ch)
 {
   _print((char)ch, false);
   return 1;
 }
 
-/**
- * Write a list of bytes to the viewport and returns the number of bytes written.
- */
 size_t Video::write(const uint8_t *buffer, size_t size)
 {
   size_t result = 0;
@@ -394,17 +301,11 @@ size_t Video::write(const uint8_t *buffer, size_t size)
   return result;
 }
 
-/**
- * Prints one character to the current cursor position
- */
 void Video::print(const char character, bool raw)
 {
   _print(character, raw);
 }
 
-/**
- * Prints one character to the current cursor position
- */
 void Video::_print(const char character, bool raw)
 {
   if (character == '\0')
@@ -465,9 +366,6 @@ void Video::_print(const char character, bool raw)
   }
 }
 
-/**
- * Prints a string to the given x and y coordinate within the viewport
- */
 void Video::print(uint8_t x, uint8_t y, const char *str)
 {
   uint16_t length = strlen(str);
@@ -475,34 +373,22 @@ void Video::print(uint8_t x, uint8_t y, const char *str)
   write((const uint8_t *)str, length);
 }
 
-/**
- * Prints a string to the given x and y coordinate within the viewport
- */
 void Video::print(uint8_t x, uint8_t y, const char *str, uint16_t length)
 {
   setXY(x, y);
   write((const uint8_t *)str, length);
 }
 
-/**
- * Sets whether the video should automatically scroll when the cursor reaches the end of the viewport
- */
 void Video::setAutoScroll(bool autoScroll)
 {
   _autoScroll = autoScroll;
 }
 
-/**
- * Sets whether the video has a lower-case mod or not
- */
 void Video::setLowerCaseMod(bool hasLowerCaseMod)
 {
   _hasLowerCaseMod = hasLowerCaseMod;
 }
 
-/**
- * Converts a string coming from the Model 1 to the local ASCII format
- */
 char Video::convertModel1CharacterToLocal(char character)
 {
   character &= 0x7F; // Clear the high bit - No graphics support
@@ -515,9 +401,6 @@ char Video::convertModel1CharacterToLocal(char character)
   return character;
 }
 
-/**
- * Converts an ASCII string to the Model 1 format
- */
 char Video::convertLocalCharacterToModel1(char character)
 {
   character &= 0x7F; // Clear the high bit - No graphics support
