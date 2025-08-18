@@ -13,7 +13,7 @@
 class Display_ST7789_320x240 : public DisplayProvider
 {
 private:
-    Adafruit_ST7789 *_display;
+    Adafruit_ST7789 *_display; // Pointer to the ST7789 display instance
 
 public:
     // Constructor

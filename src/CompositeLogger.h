@@ -32,18 +32,18 @@ public:
     bool hasLogger(ILogger *logger) const; // Check if a specific logger is registered
 
     // ILogger interface implementation
-    void info(const char *fmt, ...) override;
-    void warn(const char *fmt, ...) override;
-    void err(const char *fmt, ...) override;
-    void debug(const char *fmt, ...) override;
+    void info(const char *fmt, ...) override;  // Log informational message to all registered loggers
+    void warn(const char *fmt, ...) override;  // Log warning message to all registered loggers
+    void err(const char *fmt, ...) override;   // Log error message to all registered loggers
+    void debug(const char *fmt, ...) override; // Log debug message to all registered loggers
 
     using ILogger::debug;
     using ILogger::err;
     using ILogger::info;
     using ILogger::warn;
 
-    size_t write(uint8_t ch) override;
-    size_t write(const uint8_t *buffer, size_t size) override;
+    size_t write(uint8_t ch) override;                         // Write single character to all registered loggers
+    size_t write(const uint8_t *buffer, size_t size) override; // Write buffer to all registered loggers
 
     using Print::print;
     using Print::println;

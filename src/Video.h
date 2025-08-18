@@ -26,15 +26,15 @@ struct ViewPort
 class Video : public Print
 {
 private:
-  ILogger *_logger;
-  ViewPort _viewPort;
+  ILogger *_logger;   // Logger instance for debugging output
+  ViewPort _viewPort; // Viewport boundaries for video operations
 
-  uint8_t _cursorPositionX;
-  uint8_t _cursorPositionY;
-  bool _autoScroll;
-  bool _hasLowerCaseMod;
+  uint8_t _cursorPositionX; // Current cursor X position (0-63)
+  uint8_t _cursorPositionY; // Current cursor Y position (0-15)
+  bool _autoScroll;         // Enable automatic scrolling when cursor reaches bottom
+  bool _hasLowerCaseMod;    // True if lowercase modification is available
 
-  void _print(const char character, bool raw);
+  void _print(const char character, bool raw); // Internal character printing with raw mode option
 
 public:
   // Constructor

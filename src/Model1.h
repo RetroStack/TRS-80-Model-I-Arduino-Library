@@ -12,50 +12,51 @@
 #include "AddressBus.h"
 #include "DataBus.h"
 
+// Print style enumeration for memory output formatting
 enum PRINT_STYLE
 {
-    ASCII,
-    HEXADECIMAL,
-    BOTH
+    ASCII,       // Display as ASCII characters only
+    HEXADECIMAL, // Display as hexadecimal values only
+    BOTH         // Display both ASCII and hexadecimal formats
 };
 
 class Model1Class
 {
 private:
-    ILogger *_logger;
-    AddressBus _addressBus;
-    DataBus _dataBus;
+    ILogger *_logger;       // Logger instance for debugging output
+    AddressBus _addressBus; // Address bus controller
+    DataBus _dataBus;       // Data bus controller
 
-    volatile bool _mutability;
-    uint8_t _nextMemoryRefreshRow;
-    volatile bool _activeRefresh;
-    int _timer;
+    volatile bool _mutability;     // Flag indicating if bus modification is allowed
+    uint8_t _nextMemoryRefreshRow; // Next memory row to refresh
+    volatile bool _activeRefresh;  // Flag indicating if memory refresh is active
+    int _timer;                    // Timer selection for memory refresh
 
-    void _setMutable();
-    void _setImmutable();
-    void _setMutability(bool value);
-    bool _isMutable();
-    bool _checkMutability();
+    void _setMutable();              // Enable bus modification
+    void _setImmutable();            // Disable bus modification
+    void _setMutability(bool value); // Set bus modification state
+    bool _isMutable();               // Check if bus modification is enabled
+    bool _checkMutability();         // Validate bus modification state
 
-    void _refreshNextMemoryRow();
+    void _refreshNextMemoryRow(); // Refresh next memory row in sequence
 
-    void _initSystemControlSignals();
-    void _initExternalControlSignals();
+    void _initSystemControlSignals();   // Initialize system control signal pins
+    void _initExternalControlSignals(); // Initialize external control signal pins
 
-    void _setupMemoryRefreshTimer1();
-    void _setupMemoryRefreshTimer2();
+    void _setupMemoryRefreshTimer1(); // Configure timer 1 for memory refresh
+    void _setupMemoryRefreshTimer2(); // Configure timer 2 for memory refresh
 
-    void _activateBusControlSignals();
-    void _deactivateBusControlSignals();
-    void _resetBusControlSignals();
+    void _activateBusControlSignals();   // Enable bus control signals
+    void _deactivateBusControlSignals(); // Disable bus control signals
+    void _resetBusControlSignals();      // Reset bus control signals to default state
 
-    void _activateBusAccessSignals();
-    void _deactivateBusAccessSignals();
-    void _resetBusAccessSignals();
+    void _activateBusAccessSignals();   // Enable bus access signals
+    void _deactivateBusAccessSignals(); // Disable bus access signals
+    void _resetBusAccessSignals();      // Reset bus access signals to default state
 
-    void _setInterruptRequestSignal(bool value);
-    void _setTestSignal(bool value);
-    void _setWaitSignal(bool value);
+    void _setInterruptRequestSignal(bool value); // Set interrupt request signal state
+    void _setTestSignal(bool value);             // Set test signal state
+    void _setWaitSignal(bool value);             // Set wait signal state
 
 public:
     Model1Class(); // Constructor

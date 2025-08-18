@@ -106,11 +106,11 @@
 class Cassette
 {
 private:
-    ILogger *_logger;
-    uint8_t _state;
+    ILogger *_logger; // Logger instance for debugging output
+    uint8_t _state;   // Current cassette interface state
 
-    uint8_t _read();
-    void _write(uint8_t data);
+    uint8_t _read();           // Read data from cassette interface
+    void _write(uint8_t data); // Write data to cassette interface
 
 public:
     // Constructor

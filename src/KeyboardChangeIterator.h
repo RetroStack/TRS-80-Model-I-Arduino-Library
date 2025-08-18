@@ -53,14 +53,14 @@ public:
     bool isShiftPressed() const;
 
 private:
-    uint8_t _previous[8];
-    uint8_t _current[8];
-    uint8_t _byteIndex;
-    uint8_t _bitMask;
-    bool _found;
+    uint8_t _previous[8]; // Previous keyboard state for comparison
+    uint8_t _current[8];  // Current keyboard state for comparison
+    uint8_t _byteIndex;   // Current byte being examined (0-7)
+    uint8_t _bitMask;     // Current bit mask for change detection
+    bool _found;          // True if a change has been found at current position
 
-    void _advanceToNextChange();
-    uint8_t _bitIndex() const;
+    void _advanceToNextChange(); // Move iterator to next keyboard state change
+    uint8_t _bitIndex() const;   // Get bit index within current byte
 };
 
 #endif /* KEYBOARDCHANGEITERATOR_H */

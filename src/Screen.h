@@ -49,7 +49,7 @@ enum ActionTaken : uint16_t
 class Screen
 {
 private:
-    bool _active; // Track whether this screen is currently active
+    bool _active; // Track whether this screen is currently active // Track whether this screen is currently active
 
 protected:
     virtual void _drawScreen() = 0; // Pure virtual method for initial screen rendering

@@ -13,12 +13,12 @@
 class AddressBus
 {
 private:
-    ILogger *_logger;
+    ILogger *_logger; // Logger instance for debugging output
 
-    volatile bool _writable;
+    volatile bool _writable; // Flag indicating if bus is configured for writing
 
-    void _setBus(bool writableOption);
-    void _configurePort(uint16_t config);
+    void _setBus(bool writableOption);    // Configure bus direction (true for write, false for read)
+    void _configurePort(uint16_t config); // Set port configuration for direction control
 
 public:
     // Constructor

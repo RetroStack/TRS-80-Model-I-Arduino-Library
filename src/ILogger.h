@@ -25,6 +25,8 @@ public:
     virtual void debug(const char *fmt, ...) = 0;
 
     // String versions with optional format arguments
+
+    // Log informational message from Arduino String object
     void info(const String &fmt, ...)
     {
         va_list args;
@@ -38,6 +40,7 @@ public:
         va_end(args);
     }
 
+    // Log warning message from Arduino String object
     void warn(const String &fmt, ...)
     {
         va_list args;
@@ -51,6 +54,7 @@ public:
         va_end(args);
     }
 
+    // Log error message from Arduino String object
     void err(const String &fmt, ...)
     {
         va_list args;
@@ -64,6 +68,7 @@ public:
         va_end(args);
     }
 
+    // Log debug message from Arduino String object
     void debug(const String &fmt, ...)
     {
         va_list args;
@@ -78,6 +83,8 @@ public:
     }
 
     // F() macro versions with format string support (more memory efficient)
+
+    // Log informational message from FlashString (F() macro)
     void infoF(const __FlashStringHelper *fmt, ...)
     {
         va_list args;
@@ -100,6 +107,7 @@ public:
         va_end(args);
     }
 
+    // Log warning message from FlashString (F() macro)
     void warnF(const __FlashStringHelper *fmt, ...)
     {
         va_list args;
@@ -122,6 +130,7 @@ public:
         va_end(args);
     }
 
+    // Log error message from FlashString (F() macro)
     void errF(const __FlashStringHelper *fmt, ...)
     {
         va_list args;
@@ -144,6 +153,7 @@ public:
         va_end(args);
     }
 
+    // Log debug message from FlashString (F() macro)
     void debugF(const __FlashStringHelper *fmt, ...)
     {
         va_list args;

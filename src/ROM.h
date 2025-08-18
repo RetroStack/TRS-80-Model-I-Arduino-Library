@@ -16,9 +16,9 @@ typedef void (*ContentPrinter)(const uint8_t *data, uint16_t length, uint16_t of
 class ROM
 {
 private:
-  ILogger *_logger;
+  ILogger *_logger; // Logger instance for debugging output
 
-  bool _checkROMNumber(uint8_t rom) const;
+  bool _checkROMNumber(uint8_t rom) const; // Validate ROM number is within valid range (0-2)
 
 public:
   // Constructor

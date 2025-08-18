@@ -13,9 +13,9 @@
 class SerialLogger : public ILogger
 {
 private:
-    bool _silent = false;
+    bool _silent = false; // Flag to suppress output when true
 
-    void _log(const char *fmt, va_list arguments);
+    void _log(const char *fmt, va_list arguments); // Internal logging implementation with variable arguments
 
 public:
     // Log informational message to serial output

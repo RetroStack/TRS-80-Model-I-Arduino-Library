@@ -13,7 +13,7 @@
 class Display_ILI9341 : public DisplayProvider
 {
 private:
-    Adafruit_ILI9341 *_display;
+    Adafruit_ILI9341 *_display; // Pointer to the ILI9341 display instance
 
 public:
     // Constructor

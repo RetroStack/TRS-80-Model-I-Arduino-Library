@@ -21,8 +21,8 @@
 class Display_SH1106 : public DisplayProvider
 {
 private:
-    Adafruit_SH1106G *_display;
-    bool _useSPI;
+    Adafruit_SH1106G *_display; // Pointer to the SH1106 display instance
+    bool _useSPI;               // True for SPI mode, false for I2C mode
 
 public:
     // Constructor with SPI/I2C mode selection

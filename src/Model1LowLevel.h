@@ -66,7 +66,6 @@ public:
     // Configure individual pins as INPUT or OUTPUT
     // Parameters: outputMode - Use OUTPUT or INPUT constants
 
-    /** Configure RAS (Row Address Strobe) pin direction */
     static inline void configWriteRAS(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
@@ -75,7 +74,6 @@ public:
             pinConfigWrite(RAS, INPUT);
     }
 
-    /** Configure CAS (Column Address Strobe) pin direction */
     static inline void configWriteCAS(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
@@ -84,7 +82,6 @@ public:
             pinConfigWrite(CAS, INPUT);
     }
 
-    /** Configure MUX (Address Multiplexer) pin direction */
     static inline void configWriteMUX(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
@@ -93,7 +90,6 @@ public:
             pinConfigWrite(MUX, INPUT);
     }
 
-    /** Configure RD (Read signal) pin direction */
     static inline void configWriteRD(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
@@ -102,7 +98,6 @@ public:
             pinConfigWrite(RD, INPUT);
     }
 
-    /** Configure WR (Write signal) pin direction */
     static inline void configWriteWR(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
@@ -111,7 +106,6 @@ public:
             pinConfigWrite(WR, INPUT);
     }
 
-    /** Configure IN (Input signal) pin direction */
     static inline void configWriteIN(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
@@ -120,7 +114,6 @@ public:
             pinConfigWrite(IN, INPUT);
     }
 
-    /** Configure OUT (Output signal) pin direction */
     static inline void configWriteOUT(uint8_t outputMode)
     {
         if (outputMode == OUTPUT)
@@ -174,7 +167,6 @@ public:
     // Parameters: value - Use HIGH or LOW constants
     // Note: Pin must be configured as OUTPUT before setting
 
-    /** Write RAS (Row Address Strobe) signal state */
     static inline void writeRAS(uint8_t value)
     {
         if (value == HIGH)
@@ -275,7 +267,6 @@ public:
     // Read current pin configuration (INPUT/OUTPUT state)
     // Returns: INPUT (0) or OUTPUT (1)
 
-    /** Read RAS pin configuration state */
     static inline uint8_t configReadRAS() { return pinConfigRead(RAS); }
     static inline uint8_t configReadCAS() { return pinConfigRead(CAS); }
     static inline uint8_t configReadMUX() { return pinConfigRead(MUX); }
@@ -293,7 +284,6 @@ public:
     // Read current pin signal state (HIGH/LOW)
     // Returns: HIGH (1) or LOW (0)
 
-    /** Read RAS signal current state */
     static inline uint8_t readRAS() { return pinRead(RAS); }
     static inline uint8_t readCAS() { return pinRead(CAS); }
     static inline uint8_t readMUX() { return pinRead(MUX); }
@@ -312,7 +302,6 @@ public:
     // Address bus: pins 22-37 (ADDR_LOW: 22-29, ADDR_HIGH: 30-37)
     // Data bus: pins 14-21
 
-    /** Write complete 16-bit address on address bus */
     static inline void writeAddressBus(uint16_t address)
     {
         busWrite(ADDR_LOW, address & 0xff);

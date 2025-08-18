@@ -15,8 +15,8 @@
 class Keyboard
 {
 private:
-  ILogger *_logger;
-  uint8_t _previousState[8];
+  ILogger *_logger;          // Logger instance for debugging output
+  uint8_t _previousState[8]; // Previous keyboard state for change detection
 
 public:
   // Constructor

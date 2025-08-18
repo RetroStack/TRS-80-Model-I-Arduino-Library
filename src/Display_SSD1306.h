@@ -14,9 +14,9 @@
 class Display_SSD1306 : public DisplayProvider
 {
 private:
-    Adafruit_SSD1306 *_display;
-    bool _isI2C;
-    uint8_t _i2cAddress;
+    Adafruit_SSD1306 *_display; // Pointer to the SSD1306 display instance
+    bool _isI2C;                // True for I2C mode, false for SPI mode
+    uint8_t _i2cAddress;        // I2C address for the display (typically 0x3C)
 
 public:
     // Constructor

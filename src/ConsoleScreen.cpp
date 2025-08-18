@@ -605,11 +605,19 @@ uint16_t ConsoleScreen::getPagingTimeout() const
     return _pagingTimeoutMs;
 }
 
+// Check if console is currently waiting for paging action
+bool ConsoleScreen::isPagingWaiting() const
+{
+    return _isWaitingForPaging;
+}
+
+// Check if console is currently waiting for paging action
 bool ConsoleScreen::isWaitingForPaging() const
 {
     return _isWaitingForPaging;
 }
 
+// Continue paging after it was paused
 void ConsoleScreen::continuePaging()
 {
     if (_isWaitingForPaging)
