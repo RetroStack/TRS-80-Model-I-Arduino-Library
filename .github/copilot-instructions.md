@@ -65,12 +65,18 @@ void setTitleF(const __FlashStringHelper *title); // F-string version
 - **examples/** - Demonstration code organized by functionality
 - **docs/** - Comprehensive API documentation
 
-Every class should have its own file (header and cpp)
+Every class should have its own file (header and cpp).
+
+Keep the "Code-Structure.md" file in the root directory up-to-date. When adding new functions, classes, files, directories, always keep it up to date. This is very important. This should be used by you as well to have a cached index of all functions and definitions and what they are used for.
+
+Any class or method name change should be added to the keywords.txt in the project root.
+Any changes to classnames (including adding/removing) require an update in the library.properties file in the root.
 
 ### Naming Conventions
 
 - **Files**: Use descriptive names like `SimpleScreen.h` not `ExampleScreen.h`
 - **Classes**: Match filename (e.g., `SimpleScreen` class in `SimpleScreen.h`)
+- **Header Guards**: Use uppercase with underscores (e.g., `#ifndef COMPREHENSIVE_SCREEN_H` for `ComprehensiveScreen.h`). Single characters should not be separated (e.g., `ILOGGER_H` not `I_LOGGER_H`). Always include matching comment: `#endif /* HEADER_NAME_H */`
 - **No special characters**: ASCII-only throughout codebase
 
 ### Example Structure
@@ -78,12 +84,24 @@ Every class should have its own file (header and cpp)
 - Each example should have `.ino`, `.h`, `.cpp`, and `README.md` files
 - README files should include usage examples and learning objectives
 - Documentation should be moved from `.ino` files to README files for accessibility
+- Examples for the UI which use a displayProvider should already provide commented-out headers and variables as shown in the simple screen example
 
 ## Documentation Requirements
 
+### Source Code Documentation
+
+- **Header files (.h)**: One-line comments for public methods only
+- **CPP files (.cpp)**: Essential inline comments only for complex logic
+- **Comprehensive documentation**: Located in corresponding docs/ folder files
+- **No extensive multi-line comments** in source code files
+- **No @brief, @param, @return** tags in source code
+
 ### API Documentation
 
-- All public methods must have comprehensive documentation
+- All comprehensive method documentation must be in docs/ folder
+- Use docs/ClassName.md format for each class
+- Include complete API reference, usage examples, and implementation notes
+- Cross-reference related classes and concepts
 
 ### Example Documentation
 
