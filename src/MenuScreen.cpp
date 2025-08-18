@@ -1,3 +1,9 @@
+/*
+ * MenuScreen.cpp - Complete menu framework with pagination and navigation
+ * Authors: Marcel Erz (RetroStack)
+ * Released under the MIT License.
+ */
+
 #include "MenuScreen.h"
 #include "M1Shield.h"
 #include <Adafruit_GFX.h>

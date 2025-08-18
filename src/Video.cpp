@@ -1,3 +1,9 @@
+/*
+ * Video.cpp - Class for accessing video memory and display operations
+ * Authors: Ven Reddy, Marcel Erz (RetroStack)
+ * Released under the MIT License.
+ */
+
 #include "Video.h"
 #include "Model1.h"
 

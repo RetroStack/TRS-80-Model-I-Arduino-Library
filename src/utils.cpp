@@ -1,4 +1,8 @@
-// Various utilities to support print, input, high precision wait, etc.
+/*
+ * utils.cpp - Utility functions and helpers
+ * Authors: Ven Reddy, Marcel Erz (RetroStack)
+ * Released under the MIT License.
+ */
 
 #include "utils.h"
 

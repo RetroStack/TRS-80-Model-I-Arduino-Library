@@ -1,5 +1,5 @@
 /*
- * Display_ST7789_240x240.h - Factory for creating ST7789 240x240 display instances
+ * Display_ST7789_320x170.h - Factory for creating ST7789 320x170 display instances
  * Authors: Marcel Erz (RetroStack)
  * Released under the MIT License.
  */

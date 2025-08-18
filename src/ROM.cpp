@@ -1,4 +1,8 @@
-// ROM related operations
+/*
+ * ROM.cpp - Class for accessing ROM and performing operations
+ * Authors: Ven Reddy, Marcel Erz (RetroStack)
+ * Released under the MIT License.
+ */
 
 #include "ROM.h"
 #include "Model1.h"

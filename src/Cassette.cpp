@@ -1,3 +1,9 @@
+/*
+ * Cassette.cpp - Class for accessing the cassette interface
+ * Authors: Ven Reddy, Marcel Erz (RetroStack)
+ * Released under the MIT License.
+ */
+
 #include "Cassette.h"
 #include "Model1.h"
 #include "utils.h"
@@ -282,5 +288,5 @@ void Cassette::set64CharacterMode()
  */
 void Cassette::setLogger(ILogger &logger)
 {
-  _logger = &logger;
+    _logger = &logger;
 }

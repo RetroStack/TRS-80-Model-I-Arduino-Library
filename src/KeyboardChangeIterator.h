@@ -1,5 +1,5 @@
 /*
- * Model1.h - Class for accessing the TRS-80 Model 1 low-level signals
+ * KeyboardChangeIterator.h - Iterator for keyboard state changes
  * Authors: Ven Reddy, Marcel Erz (RetroStack)
  * Released under the MIT License.
  */

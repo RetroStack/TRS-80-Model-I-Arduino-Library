@@ -1,3 +1,9 @@
+/*
+ * LoggerScreen.cpp - Screen implementation for logger display
+ * Authors: Marcel Erz (RetroStack)
+ * Released under the MIT License.
+ */
+
 #include "LoggerScreen.h"
 #include "M1Shield.h"
 #include <Arduino.h>

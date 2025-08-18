@@ -1,10 +1,7 @@
-/**
- * @file ContentScreen.cpp
- * @brief Implementation of the ContentScreen structured layout template
- *
- * This file provides the abstract implementation of the ContentScreen class,
- * which manages the standard screen layout with header, content, footer,
- * and progress bar regions.
+/*
+ * ContentScreen.cpp - Structured layout template for screens with header, content, footer, and progress bar
+ * Authors: Marcel Erz (RetroStack)
+ * Released under the MIT License.
  */
 
 #include "ContentScreen.h"

@@ -1,10 +1,7 @@
-/**
- * @file M1Shield.cpp
- * @brief Implementation of the M1Shield hardware abstraction layer
- *
- * This file provides the complete implementation of the M1ShieldClass,
- * managing all hardware components of the TRS-80 Model I Arduino Shield
- * including display, input devices, and status indicators.
+/*
+ * M1Shield.cpp - Hardware abstraction layer for Arduino shield
+ * Authors: Marcel Erz (RetroStack)
+ * Released under the MIT License.
  */
 
 #include "M1Shield.h"

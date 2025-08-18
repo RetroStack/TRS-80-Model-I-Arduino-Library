@@ -1,9 +1,7 @@
-/**
- * @file Screen.cpp
- * @brief Implementation of the Screen base class for screen management
- *
- * This file provides the concrete implementation of the Screen class lifecycle methods.
- * The Screen class serves as the foundation for all user interface screens in the library.
+/*
+ * Screen.cpp - Abstract base class for all UI screens
+ * Authors: Marcel Erz (RetroStack)
+ * Released under the MIT License.
  */
 
 #include "Screen.h"

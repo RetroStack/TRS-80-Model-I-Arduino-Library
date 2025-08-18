@@ -1,3 +1,9 @@
+/*
+ * CompositeLogger.cpp - Composite logger implementation
+ * Authors: Marcel Erz (RetroStack)
+ * Released under the MIT License.
+ */
+
 #include "CompositeLogger.h"
 
 /**

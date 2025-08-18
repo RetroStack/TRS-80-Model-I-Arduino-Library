@@ -1,3 +1,9 @@
+/*
+ * Keyboard.cpp - Class for accessing the keyboard matrix
+ * Authors: Ven Reddy, Marcel Erz (RetroStack)
+ * Released under the MIT License.
+ */
+
 #include "Keyboard.h"
 #include "Model1.h"
 #include "utils.h"

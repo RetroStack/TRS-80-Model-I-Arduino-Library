@@ -1,3 +1,9 @@
+/*
+ * DataBus.cpp - Class for accessing the data bus
+ * Authors: Ven Reddy, Marcel Erz (RetroStack)
+ * Released under the MIT License.
+ */
+
 #include "DataBus.h"
 #include "utils.h"
 #include "Model1LowLevel.h"

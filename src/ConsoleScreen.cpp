@@ -1,3 +1,9 @@
+/*
+ * ConsoleScreen.cpp - Console-style screen implementation
+ * Authors: Marcel Erz (RetroStack)
+ * Released under the MIT License.
+ */
+
 #include "ConsoleScreen.h"
 #include "M1Shield.h"
 #include <Adafruit_GFX.h>

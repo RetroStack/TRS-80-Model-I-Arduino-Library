@@ -1,3 +1,9 @@
+/*
+ * Model1.cpp - Class for accessing the TRS-80 Model 1 low-level signals
+ * Authors: Ven Reddy, Marcel Erz (RetroStack)
+ * Released under the MIT License.
+ */
+
 #include "Model1.h"
 #include "utils.h"
 #include "Model1LowLevel.h"
@@ -957,7 +963,7 @@ uint64_t Model1Class::getStateData()
  *
  * Bit layout (64-bit):
  * Bits 63-48: Address Bus Config (16 bits) - Memory address bus pin configurations
- * Bits 47-40: Data Bus Config (8 bits) - Data bus pin configurations  
+ * Bits 47-40: Data Bus Config (8 bits) - Data bus pin configurations
  * Bits 39-32: Memory control signal configs (8 bits) - RD, WR, IN, OUT, RAS, CAS, MUX, (1 spare)
  * Bits 31-24: System signal configs (8 bits) - SYS_RES, INT_ACK, INT, TEST, WAIT, (3 spare)
  * Bits 23-0:  Reserved for future use (24 bits)

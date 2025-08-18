@@ -1,3 +1,9 @@
+/*
+ * AddressBus.cpp - Class for accessing the address bus
+ * Authors: Ven Reddy, Marcel Erz (RetroStack)
+ * Released under the MIT License.
+ */
+
 #include "AddressBus.h"
 #include "utils.h"
 #include "Model1LowLevel.h"

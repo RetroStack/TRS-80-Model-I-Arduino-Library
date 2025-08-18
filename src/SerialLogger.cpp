@@ -1,3 +1,9 @@
+/*
+ * SerialLogger.cpp - Class for logging to the serial interface
+ * Authors: Ven Reddy, Marcel Erz (RetroStack)
+ * Released under the MIT License.
+ */
+
 #include "SerialLogger.h"
 
 /**

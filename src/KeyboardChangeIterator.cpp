@@ -1,3 +1,9 @@
+/*
+ * KeyboardChangeIterator.cpp - Iterator for keyboard state changes
+ * Authors: Ven Reddy, Marcel Erz (RetroStack)
+ * Released under the MIT License.
+ */
+
 #include "KeyboardChangeIterator.h"
 
 #define KEY_ENTER 0xB0

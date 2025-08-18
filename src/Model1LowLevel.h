@@ -2,7 +2,9 @@
  * Model1LowLevel.h - Class for accessing the TRS-80 Model 1 low-level signals
  * Authors: Ven Reddy, Marcel Erz (RetroStack)
  * Released under the MIT License.
- *
+ */
+
+/**
  * This class provides direct, low-level access to all TRS-80 Model 1 hardware control signals
  * and buses, bypassing the safety mechanisms of the main Model1 class. Use with caution.
  *
