@@ -25,8 +25,10 @@ private:
     bool _useSPI;
 
 public:
+    // Constructor with SPI/I2C mode selection
     Display_SH1106(bool useSPI = false) : _display(nullptr), _useSPI(useSPI) {}
 
+    // Create SH1106 display instance with specified pins
     bool create(int8_t cs, int8_t dc, int8_t rst) override
     {
         if (_display)

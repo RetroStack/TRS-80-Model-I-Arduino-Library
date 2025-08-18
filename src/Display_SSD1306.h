@@ -19,9 +19,10 @@ private:
     uint8_t _i2cAddress;
 
 public:
+    // Constructor
     Display_SSD1306() : _display(nullptr), _isI2C(false), _i2cAddress(0x3C) {}
 
-    // SPI constructor
+    // Create SSD1306 display instance with SPI interface
     bool create(int8_t cs, int8_t dc, int8_t rst) override
     {
         if (_display)
@@ -38,7 +39,7 @@ public:
         return false;
     }
 
-    // I2C constructor
+    // Create SSD1306 display instance with I2C interface
     bool createI2C(uint8_t i2cAddress = 0x3C, int8_t rst = -1)
     {
         if (_display)

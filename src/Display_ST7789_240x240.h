@@ -16,8 +16,10 @@ private:
     Adafruit_ST7789 *_display;
 
 public:
+    // Constructor
     Display_ST7789_240x240() : _display(nullptr) {}
 
+    // Create ST7789 240x240 display instance with specified pins
     bool create(int8_t cs, int8_t dc, int8_t rst) override
     {
         if (_display)

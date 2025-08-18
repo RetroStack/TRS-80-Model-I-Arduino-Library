@@ -1,6 +1,12 @@
 /*
- * KeyboardChangeIterator.cpp - Iterator for keyboard state changes
- * Authors: Ven Reddy, Marcel Erz (RetroStack)
+ * KeyboardChangeIterator.cpp - Iterator for keyboard state c// Check if there are more changes to iterate
+bool KeyboardChangeIterator::hasNext() const
+{
+    return _found;
+}
+
+// Get the key information for the current change
+KeyChange KeyboardChangeIterator::next() * Authors: Ven Reddy, Marcel Erz (RetroStack)
  * Released under the MIT License.
  */
 
@@ -52,6 +58,7 @@ const uint8_t lookupTableShift[8][8] PROGMEM = {
     {KEY_SHIFT, KEY_UNUSED_6, KEY_UNUSED_7, KEY_UNUSED_8, KEY_UNUSED_9, KEY_UNUSED_10, KEY_UNUSED_11, KEY_UNUSED_12}, // 3860
 };
 
+// Constructor with previous and current keyboard states
 KeyboardChangeIterator::KeyboardChangeIterator(const uint8_t *previous, const uint8_t *current)
     : _byteIndex(0), _bitMask(1), _found(false)
 {
@@ -61,11 +68,13 @@ KeyboardChangeIterator::KeyboardChangeIterator(const uint8_t *previous, const ui
     _advanceToNextChange();
 }
 
+// Check if there are more changes to iterate
 bool KeyboardChangeIterator::hasNext() const
 {
     return _found;
 }
 
+// Advance to next change
 void KeyboardChangeIterator::next()
 {
     _bitMask <<= 1;
@@ -79,41 +88,49 @@ void KeyboardChangeIterator::next()
     _advanceToNextChange();
 }
 
+// Get linear key index (0-63)
 uint8_t KeyboardChangeIterator::keyIndex() const
 {
     return _byteIndex * 8 + _bitIndex();
 }
 
+// Get keyboard row (0-7)
 uint8_t KeyboardChangeIterator::row() const
 {
     return _byteIndex;
 }
 
+// Get keyboard column (0-7)
 uint8_t KeyboardChangeIterator::column() const
 {
     return _bitIndex();
 }
 
+// Check if key was pressed in previous state
 bool KeyboardChangeIterator::wasPressed() const
 {
     return (_previous[_byteIndex] & _bitMask) != 0;
 }
 
+// Check if key is pressed in current state
 bool KeyboardChangeIterator::isPressed() const
 {
     return (_current[_byteIndex] & _bitMask) != 0;
 }
 
+// Check if key was just pressed (transition from released to pressed)
 bool KeyboardChangeIterator::wasJustPressed() const
 {
     return !wasPressed() && isPressed();
 }
 
+// Check if key was just released (transition from pressed to released)
 bool KeyboardChangeIterator::wasReleased() const
 {
     return wasPressed() && !isPressed();
 }
 
+// Get TRS-80 key value/scan code
 uint8_t KeyboardChangeIterator::keyValue() const
 {
     uint8_t r = row();
@@ -128,6 +145,7 @@ uint8_t KeyboardChangeIterator::keyValue() const
     }
 }
 
+// Get human-readable key name
 String KeyboardChangeIterator::keyName() const
 {
     uint8_t keyVal = keyValue();
@@ -172,11 +190,13 @@ String KeyboardChangeIterator::keyName() const
     }
 }
 
+// Check if shift key is currently pressed
 bool KeyboardChangeIterator::isShiftPressed() const
 {
     return (_current[7] & 0x01) > 0;
 }
 
+// Find and position at the next keyboard state change
 void KeyboardChangeIterator::_advanceToNextChange()
 {
     _found = false;
@@ -201,6 +221,7 @@ void KeyboardChangeIterator::_advanceToNextChange()
     }
 }
 
+// Get the bit position within the current byte
 uint8_t KeyboardChangeIterator::_bitIndex() const
 {
     uint8_t bit = 0;

@@ -6,6 +6,7 @@
 
 #include "SerialLogger.h"
 
+// Internal logging method with format string and arguments
 void SerialLogger::_log(const char *fmt, va_list arguments)
 {
     const int LEN = 255;
@@ -15,6 +16,7 @@ void SerialLogger::_log(const char *fmt, va_list arguments)
     Serial.println(buffer);
 }
 
+// Write single character to serial output
 size_t SerialLogger::write(uint8_t ch)
 {
     if (ch == '\n')
@@ -27,6 +29,7 @@ size_t SerialLogger::write(uint8_t ch)
     }
 }
 
+// Write buffer to serial output
 size_t SerialLogger::write(const uint8_t *buffer, size_t size)
 {
     size_t result = 0;
@@ -37,6 +40,7 @@ size_t SerialLogger::write(const uint8_t *buffer, size_t size)
     return result;
 }
 
+// Log info message with format string
 void SerialLogger::info(const char *fmt, ...)
 {
     if (_silent)
@@ -51,6 +55,7 @@ void SerialLogger::info(const char *fmt, ...)
     va_end(arguments);
 }
 
+// Log warning message with format string
 void SerialLogger::warn(const char *fmt, ...)
 {
     if (_silent)
@@ -65,6 +70,7 @@ void SerialLogger::warn(const char *fmt, ...)
     va_end(arguments);
 }
 
+// Log error message with format string
 void SerialLogger::err(const char *fmt, ...)
 {
     if (_silent)
@@ -79,6 +85,7 @@ void SerialLogger::err(const char *fmt, ...)
     va_end(arguments);
 }
 
+// Log debug message with format string
 void SerialLogger::debug(const char *fmt, ...)
 {
     if (_silent)
@@ -93,10 +100,13 @@ void SerialLogger::debug(const char *fmt, ...)
     va_end(arguments);
 }
 
+// Disable logging output
 void SerialLogger::mute()
 {
     _silent = true;
 }
+
+// Enable logging output
 void SerialLogger::unmute()
 {
     _silent = false;

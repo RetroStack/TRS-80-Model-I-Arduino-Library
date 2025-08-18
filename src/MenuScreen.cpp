@@ -34,6 +34,7 @@ constexpr uint16_t DISABLED_ROW_COLOR_FG2 = 0x7BEF;       // Foreground color fo
 constexpr uint16_t NEXT_PAGE_INDICATOR_COLOR_FG = 0xFFFF; // Color for next page indicator text
 constexpr uint16_t TABLE_COLOR_BG = 0x0000;               // Color for table background
 
+// Constructor
 MenuScreen::MenuScreen() : ContentScreen()
 {
     _currentPage = 0;
@@ -48,11 +49,13 @@ MenuScreen::MenuScreen() : ContentScreen()
     setButtonItems(buttonItems, 2);
 }
 
+// Destructor
 MenuScreen::~MenuScreen()
 {
     clearMenuItems();
 }
 
+// Calculate how many menu items fit on one page
 uint8_t MenuScreen::_getItemsPerPage() const
 {
     uint16_t contentHeight = _getContentHeight();
@@ -100,6 +103,7 @@ uint8_t MenuScreen::_findNextEnabledItem(uint8_t startIndex, bool forward) const
 
 // Input Handling and Navigation
 
+// Handle user input actions and navigation
 Screen *MenuScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)
 {
     if (!isActive())

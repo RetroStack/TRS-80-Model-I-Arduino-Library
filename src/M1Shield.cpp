@@ -48,6 +48,7 @@ constexpr uint8_t PIN_CASS_OUT = A15; // Cassette output from the perspective of
 // Define global instance
 M1ShieldClass M1Shield;
 
+// Constructor
 M1ShieldClass::M1ShieldClass() : _screen(nullptr),
                                  _displayProvider(nullptr),
                                  _menuPressed(0),

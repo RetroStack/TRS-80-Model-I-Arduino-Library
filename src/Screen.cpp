@@ -8,16 +8,19 @@
 #include "M1Shield.h"
 #include <Adafruit_GFX.h>
 
+// Constructor - initialize screen as inactive
 Screen::Screen()
 {
     _active = false;
 }
 
+// Check if screen is currently active
 bool Screen::isActive() const
 {
     return _active;
 }
 
+// Activate screen and perform initial setup
 bool Screen::open()
 {
     if (_active)
@@ -32,6 +35,7 @@ bool Screen::open()
     return true;
 }
 
+// Deactivate screen and perform cleanup
 void Screen::close()
 {
     if (!_active)
@@ -42,6 +46,7 @@ void Screen::close()
     _active = false;
 }
 
+// Force complete redraw of screen content
 void Screen::refresh()
 {
     if (_active)
@@ -51,6 +56,7 @@ void Screen::refresh()
     }
 }
 
+// Check if current display is small (height <= 128 pixels)
 bool Screen::isSmallDisplay() const
 {
     return M1Shield.getScreenHeight() <= 128;

@@ -16,8 +16,10 @@ private:
     Adafruit_ST7796S *_display;
 
 public:
+    // Constructor
     Display_ST7796() : _display(nullptr) {}
 
+    // Create ST7796 display instance with specified pins
     bool create(int8_t cs, int8_t dc, int8_t rst) override
     {
         if (_display)

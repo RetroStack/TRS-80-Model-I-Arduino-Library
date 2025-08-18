@@ -16,8 +16,10 @@ private:
     Adafruit_ILI9325 *_display;
 
 public:
+    // Constructor
     Display_ILI9325() : _display(nullptr) {}
 
+    // Create ILI9325 display instance with specified pins
     bool create(int8_t cs, int8_t dc, int8_t rst) override
     {
         if (_display)

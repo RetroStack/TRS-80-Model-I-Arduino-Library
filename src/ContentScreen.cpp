@@ -51,6 +51,7 @@ constexpr uint16_t ALERT_COLOR_FG = 0x0000;   // Alert text color (black)
 constexpr uint16_t CONFIRM_COLOR_BG = 0xF81F; // Confirm background (magenta)
 constexpr uint16_t CONFIRM_COLOR_FG = 0x0000; // Confirm text color (black)
 
+// Constructor
 ContentScreen::ContentScreen() : Screen()
 {
     _title = nullptr;       // No title allocated initially
@@ -65,6 +66,7 @@ ContentScreen::ContentScreen() : Screen()
     _notificationActive = false;
 }
 
+// Destructor
 ContentScreen::~ContentScreen()
 {
     clearTitle();
@@ -72,6 +74,7 @@ ContentScreen::~ContentScreen()
     _clearNotification();
 }
 
+// Draw the complete screen layout with header, content, footer, and progress bar
 void ContentScreen::_drawScreen()
 {
     if (!isActive())

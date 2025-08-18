@@ -16,8 +16,10 @@ private:
     Adafruit_HX8357 *_display;
 
 public:
+    // Constructor
     Display_HX8357() : _display(nullptr) {}
 
+    // Create HX8357 display instance with specified pins
     bool create(int8_t cs, int8_t dc, int8_t rst) override
     {
         if (_display)

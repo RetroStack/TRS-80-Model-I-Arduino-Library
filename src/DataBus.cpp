@@ -8,37 +8,44 @@
 #include "utils.h"
 #include "Model1LowLevel.h"
 
+// Configure data bus port direction
 void DataBus::_configurePort(uint8_t config)
 {
   Model1LowLevel::configWriteDataBus(config);
 }
 
+// Constructor - initialize data bus
 DataBus::DataBus()
 {
   _logger = nullptr;
   _writable = false;
 }
 
+// Initialize data bus as readable
 void DataBus::begin()
 {
   setAsReadable();
 }
 
+// Reset data bus to default readable state
 void DataBus::end()
 {
   setAsReadable();
 }
 
+// Set logger for debugging output
 void DataBus::setLogger(ILogger &logger)
 {
   _logger = &logger;
 }
 
+// Read 8-bit data value from bus
 uint8_t DataBus::readData()
 {
   return Model1LowLevel::readDataBus();
 }
 
+// Write 8-bit data value to bus
 void DataBus::writeData(uint8_t data)
 {
   if (!_writable)

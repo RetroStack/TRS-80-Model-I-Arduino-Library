@@ -72,16 +72,19 @@ const ROMSignature signatures[] PROGMEM = {
     {DIAG_ROM, 0xAE31, 0x0000, 0x0000, 0x0000},
 };
 
+// Constructor - initialize ROM interface
 ROM::ROM()
 {
   _logger = nullptr;
 }
 
+// Set logger for debugging output
 void ROM::setLogger(ILogger &logger)
 {
   _logger = &logger;
 }
 
+// Get starting memory address for specified ROM number
 uint16_t ROM::getROMStartAddress(uint8_t rom)
 {
   if (!_checkROMNumber(rom))

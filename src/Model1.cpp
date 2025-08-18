@@ -31,6 +31,7 @@
 // Define global instance
 Model1Class Model1;
 
+// Constructor
 Model1Class::Model1Class()
 {
     _logger = nullptr;
@@ -43,6 +44,7 @@ Model1Class::Model1Class()
     deactivateMemoryRefresh();
 }
 
+// Initialize the Model1 interface with memory refresh timer
 void Model1Class::begin(int refreshTimer)
 {
     _addressBus.begin();
@@ -73,6 +75,7 @@ void Model1Class::begin(int refreshTimer)
     }
 }
 
+// Shutdown the Model1 interface
 void Model1Class::end()
 {
     _addressBus.end();
@@ -84,6 +87,7 @@ void Model1Class::end()
     deactivateMemoryRefresh();
 }
 
+// Set the logger for debugging output
 void Model1Class::setLogger(ILogger &logger)
 {
     _logger = &logger;
@@ -95,41 +99,49 @@ void Model1Class::setLogger(ILogger &logger)
 // ---------- Address Space
 // ----------------------------------------
 
+// Check if address is in ROM range (0x0000-0x2FFF)
 bool Model1Class::isROMAddress(uint16_t address)
 {
     return (address <= 0x2FFF);
 }
 
+// Check if address is in unused range (0x3000-0x37DF)
 bool Model1Class::isUnusedAddress(uint16_t address)
 {
     return (address >= 0x3000 && address <= 0x37DF);
 }
 
+// Check if address is memory-mapped I/O (0x37E0-0x37FF)
 bool Model1Class::isMemoryMappedIOAddress(uint16_t address)
 {
     return (address >= 0x37E0 && address <= 0x37FF);
 }
 
+// Check if address is keyboard range (0x3800-0x3BFF)
 bool Model1Class::isKeyboardAddress(uint16_t address)
 {
     return (address >= 0x3800 && address <= 0x3BFF); // memory space is shadowed from 0x3900 to 0x3BFF (3x)
 }
 
+// Check if address is video memory range (0x3C00-0x3FFF)
 bool Model1Class::isVideoAddress(uint16_t address)
 {
     return (address >= 0x3C00 && address <= 0x3FFF);
 }
 
+// Check if address is system memory range (0x4000-0x41FF)
 bool Model1Class::isSystemAddress(uint16_t address)
 {
     return (address >= 0x4000 && address <= 0x41FF);
 }
 
+// Check if address is lower memory range (0x4200-0x7FFF)
 bool Model1Class::isLowerMemoryAddress(uint16_t address)
 {
     return (address >= 0x4200 && address <= 0x7FFF);
 }
 
+// Check if address is higher memory range (0x8000-0xFFFF)
 bool Model1Class::isHigherMemoryAddress(uint16_t address)
 {
     return (address >= 0x8000 && address <= 0xFFFF);

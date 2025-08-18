@@ -22,12 +22,14 @@
 
 #define CASSETTE_DEFAULT_STATE 0
 
+// Constructor
 Cassette::Cassette()
 {
     _logger = nullptr;
     _state = CASSETTE_DEFAULT_STATE;
 }
 
+// Read cassette input status
 uint8_t Cassette::_read()
 {
     // Initialize the result
@@ -45,11 +47,13 @@ uint8_t Cassette::_read()
     return result;
 }
 
+// Write data to cassette port
 void Cassette::_write(uint8_t data)
 {
     Model1.writeIO(CASSETTE_PORT, data);
 }
 
+// Update cassette state and write to hardware
 void Cassette::update()
 {
     uint8_t data = _read();

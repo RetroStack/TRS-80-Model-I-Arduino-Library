@@ -6,6 +6,7 @@
 
 #include "CompositeLogger.h"
 
+// Constructor initializes empty logger array
 CompositeLogger::CompositeLogger() : _loggerCount(0)
 {
     // Initialize logger array to null pointers
@@ -15,7 +16,8 @@ CompositeLogger::CompositeLogger() : _loggerCount(0)
     }
 }
 
-bool CompositeLogger::addLogger(ILogger* logger)
+// Add a logger to the composite logger
+bool CompositeLogger::addLogger(ILogger *logger)
 {
     // Check for null pointer
     if (logger == nullptr)
@@ -38,11 +40,12 @@ bool CompositeLogger::addLogger(ILogger* logger)
     // Add logger to the first available slot
     _loggers[_loggerCount] = logger;
     _loggerCount++;
-    
+
     return true;
 }
 
-bool CompositeLogger::removeLogger(ILogger* logger)
+// Remove a logger from the composite logger
+bool CompositeLogger::removeLogger(ILogger *logger)
 {
     // Check for null pointer
     if (logger == nullptr)
@@ -60,18 +63,19 @@ bool CompositeLogger::removeLogger(ILogger* logger)
             {
                 _loggers[j] = _loggers[j + 1];
             }
-            
+
             // Clear the last slot and decrement count
             _loggers[_loggerCount - 1] = nullptr;
             _loggerCount--;
-            
+
             return true;
         }
     }
-    
+
     return false; // Logger not found
 }
 
+// Clear all loggers from the composite logger
 void CompositeLogger::clearLoggers()
 {
     for (uint8_t i = 0; i < MAX_LOGGERS; i++)
@@ -81,12 +85,14 @@ void CompositeLogger::clearLoggers()
     _loggerCount = 0;
 }
 
+// Get the number of registered loggers
 uint8_t CompositeLogger::getLoggerCount() const
 {
     return _loggerCount;
 }
 
-bool CompositeLogger::hasLogger(ILogger* logger) const
+// Check if a specific logger is registered
+bool CompositeLogger::hasLogger(ILogger *logger) const
 {
     if (logger == nullptr)
     {
@@ -100,7 +106,7 @@ bool CompositeLogger::hasLogger(ILogger* logger) const
             return true;
         }
     }
-    
+
     return false;
 }
 
@@ -109,12 +115,12 @@ void CompositeLogger::info(const char *fmt, ...)
     // Create formatted string once
     const int LEN = 255;
     char buffer[LEN];
-    
+
     va_list arguments;
     va_start(arguments, fmt);
     vsnprintf(buffer, LEN, fmt, arguments);
     va_end(arguments);
-    
+
     // Forward formatted string to each registered logger
     for (uint8_t i = 0; i < _loggerCount; i++)
     {
@@ -130,12 +136,12 @@ void CompositeLogger::warn(const char *fmt, ...)
     // Create formatted string once
     const int LEN = 255;
     char buffer[LEN];
-    
+
     va_list arguments;
     va_start(arguments, fmt);
     vsnprintf(buffer, LEN, fmt, arguments);
     va_end(arguments);
-    
+
     // Forward formatted string to each registered logger
     for (uint8_t i = 0; i < _loggerCount; i++)
     {
@@ -151,12 +157,12 @@ void CompositeLogger::err(const char *fmt, ...)
     // Create formatted string once
     const int LEN = 255;
     char buffer[LEN];
-    
+
     va_list arguments;
     va_start(arguments, fmt);
     vsnprintf(buffer, LEN, fmt, arguments);
     va_end(arguments);
-    
+
     // Forward formatted string to each registered logger
     for (uint8_t i = 0; i < _loggerCount; i++)
     {
@@ -172,12 +178,12 @@ void CompositeLogger::debug(const char *fmt, ...)
     // Create formatted string once
     const int LEN = 255;
     char buffer[LEN];
-    
+
     va_list arguments;
     va_start(arguments, fmt);
     vsnprintf(buffer, LEN, fmt, arguments);
     va_end(arguments);
-    
+
     // Forward formatted string to each registered logger
     for (uint8_t i = 0; i < _loggerCount; i++)
     {
@@ -191,7 +197,7 @@ void CompositeLogger::debug(const char *fmt, ...)
 size_t CompositeLogger::write(uint8_t ch)
 {
     size_t totalWritten = 0;
-    
+
     // Forward to each registered logger
     for (uint8_t i = 0; i < _loggerCount; i++)
     {
@@ -200,14 +206,14 @@ size_t CompositeLogger::write(uint8_t ch)
             totalWritten += _loggers[i]->write(ch);
         }
     }
-    
+
     return totalWritten;
 }
 
 size_t CompositeLogger::write(const uint8_t *buffer, size_t size)
 {
     size_t totalWritten = 0;
-    
+
     // Forward to each registered logger
     for (uint8_t i = 0; i < _loggerCount; i++)
     {
@@ -216,6 +222,6 @@ size_t CompositeLogger::write(const uint8_t *buffer, size_t size)
             totalWritten += _loggers[i]->write(buffer, size);
         }
     }
-    
+
     return totalWritten;
 }

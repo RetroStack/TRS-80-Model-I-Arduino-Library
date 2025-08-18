@@ -13,32 +13,38 @@ void AddressBus::_configurePort(uint16_t config)
     Model1LowLevel::configWriteAddressBus(config);
 }
 
+// Constructor - initialize address bus
 AddressBus::AddressBus()
 {
     _logger = nullptr;
     _writable = false;
 }
 
+// Initialize address bus as readable
 void AddressBus::begin()
 {
     setAsReadable();
 }
 
+// Reset address bus to default readable state
 void AddressBus::end()
 {
     setAsReadable();
 }
 
+// Set logger for debugging output
 void AddressBus::setLogger(ILogger &logger)
 {
     _logger = &logger;
 }
 
+// Read 16-bit memory address from bus
 uint16_t AddressBus::readMemoryAddress()
 {
     return Model1LowLevel::readAddressBus();
 }
 
+// Write 16-bit memory address to bus
 void AddressBus::writeMemoryAddress(uint16_t address)
 {
     if (!_writable)

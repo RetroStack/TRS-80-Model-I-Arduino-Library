@@ -13,6 +13,7 @@ const uint16_t VIDEO_MEM_START = 0x3C00;
 
 const uint8_t SPACE_CHARACTER = 0x20;
 
+// Constructor
 Video::Video()
 {
   _logger = nullptr;
@@ -29,11 +30,13 @@ Video::Video()
   _viewPort.height = VIDEO_ROWS;
 }
 
+// Set the logger for debugging output
 void Video::setLogger(ILogger &logger)
 {
   _logger = &logger;
 }
 
+// Set the active video viewport
 void Video::setViewPort(ViewPort viewPort)
 {
   // Validate and auto-correct viewport
@@ -65,27 +68,32 @@ void Video::setViewPort(ViewPort viewPort)
   _viewPort = viewPort;
 }
 
+// Get memory address for the start of a video row
 uint16_t Video::getRowAddress(uint8_t y)
 {
   return VIDEO_MEM_START + ((_viewPort.y + y) * VIDEO_COLS);
 }
 
+// Get memory address for a specific column in a row
 uint16_t Video::getColumnAddress(uint16_t rowAddress, uint8_t x)
 {
   return rowAddress + _viewPort.x + x;
 }
 
+// Get memory address for specific x,y coordinates
 uint16_t Video::getAddress(uint8_t x, uint8_t y)
 {
   uint16_t rowAddress = getRowAddress(y);
   return getColumnAddress(rowAddress, x);
 }
 
+// Get current cursor X position
 uint8_t Video::getX()
 {
   return _cursorPositionX;
 }
 
+// Set cursor X position with bounds checking
 void Video::setX(uint8_t x)
 {
   if (x > _viewPort.width)
@@ -98,11 +106,13 @@ void Video::setX(uint8_t x)
   }
 }
 
+// Get current cursor Y position
 uint8_t Video::getY()
 {
   return _cursorPositionY;
 }
 
+// Set cursor Y position with bounds checking
 void Video::setY(uint8_t y)
 {
   if (y > _viewPort.height)
@@ -115,75 +125,89 @@ void Video::setY(uint8_t y)
   }
 }
 
+// Set cursor X and Y positions
 void Video::setXY(uint8_t x, uint8_t y)
 {
   setX(x);
   setY(y);
 }
 
+// Get viewport start X coordinate
 uint8_t Video::getStartX()
 {
   return _viewPort.x;
 }
 
+// Get viewport end X coordinate
 uint8_t Video::getEndX()
 {
   return _viewPort.x + _viewPort.width;
 }
 
+// Get viewport start Y coordinate
 uint8_t Video::getStartY()
 {
   return _viewPort.y;
 }
 
+// Get viewport end Y coordinate
 uint8_t Video::getEndY()
 {
   return _viewPort.y + _viewPort.height;
 }
 
+// Get viewport width
 uint8_t Video::getWidth()
 {
   return _viewPort.width;
 }
 
+// Get viewport height
 uint8_t Video::getHeight()
 {
   return _viewPort.height;
 }
 
+// Get total size of viewport (width * height)
 uint16_t Video::getSize()
 {
   return _viewPort.width * _viewPort.height;
 }
 
+// Convert relative X coordinate to absolute screen coordinate
 uint8_t Video::getAbsoluteX(uint8_t x)
 {
   int xCoord = _viewPort.x + x;
   return xCoord > VIDEO_COLS ? VIDEO_COLS : xCoord;
 }
 
+// Convert relative Y coordinate to absolute screen coordinate
 uint8_t Video::getAbsoluteY(uint8_t y)
 {
   int yCoord = _viewPort.y + y;
   return yCoord > VIDEO_ROWS ? VIDEO_ROWS : yCoord;
 }
 
+// Clear screen with space characters
 void Video::cls()
 {
   cls(SPACE_CHARACTER);
 }
 
+// Clear screen with specified character
 void Video::cls(char character)
 {
   cls(&character, 1);
 }
 
+// Clear screen with character array
 void Video::cls(char *characters)
 {
   uint16_t length = strlen(characters);
   cls(characters, length);
 }
 
+// Clear screen with character array of specified length
 void Video::cls(char *characters, uint16_t length)
 {
   int i = 0;
@@ -200,11 +224,13 @@ void Video::cls(char *characters, uint16_t length)
   _cursorPositionY = 0;
 }
 
+// Scroll screen up by one row
 void Video::scroll()
 {
   scroll(1);
 }
 
+// Scroll screen up by specified number of rows
 void Video::scroll(uint8_t rows)
 {
   if (rows == 0)

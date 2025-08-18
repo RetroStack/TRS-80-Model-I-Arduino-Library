@@ -65,6 +65,7 @@ public:
     }
 };
 
+// Constructor with title
 LoggerScreen::LoggerScreen(const char *title) : ConsoleScreen(), _loggerAdapter(nullptr)
 {
     // Set the screen title
@@ -88,12 +89,14 @@ LoggerScreen::LoggerScreen(const char *title) : ConsoleScreen(), _loggerAdapter(
     _loggerAdapter = new LoggerAdapter(this);
 }
 
+// Destructor
 LoggerScreen::~LoggerScreen()
 {
     delete _loggerAdapter;
     // Base class handles cleanup
 }
 
+// Get the logger adapter interface
 ILogger *LoggerScreen::asLogger()
 {
     return _loggerAdapter;

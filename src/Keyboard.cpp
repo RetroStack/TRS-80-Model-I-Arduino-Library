@@ -11,6 +11,7 @@
 #define KEYBOARD_ALL_ADDRESS 0x38FF
 #define KEYBOARD_MEM_ADDRESS 0x3800
 
+// Constructor - initialize keyboard interface
 Keyboard::Keyboard()
 {
   _logger = nullptr;
@@ -18,16 +19,19 @@ Keyboard::Keyboard()
   memset(_previousState, 0, sizeof(_previousState));
 }
 
+// Set logger for debugging output
 void Keyboard::setLogger(ILogger &logger)
 {
   _logger = &logger;
 }
 
+// Check if any key is currently pressed
 bool Keyboard::isKeyPressed() const
 {
   return Model1.readMemory(KEYBOARD_ALL_ADDRESS) > 0;
 }
 
+// Update keyboard state by reading current values
 void Keyboard::update()
 {
   for (int i = 0; i < 8; i++)
@@ -37,6 +41,7 @@ void Keyboard::update()
   }
 }
 
+// Get iterator for keyboard state changes since last update
 KeyboardChangeIterator Keyboard::changes()
 {
   uint8_t keyboardState[8];
