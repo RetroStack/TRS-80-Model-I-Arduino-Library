@@ -361,6 +361,18 @@ size_t Video::write(uint8_t ch)
 
 size_t Video::write(const uint8_t *buffer, size_t size)
 {
+  if (!buffer)
+  {
+    if (_logger)
+      _logger->errF(F("Video: write() called with null buffer"));
+    return 0;
+  }
+  if (size == 0)
+  {
+    if (_logger)
+      _logger->warnF(F("Video: write() called with length 0"));
+    return 0; // Not an error, just nothing to write
+  }
   size_t result = 0;
   for (uint16_t i = 0; i < size; i++)
   {

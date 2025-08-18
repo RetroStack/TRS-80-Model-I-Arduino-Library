@@ -29,7 +29,7 @@ public:
         _display = new Adafruit_ILI9341(cs, dc, rst);
         _display->begin();
         _display->setRotation(3);
-        return _display != nullptr;
+        return true;
     }
 
     Adafruit_GFX &getGFX() override

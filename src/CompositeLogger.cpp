@@ -212,6 +212,11 @@ size_t CompositeLogger::write(uint8_t ch)
 
 size_t CompositeLogger::write(const uint8_t *buffer, size_t size)
 {
+    if (!buffer)
+    {
+        return 0; // Can't log an error in a logger about null buffer, just return 0
+    }
+    
     size_t totalWritten = 0;
 
     // Forward to each registered logger

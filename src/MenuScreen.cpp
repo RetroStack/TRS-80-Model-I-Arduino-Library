@@ -318,6 +318,10 @@ void MenuScreen::_drawContent()
                     strcpy_P(tempConfigBuffer, (const char *)configValueF);
                     configValue = tempConfigBuffer;
                 }
+                else if (getLogger())
+                {
+                    getLogger()->errF(F("MenuScreen: Failed to allocate memory for config value display"));
+                }
             }
             else
             {

@@ -62,6 +62,14 @@ const uint8_t lookupTableShift[8][8] PROGMEM = {
 KeyboardChangeIterator::KeyboardChangeIterator(const uint8_t *previous, const uint8_t *current)
     : _byteIndex(0), _bitMask(1), _found(false)
 {
+    if (!previous || !current)
+    {
+        // Initialize with safe defaults if null pointers provided
+        memset(_previous, 0, 8);
+        memset(_current, 0, 8);
+        return; // _found is already false, no changes to iterate
+    }
+    
     memcpy(_previous, previous, 8);
     memcpy(_current, current, 8);
 

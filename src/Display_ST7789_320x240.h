@@ -29,7 +29,7 @@ public:
         _display = new Adafruit_ST7789(cs, dc, rst);
         _display->init(240, 320, SPI_MODE0);
         _display->setRotation(3);
-        return _display != nullptr;
+        return true;
     }
 
     // Get reference to Adafruit_GFX interface

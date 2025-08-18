@@ -8,6 +8,11 @@
 
 char *uint8ToBinary(uint8_t value, char *buffer)
 {
+  if (!buffer)
+  {
+    return nullptr; // Cannot convert to null buffer
+  }
+  
   for (int i = 7; i >= 0; i--)
   {
     buffer[7 - i] = ((value >> i) & 1) ? '1' : '0';
@@ -18,6 +23,11 @@ char *uint8ToBinary(uint8_t value, char *buffer)
 
 char *uint16ToBinary(uint16_t value, char *buffer)
 {
+  if (!buffer)
+  {
+    return nullptr; // Cannot convert to null buffer
+  }
+  
   for (int i = 15; i >= 0; i--)
   {
     buffer[15 - i] = ((value >> i) & 1) ? '1' : '0';
