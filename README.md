@@ -84,6 +84,19 @@ protected:
 2. Connect Arduino Mega 2560 to TRS-80 (M1Shield recommended, direct wiring supported)
 3. Try examples: **M1Shield/HardwareTest** or **Model1/BasicAccess**
 
+## Examples
+
+**[Complete Examples Guide](examples/)** - Comprehensive examples with progressive learning paths
+
+The examples folder contains over 40 examples organized by functionality:
+
+- **[M1Shield Examples](examples/M1Shield/)** - Hardware platform and display examples
+- **[Model1 Examples](examples/Model1/)** - TRS-80 hardware interface (ROM, RAM, Video, Keyboard, etc.)
+- **[UI Examples](examples/UI/)** - User interface framework and screen management
+- **[Logger Examples](examples/Logger/)** - Debugging and monitoring system
+
+All examples follow a Simple/Comprehensive pattern for progressive learning, with complete documentation and integration guidance.
+
 ## Connection Options
 
 **M1Shield (Recommended):** Clean, safe connection with built-in display and controls  
