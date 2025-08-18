@@ -11,6 +11,7 @@
 #include <Adafruit_GFX.h>
 #include "Screen.h"
 #include "DisplayProvider.h"
+#include "ILogger.h"
 
 // RGB LED color enumeration for status indication
 enum LEDColor
@@ -45,6 +46,7 @@ class M1ShieldClass
 private:
     Screen *_screen;                   // Currently active screen
     DisplayProvider *_displayProvider; // Display provider instance
+    ILogger *_logger;                  // Logger instance for debugging output
 
     // Button debouncing state tracking
     unsigned long _menuPressed;     // Last menu button press timestamp
@@ -73,6 +75,9 @@ public:
 
     bool begin();                          // Initialize shield hardware and display
     bool begin(DisplayProvider &provider); // Initialize shield with custom display provider
+
+    void setLogger(ILogger &logger); // Set logger for debugging output
+    ILogger *getLogger() const;      // Get logger instance
 
     void activateJoystick(); // Activate joystick input
 

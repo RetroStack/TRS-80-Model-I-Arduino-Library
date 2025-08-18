@@ -137,9 +137,14 @@ void demonstrateAdvancedViewportOperations()
     // Test reading from viewport
     video.println("READING TEST:");
     video.print(5, 8, "READ THIS TEXT");
-    String readText = video.read(5, 8, 4, false);
+    char *readText = video.read(5, 8, 4, false);
     video.print(0, 9, "READ: '");
-    video.print(readText);
+    if (readText) {
+        video.print(readText);
+        free(readText);
+    } else {
+        video.print("ERROR");
+    }
     video.println("'");
 
     Serial.println(F("Advanced viewport operations completed"));

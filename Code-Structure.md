@@ -17,6 +17,8 @@ This document provides a comprehensive reference of all classes and functions av
 - `bool display()` // Update/refresh display
 - `uint16_t convertColor(uint16_t color)` // Convert color for current display
 - `bool setScreen(Screen *screen)` // Set active screen with lifecycle management
+- `void setLogger(ILogger &logger)` // Set logger for debugging output
+- `ILogger* getLogger() const` // Get logger instance
 - `void setLEDColor(uint8_t r, uint8_t g, uint8_t b) const` // Set RGB LED with individual channels
 - `void setLEDColor(LEDColor color, uint8_t intensity = 255) const` // Set LED with predefined color
 - `bool isMenuPressed() const` // Check menu button current state
@@ -98,6 +100,8 @@ This document provides a comprehensive reference of all classes and functions av
 - `virtual ~Screen()` // Virtual destructor for proper cleanup
 - `bool isActive() const` // Check if screen is currently active
 - `bool isSmallDisplay() const` // Check if display is small (height <= 128px)
+- `void setLogger(ILogger &logger)` // Set logger for debugging output
+- `ILogger* getLogger() const` // Get logger instance
 - `void refresh()` // Force complete screen redraw
 - `virtual bool open()` // Activate screen and perform initial setup
 - `virtual void close()` // Deactivate screen and cleanup

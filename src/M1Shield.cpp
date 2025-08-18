@@ -9,6 +9,7 @@
 #include <SPI.h>
 #include <Arduino.h>
 #include "Model1.h"
+#include "ContentScreen.h"
 
 // Hardware timing constants
 constexpr unsigned long DEBOUNCE_TIME = 250; // Button debounce time in milliseconds
@@ -51,6 +52,7 @@ M1ShieldClass M1Shield;
 // Constructor
 M1ShieldClass::M1ShieldClass() : _screen(nullptr),
                                  _displayProvider(nullptr),
+                                 _logger(nullptr),
                                  _menuPressed(0),
                                  _upPressed(0),
                                  _downPressed(0),
@@ -115,9 +117,23 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
 
     bool success = provider.create(PIN_TFT_CS, PIN_TFT_DC, PIN_TFT_RST);
 
+    if (!success)
+    {
+        if (_logger)
+        {
+            _logger->err(F("M1Shield: Failed to initialize display provider"));
+        }
+        return false;
+    }
+
     // Initialize display based on the selected type
     _screenWidth = provider.width();
     _screenHeight = provider.height();
+
+    if (_logger)
+    {
+        _logger->info(F("M1Shield: Display initialized successfully (%dx%d)"), _screenWidth, _screenHeight);
+    }
 
     return success;
 }
@@ -139,6 +155,14 @@ bool M1ShieldClass::isDisplayInitialized() const
 
 Adafruit_GFX &M1ShieldClass::getGFX()
 {
+    if (!_displayProvider)
+    {
+        if (_logger)
+        {
+            _logger->err(F("M1Shield: Attempted to get GFX without initialized display provider"));
+        }
+        // This will likely cause a crash, but at least we log it
+    }
     return _displayProvider->getGFX();
 }
 
@@ -154,14 +178,42 @@ uint16_t M1ShieldClass::getScreenHeight() const
 
 DisplayProvider &M1ShieldClass::getDisplayProvider() const
 {
+    if (!_displayProvider)
+    {
+        if (_logger)
+        {
+            _logger->err(F("M1Shield: Attempted to get display provider that is not initialized"));
+        }
+        // This will likely cause a crash, but at least we log it
+    }
     return *_displayProvider;
+}
+
+void M1ShieldClass::setLogger(ILogger &logger)
+{
+    _logger = &logger;
+}
+
+ILogger *M1ShieldClass::getLogger() const
+{
+    return _logger;
 }
 
 bool M1ShieldClass::display()
 {
     if (_displayProvider)
     {
-        return _displayProvider->display();
+        bool result = _displayProvider->display();
+        if (!result && _logger)
+        {
+            _logger->warn(F("M1Shield: Display update failed"));
+        }
+        return result;
+    }
+
+    if (_logger)
+    {
+        _logger->warn(F("M1Shield: Attempted to update display without initialized display provider"));
     }
     return false;
 }
@@ -178,18 +230,62 @@ uint16_t M1ShieldClass::convertColor(uint16_t color)
 bool M1ShieldClass::setScreen(Screen *screen)
 {
     if (!screen)
+    {
+        if (_logger)
+        {
+            _logger->warn(F("M1Shield: Attempted to set null screen"));
+        }
         return false;
+    }
 
     // Free up the old screen to avoid memory leaks
     if (_screen)
     {
+        if (_logger)
+        {
+            // Try to get title context if this is a ContentScreen
+            ContentScreen *contentScreen = dynamic_cast<ContentScreen *>(_screen);
+            if (contentScreen && contentScreen->getTitle())
+            {
+                _logger->info(F("M1Shield: Closing screen '%s'"), contentScreen->getTitle());
+            }
+            else
+            {
+                _logger->info(F("M1Shield: Closing current screen"));
+            }
+        }
+
         _screen->close();
         delete _screen;
         _screen = nullptr;
     }
 
+    // Automatically propagate logger from M1Shield to screen if screen doesn't have one
+    if (_logger && !screen->getLogger())
+    {
+        screen->setLogger(*_logger);
+    }
+
+    // Log new screen opening with context if available
+    if (_logger)
+    {
+        ContentScreen *contentScreen = dynamic_cast<ContentScreen *>(screen);
+        if (contentScreen && contentScreen->getTitle())
+        {
+            _logger->info(F("M1Shield: Opening screen '%s'"), contentScreen->getTitle());
+        }
+        else
+        {
+            _logger->info(F("M1Shield: Opening new screen"));
+        }
+    }
+
     if (!screen->open())
     {
+        if (_logger)
+        {
+            _logger->err(F("M1Shield: Failed to open new screen"));
+        }
         // Screen failed to open, clean up
         delete screen;
         _screen = nullptr;
@@ -197,6 +293,12 @@ bool M1ShieldClass::setScreen(Screen *screen)
     }
 
     _screen = screen;
+
+    if (_logger)
+    {
+        _logger->info(F("M1Shield: Screen transition completed successfully"));
+    }
+
     return true;
 }
 

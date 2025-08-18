@@ -51,7 +51,7 @@ void DataBus::writeData(uint8_t data)
   if (!_writable)
   {
     if (_logger)
-      _logger->err("Data bus is not writable.");
+      _logger->err(F("Data bus is not writable."));
     return;
   }
   Model1LowLevel::writeDataBus(data);
@@ -80,7 +80,15 @@ void DataBus::setAsWritable()
 char *DataBus::getState()
 {
   const int LEN = 20;
-  char *buffer = new char[LEN];
+  char *buffer = (char *)malloc(LEN);
+  if (!buffer)
+  {
+    if (_logger)
+    {
+      _logger->err(F("DataBus: Failed to allocate memory for state string"));
+    }
+    return nullptr;
+  }
   char dataChars[9];
   uint8_t dataConfig = Model1LowLevel::configReadDataBus();
   uint8_t data = Model1LowLevel::readDataBus();

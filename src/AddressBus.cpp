@@ -50,7 +50,7 @@ void AddressBus::writeMemoryAddress(uint16_t address)
     if (!_writable)
     {
         if (_logger)
-            _logger->err("Address bus is not writable.");
+            _logger->err(F("Address bus is not writable."));
         return;
     }
     Model1LowLevel::writeAddressBus(address);
@@ -71,7 +71,7 @@ void AddressBus::writeIOAddress(uint8_t address)
     if (!_writable)
     {
         if (_logger)
-            _logger->err("IO address bus is not writable.");
+            _logger->err(F("IO address bus is not writable."));
         return;
     }
     Model1LowLevel::writeAddressBus(address);
@@ -100,7 +100,15 @@ void AddressBus::setAsWritable()
 char *AddressBus::getState()
 {
     const int LEN = 31;
-    char *buffer = new char[LEN];
+    char *buffer = (char *)malloc(LEN);
+    if (!buffer)
+    {
+        if (_logger)
+        {
+            _logger->err(F("AddressBus: Failed to allocate memory for state string"));
+        }
+        return nullptr;
+    }
     char addrChars[17];
     uint16_t addrConfig = Model1LowLevel::configReadAddressBus();
     uint16_t addr = Model1LowLevel::readAddressBus();

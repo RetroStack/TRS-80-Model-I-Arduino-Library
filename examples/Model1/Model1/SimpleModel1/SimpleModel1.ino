@@ -119,7 +119,7 @@ void demonstrateMemoryBlockOperations()
         Serial.print((char)readData[i]);
     }
     Serial.println();
-    delete[] readData; // Clean up allocated memory
+    free(readData); // Clean up allocated memory
 
     // Demonstrate fill operation
     Serial.println(F("Filling 10 bytes with 'A' character..."));

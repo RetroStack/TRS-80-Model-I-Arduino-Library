@@ -8,6 +8,7 @@
 #define SCREEN_H
 
 #include <Arduino.h>
+#include "ILogger.h"
 
 // Input action enumeration using bit flags for combining multiple simultaneous actions
 enum ActionTaken : uint16_t
@@ -49,7 +50,8 @@ enum ActionTaken : uint16_t
 class Screen
 {
 private:
-    bool _active; // Track whether this screen is currently active // Track whether this screen is currently active
+    bool _active;     // Track whether this screen is currently active
+    ILogger *_logger; // Logger instance for debugging output
 
 protected:
     virtual void _drawScreen() = 0; // Pure virtual method for initial screen rendering
@@ -58,6 +60,9 @@ public:
     Screen();                    // Default constructor initializes screen in inactive state
     virtual ~Screen() = default; // Virtual destructor ensures proper cleanup of derived classes
     bool isSmallDisplay() const; // Check if the current display is considered small (height <= 128 pixels)
+
+    void setLogger(ILogger &logger); // Set logger for debugging output
+    ILogger *getLogger() const;      // Get logger instance
 
     bool isActive() const; // Check if this screen is currently active
 

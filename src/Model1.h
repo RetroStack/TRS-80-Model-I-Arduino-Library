@@ -85,7 +85,7 @@ public:
     // ---------- Memory
     uint8_t readMemory(uint16_t address);             // Read byte from memory
     void writeMemory(uint16_t address, uint8_t data); // Write byte to memory
-    // Returns a newly allocated buffer; caller must delete[] the result
+    // Returns a newly allocated buffer; caller must free() the result
     uint8_t *readMemory(uint16_t address, uint16_t length);                                             // Read memory block
     void writeMemory(uint16_t address, uint8_t *data, uint16_t length);                                 // Write memory block
     void writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint16_t offset);                // Write memory block with offset

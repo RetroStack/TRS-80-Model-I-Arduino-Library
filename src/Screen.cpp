@@ -12,12 +12,25 @@
 Screen::Screen()
 {
     _active = false;
+    _logger = nullptr;
 }
 
 // Check if screen is currently active
 bool Screen::isActive() const
 {
     return _active;
+}
+
+// Set logger for debugging output
+void Screen::setLogger(ILogger &logger)
+{
+    _logger = &logger;
+}
+
+// Get logger instance
+ILogger *Screen::getLogger() const
+{
+    return _logger;
 }
 
 // Activate screen and perform initial setup

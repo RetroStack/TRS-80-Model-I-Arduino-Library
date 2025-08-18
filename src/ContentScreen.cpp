@@ -310,6 +310,10 @@ void ContentScreen::setButtonItemsF(const __FlashStringHelper **buttonItems, uin
     char **stringArray = (char **)malloc(buttonItemCount * sizeof(char *));
     if (stringArray == nullptr)
     {
+        if (getLogger())
+        {
+            getLogger()->err(F("ContentScreen: Failed to allocate memory for button items array"));
+        }
         clearButtonItems();
         return;
     }
@@ -330,6 +334,10 @@ void ContentScreen::setButtonItemsF(const __FlashStringHelper **buttonItems, uin
             if (stringArray[i] != nullptr)
             {
                 strcpy_P(stringArray[i], (const char *)buttonItems[i]);
+            }
+            else if (getLogger())
+            {
+                getLogger()->err(F("ContentScreen: Failed to allocate memory for button item %d"), i);
             }
         }
     }
@@ -375,8 +383,16 @@ void ContentScreen::setButtonItems(const char **buttonItems, uint8_t buttonItemC
                     {
                         strcpy(_buttonItems[i], buttonItems[i]); // Safe because we allocated exact size needed
                     }
+                    else if (getLogger())
+                    {
+                        getLogger()->err(F("ContentScreen: Failed to allocate memory for button label %d"), i);
+                    }
                 }
             }
+        }
+        else if (getLogger())
+        {
+            getLogger()->err(F("ContentScreen: Failed to allocate memory for button items array"));
         }
     }
 
@@ -431,6 +447,10 @@ void ContentScreen::setTitle(const char *title)
         {
             strcpy(_title, title); // Safe because we allocated exact size needed
         }
+        else if (getLogger())
+        {
+            getLogger()->err(F("ContentScreen: Failed to allocate memory for title"));
+        }
     }
 
     // Update header immediately if screen is active
@@ -462,6 +482,10 @@ void ContentScreen::setTitleF(const __FlashStringHelper *title)
     char *buffer = (char *)malloc(len + 1);
     if (buffer == nullptr)
     {
+        if (getLogger())
+        {
+            getLogger()->err(F("ContentScreen: Failed to allocate memory for flash title"));
+        }
         clearTitle();
         return;
     }
@@ -618,6 +642,11 @@ void ContentScreen::notify(const char *text, unsigned long durationMs)
     if (text == nullptr)
         return;
 
+    if (getLogger())
+    {
+        getLogger()->info(F("ContentScreen: Showing notification '%s' for %lu ms"), text, durationMs);
+    }
+
     // Clear any existing notification
     _clearNotification();
 
@@ -625,7 +654,13 @@ void ContentScreen::notify(const char *text, unsigned long durationMs)
     size_t len = strlen(text);
     _notificationText = (char *)malloc(len + 1);
     if (_notificationText == nullptr)
+    {
+        if (getLogger())
+        {
+            getLogger()->err(F("ContentScreen: Failed to allocate memory for notification"));
+        }
         return; // Failed allocation
+    }
 
     strcpy(_notificationText, text);
 
@@ -756,6 +791,11 @@ void ContentScreen::alert(const char *text)
     // Clear any existing notification to prevent conflicts
     _clearNotification();
 
+    if (getLogger())
+    {
+        getLogger()->info(F("ContentScreen: Showing alert '%s'"), text);
+    }
+
     // Draw the alert dialog
     _drawAlert(text);
     M1Shield.display();
@@ -771,6 +811,11 @@ void ContentScreen::alert(const char *text)
         }
 
         delay(10); // Small delay to prevent excessive CPU usage
+    }
+
+    if (getLogger())
+    {
+        getLogger()->info(F("ContentScreen: Alert confirmed"));
     }
 
     // Restore the footer efficiently (no need for full screen refresh)
@@ -795,7 +840,13 @@ void ContentScreen::alertF(const __FlashStringHelper *text)
     size_t len = strlen_P((const char *)text);
     char *buffer = (char *)malloc(len + 1);
     if (buffer == nullptr)
+    {
+        if (getLogger())
+        {
+            getLogger()->err(F("ContentScreen: Failed to allocate memory for flash alert text"));
+        }
         return; // Failed allocation
+    }
 
     strcpy_P(buffer, (const char *)text);
 
@@ -814,6 +865,11 @@ ConfirmResult ContentScreen::confirm(const char *text, const char *leftText, con
     // Clear any existing notification to prevent conflicts
     _clearNotification();
 
+    if (getLogger())
+    {
+        getLogger()->info(F("ContentScreen: Showing confirmation dialog '%s' with buttons '%s' and '%s'"), text, leftText, rightText);
+    }
+
     // Draw the confirmation dialog
     _drawConfirm(text, leftText, rightText);
     M1Shield.display();
@@ -825,6 +881,11 @@ ConfirmResult ContentScreen::confirm(const char *text, const char *leftText, con
 
         if (M1Shield.wasLeftPressed())
         {
+            if (getLogger())
+            {
+                getLogger()->info(F("ContentScreen: Confirmed with left button '%s'"), leftText);
+            }
+
             // Restore the footer efficiently and return left choice
             Adafruit_GFX &gfx = M1Shield.getGFX();
             gfx.startWrite();
@@ -835,6 +896,11 @@ ConfirmResult ContentScreen::confirm(const char *text, const char *leftText, con
         }
         else if (M1Shield.wasRightPressed())
         {
+            if (getLogger())
+            {
+                getLogger()->info(F("ContentScreen: Confirmed with right button '%s'"), rightText);
+            }
+
             // Restore the footer efficiently and return right choice
             Adafruit_GFX &gfx = M1Shield.getGFX();
             gfx.startWrite();
@@ -870,6 +936,11 @@ ConfirmResult ContentScreen::confirmF(const __FlashStringHelper *text, const __F
 
     if (textBuffer == nullptr || leftBuffer == nullptr || rightBuffer == nullptr)
     {
+        if (getLogger())
+        {
+            getLogger()->err(F("ContentScreen: Failed to allocate memory for flash confirm dialog"));
+        }
+
         // Free any successfully allocated buffers before returning
         if (textBuffer)
             free(textBuffer);

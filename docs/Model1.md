@@ -106,7 +106,7 @@ if (Model1.isVideoAddress(0x3C00)) {
 - **`uint8_t readMemory(uint16_t address)`** - Read single byte from memory
 - **`uint8_t* readMemory(uint16_t address, uint16_t length)`** - Read block from memory (heap-allocated buffer)
 
-_(Remember to `delete[]` the buffer returned by block read.)_
+_(Remember to `free()` the buffer returned by block read.)_
 
 ### Write Memory
 
@@ -177,7 +177,7 @@ The `getStateData()` function returns all TRS-80 system state in a single 64-bit
 
 ```
 Bits 63-48: Address Bus (16 bits)
-Bits 47-40: Data Bus (8 bits)  
+Bits 47-40: Data Bus (8 bits)
 Bits 39-32: Memory Control Signals (8 bits)
   - Bit 39: RAS (Row Address Strobe)
   - Bit 38: CAS (Column Address Strobe)
@@ -330,5 +330,5 @@ void loop() {
 ## Notes
 
 - Always call `activateTestSignal()` before memory or I/O operations.
-- Remember to `delete[]` buffers returned by `readMemory()` block operations.
+- Remember to `free()` buffers returned by `readMemory()` block operations.
 - Use proper timer interrupt handlers when enabling memory refresh.

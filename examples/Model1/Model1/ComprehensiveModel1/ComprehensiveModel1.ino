@@ -167,7 +167,7 @@ void demonstrateAdvancedMemoryOperations()
     Serial.println(dataIntact ? F("PASS") : F("FAIL"));
 
     delete[] testPattern;
-    delete[] readBack;
+    free(readBack);
 }
 
 void demonstrateAdvancedIOOperations()

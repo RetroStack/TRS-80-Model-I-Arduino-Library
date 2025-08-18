@@ -29,6 +29,12 @@ Cassette::Cassette()
     _state = CASSETTE_DEFAULT_STATE;
 }
 
+// Set logger for debugging output
+void Cassette::setLogger(ILogger &logger)
+{
+    _logger = &logger;
+}
+
 // Read cassette input status
 uint8_t Cassette::_read()
 {
@@ -125,6 +131,26 @@ bool Cassette::readRaw()
 
 void Cassette::play(uint16_t frequency, uint32_t durationMs)
 {
+    if (frequency == 0)
+    {
+        if (_logger)
+            _logger->err(F("Cassette: Invalid frequency 0 Hz - cannot play"));
+        return;
+    }
+
+    if (frequency > 10000)
+    {
+        if (_logger)
+            _logger->warn(F("Cassette: High frequency %d Hz may not be suitable for cassette playback"), frequency);
+    }
+
+    if (durationMs == 0)
+    {
+        if (_logger)
+            _logger->warn(F("Cassette: Duration 0ms - no output generated"));
+        return;
+    }
+
     update();
 
     uint32_t halfPeriod = 500000UL / frequency;
