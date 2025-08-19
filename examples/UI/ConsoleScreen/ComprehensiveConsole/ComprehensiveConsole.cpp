@@ -31,7 +31,7 @@ ComprehensiveConsole::ComprehensiveConsole() : ConsoleScreen()
     }
 
     // Configure console with advanced settings
-    setTitle(F("Comprehensive Console"));
+    setTitleF(F("Comprehensive Console"));
     setConsoleBackground(M1Shield.convertColor(0x0008)); // Very dark blue
     setTextColor(M1Shield.convertColor(0xFFFF));         // White text
     setTextSize(1);
@@ -470,7 +470,7 @@ void ComprehensiveConsole::showPerformanceStats()
     println();
 }
 
-Screen *ComprehensiveConsole::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)
+Screen *ComprehensiveConsole::actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY)
 {
     if (action & BUTTON_UP)
     {

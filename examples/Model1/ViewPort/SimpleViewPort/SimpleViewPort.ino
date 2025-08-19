@@ -79,8 +79,8 @@ void demonstrateViewportBoundaries()
     video.print(0, 0, "+-----------------------------------------+");
     for (int row = 1; row < 9; row++)
     {
-        video.print(0, row, "|");
-        video.print(43, row, "|");
+        video.print(0, row, "I");
+        video.print(43, row, "I");
     }
     video.print(0, 9, "+-----------------------------------------+");
 
@@ -138,6 +138,7 @@ void demonstrateViewportClipping()
 
 void demonstrateViewportScrolling()
 {
+    // TODO: There is a bug in the viewport scrolling
     video.cls();
 
     video.println("SCROLLING IN VIEWPORT:");

@@ -11,19 +11,30 @@ LifecycleDemoScreen::LifecycleDemoScreen()
 {
     // Set the screen title
     setTitle("Lifecycle Demo");
-    
+
     // Initialize lifecycle state
     memset(&lifecycleState, 0, sizeof(lifecycleState));
     lifecycleState.currentState = "Created";
+    lifecycleState.needsFullRedraw = true;
+    lifecycleState.lastDisplayUpdate = 0;
 }
 
 bool LifecycleDemoScreen::open()
 {
+    // CRITICAL: Call base class open() first to set _active flag and perform initialization
+    bool result = Screen::open();
+    if (!result)
+    {
+        Serial.println("ERROR: Base Screen::open() failed!");
+        return false;
+    }
+
     lifecycleState.openTime = millis();
     lifecycleState.openCount++;
     lifecycleState.isCurrentlyOpen = true;
     lifecycleState.lastStateChange = lifecycleState.openTime;
     lifecycleState.currentState = "Open";
+    lifecycleState.needsFullRedraw = true; // Force full redraw on open
 
     Serial.println("=== LifecycleDemoScreen::open() ===");
     Serial.print("Open count: ");
@@ -64,21 +75,40 @@ void LifecycleDemoScreen::close()
 
     // Simulate resource cleanup
     simulateResourceCleanup();
+
+    // CRITICAL: Call base class close() to properly deactivate the screen
+    Screen::close();
 }
 
 void LifecycleDemoScreen::_drawScreen()
 {
-    int startY = isSmallDisplay() ? 25 : 80;
+    if (!isActive())
+        return;
 
-    drawLifecycleStatus();
+    // Get access to the display
+    Adafruit_GFX &gfx = M1Shield.getGFX();
 
-    if (!isSmallDisplay())
+    // Only do full screen redraw when necessary
+    if (lifecycleState.needsFullRedraw)
     {
-        drawResourceUsage();
-        drawStateHistory();
-    }
+        // Clear the entire screen
+        gfx.fillScreen(M1Shield.convertColor(0x0000)); // Black background
 
-    updateLifecycleStats();
+        drawLifecycleStatus();
+
+        if (!isSmallDisplay())
+        {
+            drawResourceUsage();
+            drawStateHistory();
+        }
+
+        lifecycleState.needsFullRedraw = false;
+    }
+    else
+    {
+        // Just update the dynamic parts
+        updateLifecycleDisplay();
+    }
 }
 
 void LifecycleDemoScreen::loop()
@@ -91,9 +121,17 @@ void LifecycleDemoScreen::loop()
     {
         simulatedMemoryUsage = (simulatedMemoryUsage + 1) % 1000;
     }
+
+    // Refresh display periodically to show updates
+    unsigned long currentTime = millis();
+    if (currentTime - lifecycleState.lastDisplayUpdate > 500) // Update every 500ms
+    {
+        lifecycleState.lastDisplayUpdate = currentTime;
+        refresh(); // This will trigger _drawScreen() which will call updateLifecycleDisplay()
+    }
 }
 
-Screen *LifecycleDemoScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)
+Screen *LifecycleDemoScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY)
 {
     Serial.println("=== LifecycleDemoScreen Input ===");
     Serial.print("Action while state is: ");
@@ -130,6 +168,7 @@ Screen *LifecycleDemoScreen::actionTaken(ActionTaken action, uint8_t offsetX, ui
         simulateResourceCleanup();
         delay(100); // Simulate cleanup time
         simulateResourceAllocation();
+        lifecycleState.needsFullRedraw = true; // Force full redraw after resource change
     }
 
     if (action & BUTTON_RIGHT)
@@ -143,6 +182,7 @@ Screen *LifecycleDemoScreen::actionTaken(ActionTaken action, uint8_t offsetX, ui
         {
             simulateResourceAllocation();
         }
+        lifecycleState.needsFullRedraw = true; // Force full redraw after resource change
     }
 
     refresh();
@@ -247,6 +287,51 @@ void LifecycleDemoScreen::drawStateHistory()
     display.print("UP/DOWN: Memory  LEFT: Reset  RIGHT: Toggle");
 }
 
+void LifecycleDemoScreen::updateLifecycleDisplay()
+{
+    // Get access to the display
+    Adafruit_GFX &display = M1Shield.getGFX();
+
+    int y = isSmallDisplay() ? 25 : 80;
+
+    // Clear and update the dynamic session time area
+    if (lifecycleState.isCurrentlyOpen)
+    {
+        // Clear the session time line
+        display.fillRect(10, y + 45, 200, 10, M1Shield.convertColor(0x0000)); // Black
+
+        // Draw updated session time
+        display.setTextSize(1);
+        display.setTextColor(M1Shield.convertColor(0xFFFF));
+        display.setCursor(10, y + 45);
+        display.print("Session: ");
+        unsigned long currentSessionTime = millis() - lifecycleState.openTime;
+        display.print(currentSessionTime);
+        display.print("ms");
+    }
+
+    // Update memory usage bar if resources are allocated and we're on large display
+    if (!isSmallDisplay() && resourcesAllocated)
+    {
+        int resourceY = 150;
+
+        // Clear and redraw memory usage line
+        display.fillRect(10, resourceY + 15, 200, 10, M1Shield.convertColor(0x0000)); // Black
+        display.setTextSize(1);
+        display.setTextColor(M1Shield.convertColor(0xFFFF));
+        display.setCursor(10, resourceY + 15);
+        display.print("Memory: ");
+        display.print(simulatedMemoryUsage);
+        display.print(" bytes");
+
+        // Clear and redraw memory bar
+        display.fillRect(10, resourceY + 30, 200, 10, M1Shield.convertColor(0x0000)); // Clear bar area
+        int barWidth = (simulatedMemoryUsage * 200) / 2000;
+        display.drawRect(10, resourceY + 30, 200, 10, M1Shield.convertColor(0xFFFF));
+        display.fillRect(10, resourceY + 30, barWidth, 10, M1Shield.convertColor(0x07E0));
+    }
+}
+
 void LifecycleDemoScreen::simulateResourceAllocation()
 {
     if (!resourcesAllocated)
@@ -289,6 +374,8 @@ void LifecycleDemoScreen::updateLifecycleStats()
         {
             lastUpdate = currentTime;
             // Could update average session time, etc.
+            // Note: The actual display update happens in updateLifecycleDisplay()
+            // which is called from _drawScreen() when refresh() is called from loop()
         }
     }
 }

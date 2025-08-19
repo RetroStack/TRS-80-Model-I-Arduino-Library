@@ -72,7 +72,7 @@ void loop()
 
 void demonstrateMultipleViewports()
 {
-    Serial.println(F("\\n--- Multiple Viewport Demonstration ---"));
+    Serial.println(F("--- Multiple Viewport Demonstration ---"));
 
     // Start with full screen viewport
     video.setViewPort(fullScreen);
@@ -105,7 +105,7 @@ void demonstrateMultipleViewports()
 
 void demonstrateAdvancedViewportOperations()
 {
-    Serial.println(F("\\n--- Advanced ViewPort Operations ---"));
+    Serial.println(F("--- Advanced ViewPort Operations ---"));
 
     // Work in main window
     video.setViewPort(mainWindow);
@@ -139,10 +139,13 @@ void demonstrateAdvancedViewportOperations()
     video.print(5, 8, "READ THIS TEXT");
     char *readText = video.read(5, 8, 4, false);
     video.print(0, 9, "READ: '");
-    if (readText) {
+    if (readText)
+    {
         video.print(readText);
         free(readText);
-    } else {
+    }
+    else
+    {
         video.print("ERROR");
     }
     video.println("'");
@@ -152,7 +155,7 @@ void demonstrateAdvancedViewportOperations()
 
 void demonstrateViewportAnalysis()
 {
-    Serial.println(F("\\n--- ViewPort Analysis ---"));
+    Serial.println(F("--- ViewPort Analysis ---"));
 
     video.setViewPort(mainWindow);
     video.cls();
@@ -193,7 +196,7 @@ void demonstrateViewportAnalysis()
 
 void demonstrateDynamicViewportSwitching()
 {
-    Serial.println(F("\\n--- Dynamic ViewPort Switching ---"));
+    Serial.println(F("--- Dynamic ViewPort Switching ---"));
 
     // Animate viewport size changes
     for (int size = 10; size <= 50; size += 5)
@@ -229,7 +232,7 @@ void demonstrateDynamicViewportSwitching()
 
 void demonstrateViewportMemoryOperations()
 {
-    Serial.println(F("\\n--- ViewPort Memory Operations ---"));
+    Serial.println(F("--- ViewPort Memory Operations ---"));
 
     video.setViewPort(smallWindow);
     video.cls();
@@ -238,10 +241,7 @@ void demonstrateViewportMemoryOperations()
     video.cls("AB");
     delay(1000);
 
-    // Read memory from current viewport area
-    Model1.activateTestSignal();
-
-    Serial.println(F("\\nViewPort Memory Contents:"));
+    Serial.println(F("ViewPort Memory Contents:"));
     for (uint8_t y = 0; y < video.getHeight(); y++)
     {
         Serial.print(F("Row "));
@@ -262,8 +262,6 @@ void demonstrateViewportMemoryOperations()
         Serial.println();
     }
 
-    Model1.deactivateTestSignal();
-
     // Show memory address mapping
     video.cls();
     video.println("MEMORY MAPPING:");
@@ -280,7 +278,7 @@ void demonstrateViewportMemoryOperations()
 
 void demonstrateViewportEdgeCases()
 {
-    Serial.println(F("\\n--- ViewPort Edge Cases ---"));
+    Serial.println(F("--- ViewPort Edge Cases ---"));
 
     // Test minimum viewport
     ViewPort miniViewPort = {30, 8, 4, 2};
@@ -300,7 +298,7 @@ void demonstrateViewportEdgeCases()
     // Test viewport at screen edges
     ViewPort rightEdge = {63, 0, 1, 16};
     video.setViewPort(rightEdge);
-    video.cls('|');
+    video.cls('I');
     delay(1000);
 
     ViewPort bottomEdge = {0, 15, 64, 1};
@@ -349,8 +347,8 @@ void drawBorder(const char *title)
     // Draw side borders
     for (int y = 1; y < video.getHeight() - 1; y++)
     {
-        video.print(0, y, "|");
-        video.print(video.getWidth() - 1, y, "|");
+        video.print(0, y, "I");
+        video.print(video.getWidth() - 1, y, "I");
     }
 
     // Draw bottom border

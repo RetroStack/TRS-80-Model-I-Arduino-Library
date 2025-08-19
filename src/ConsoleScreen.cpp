@@ -139,11 +139,11 @@ void ConsoleScreen::loop()
 }
 
 // Handle user input actions
-Screen *ConsoleScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)
+Screen *ConsoleScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY)
 {
     (void)offsetX; // Parameter not used in console screen
     (void)offsetY; // Parameter not used in console screen
-    
+
     if (!isActive())
     {
         return nullptr;

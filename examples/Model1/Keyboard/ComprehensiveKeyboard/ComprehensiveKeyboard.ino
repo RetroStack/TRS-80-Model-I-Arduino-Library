@@ -91,7 +91,7 @@ void demonstrateAdvancedKeyboardAnalysis()
         {
             handleKeyPress(keyValue);
         }
-        else if (it.wasJustReleased())
+        else if (it.wasReleased())
         {
             handleKeyRelease(keyValue);
         }
@@ -319,7 +319,7 @@ void demonstrateTypingAnalysis()
         float keysPerMinute = (float)(stats.totalKeyPresses * 60000) / sessionTime;
         float keysPerSecond = (float)stats.totalKeyPresses / (sessionTime / 1000.0);
 
-        Serial.println(F("\\n--- Typing Analysis ---"));
+        Serial.println(F("--- Typing Analysis ---"));
         Serial.print(F("Keys per minute: "));
         Serial.println(keysPerMinute, 1);
         Serial.print(F("Keys per second: "));
@@ -355,7 +355,7 @@ void demonstrateKeyboardDiagnostics()
     // Perform diagnostics every 10 seconds
     if (currentTime - lastDiagnostic > 10000)
     {
-        Serial.println(F("\\n--- Keyboard Diagnostics ---"));
+        Serial.println(F("--- Keyboard Diagnostics ---"));
 
         // Check keyboard responsiveness
         unsigned long timeSinceLastKey = currentTime - stats.lastKeyTime;
@@ -409,7 +409,7 @@ void displayPeriodicStatistics()
     {
         unsigned long sessionTime = currentTime - stats.sessionStart;
 
-        Serial.println(F("\\n=== Session Statistics ==="));
+        Serial.println(F("=== Session Statistics ==="));
         Serial.print(F("Session time: "));
         Serial.print(sessionTime / 1000);
         Serial.println(F(" seconds"));

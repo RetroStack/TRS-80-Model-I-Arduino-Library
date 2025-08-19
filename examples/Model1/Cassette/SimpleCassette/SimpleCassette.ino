@@ -140,23 +140,6 @@ void demonstrateRemoteControl()
     Serial.println(F("(This would typically stop a cassette motor)"));
     delay(1000);
 
-    // Demonstrate rapid on/off cycling
-    Serial.println(F("Demonstrating remote control cycling:"));
-    for (int cycle = 1; cycle <= 3; cycle++)
-    {
-        Serial.print(F("Cycle "));
-        Serial.print(cycle);
-        Serial.println(F(": ON"));
-        cassette.activateRemote();
-        delay(500);
-
-        Serial.print(F("Cycle "));
-        Serial.print(cycle);
-        Serial.println(F(": OFF"));
-        cassette.deactivateRemote();
-        delay(500);
-    }
-
     Serial.println(F("Remote control demonstration complete"));
     Serial.println();
 }

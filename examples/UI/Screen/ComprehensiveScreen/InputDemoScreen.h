@@ -1,7 +1,23 @@
 /*
  * InputDemoScreen.h
  *
- * Demonstrates ALL input handling capabilities of the Screen class:
+ * Demonstrates ALL inprivate:
+    // Organized layout methods - each handles small/large display logic internally
+    void drawControllerLayout(); // Button layout (compact for small, full for large)
+    void drawJoystickArea();     // Joystick visualization (text for small, visual for large)
+    void drawStatusArea();       // Status and information area
+
+    // Selective update methods for performance optimization
+    void updateAfterInput(ActionTaken action, int8_t offsetX, int8_t offsetY);
+    void updateButtonVisuals();   // Update only button area
+    void updateJoystickVisual();  // Update only joystick area
+    void updateStatusVisual();    // Update only status area
+
+    // Utility methods
+    void drawButton(int x, int y, int w, int h, const char *label, bool pressed, uint16_t pressedColor);
+    void resetButtonColors();
+    uint16_t getActionColor(ActionTaken action);
+    const char *getActionName(ActionTaken action);lities of the Screen class:
  * - All button types (MENU, LEFT, RIGHT, UP, DOWN, JOYSTICK)
  * - All joystick directions including diagonals
  * - Analog joystick offset values (offsetX, offsetY)
@@ -44,14 +60,25 @@ public:
 
     void _drawScreen() override;
     void loop() override;
-    Screen *actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override;
+    Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override;
     bool open() override;
 
 private:
-    void drawInputStatus();
-    void drawJoystickVisualization();
-    void drawButtonStatus();
-    void drawInputHistory();
+    // New organized layout methods
+    void drawCompactLayout();    // For small displays
+    void drawControllerLayout(); // Button layout like a real controller
+    void drawJoystickArea();     // Prominent joystick visualization
+    void drawStatusArea();       // Status and information area
+
+    // Selective update methods for performance optimization
+    void updateAfterInput(ActionTaken action, int8_t offsetX, int8_t offsetY);
+    void updateCompactStatus();  // Update only compact status area
+    void updateButtonVisuals();  // Update only button area
+    void updateJoystickVisual(); // Update only joystick area
+    void updateStatusVisual();   // Update only status area
+
+    // Utility methods
+    void drawButton(int x, int y, int w, int h, const char *label, bool pressed, uint16_t pressedColor);
     void resetButtonColors();
     uint16_t getActionColor(ActionTaken action);
     const char *getActionName(ActionTaken action);

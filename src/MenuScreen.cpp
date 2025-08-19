@@ -104,7 +104,7 @@ uint8_t MenuScreen::_findNextEnabledItem(uint8_t startIndex, bool forward) const
 // Input Handling and Navigation
 
 // Handle user input actions and navigation
-Screen *MenuScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)
+Screen *MenuScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY)
 {
     if (!isActive())
     {
@@ -122,11 +122,11 @@ Screen *MenuScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t off
             {
                 if (selectedIndex < _menuItemCount && _menuItems[selectedIndex])
                 {
-                    getLogger()->info(F("MenuScreen: Selecting menu item %d: '%s'"), selectedIndex, _menuItems[selectedIndex]);
+                    getLogger()->infoF(F("MenuScreen: Selecting menu item %d: '%s'"), selectedIndex, _menuItems[selectedIndex]);
                 }
                 else
                 {
-                    getLogger()->info(F("MenuScreen: Selecting menu item %d"), selectedIndex);
+                    getLogger()->infoF(F("MenuScreen: Selecting menu item %d"), selectedIndex);
                 }
             }
             return _getSelectedMenuItemScreen(selectedIndex);
@@ -134,7 +134,7 @@ Screen *MenuScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t off
         // If current item is disabled, don't activate it
         if (getLogger())
         {
-            getLogger()->warn(F("MenuScreen: Attempted to select disabled menu item %d"), selectedIndex);
+            getLogger()->warnF(F("MenuScreen: Attempted to select disabled menu item %d"), selectedIndex);
         }
         return nullptr;
     }
@@ -150,11 +150,11 @@ Screen *MenuScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t off
             {
                 if (selectedIndex < _menuItemCount && _menuItems[selectedIndex])
                 {
-                    getLogger()->info(F("MenuScreen: Selecting menu item %d: '%s'"), selectedIndex, _menuItems[selectedIndex]);
+                    getLogger()->infoF(F("MenuScreen: Selecting menu item %d: '%s'"), selectedIndex, _menuItems[selectedIndex]);
                 }
                 else
                 {
-                    getLogger()->info(F("MenuScreen: Selecting menu item %d"), selectedIndex);
+                    getLogger()->infoF(F("MenuScreen: Selecting menu item %d"), selectedIndex);
                 }
             }
             return _getSelectedMenuItemScreen(selectedIndex);
@@ -162,7 +162,7 @@ Screen *MenuScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t off
         // If current item is disabled, don't activate it
         if (getLogger())
         {
-            getLogger()->warn(F("MenuScreen: Attempted to select disabled menu item %d"), selectedIndex);
+            getLogger()->warnF(F("MenuScreen: Attempted to select disabled menu item %d"), selectedIndex);
         }
         return nullptr;
     }
@@ -172,7 +172,7 @@ Screen *MenuScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t off
     {
         if (getLogger())
         {
-            getLogger()->info(F("MenuScreen: Exiting menu via menu button"));
+            getLogger()->infoF(F("MenuScreen: Exiting menu via menu button"));
         }
         return _getSelectedMenuItemScreen(-1);
     }
@@ -460,7 +460,7 @@ void MenuScreen::setMenuItemsF(const __FlashStringHelper **menuItems, uint8_t me
     {
         if (getLogger())
         {
-            getLogger()->err(F("MenuScreen: Failed to allocate memory for flash menu items array"));
+            getLogger()->errF(F("MenuScreen: Failed to allocate memory for flash menu items array"));
         }
         clearMenuItems();
         return; // Allocation failed
@@ -490,7 +490,7 @@ void MenuScreen::setMenuItemsF(const __FlashStringHelper **menuItems, uint8_t me
                 }
                 else if (getLogger())
                 {
-                    getLogger()->err(F("MenuScreen: Failed to allocate memory for flash menu item %d"), i);
+                    getLogger()->errF(F("MenuScreen: Failed to allocate memory for flash menu item %d"), i);
                 }
             }
         }
@@ -526,7 +526,7 @@ void MenuScreen::setMenuItems(const char **menuItems, uint8_t menuItemCount)
     {
         if (getLogger())
         {
-            getLogger()->err(F("MenuScreen: Failed to allocate memory for menu items array"));
+            getLogger()->errF(F("MenuScreen: Failed to allocate memory for menu items array"));
         }
         return; // Allocation failed
     }
@@ -553,7 +553,7 @@ void MenuScreen::setMenuItems(const char **menuItems, uint8_t menuItemCount)
             }
             else if (getLogger())
             {
-                getLogger()->err(F("MenuScreen: Failed to allocate memory for menu item %d"), i);
+                getLogger()->errF(F("MenuScreen: Failed to allocate memory for menu item %d"), i);
             }
         }
     }
@@ -619,7 +619,7 @@ void MenuScreen::setMenuItems(String *menuItems, uint8_t menuItemCount)
             }
             else if (getLogger())
             {
-                getLogger()->err(F("MenuScreen: Failed to allocate memory for menu item %d"), i);
+                getLogger()->errF(F("MenuScreen: Failed to allocate memory for menu item %d"), i);
             }
         }
     }

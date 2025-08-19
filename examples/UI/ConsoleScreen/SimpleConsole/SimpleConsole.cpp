@@ -15,7 +15,7 @@ SimpleConsole::SimpleConsole() : ConsoleScreen()
     showingWelcome = true;
 
     // Configure console appearance
-    setTitle(F("Simple Console"));
+    setTitleF(F("Simple Console"));
     setConsoleBackground(M1Shield.convertColor(0x0000)); // Black background
     setTextColor(M1Shield.convertColor(0xFFFF));         // White text
     setTextSize(1);
@@ -120,7 +120,7 @@ void SimpleConsole::addStatusMessage()
     println(F("s"));
 }
 
-Screen *SimpleConsole::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)
+Screen *SimpleConsole::actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY)
 {
     if (action & BUTTON_MENU)
     {

@@ -200,11 +200,6 @@ void performHardwareTest()
     hardwareHealth.displayHealthy = testDisplay();
     Serial.println(hardwareHealth.displayHealthy ? "PASS" : "FAIL");
 
-    // Test input systems
-    Serial.print("  Input test: ");
-    hardwareHealth.inputHealthy = testInputs();
-    Serial.println(hardwareHealth.inputHealthy ? "PASS" : "FAIL");
-
     // Test LED functionality
     Serial.print("  LED test: ");
     hardwareHealth.ledHealthy = testLED();
@@ -223,13 +218,6 @@ bool testDisplay()
     gfx.fillRect(0, 0, 10, 10, M1Shield.convertColor(0xFFFF));
 
     return M1Shield.isDisplayInitialized();
-}
-
-bool testInputs()
-{
-    // Test that input functions are responsive
-    // This is a basic connectivity test
-    return true; // Assume healthy if no obvious failures
 }
 
 bool testLED()
@@ -636,10 +624,6 @@ void performDiagnostics()
     {
         Serial.println("STRESSED");
     }
-
-    // Memory status (simplified)
-    Serial.print("Memory Status: ");
-    Serial.println("OK");
 
     Serial.println("=============================");
 }

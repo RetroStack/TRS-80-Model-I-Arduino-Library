@@ -98,7 +98,7 @@ void Screen::setTitle(const char *title)
         }
         else if (getLogger())
         {
-            getLogger()->err(F("Screen: Failed to allocate memory for title"));
+            getLogger()->errF(F("Screen: Failed to allocate memory for title"));
         }
     }
 }
@@ -125,7 +125,7 @@ void Screen::setTitleF(const __FlashStringHelper *title)
     {
         if (getLogger())
         {
-            getLogger()->err(F("Screen: Failed to allocate memory for flash title"));
+            getLogger()->errF(F("Screen: Failed to allocate memory for flash title"));
         }
         clearTitle();
         return;

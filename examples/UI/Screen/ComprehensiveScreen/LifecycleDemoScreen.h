@@ -30,6 +30,8 @@ private:
         bool isCurrentlyOpen;
         unsigned long lastStateChange;
         String currentState;
+        bool needsFullRedraw;
+        unsigned long lastDisplayUpdate;
     } lifecycleState;
 
     // Resource usage simulation
@@ -42,7 +44,7 @@ public:
 
     void _drawScreen() override;
     void loop() override;
-    Screen *actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override;
+    Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override;
     bool open() override;
     void close() override;
 
@@ -50,6 +52,7 @@ private:
     void drawLifecycleStatus();
     void drawResourceUsage();
     void drawStateHistory();
+    void updateLifecycleDisplay();
     void simulateResourceAllocation();
     void simulateResourceCleanup();
     void updateLifecycleStats();

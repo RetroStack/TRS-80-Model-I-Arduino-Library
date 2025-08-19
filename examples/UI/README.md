@@ -166,7 +166,7 @@ Screen* MyScreen::actionTaken(ActionTaken action, uint8_t x, uint8_t y) {
 
 ```cpp
 // Use F-strings for static text to save RAM
-setTitle(F("My Application"));
+setTitleF(F("My Application"));
 println(F("Static message"));
 
 // Use regular strings for dynamic content

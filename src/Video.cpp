@@ -44,25 +44,25 @@ void Video::setViewPort(ViewPort viewPort)
   {
     viewPort.x = VIDEO_COLS - 1;
     if (_logger)
-      _logger->warn(F("X coordinate of viewport is larger than there is space. Reset to %d."), viewPort.x);
+      _logger->warnF(F("X coordinate of viewport is larger than there is space. Reset to %d."), viewPort.x);
   }
   if (viewPort.y >= VIDEO_ROWS)
   {
     viewPort.y = VIDEO_ROWS - 1;
     if (_logger)
-      _logger->warn(F("Y coordinate of viewport is larger than there is space. Reset to %d."), viewPort.y);
+      _logger->warnF(F("Y coordinate of viewport is larger than there is space. Reset to %d."), viewPort.y);
   }
   if (viewPort.x + viewPort.width > VIDEO_COLS)
   {
     viewPort.width = VIDEO_COLS - viewPort.x;
     if (_logger)
-      _logger->warn(F("Width of viewport is larger than there is space. Reset to %d."), viewPort.width);
+      _logger->warnF(F("Width of viewport is larger than there is space. Reset to %d."), viewPort.width);
   }
   if (viewPort.y + viewPort.height > VIDEO_ROWS)
   {
     viewPort.height = VIDEO_ROWS - viewPort.y;
     if (_logger)
-      _logger->warn(F("Height of viewport is larger than there is space. Reset to %d."), viewPort.height);
+      _logger->warnF(F("Height of viewport is larger than there is space. Reset to %d."), viewPort.height);
   }
 
   _viewPort = viewPort;
@@ -99,7 +99,7 @@ void Video::setX(uint8_t x)
   if (x > _viewPort.width)
   {
     if (_logger)
-      _logger->warn(F("Video: X cursor position %d out of bounds (max %d). Reset to %d."), x, _viewPort.width, _viewPort.width - 1);
+      _logger->warnF(F("Video: X cursor position %d out of bounds (max %d). Reset to %d."), x, _viewPort.width, _viewPort.width - 1);
     _cursorPositionX = _viewPort.width - 1;
   }
   else
@@ -120,7 +120,7 @@ void Video::setY(uint8_t y)
   if (y > _viewPort.height)
   {
     if (_logger)
-      _logger->warn(F("Video: Y cursor position %d out of bounds (max %d). Reset to %d."), y, _viewPort.height, _viewPort.height - 1);
+      _logger->warnF(F("Video: Y cursor position %d out of bounds (max %d). Reset to %d."), y, _viewPort.height, _viewPort.height - 1);
     _cursorPositionY = _viewPort.height - 1;
   }
   else
@@ -210,14 +210,14 @@ void Video::cls(char *characters)
   if (!characters)
   {
     if (_logger)
-      _logger->err(F("Video: cls() called with null character array"));
+      _logger->errF(F("Video: cls() called with null character array"));
     return;
   }
   uint16_t length = strlen(characters);
   if (length == 0)
   {
     if (_logger)
-      _logger->warn(F("Video: cls() called with empty character array"));
+      _logger->warnF(F("Video: cls() called with empty character array"));
     return;
   }
   cls(characters, length);
@@ -229,13 +229,13 @@ void Video::cls(char *characters, uint16_t length)
   if (!characters)
   {
     if (_logger)
-      _logger->err(F("Video: cls() called with null character array"));
+      _logger->errF(F("Video: cls() called with null character array"));
     return;
   }
   if (length == 0)
   {
     if (_logger)
-      _logger->warn(F("Video: cls() called with length 0"));
+      _logger->warnF(F("Video: cls() called with length 0"));
     return;
   }
   int i = 0;
@@ -264,7 +264,7 @@ void Video::scroll(uint8_t rows)
   if (rows == 0)
   {
     if (_logger)
-      _logger->warn(F("Video: Scroll called with 0 rows - no action taken"));
+      _logger->warnF(F("Video: Scroll called with 0 rows - no action taken"));
     return;
   }
 
@@ -272,7 +272,7 @@ void Video::scroll(uint8_t rows)
   if (rows > _viewPort.height)
   {
     if (_logger)
-      _logger->info(F("Video: Scroll rows %d exceeds viewport height %d. Capped to %d."), rows, _viewPort.height, _viewPort.height);
+      _logger->infoF(F("Video: Scroll rows %d exceeds viewport height %d. Capped to %d."), rows, _viewPort.height, _viewPort.height);
     rows = _viewPort.height;
   }
 
@@ -312,7 +312,7 @@ char *Video::read(uint8_t x, uint8_t y, uint16_t length, bool raw)
   {
     if (_logger)
     {
-      _logger->err(F("Video: Failed to allocate memory for read buffer"));
+      _logger->errF(F("Video: Failed to allocate memory for read buffer"));
     }
     return nullptr;
   }
@@ -451,7 +451,7 @@ void Video::print(uint8_t x, uint8_t y, const char *str)
   if (!str)
   {
     if (_logger)
-      _logger->err(F("Video: print() called with null string"));
+      _logger->errF(F("Video: print() called with null string"));
     return;
   }
   uint16_t length = strlen(str);
@@ -464,13 +464,13 @@ void Video::print(uint8_t x, uint8_t y, const char *str, uint16_t length)
   if (!str)
   {
     if (_logger)
-      _logger->err(F("Video: print() called with null string"));
+      _logger->errF(F("Video: print() called with null string"));
     return;
   }
   if (length == 0)
   {
     if (_logger)
-      _logger->warn(F("Video: print() called with length 0"));
+      _logger->warnF(F("Video: print() called with length 0"));
     return;
   }
   setXY(x, y);

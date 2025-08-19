@@ -1,8 +1,9 @@
 /*
  * ComprehensiveScreen.h
  *
- * Main controller for the complete Screen base class demonstration.
- * This coordinates three separate demo screens showing different Screen capabilities.
+ * Complete demonstration of Screen base class capabilities.
+ * This shows all the features available in the Screen class and acts as a menu
+ * to switch to individual demo screens.
  */
 
 #ifndef COMPREHENSIVE_SCREEN_H
@@ -11,32 +12,19 @@
 #include <Arduino.h>
 #include <Screen.h>
 #include <M1Shield.h>
-#include "InputDemoScreen.h"
-#include "LifecycleDemoScreen.h"
-#include "AnimationDemoScreen.h"
 
 /*
  * ComprehensiveScreen
  *
- * Main controller that demonstrates all Screen capabilities by cycling
- * through three specialized demo screens, each showing different aspects
- * of the Screen base class functionality.
- *
- * This screen acts as both:
- * 1. A demonstration of navigation between multiple screens
- * 2. A controller that manages the three demo sub-screens
- * 3. An example of proper screen lifecycle management
+ * A menu screen that demonstrates Screen capabilities and allows switching
+ * to individual demo screens. This follows the proper pattern of creating
+ * new Screen instances when needed, rather than managing them as member variables.
  */
 class ComprehensiveScreen : public Screen
 {
 private:
     // Track which demo we're currently showing
     int currentDemo;
-
-    // Our three demonstration screens
-    InputDemoScreen *inputDemo;
-    LifecycleDemoScreen *lifecycleDemo;
-    AnimationDemoScreen *animationDemo;
 
     // Track screen state for lifecycle demonstration
     bool isActive;
@@ -55,19 +43,16 @@ public:
     // Core Screen methods that EVERY screen must implement
     void _drawScreen() override;
     void loop() override;
-    Screen *actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override;
+    Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override;
 
     // Lifecycle methods that screens can override for advanced behavior
     bool open() override;
     void close() override;
 
     // Utility methods for demo functionality
-    void switchToNextDemo();
-    void drawHeader();
-    void drawCurrentDemo();
-    void updatePerformanceStats();
+    Screen *launchSelectedDemo();
     const char *getDemoName();
-    const char *getDemoDescription();
+    void drawNavigationInfo();
 };
 
 #endif /* COMPREHENSIVE_SCREEN_H */

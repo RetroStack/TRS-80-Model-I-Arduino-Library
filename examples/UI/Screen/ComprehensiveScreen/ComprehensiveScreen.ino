@@ -10,6 +10,8 @@
 
 #include <M1Shield.h>
 #include <Screen.h>
+#include <SerialLogger.h>
+#include <Model1.h>
 #include "ComprehensiveScreen.h" // Our comprehensive screen examples
 
 // For ST7789 240x320 displays (most common, landscape becomes 320x240)
@@ -52,33 +54,44 @@ Display_ST7789_320x240 displayProvider;
 // #include <Display_SH1106.h>
 // Display_SH1106 displayProvider;
 
-// ----------------------------------
+// Serial logger for debugging M1Shield and Model1 issues
+SerialLogger logger;
 
-// This demonstrates the three core screen capabilities
+// The comprehensive screen demonstration
 ComprehensiveScreen screenDemo;
 
 void setup()
 {
     // Start serial communication for debug messages
-    // (Open "Serial Monitor" in Arduino IDE to see these)
     Serial.begin(115200);
-    Serial.println("=== Screen Complete Tutorial Starting ===");
+    delay(1000); // Give serial time to initialize
+
+    Serial.println("=== Comprehensive Screen Example ===");
+    Serial.println("Demonstrating ALL Screen class capabilities");
+
+    // Set up logging for M1Shield and Model1 to capture any errors
+    M1Shield.setLogger(logger);
+    Model1.setLogger(logger);
+
+    // Set up logging for our screen
+    screenDemo.setLogger(logger);
 
     // Initialize the M1Shield hardware
-    // This sets up display, buttons, joystick, LED, etc.
     M1Shield.begin(displayProvider);
 
     // Enable joystick input for comprehensive input testing
-    // This is important for testing all Screen input capabilities
     M1Shield.activateJoystick();
 
-    Serial.println("Hardware initialized!");
-
     // Set our comprehensive screen as the active screen
-    Serial.println("Setting comprehensive screen demo...");
-    M1Shield.setScreen(&screenDemo);
+    if (M1Shield.setScreen(&screenDemo))
+    {
+        Serial.println("Screen demo loaded successfully!");
+    }
+    else
+    {
+        Serial.println("ERROR: Failed to load screen demo!");
+    }
 
-    Serial.println("Screen demo loaded!");
     Serial.println("");
     Serial.println("=== SCREEN FEATURES TUTORIAL ===");
     Serial.println("This example demonstrates ALL Screen base class capabilities:");
@@ -87,7 +100,7 @@ void setup()
     Serial.println("3. Display size adaptation (small/large displays)");
     Serial.println("4. Screen navigation and transitions");
     Serial.println("5. Advanced input processing and combinations");
-    Serial.println("6. Performance optimization and best practices");
+    Serial.println("6. Performance optimization and real-time updates");
     Serial.println("");
     Serial.println("=== CONTROLS ===");
     Serial.println("- ALL BUTTONS: Test complete input handling");
@@ -108,13 +121,6 @@ void setup()
 
 void loop()
 {
-    // This is all you need! M1Shield.loop() handles everything:
-    // - Reading button presses and joystick movement
-    // - Calling your screen's loop() method
-    // - Calling your screen's actionTaken() when inputs occur
-    // - Managing the display updates
-    // - Everything else!
+    // Let M1Shield handle input and call our screen's methods
     M1Shield.loop();
-
-    // The magic happens in ComprehensiveScreen.cpp!
 }

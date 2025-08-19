@@ -77,7 +77,7 @@ void SimpleScreen::loop()
 }
 
 // This method is called whenever the user presses a button or moves the joystick
-Screen *SimpleScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)
+Screen *SimpleScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY)
 {
     // This method gets called only when something was pressed
 

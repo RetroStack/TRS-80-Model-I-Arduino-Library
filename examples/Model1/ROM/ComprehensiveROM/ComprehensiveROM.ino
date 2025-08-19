@@ -66,7 +66,7 @@ void loop()
 
 void demonstrateComprehensiveSystemAnalysis()
 {
-    Serial.println(F("\\n--- Comprehensive System Analysis ---"));
+    Serial.println(F("--- Comprehensive System Analysis ---"));
 
     // Detailed system identification
     const __FlashStringHelper *systemName = rom.identifyROM();
@@ -121,7 +121,7 @@ void demonstrateComprehensiveSystemAnalysis()
             presentROMs++;
     }
 
-    Serial.print(F("\\nSummary: "));
+    Serial.print(F("Summary: "));
     Serial.print(presentROMs);
     Serial.println(F(" ROM(s) detected"));
 
@@ -141,13 +141,13 @@ void demonstrateComprehensiveSystemAnalysis()
 
 void demonstrateROMContentAnalysis()
 {
-    Serial.println(F("\\n--- ROM Content Analysis ---"));
+    Serial.println(F("--- ROM Content Analysis ---"));
 
     // Analyze ROM A content in detail (most critical ROM)
     Serial.println(F("Analyzing ROM A content:"));
 
     // Print first 64 bytes of ROM A as hex dump
-    Serial.println(F("\\nFirst 64 bytes (hex dump):"));
+    Serial.println(F("First 64 bytes (hex dump):"));
     Serial.println(F("Addr  | 00 01 02 03 04 05 06 07 | ASCII"));
     Serial.println(F("------|-------------------------|--------"));
 
@@ -190,7 +190,7 @@ void demonstrateROMContentAnalysis()
     }
 
     // Look for common ROM signatures
-    Serial.println(F("\\nLooking for ROM signatures:"));
+    Serial.println(F("Looking for ROM signatures:"));
 
     // Check for copyright strings or version info
     uint8_t firstBytes[16];
@@ -212,14 +212,7 @@ void demonstrateROMContentAnalysis()
 
 void demonstrateROMMemoryMapping()
 {
-    Serial.println(F("\\n--- ROM Memory Mapping ---"));
-
-    Serial.println(F("TRS-80 Model I ROM Memory Map:"));
-    Serial.println(F("ROM A: 0x0000-0x07FF (2KB) - System Bootstrap"));
-    Serial.println(F("ROM B: 0x0800-0x0FFF (2KB) - BASIC Interpreter"));
-    Serial.println(F("ROM C: 0x1000-0x17FF (2KB) - BASIC Interpreter"));
-    Serial.println(F("ROM D: 0x1800-0x1FFF (2KB) - BASIC Interpreter"));
-    Serial.println();
+    Serial.println(F("--- ROM Memory Mapping ---"));
 
     // Verify memory mapping by reading from different ROM areas
     Serial.println(F("Memory mapping verification:"));
@@ -242,22 +235,22 @@ void demonstrateROMMemoryMapping()
 
 void demonstrateROMIntegrityCheck()
 {
-    Serial.println(F("\\n--- ROM Integrity Check ---"));
+    Serial.println(F("--- ROM Integrity Check ---"));
 
     // Perform multiple checksum calculations to verify consistency
     Serial.println(F("Multiple checksum verification:"));
 
-    for (int rom = 0; rom < 4; rom++)
+    for (int i = 0; i < 4; i++)
     {
         Serial.print(F("ROM "));
-        Serial.print((char)('A' + rom));
+        Serial.print((char)('A' + i));
         Serial.print(F(": "));
 
-        uint16_t checksum1 = rom.getChecksum(rom);
+        uint16_t checksum1 = rom.getChecksum(i);
         delay(10); // Small delay between reads
-        uint16_t checksum2 = rom.getChecksum(rom);
+        uint16_t checksum2 = rom.getChecksum(i);
         delay(10);
-        uint16_t checksum3 = rom.getChecksum(rom);
+        uint16_t checksum3 = rom.getChecksum(i);
 
         if (checksum1 == checksum2 && checksum2 == checksum3)
         {
@@ -285,7 +278,7 @@ void demonstrateROMIntegrityCheck()
 
 void demonstrateROMComparison()
 {
-    Serial.println(F("\\n--- ROM Comparison Analysis ---"));
+    Serial.println(F("--- ROM Comparison Analysis ---"));
 
     // Compare ROM contents to identify patterns
     Serial.println(F("Analyzing ROM differences:"));
@@ -315,11 +308,11 @@ void demonstrateROMComparison()
     // Display full ROM contents for ROM A (if present)
     if (checksums[0] != 0x0000 && checksums[0] != 0xFFFF)
     {
-        Serial.println(F("\\nDisplaying ROM A contents:"));
+        Serial.println(F("Displaying ROM A contents:"));
         rom.printROMContents(0);
     }
     else
     {
-        Serial.println(F("\\nROM A not present - skipping content display"));
+        Serial.println(F("ROM A not present - skipping content display"));
     }
 }

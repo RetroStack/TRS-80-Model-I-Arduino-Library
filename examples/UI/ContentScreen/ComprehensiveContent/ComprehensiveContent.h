@@ -18,7 +18,7 @@
 #ifndef COMPREHENSIVE_CONTENT_H
 #define COMPREHENSIVE_CONTENT_H
 
-#include "../../../../src/ContentScreen.h"
+#include <ContentScreen.h>
 
 enum ContentMode
 {
@@ -85,7 +85,7 @@ public:
     // Override ContentScreen methods
     bool open() override;
     void _drawContent() override;
-    Screen *actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override;
+    Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override;
     void loop() override;
 
 private:

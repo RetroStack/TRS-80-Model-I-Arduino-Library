@@ -120,7 +120,7 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
     {
         if (_logger)
         {
-            _logger->err(F("M1Shield: Failed to initialize display provider"));
+            _logger->errF(F("M1Shield: Failed to initialize display provider"));
         }
         return false;
     }
@@ -131,7 +131,7 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
 
     if (_logger)
     {
-        _logger->info(F("M1Shield: Display initialized successfully (%dx%d)"), _screenWidth, _screenHeight);
+        _logger->infoF(F("M1Shield: Display initialized successfully (%dx%d)"), _screenWidth, _screenHeight);
     }
 
     return success;
@@ -158,7 +158,7 @@ Adafruit_GFX &M1ShieldClass::getGFX()
     {
         if (_logger)
         {
-            _logger->err(F("M1Shield: Attempted to get GFX without initialized display provider"));
+            _logger->errF(F("M1Shield: Attempted to get GFX without initialized display provider"));
         }
         // This will likely cause a crash, but at least we log it
     }
@@ -181,7 +181,7 @@ DisplayProvider &M1ShieldClass::getDisplayProvider() const
     {
         if (_logger)
         {
-            _logger->err(F("M1Shield: Attempted to get display provider that is not initialized"));
+            _logger->errF(F("M1Shield: Attempted to get display provider that is not initialized"));
         }
         // This will likely cause a crash, but at least we log it
     }
@@ -205,14 +205,14 @@ bool M1ShieldClass::display()
         bool result = _displayProvider->display();
         if (!result && _logger)
         {
-            _logger->warn(F("M1Shield: Display update failed"));
+            _logger->warnF(F("M1Shield: Display update failed"));
         }
         return result;
     }
 
     if (_logger)
     {
-        _logger->warn(F("M1Shield: Attempted to update display without initialized display provider"));
+        _logger->warnF(F("M1Shield: Attempted to update display without initialized display provider"));
     }
     return false;
 }
@@ -232,7 +232,7 @@ bool M1ShieldClass::setScreen(Screen *screen)
     {
         if (_logger)
         {
-            _logger->warn(F("M1Shield: Attempted to set null screen"));
+            _logger->warnF(F("M1Shield: Attempted to set null screen"));
         }
         return false;
     }
@@ -246,11 +246,11 @@ bool M1ShieldClass::setScreen(Screen *screen)
             const char *title = _screen->getTitle();
             if (title)
             {
-                _logger->info(F("M1Shield: Closing screen '%s'"), title);
+                _logger->infoF(F("M1Shield: Closing screen '%s'"), title);
             }
             else
             {
-                _logger->info(F("M1Shield: Closing current screen"));
+                _logger->infoF(F("M1Shield: Closing current screen"));
             }
         }
 
@@ -271,11 +271,11 @@ bool M1ShieldClass::setScreen(Screen *screen)
         const char *title = screen->getTitle();
         if (title)
         {
-            _logger->info(F("M1Shield: Opening screen '%s'"), title);
+            _logger->infoF(F("M1Shield: Opening screen '%s'"), title);
         }
         else
         {
-            _logger->info(F("M1Shield: Opening new screen"));
+            _logger->infoF(F("M1Shield: Opening new screen"));
         }
     }
 
@@ -283,7 +283,7 @@ bool M1ShieldClass::setScreen(Screen *screen)
     {
         if (_logger)
         {
-            _logger->err(F("M1Shield: Failed to open new screen"));
+            _logger->errF(F("M1Shield: Failed to open new screen"));
         }
         // Screen failed to open, clean up
         delete screen;
@@ -295,7 +295,7 @@ bool M1ShieldClass::setScreen(Screen *screen)
 
     if (_logger)
     {
-        _logger->info(F("M1Shield: Screen transition completed successfully"));
+        _logger->infoF(F("M1Shield: Screen transition completed successfully"));
     }
 
     return true;
@@ -555,8 +555,9 @@ void M1ShieldClass::loop()
 
     // Figure out what action has been taken and send to screen
     ActionTaken action = NONE;
-    uint8_t offsetX = 0;
-    uint8_t offsetY = 0;
+    int8_t offsetX = 0;
+    int8_t offsetY = 0;
+    bool joystickMoved = false;
 
     if (_activeJoystick)
     {
@@ -564,52 +565,60 @@ void M1ShieldClass::loop()
         uint8_t x = getJoystickX();
         uint8_t y = getJoystickY();
 
-        // Diagonal directions for Joystick
-        if (x < JOYSTICK_CENTER_MIN && y < JOYSTICK_CENTER_MIN)
-        {
-            offsetX = JOYSTICK_CENTER_MIN - x;
-            offsetY = JOYSTICK_CENTER_MIN - y;
-            action = static_cast<ActionTaken>(action | JOYSTICK_UP_LEFT);
-        }
-        else if (x > JOYSTICK_CENTER_MAX && y < JOYSTICK_CENTER_MIN)
-        {
-            offsetX = x - JOYSTICK_CENTER_MIN;
-            offsetY = JOYSTICK_CENTER_MIN - y;
-            action = static_cast<ActionTaken>(action | JOYSTICK_UP_RIGHT);
-        }
-        else if (x < JOYSTICK_CENTER_MIN && y > JOYSTICK_CENTER_MAX)
-        {
-            offsetX = JOYSTICK_CENTER_MIN - x;
-            offsetY = y - JOYSTICK_CENTER_MIN;
-            action = static_cast<ActionTaken>(action | JOYSTICK_DOWN_LEFT);
-        }
-        else if (x > JOYSTICK_CENTER_MAX && y > JOYSTICK_CENTER_MAX)
-        {
-            offsetX = x - JOYSTICK_CENTER_MIN;
-            offsetY = y - JOYSTICK_CENTER_MIN;
-            action = static_cast<ActionTaken>(action | JOYSTICK_DOWN_RIGHT);
-        }
+        // Calculate center point (around 127 for 0-255 range)
+        int16_t centerX = 127;
+        int16_t centerY = 127;
 
-        // Cardinal directions for Joystick
-        else if (x < JOYSTICK_CENTER_MIN)
+        // Convert to signed coordinates relative to center using proper arithmetic
+        // Use int16_t for intermediate calculation to avoid overflow, then clamp to int8_t range
+        int16_t tempX = (int16_t)x - centerX;
+        int16_t tempY = (int16_t)y - centerY;
+
+        // Clamp to int8_t range (-128 to +127)
+        offsetX = (int8_t)constrain(tempX, -128, 127);
+        offsetY = (int8_t)constrain(tempY, -128, 127);
+
+        // Only consider it "moved" if beyond the deadzone
+        if (x < JOYSTICK_CENTER_MIN || x > JOYSTICK_CENTER_MAX ||
+            y < JOYSTICK_CENTER_MIN || y > JOYSTICK_CENTER_MAX)
         {
-            offsetX = JOYSTICK_CENTER_MIN - x;
-            action = static_cast<ActionTaken>(action | JOYSTICK_LEFT);
-        }
-        else if (x > JOYSTICK_CENTER_MAX)
-        {
-            offsetX = x - JOYSTICK_CENTER_MIN;
-            action = static_cast<ActionTaken>(action | JOYSTICK_RIGHT);
-        }
-        else if (y < JOYSTICK_CENTER_MIN)
-        {
-            offsetY = JOYSTICK_CENTER_MIN - y;
-            action = static_cast<ActionTaken>(action | JOYSTICK_UP);
-        }
-        else if (y > JOYSTICK_CENTER_MAX)
-        {
-            offsetY = y - JOYSTICK_CENTER_MIN;
-            action = static_cast<ActionTaken>(action | JOYSTICK_DOWN);
+            joystickMoved = true;
+
+            // Diagonal directions for Joystick
+            if (x < JOYSTICK_CENTER_MIN && y < JOYSTICK_CENTER_MIN)
+            {
+                action = static_cast<ActionTaken>(action | JOYSTICK_UP_LEFT);
+            }
+            else if (x > JOYSTICK_CENTER_MAX && y < JOYSTICK_CENTER_MIN)
+            {
+                action = static_cast<ActionTaken>(action | JOYSTICK_UP_RIGHT);
+            }
+            else if (x < JOYSTICK_CENTER_MIN && y > JOYSTICK_CENTER_MAX)
+            {
+                action = static_cast<ActionTaken>(action | JOYSTICK_DOWN_LEFT);
+            }
+            else if (x > JOYSTICK_CENTER_MAX && y > JOYSTICK_CENTER_MAX)
+            {
+                action = static_cast<ActionTaken>(action | JOYSTICK_DOWN_RIGHT);
+            }
+
+            // Cardinal directions for Joystick
+            else if (x < JOYSTICK_CENTER_MIN)
+            {
+                action = static_cast<ActionTaken>(action | JOYSTICK_LEFT);
+            }
+            else if (x > JOYSTICK_CENTER_MAX)
+            {
+                action = static_cast<ActionTaken>(action | JOYSTICK_RIGHT);
+            }
+            else if (y < JOYSTICK_CENTER_MIN)
+            {
+                action = static_cast<ActionTaken>(action | JOYSTICK_UP);
+            }
+            else if (y > JOYSTICK_CENTER_MAX)
+            {
+                action = static_cast<ActionTaken>(action | JOYSTICK_DOWN);
+            }
         }
 
         if (wasJoystickPressed())
@@ -640,8 +649,8 @@ void M1ShieldClass::loop()
         action = static_cast<ActionTaken>(action | BUTTON_DOWN);
     }
 
-    // Was any action taken?
-    if (action != ActionTaken::NONE)
+    // Was any action taken or joystick moved beyond deadzone?
+    if (action != ActionTaken::NONE || joystickMoved)
     {
         Screen *newScreen = _screen->actionTaken(action, offsetX, offsetY);
 

@@ -1,39 +1,7 @@
 #include <Arduino.h>
 #include <Model1.h>
 #include <Cassette.h>
-
-// Include all the melody definitions from the original example
-extern int imperialMelody[];
-extern float imperialDurations[];
-extern const size_t imperialMelodyLength;
-
-extern int tetrisMelodyLead[];
-extern float tetrisDurationsLead[];
-extern const size_t tetrisMelodyLength;
-
-extern int marioMelody[];
-extern float marioDurations[];
-extern const size_t marioMelodyLength;
-
-extern int underworldMelody[];
-extern float underworldDurations[];
-extern const size_t underworldMelodyLength;
-
-extern int simpsonsMelody[];
-extern float simpsonsDurations[];
-extern const size_t simpsonsMelodyLength;
-
-extern int gameOfThronesMelody[];
-extern float gameOfThronesDurations[];
-extern const size_t gameOfThronesMelodyLength;
-
-extern int doomMelody[];
-extern float doomDurations[];
-extern const size_t doomMelodyLength;
-
-extern int pacmanMelody[];
-extern float pacmanDurations[];
-extern const size_t pacmanMelodyLength;
+#include "CassetteSongData.h"
 
 // Cassette class instance
 Cassette cassette;
@@ -42,8 +10,8 @@ Cassette cassette;
 struct MelodyInfo
 {
     const char *name;
-    int *melody;
-    float *durations;
+    const int *melody;
+    const float *durations;
     size_t length;
     int tempo;
 };
@@ -60,18 +28,11 @@ struct CassetteAnalysis
 
 CassetteAnalysis analysis = {};
 
-// Define all available melodies
+// Define available melodies
 MelodyInfo melodies[] = {
-    {"Imperial March", imperialMelody, imperialDurations, imperialMelodyLength, 120},
-    {"Tetris", tetrisMelodyLead, tetrisDurationsLead, tetrisMelodyLength, 140},
-    {"Super Mario", marioMelody, marioDurations, marioMelodyLength, 180},
-    {"Mario Underworld", underworldMelody, underworldDurations, underworldMelodyLength, 180},
-    {"The Simpsons", simpsonsMelody, simpsonsDurations, simpsonsMelodyLength, 160},
-    {"Game of Thrones", gameOfThronesMelody, gameOfThronesDurations, gameOfThronesMelodyLength, 160},
-    {"Doom E1M1", doomMelody, doomDurations, doomMelodyLength, 140},
-    {"Pac-Man", pacmanMelody, pacmanDurations, pacmanMelodyLength, 120}};
+    {"Pac-Man Theme", pacmanMelody, pacmanDurations, pacmanMelodyLength, 120}};
 
-const int melodyCount = 8;
+const int melodyCount = 1;
 
 void setup()
 {
@@ -123,7 +84,7 @@ void loop()
 
 void demonstrateAdvancedCharacterModes()
 {
-    Serial.println(F("\\n--- Advanced Character Mode Analysis ---"));
+    Serial.println(F("--- Advanced Character Mode Analysis ---"));
 
     // Detailed mode switching with timing
     Serial.println(F("Analyzing character mode switching:"));
@@ -154,7 +115,7 @@ void demonstrateAdvancedCharacterModes()
     Serial.println(F(" μs"));
 
     // Rapid mode switching test
-    Serial.println(F("\\nRapid mode switching test (10 cycles):"));
+    Serial.println(F("Rapid mode switching test (10 cycles):"));
     startTime = millis();
 
     for (int i = 0; i < 10; i++)
@@ -178,7 +139,7 @@ void demonstrateAdvancedCharacterModes()
 
 void demonstrateAdvancedSoundGeneration()
 {
-    Serial.println(F("\\n--- Advanced Sound Generation ---"));
+    Serial.println(F("--- Advanced Sound Generation ---"));
 
     // Frequency response testing
     Serial.println(F("Testing frequency response:"));
@@ -209,7 +170,7 @@ void demonstrateAdvancedSoundGeneration()
     }
 
     // Chord generation test
-    Serial.println(F("\\nChord simulation (rapid note sequence):"));
+    Serial.println(F("Chord simulation (rapid note sequence):"));
     int chordNotes[] = {262, 330, 392}; // C major chord
     float chordDurations[] = {0.1, 0.1, 0.1};
 
@@ -219,7 +180,7 @@ void demonstrateAdvancedSoundGeneration()
 
 void demonstrateMelodyLibrary()
 {
-    Serial.println(F("\\n--- Melody Library Analysis ---"));
+    Serial.println(F("--- Melody Library Analysis ---"));
 
     // Analyze all available melodies
     Serial.println(F("Available melodies:"));
@@ -234,11 +195,15 @@ void demonstrateMelodyLibrary()
         float totalDuration = 0;
         for (size_t j = 0; j < melody.length; j++)
         {
-            totalDuration += melody.durations[j];
+            totalDuration += pgm_read_float(&melody.durations[j]);
         }
 
-        // Adjust for tempo (120 BPM = 1 beat per 0.5 seconds)
-        float estimatedSeconds = totalDuration * (120.0 / melody.tempo) * 0.5;
+        // Match the playSongPGM calculation:
+        // wholeNoteMs = (60000.0 * 4) / bpm
+        // totalMs = totalDuration * wholeNoteMs
+        float wholeNoteMs = (60000.0 * 4) / melody.tempo;
+        float estimatedMs = totalDuration * wholeNoteMs;
+        float estimatedSeconds = estimatedMs / 1000.0;
 
         Serial.print(melody.name);
         // Pad name to 18 characters
@@ -262,9 +227,9 @@ void demonstrateMelodyLibrary()
     }
 
     // Play a selection of melodies with analysis
-    Serial.println(F("\\nPlaying melody selection:"));
+    Serial.println(F("Playing melody selection:"));
 
-    for (int i = 0; i < 3; i++) // Play first 3 melodies
+    for (int i = 0; i < melodyCount; i++) // Play all available melodies
     {
         MelodyInfo &melody = melodies[i];
 
@@ -275,7 +240,7 @@ void demonstrateMelodyLibrary()
         analyzeMelody(melody);
 
         unsigned long playStart = millis();
-        cassette.playSong(melody.melody, melody.durations, melody.length, melody.tempo);
+        cassette.playSongPGM(melody.melody, melody.durations, melody.length, melody.tempo);
         unsigned long actualPlayTime = millis() - playStart;
 
         Serial.print(F("Actual play time: "));
@@ -299,15 +264,18 @@ void analyzeMelody(MelodyInfo &melody)
 
     for (size_t i = 0; i < melody.length; i++)
     {
-        if (melody.melody[i] < localLowest && melody.melody[i] > 0)
+        int note = pgm_read_word(&melody.melody[i]);
+        float duration = pgm_read_float(&melody.durations[i]);
+
+        if (note < localLowest && note > 0)
         {
-            localLowest = melody.melody[i];
+            localLowest = note;
         }
-        if (melody.melody[i] > localHighest)
+        if (note > localHighest)
         {
-            localHighest = melody.melody[i];
+            localHighest = note;
         }
-        totalDuration += melody.durations[i];
+        totalDuration += duration;
     }
 
     Serial.print(F("  Range: "));
@@ -331,7 +299,7 @@ void analyzeMelody(MelodyInfo &melody)
 
 void demonstrateAdvancedRemoteControl()
 {
-    Serial.println(F("\\n--- Advanced Remote Control ---"));
+    Serial.println(F("--- Advanced Remote Control ---"));
 
     // Remote control timing analysis
     Serial.println(F("Remote control timing analysis:"));
@@ -353,34 +321,11 @@ void demonstrateAdvancedRemoteControl()
     Serial.print(F("Remote deactivate time: "));
     Serial.print(deactivateTime);
     Serial.println(F(" μs"));
-
-    // Pulse width modulation simulation
-    Serial.println(F("\\nPWM simulation (motor speed control):"));
-
-    for (int dutyCycle = 10; dutyCycle <= 90; dutyCycle += 20)
-    {
-        Serial.print(F("Duty cycle: "));
-        Serial.print(dutyCycle);
-        Serial.println(F("%"));
-
-        for (int pulse = 0; pulse < 20; pulse++) // 20 pulses
-        {
-            cassette.activateRemote();
-            delay(dutyCycle / 10); // On time proportional to duty cycle
-
-            cassette.deactivateRemote();
-            delay((100 - dutyCycle) / 10); // Off time
-        }
-
-        delay(500); // Pause between duty cycles
-    }
-
-    Serial.println(F("PWM simulation complete"));
 }
 
 void demonstrateCassetteSystemDiagnostics()
 {
-    Serial.println(F("\\n--- Cassette System Diagnostics ---"));
+    Serial.println(F("--- Cassette System Diagnostics ---"));
 
     // System state verification
     Serial.println(F("System state verification:"));
@@ -390,7 +335,7 @@ void demonstrateCassetteSystemDiagnostics()
     Serial.println(currentMode ? F("64-char") : F("32-char"));
 
     // Test mode switching reliability
-    Serial.println(F("\\nMode switching reliability test:"));
+    Serial.println(F("Mode switching reliability test:"));
 
     int successfulSwitches = 0;
     const int testCycles = 50;
@@ -432,7 +377,7 @@ void demonstrateCassetteSystemDiagnostics()
     }
 
     // Performance summary
-    Serial.println(F("\\nSession Performance Summary:"));
+    Serial.println(F("Session Performance Summary:"));
     Serial.print(F("Total songs played: "));
     Serial.println(analysis.songCount);
     Serial.print(F("Total notes played: "));
@@ -460,7 +405,7 @@ void demonstrateCassetteSystemDiagnostics()
 
 void demonstrateCustomMelodyGeneration()
 {
-    Serial.println(F("\\n--- Custom Melody Generation ---"));
+    Serial.println(F("--- Custom Melody Generation ---"));
 
     // Generate algorithmic melodies
     Serial.println(F("Generating algorithmic melodies:"));

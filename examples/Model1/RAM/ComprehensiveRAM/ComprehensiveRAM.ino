@@ -75,7 +75,7 @@ void loop()
 
 void demonstrateMemoryMapping()
 {
-    Serial.println(F("\\n--- TRS-80 Model I Memory Map Analysis ---"));
+    Serial.println(F("--- TRS-80 Model I Memory Map Analysis ---"));
 
     Model1.activateTestSignal();
 
@@ -114,7 +114,7 @@ void demonstrateMemoryMapping()
     }
 
     // Test ROM regions (should be read-only)
-    Serial.println(F("\\nROM Regions (Read-Only):"));
+    Serial.println(F("ROM Regions (Read-Only):"));
     Serial.println(F("0x0000-0x1FFF | 8KB   | System ROM  | R/O"));
 
     Model1.deactivateTestSignal();
@@ -122,7 +122,7 @@ void demonstrateMemoryMapping()
 
 void demonstrateAdvancedMemoryTests()
 {
-    Serial.println(F("\\n--- Advanced Memory Tests ---"));
+    Serial.println(F("--- Advanced Memory Tests ---"));
 
     Model1.activateTestSignal();
 
@@ -174,7 +174,7 @@ void demonstrateAdvancedMemoryTests()
     }
 
     // Walking bit test
-    Serial.println(F("\\nWalking bit test:"));
+    Serial.println(F("Walking bit test:"));
     performWalkingBitTest(testAddr, 64); // Test 64 bytes
 
     Model1.deactivateTestSignal();
@@ -182,7 +182,7 @@ void demonstrateAdvancedMemoryTests()
 
 void demonstrateMemoryRegionAnalysis()
 {
-    Serial.println(F("\\n--- Memory Region Analysis ---"));
+    Serial.println(F("--- Memory Region Analysis ---"));
 
     Model1.activateTestSignal();
 
@@ -190,7 +190,7 @@ void demonstrateMemoryRegionAnalysis()
     {
         MemoryRegion &region = memoryRegions[r];
 
-        Serial.print(F("\\nAnalyzing "));
+        Serial.print(F("Analyzing "));
         Serial.print(region.name);
         Serial.println(F(":"));
 
@@ -257,7 +257,7 @@ void demonstrateMemoryRegionAnalysis()
 
 void demonstrateMemoryPerformance()
 {
-    Serial.println(F("\\n--- Memory Performance Analysis ---"));
+    Serial.println(F("--- Memory Performance Analysis ---"));
 
     Model1.activateTestSignal();
 
@@ -298,7 +298,7 @@ void demonstrateMemoryPerformance()
 
 void demonstrateLongTermStabilityTest()
 {
-    Serial.println(F("\\n--- Long-Term Stability Test ---"));
+    Serial.println(F("--- Long-Term Stability Test ---"));
 
     Model1.activateTestSignal();
 

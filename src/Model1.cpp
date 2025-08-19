@@ -51,7 +51,7 @@ void Model1Class::begin(int refreshTimer)
     if (refreshTimer != -1 && refreshTimer != 1 && refreshTimer != 2)
     {
         if (_logger)
-            _logger->warn(F("Model1: Invalid refresh timer %d. Valid values are -1 (disabled), 1, or 2. Using disabled."), refreshTimer);
+            _logger->warnF(F("Model1: Invalid refresh timer %d. Valid values are -1 (disabled), 1, or 2. Using disabled."), refreshTimer);
         refreshTimer = -1;
     }
 
@@ -185,7 +185,7 @@ bool Model1Class::_checkMutability()
     if (!_isMutable())
     {
         if (_logger)
-            _logger->err(F("System is not mutable, but a request to access the system was made."));
+            _logger->errF(F("System is not mutable, but a request to access the system was made."));
     }
     return mutability;
 }
@@ -369,7 +369,7 @@ uint8_t *Model1Class::readMemory(uint16_t address, uint16_t length)
     {
         if (_logger)
         {
-            _logger->err(F("Model1: Failed to allocate memory buffer for readMemory (%u bytes)"), length);
+            _logger->errF(F("Model1: Failed to allocate memory buffer for readMemory (%u bytes)"), length);
         }
         return nullptr;
     }
@@ -387,7 +387,7 @@ void Model1Class::writeMemory(uint16_t address, uint8_t *data, uint16_t length)
     if (!data)
     {
         if (_logger)
-            _logger->err(F("Model1: writeMemory called with null data pointer"));
+            _logger->errF(F("Model1: writeMemory called with null data pointer"));
         return;
     }
     writeMemory(address, data, length, 0);
@@ -398,13 +398,13 @@ void Model1Class::writeMemory(uint16_t address, uint8_t *data, uint16_t length, 
     if (!data)
     {
         if (_logger)
-            _logger->err(F("Model1: writeMemory called with null data pointer"));
+            _logger->errF(F("Model1: writeMemory called with null data pointer"));
         return;
     }
     if (length == 0)
     {
         if (_logger)
-            _logger->warn(F("Model1: writeMemory called with length 0"));
+            _logger->warnF(F("Model1: writeMemory called with length 0"));
         return;
     }
     for (uint16_t i = 0; i < length; i++)
@@ -418,13 +418,13 @@ void Model1Class::copyMemory(uint16_t src_address, uint16_t dst_address, uint16_
     if (length == 0)
     {
         if (_logger)
-            _logger->warn(F("Model1: Copy memory called with length 0 - no action taken"));
+            _logger->warnF(F("Model1: Copy memory called with length 0 - no action taken"));
         return;
     }
     if (dst_address == src_address)
     {
         if (_logger)
-            _logger->warn(F("Model1: Copy memory called with same src and dst address 0x%04X - no action taken"), src_address);
+            _logger->warnF(F("Model1: Copy memory called with same src and dst address 0x%04X - no action taken"), src_address);
         return;
     }
 
@@ -433,7 +433,7 @@ void Model1Class::copyMemory(uint16_t src_address, uint16_t dst_address, uint16_
         (dst_address < src_address && dst_address + length > src_address))
     {
         if (_logger)
-            _logger->warn(F("Model1: Memory copy addresses overlap - src:0x%04X dst:0x%04X len:%d may cause data corruption"), src_address, dst_address, length);
+            _logger->warnF(F("Model1: Memory copy addresses overlap - src:0x%04X dst:0x%04X len:%d may cause data corruption"), src_address, dst_address, length);
     }
 
     for (uint16_t i = 0; i < length; i++)
@@ -455,19 +455,19 @@ void Model1Class::fillMemory(uint8_t *fill_data, uint16_t length, uint16_t addre
     if (!fill_data)
     {
         if (_logger)
-            _logger->err(F("Model1: fillMemory called with null fill_data pointer"));
+            _logger->errF(F("Model1: fillMemory called with null fill_data pointer"));
         return;
     }
     if (length == 0)
     {
         if (_logger)
-            _logger->warn(F("Model1: fillMemory called with length 0"));
+            _logger->warnF(F("Model1: fillMemory called with length 0"));
         return;
     }
     if (address_length == 0)
     {
         if (_logger)
-            _logger->warn(F("Model1: fillMemory called with address_length 0"));
+            _logger->warnF(F("Model1: fillMemory called with address_length 0"));
         return;
     }
     for (uint16_t i = 0; i < address_length; i += length)
@@ -677,7 +677,7 @@ bool Model1Class::triggerInterrupt(uint8_t interrupt, uint16_t timeout)
     deactivateInterruptRequestSignal();
 
     if (_logger)
-        _logger->err(F("Model1: Interrupt trigger timeout - CPU did not respond within %d cycles"), timeout);
+        _logger->errF(F("Model1: Interrupt trigger timeout - CPU did not respond within %d cycles"), timeout);
     return false; // CPU did not respond within timeout
 }
 
@@ -686,7 +686,7 @@ void Model1Class::activateInterruptRequestSignal()
     if (Model1LowLevel::readINT() == LOW)
     {
         if (_logger)
-            _logger->warn(F("INT* signal already active."));
+            _logger->warnF(F("INT* signal already active."));
         return;
     }
 
@@ -698,7 +698,7 @@ void Model1Class::deactivateInterruptRequestSignal()
     if (Model1LowLevel::readINT() == HIGH)
     {
         if (_logger)
-            _logger->warn(F("INT* signal already deactivated."));
+            _logger->warnF(F("INT* signal already deactivated."));
         return;
     }
 
@@ -722,7 +722,7 @@ void Model1Class::activateTestSignal()
     if (Model1LowLevel::readTEST() == LOW)
     {
         if (_logger)
-            _logger->warn(F("TEST* signal already active."));
+            _logger->warnF(F("TEST* signal already active."));
         return;
     }
 
@@ -753,7 +753,7 @@ void Model1Class::deactivateTestSignal()
     if (Model1LowLevel::readTEST() == HIGH)
     {
         if (_logger)
-            _logger->warn(F("TEST* signal already deactivated."));
+            _logger->warnF(F("TEST* signal already deactivated."));
         return;
     }
 
@@ -791,7 +791,7 @@ void Model1Class::activateWaitSignal()
     if (Model1LowLevel::readWAIT() == LOW)
     {
         if (_logger)
-            _logger->warn(F("WAIT* signal already active."));
+            _logger->warnF(F("WAIT* signal already active."));
         return;
     }
 
@@ -803,7 +803,7 @@ void Model1Class::deactivateWaitSignal()
     if (Model1LowLevel::readWAIT() == HIGH)
     {
         if (_logger)
-            _logger->warn(F("WAIT* signal already deactivated."));
+            _logger->warnF(F("WAIT* signal already deactivated."));
         return;
     }
 
@@ -823,7 +823,7 @@ char *Model1Class::getState()
     {
         if (_logger)
         {
-            _logger->err(F("Model1: Failed to allocate memory for state string"));
+            _logger->errF(F("Model1: Failed to allocate memory for state string"));
         }
         free(addrStatus);
         free(dataStatus);
@@ -835,7 +835,7 @@ char *Model1Class::getState()
     {
         if (_logger)
         {
-            _logger->err(F("Model1: Failed to get bus state information"));
+            _logger->errF(F("Model1: Failed to get bus state information"));
         }
         free(buffer);
         free(addrStatus);
@@ -892,7 +892,7 @@ void Model1Class::logState()
     if (_logger)
     {
         char *state = getState();
-        _logger->info(F("State: %s"), state);
+        _logger->infoF(F("State: %s"), state);
         free(state);
     }
 }
@@ -922,7 +922,7 @@ char *Model1Class::getVersion()
     {
         if (_logger)
         {
-            _logger->err(F("Model1: Failed to allocate memory for version string"));
+            _logger->errF(F("Model1: Failed to allocate memory for version string"));
         }
         return nullptr;
     }
@@ -950,7 +950,7 @@ void Model1Class::printMemoryContents(Print &output, uint16_t start, uint16_t le
     if (bytesPerLine == 0 || bytesPerLine > 60)
     {
         if (_logger)
-            _logger->err(F("Unsupported value for bytesPerLine with %d."), bytesPerLine);
+            _logger->errF(F("Unsupported value for bytesPerLine with %d."), bytesPerLine);
         return;
     }
 
@@ -958,7 +958,7 @@ void Model1Class::printMemoryContents(Print &output, uint16_t start, uint16_t le
     if (!buffer)
     {
         if (_logger)
-            _logger->err(F("Cannot allocate byte buffer."));
+            _logger->errF(F("Cannot allocate byte buffer."));
         return;
     }
 
@@ -975,7 +975,7 @@ void Model1Class::printMemoryContents(Print &output, uint16_t start, uint16_t le
     if (!lineBuffer)
     {
         if (_logger)
-            _logger->err(F("Cannot allocate line buffer."));
+            _logger->errF(F("Cannot allocate line buffer."));
         free(buffer);
         return;
     }

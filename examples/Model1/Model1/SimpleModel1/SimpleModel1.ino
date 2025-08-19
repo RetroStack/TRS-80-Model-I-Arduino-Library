@@ -24,16 +24,8 @@ void loop()
     demonstrateBasicMemoryOperations();
     delay(3000);
 
-    // Basic I/O operations
-    demonstrateBasicIOOperations();
-    delay(3000);
-
     // Memory block operations
     demonstrateMemoryBlockOperations();
-    delay(3000);
-
-    // Bus control demonstration
-    demonstrateBusControl();
     delay(3000);
 }
 
@@ -78,28 +70,6 @@ void demonstrateBasicMemoryOperations()
     Serial.println();
 }
 
-void demonstrateBasicIOOperations()
-{
-    Serial.println(F("--- Basic I/O Operations ---"));
-
-    // Read from I/O port (keyboard status)
-    uint8_t keyboardStatus = Model1.readIO(0x3E);
-    Serial.print(F("Keyboard status port (0x3E): 0x"));
-    Serial.println(keyboardStatus, HEX);
-
-    // Write to I/O port (cassette control)
-    Serial.println(F("Writing to cassette control port (0x3F)"));
-    Model1.writeIO(0x3F, 0x00); // Reset cassette control
-    Serial.println(F("Cassette control reset"));
-
-    // Check system reset signal
-    bool isInReset = Model1.readSystemResetSignal();
-    Serial.print(F("System reset signal: "));
-    Serial.println(isInReset ? F("ACTIVE") : F("INACTIVE"));
-
-    Serial.println();
-}
-
 void demonstrateMemoryBlockOperations()
 {
     Serial.println(F("--- Memory Block Operations ---"));
@@ -133,36 +103,5 @@ void demonstrateMemoryBlockOperations()
     Serial.println(F("Clearing test area with spaces..."));
     Model1.fillMemory(' ', baseAddress, 30);
 
-    Serial.println();
-}
-
-void demonstrateBusControl()
-{
-    Serial.println(F("--- Bus Control Operations ---"));
-
-    // Demonstrate bus control cycling
-    Serial.println(F("Current status: Arduino has bus control"));
-
-    // Release control
-    Serial.println(F("Releasing bus control to Z80..."));
-    Model1.deactivateTestSignal();
-    delay(1000);
-
-    // Check if we can still access memory (we shouldn't be able to)
-    Serial.println(F("Attempting memory access without bus control..."));
-    // Note: This may not work reliably without bus control
-
-    // Regain control
-    Serial.println(F("Regaining bus control..."));
-    Model1.activateTestSignal();
-
-    // Verify we have control back
-    uint16_t testAddr = 0x3C00;
-    uint8_t testByte = Model1.readMemory(testAddr);
-    Serial.print(F("Memory access with bus control - read 0x"));
-    Serial.print(testByte, HEX);
-    Serial.println(F(" from video RAM"));
-
-    Serial.println(F("Bus control demonstration complete"));
     Serial.println();
 }

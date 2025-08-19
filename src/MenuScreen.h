@@ -36,13 +36,25 @@ protected:
     virtual Screen *_getSelectedMenuItemScreen(int index) = 0;
 
     // Get configuration value string for a menu item (optional override)
-    virtual const char *_getMenuItemConfigValue(uint8_t index) { (void)index; return nullptr; }
+    virtual const char *_getMenuItemConfigValue(uint8_t index)
+    {
+        (void)index;
+        return nullptr;
+    }
 
     // Get configuration value FlashString for a menu item (optional override)
-    virtual const __FlashStringHelper *_getMenuItemConfigValueF(uint8_t index) { (void)index; return nullptr; }
+    virtual const __FlashStringHelper *_getMenuItemConfigValueF(uint8_t index)
+    {
+        (void)index;
+        return nullptr;
+    }
 
     // Check if a menu item is enabled/selectable (optional override)
-    virtual bool _isMenuItemEnabled(uint8_t index) const { (void)index; return true; }
+    virtual bool _isMenuItemEnabled(uint8_t index) const
+    {
+        (void)index;
+        return true;
+    }
 
 public:
     MenuScreen(); // Constructor
@@ -54,7 +66,7 @@ public:
     virtual void loop() {} // Main loop processing for menu screen updates
 
     // Handle user input actions and navigate accordingly
-    Screen *actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override;
+    Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override;
 
     void setMenuItems(const char **menuItems, uint8_t menuItemCount); // Set the menu items to be displayed and navigated
 

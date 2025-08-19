@@ -29,7 +29,7 @@ constexpr uint16_t HEADER_COLOR_BG = 0x07E0; // Header background (bright green)
 constexpr uint16_t HEADER_COLOR_FG = 0x0000; // Header text color (black on green)
 
 // Footer region styling
-constexpr uint16_t FOOTER_HEIGHT = 10;       // Height of footer region in pixels
+constexpr uint16_t FOOTER_HEIGHT = 20;       // Height of footer region in pixels (increased for text size 2)
 constexpr uint16_t FOOTER_SMALL_HEIGHT = 0;  // Height of small footer region in pixels
 constexpr uint16_t FOOTER_COLOR_BG = 0x0000; // Footer background color
 constexpr uint16_t FOOTER_COLOR_FG = 0xFFFF; // Footer text color
@@ -83,9 +83,6 @@ void ContentScreen::_drawScreen()
     Adafruit_GFX &gfx = M1Shield.getGFX();
     gfx.fillScreen(M1Shield.convertColor(SCREEN_COLOR_BG));
 
-    // Update notification state before drawing
-    _updateNotification();
-
     // Render all layout regions in order
     _drawHeader();
     _drawContent(); // Implemented by derived class
@@ -113,6 +110,41 @@ void ContentScreen::_drawScreen()
         // Draw separator line above progress bar
         uint16_t progressTop = _getProgressBarY();
         gfx.drawFastHLine(0, progressTop - 1, screenWidth, M1Shield.convertColor(SCREEN_COLOR_FG));
+    }
+}
+
+void ContentScreen::loop()
+{
+    // Base ContentScreen loop handles notification timeout management
+    // Derived classes can override this but should call ContentScreen::loop() first
+
+    if (_notificationActive)
+    {
+        // Check notification timeout more frequently when active
+        static unsigned long lastNotificationCheck = 0;
+        unsigned long currentTime = millis();
+
+        if (currentTime - lastNotificationCheck >= 200) // Check every 200ms
+        {
+            lastNotificationCheck = currentTime;
+
+            // Check if notification should expire
+            if (currentTime - _notificationStartTime >= _notificationDuration)
+            {
+                // Notification has expired - clear it and redraw footer immediately
+                _clearNotification();
+
+                // Immediately redraw the footer to show the change
+                if (isActive())
+                {
+                    Adafruit_GFX &gfx = M1Shield.getGFX();
+                    gfx.startWrite();
+                    _drawFooter();
+                    gfx.endWrite();
+                    M1Shield.display();
+                }
+            }
+        }
     }
 }
 
@@ -220,6 +252,9 @@ void ContentScreen::_drawFooter()
         gfx.setTextColor(M1Shield.convertColor(FOOTER_COLOR_FG));
         gfx.setTextSize(1);
 
+        // Calculate vertical center position for text in footer
+        uint16_t textY = top + (_getFooterHeight() - 8) / 2; // 8 is approximate height of size-1 text
+
         // Distribute buttons evenly across footer width
         uint16_t xDistance = screenWidth / (_buttonItemCount + 1);
         for (uint8_t i = 0; i < _buttonItemCount; i++)
@@ -231,7 +266,7 @@ void ContentScreen::_drawFooter()
                 uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(_buttonItems[i]);
                 uint16_t xPos = xDistance * (i + 1) - (textWidth / 2);
 
-                gfx.setCursor(xPos, top + TEXT_SIZE_1_HALF_HEIGHT - 1);
+                gfx.setCursor(xPos, textY);
                 gfx.print(_buttonItems[i]);
             }
         }
@@ -311,7 +346,7 @@ void ContentScreen::setButtonItemsF(const __FlashStringHelper **buttonItems, uin
     {
         if (getLogger())
         {
-            getLogger()->err(F("ContentScreen: Failed to allocate memory for button items array"));
+            getLogger()->errF(F("ContentScreen: Failed to allocate memory for button items array"));
         }
         clearButtonItems();
         return;
@@ -336,7 +371,7 @@ void ContentScreen::setButtonItemsF(const __FlashStringHelper **buttonItems, uin
             }
             else if (getLogger())
             {
-                getLogger()->err(F("ContentScreen: Failed to allocate memory for button item %d"), i);
+                getLogger()->errF(F("ContentScreen: Failed to allocate memory for button item %d"), i);
             }
         }
     }
@@ -384,14 +419,14 @@ void ContentScreen::setButtonItems(const char **buttonItems, uint8_t buttonItemC
                     }
                     else if (getLogger())
                     {
-                        getLogger()->err(F("ContentScreen: Failed to allocate memory for button label %d"), i);
+                        getLogger()->errF(F("ContentScreen: Failed to allocate memory for button label %d"), i);
                     }
                 }
             }
         }
         else if (getLogger())
         {
-            getLogger()->err(F("ContentScreen: Failed to allocate memory for button items array"));
+            getLogger()->errF(F("ContentScreen: Failed to allocate memory for button items array"));
         }
     }
 
@@ -553,7 +588,7 @@ void ContentScreen::notify(const char *text, unsigned long durationMs)
 
     if (getLogger())
     {
-        getLogger()->info(F("ContentScreen: Showing notification '%s' for %lu ms"), text, durationMs);
+        getLogger()->infoF(F("ContentScreen: Showing notification '%s' for %lu ms"), text, durationMs);
     }
 
     // Clear any existing notification
@@ -566,7 +601,7 @@ void ContentScreen::notify(const char *text, unsigned long durationMs)
     {
         if (getLogger())
         {
-            getLogger()->err(F("ContentScreen: Failed to allocate memory for notification"));
+            getLogger()->errF(F("ContentScreen: Failed to allocate memory for notification"));
         }
         return; // Failed allocation
     }
@@ -581,7 +616,7 @@ void ContentScreen::notify(const char *text, unsigned long durationMs)
     // Trigger immediate redraw to show notification
     if (isActive())
     {
-        refresh();
+        _drawNotification();
     }
 }
 
@@ -647,32 +682,19 @@ void ContentScreen::_drawNotification()
     // Draw notification background (yellow)
     gfx.fillRect(0, top, screenWidth, height, M1Shield.convertColor(NOTIFICATION_COLOR_BG));
 
-    // Draw notification text (black on yellow)
+    // Draw notification text (black on yellow) - using text size 2 for better visibility
     gfx.setTextColor(M1Shield.convertColor(NOTIFICATION_COLOR_FG));
-    gfx.setTextSize(1);
+    gfx.setTextSize(2);
 
     // Center text horizontally
-    uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(_notificationText);
+    uint16_t textWidth = TEXT_SIZE_2_WIDTH * strlen(_notificationText);
     uint16_t xPos = (screenWidth - textWidth) / 2;
 
     // Center text vertically in footer area
-    uint16_t yPos = top + (height - 8) / 2; // 8 is approximate height of size-1 text
+    uint16_t yPos = top + (height - 16) / 2; // 16 is approximate height of size-2 text
 
     gfx.setCursor(xPos, yPos);
     gfx.print(_notificationText);
-}
-
-void ContentScreen::_updateNotification()
-{
-    if (!_notificationActive)
-        return;
-
-    // Check if notification has expired
-    unsigned long currentTime = millis();
-    if (currentTime - _notificationStartTime >= _notificationDuration)
-    {
-        _clearNotification();
-    }
 }
 
 void ContentScreen::_clearNotification()
@@ -702,7 +724,7 @@ void ContentScreen::alert(const char *text)
 
     if (getLogger())
     {
-        getLogger()->info(F("ContentScreen: Showing alert '%s'"), text);
+        getLogger()->infoF(F("ContentScreen: Showing alert '%s'"), text);
     }
 
     // Draw the alert dialog
@@ -712,8 +734,6 @@ void ContentScreen::alert(const char *text)
     // Block execution until LEFT or RIGHT button is pressed
     while (true)
     {
-        M1Shield.loop(); // Keep the shield processing
-
         if (M1Shield.wasLeftPressed() || M1Shield.wasRightPressed())
         {
             break; // Exit on either button press
@@ -724,7 +744,7 @@ void ContentScreen::alert(const char *text)
 
     if (getLogger())
     {
-        getLogger()->info(F("ContentScreen: Alert confirmed"));
+        getLogger()->infoF(F("ContentScreen: Alert confirmed"));
     }
 
     // Restore the footer efficiently (no need for full screen refresh)
@@ -752,7 +772,7 @@ void ContentScreen::alertF(const __FlashStringHelper *text)
     {
         if (getLogger())
         {
-            getLogger()->err(F("ContentScreen: Failed to allocate memory for flash alert text"));
+            getLogger()->errF(F("ContentScreen: Failed to allocate memory for flash alert text"));
         }
         return; // Failed allocation
     }
@@ -776,7 +796,7 @@ ConfirmResult ContentScreen::confirm(const char *text, const char *leftText, con
 
     if (getLogger())
     {
-        getLogger()->info(F("ContentScreen: Showing confirmation dialog '%s' with buttons '%s' and '%s'"), text, leftText, rightText);
+        getLogger()->infoF(F("ContentScreen: Showing confirmation dialog '%s' with buttons '%s' and '%s'"), text, leftText, rightText);
     }
 
     // Draw the confirmation dialog
@@ -786,13 +806,11 @@ ConfirmResult ContentScreen::confirm(const char *text, const char *leftText, con
     // Block execution until LEFT or RIGHT button is pressed
     while (true)
     {
-        M1Shield.loop(); // Keep the shield processing
-
         if (M1Shield.wasLeftPressed())
         {
             if (getLogger())
             {
-                getLogger()->info(F("ContentScreen: Confirmed with left button '%s'"), leftText);
+                getLogger()->infoF(F("ContentScreen: Confirmed with left button '%s'"), leftText);
             }
 
             // Restore the footer efficiently and return left choice
@@ -807,7 +825,7 @@ ConfirmResult ContentScreen::confirm(const char *text, const char *leftText, con
         {
             if (getLogger())
             {
-                getLogger()->info(F("ContentScreen: Confirmed with right button '%s'"), rightText);
+                getLogger()->infoF(F("ContentScreen: Confirmed with right button '%s'"), rightText);
             }
 
             // Restore the footer efficiently and return right choice
@@ -847,7 +865,7 @@ ConfirmResult ContentScreen::confirmF(const __FlashStringHelper *text, const __F
     {
         if (getLogger())
         {
-            getLogger()->err(F("ContentScreen: Failed to allocate memory for flash confirm dialog"));
+            getLogger()->errF(F("ContentScreen: Failed to allocate memory for flash confirm dialog"));
         }
 
         // Free any successfully allocated buffers before returning
@@ -889,19 +907,27 @@ void ContentScreen::_drawAlert(const char *text)
     // Draw alert background (cyan)
     gfx.fillRect(0, top, screenWidth, height, M1Shield.convertColor(ALERT_COLOR_BG));
 
-    // Draw alert text (black on cyan)
+    // Draw alert text (black on cyan) - using text size 2 for better visibility
     gfx.setTextColor(M1Shield.convertColor(ALERT_COLOR_FG));
-    gfx.setTextSize(1);
+    gfx.setTextSize(2);
 
-    // Center text horizontally
-    uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(text);
+    // Calculate vertical center position
+    uint16_t textY = top + (height - 16) / 2; // 16 is approximate height of size-2 text
+
+    // Draw left indicator "<" (left-aligned)
+    gfx.setCursor(2, textY);
+    gfx.print("<");
+
+    // Center main text horizontally
+    uint16_t textWidth = TEXT_SIZE_2_WIDTH * strlen(text);
     uint16_t xPos = (screenWidth - textWidth) / 2;
-
-    // Center text vertically in footer area
-    uint16_t yPos = top + (height - 8) / 2; // 8 is approximate height of size-1 text
-
-    gfx.setCursor(xPos, yPos);
+    gfx.setCursor(xPos, textY);
     gfx.print(text);
+
+    // Draw right indicator ">" (right-aligned)
+    uint16_t rightIndicatorX = screenWidth - TEXT_SIZE_2_WIDTH - 2; // TEXT_SIZE_2_WIDTH for ">" character
+    gfx.setCursor(rightIndicatorX, textY);
+    gfx.print(">");
 }
 
 void ContentScreen::_drawConfirm(const char *text, const char *leftText, const char *rightText)
@@ -918,32 +944,34 @@ void ContentScreen::_drawConfirm(const char *text, const char *leftText, const c
     // Draw confirm background (magenta)
     gfx.fillRect(0, top, screenWidth, height, M1Shield.convertColor(CONFIRM_COLOR_BG));
 
-    // Draw confirm text (black on magenta)
+    // Draw confirm text (black on magenta) - using text size 2 for better visibility
     gfx.setTextColor(M1Shield.convertColor(CONFIRM_COLOR_FG));
-    gfx.setTextSize(1);
+    gfx.setTextSize(2);
 
-    // Calculate positions for three text elements
-    uint16_t textY = top + (height - 8) / 2; // Vertically center all text
+    // Calculate positions for text elements
+    uint16_t textY = top + (height - 16) / 2; // 16 is approximate height of size-2 text, vertically center all text
 
-    // Left button text (left-aligned)
+    // Left button text (left-aligned) - when provided, show as indicator
     if (leftText != nullptr && leftText[0] != '\0')
     {
         gfx.setCursor(2, textY); // Small margin from left edge
+        gfx.print("<");
         gfx.print(leftText);
     }
 
     // Main message (center-aligned)
-    uint16_t mainTextWidth = TEXT_SIZE_1_WIDTH * strlen(text);
+    uint16_t mainTextWidth = TEXT_SIZE_2_WIDTH * strlen(text);
     uint16_t mainTextX = (screenWidth - mainTextWidth) / 2;
     gfx.setCursor(mainTextX, textY);
     gfx.print(text);
 
-    // Right button text (right-aligned)
+    // Right button text (right-aligned) - when provided, show as indicator
     if (rightText != nullptr && rightText[0] != '\0')
     {
-        uint16_t rightTextWidth = TEXT_SIZE_1_WIDTH * strlen(rightText);
+        uint16_t rightTextWidth = TEXT_SIZE_2_WIDTH * (strlen(rightText) + 1);
         uint16_t rightTextX = screenWidth - rightTextWidth - 2; // Small margin from right edge
         gfx.setCursor(rightTextX, textY);
         gfx.print(rightText);
+        gfx.print(">");
     }
 }

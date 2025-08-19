@@ -36,7 +36,6 @@ private:
     void _drawProgressBar();                                                          // Draw the progress bar region
     uint8_t _getPadding() const;                                                      // Gets the padding between areas
     void _drawNotification();                                                         // Draw notification overlay in place of footer
-    void _updateNotification();                                                       // Update notification state and check for expiration
     void _clearNotification();                                                        // Clear notification text and free memory
     void _drawAlert(const char *text);                                                // Draw alert dialog overlay in place of footer
     void _drawConfirm(const char *text, const char *leftText, const char *rightText); // Draw confirm dialog overlay in place of footer
@@ -65,8 +64,8 @@ public:
     virtual ~ContentScreen(); // Destructor - frees dynamically allocated button memory
 
     // Required Screen interface methods - must be implemented by derived classes
-    virtual void loop() = 0;                                                               // Main update loop for content-specific logic
-    virtual Screen *actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) = 0; // Handle input events
+    virtual void loop() override;                                                        // Base implementation handles notification timeouts, derived classes can override
+    virtual Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) = 0; // Handle input events
 
     // Progress control
     void setProgressValue(int value); // Set progress bar value (0-100)

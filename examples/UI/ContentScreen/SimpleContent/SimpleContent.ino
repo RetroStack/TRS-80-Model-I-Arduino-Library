@@ -29,9 +29,6 @@ Display_ST7789_320x240 displayProvider;
 #include <M1Shield.h>
 #include "SimpleContent.h"
 
-// Create the content screen instance
-SimpleContent contentScreen;
-
 void setup()
 {
     // Initialize serial for debugging
@@ -42,7 +39,7 @@ void setup()
     M1Shield.begin(displayProvider);
 
     // Set our content screen as active
-    M1Shield.setScreen(&contentScreen);
+    M1Shield.setScreen(new SimpleContent());
 
     Serial.println("ContentScreen loaded and ready!");
 }

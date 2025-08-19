@@ -5,7 +5,7 @@
  */
 
 #include "ComprehensiveContent.h"
-#include "../../../../src/M1Shield.h"
+#include <M1Shield.h>
 
 ComprehensiveContent::ComprehensiveContent() : ContentScreen()
 {
@@ -380,7 +380,7 @@ void ComprehensiveContent::drawAbout()
     display.print(F("Press Menu to return"));
 }
 
-Screen *ComprehensiveContent::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)
+Screen *ComprehensiveContent::actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY)
 {
     if (currentMode == MODE_INTERACTIVE_DEMO)
     {

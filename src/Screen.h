@@ -59,7 +59,7 @@ protected:
 
 public:
     Screen();                    // Default constructor initializes screen in inactive state
-    virtual ~Screen(); // Virtual destructor ensures proper cleanup of derived classes
+    virtual ~Screen();           // Virtual destructor ensures proper cleanup of derived classes
     bool isSmallDisplay() const; // Check if the current display is considered small (height <= 128 pixels)
 
     void setLogger(ILogger &logger); // Set logger for debugging output
@@ -83,7 +83,7 @@ public:
     virtual void loop() = 0; // Main update loop called every frame while screen is active
 
     // Handle user input events and return navigation result
-    virtual Screen *actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) = 0;
+    virtual Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) = 0;
 
     Screen(const Screen &) = delete; // Disable copy constructor to prevent screen duplication
 

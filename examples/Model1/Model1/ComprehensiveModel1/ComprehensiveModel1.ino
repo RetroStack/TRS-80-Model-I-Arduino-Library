@@ -43,10 +43,6 @@ void loop()
     demonstrateAdvancedMemoryOperations();
     delay(4000);
 
-    // Advanced I/O operations and port analysis
-    demonstrateAdvancedIOOperations();
-    delay(4000);
-
     // Interrupt and timing operations
     demonstrateInterruptOperations();
     delay(4000);
@@ -66,7 +62,7 @@ void loop()
 
 void demonstrateAdvancedMemoryOperations()
 {
-    Serial.println(F("\\n--- Advanced Memory Operations ---"));
+    Serial.println(F("--- Advanced Memory Operations ---"));
 
     // Memory region analysis
     Serial.println(F("TRS-80 Model I Memory Map Analysis:"));
@@ -113,7 +109,7 @@ void demonstrateAdvancedMemoryOperations()
     }
 
     // Advanced block operations with timing
-    Serial.println(F("\\nAdvanced block operations:"));
+    Serial.println(F("Advanced block operations:"));
 
     uint16_t blockAddr = 0x4000;
     uint16_t blockSize = 1024;
@@ -170,93 +166,15 @@ void demonstrateAdvancedMemoryOperations()
     free(readBack);
 }
 
-void demonstrateAdvancedIOOperations()
-{
-    Serial.println(F("\\n--- Advanced I/O Operations ---"));
-
-    // Comprehensive I/O port analysis
-    Serial.println(F("TRS-80 Model I I/O Port Map:"));
-    Serial.println(F("Port | Function"));
-    Serial.println(F("-----|------------------"));
-    Serial.println(F("0x3E | Keyboard input"));
-    Serial.println(F("0x3F | Cassette/Video control"));
-    Serial.println(F("0xE0 | Orchestra-85 (if present)"));
-    Serial.println(F("0xE4 | Orchestra-85 (if present)"));
-    Serial.println();
-
-    // Read and analyze key I/O ports
-    uint8_t keyboardPort = Model1.readIO(0x3E);
-    uint8_t cassettePort = Model1.readIO(0x3F);
-
-    Serial.print(F("Keyboard port (0x3E): 0x"));
-    Serial.print(keyboardPort, HEX);
-    Serial.print(F(" - Binary: "));
-    for (int bit = 7; bit >= 0; bit--)
-    {
-        Serial.print((keyboardPort & (1 << bit)) ? '1' : '0');
-    }
-    Serial.println();
-
-    Serial.print(F("Cassette port (0x3F): 0x"));
-    Serial.print(cassettePort, HEX);
-    Serial.print(F(" - Binary: "));
-    for (int bit = 7; bit >= 0; bit--)
-    {
-        Serial.print((cassettePort & (1 << bit)) ? '1' : '0');
-    }
-    Serial.println();
-
-    // Test cassette control bits
-    Serial.println(F("\\nTesting cassette control bits:"));
-
-    uint8_t originalCassette = Model1.readIO(0x3F);
-
-    // Test each control bit
-    for (int bit = 0; bit < 8; bit++)
-    {
-        uint8_t testValue = (1 << bit);
-        Model1.writeIO(0x3F, testValue);
-        delay(10);
-        uint8_t readBack = Model1.readIO(0x3F);
-
-        Serial.print(F("Bit "));
-        Serial.print(bit);
-        Serial.print(F(": wrote 0x"));
-        Serial.print(testValue, HEX);
-        Serial.print(F(", read 0x"));
-        Serial.println(readBack, HEX);
-    }
-
-    // Restore original cassette port value
-    Model1.writeIO(0x3F, originalCassette);
-
-    // Test Orchestra-85 ports (if present)
-    Serial.println(F("\\nTesting for Orchestra-85 sound card:"));
-
-    uint8_t orch1 = Model1.readIO(0xE0);
-    uint8_t orch2 = Model1.readIO(0xE4);
-
-    Serial.print(F("Orchestra port 0xE0: 0x"));
-    Serial.println(orch1, HEX);
-    Serial.print(F("Orchestra port 0xE4: 0x"));
-    Serial.println(orch2, HEX);
-
-    if (orch1 != 0xFF || orch2 != 0xFF)
-    {
-        Serial.println(F("Orchestra-85 may be present"));
-    }
-    else
-    {
-        Serial.println(F("Orchestra-85 not detected"));
-    }
-}
-
 void demonstrateInterruptOperations()
 {
-    Serial.println(F("\\n--- Interrupt Operations ---"));
+    // TODO: Somehow doesn't work. Need to debug this
+    Serial.println(F("--- Interrupt Operations ---"));
 
     // Test interrupt triggering
     Serial.println(F("Testing Z80 interrupt capabilities:"));
+
+    Model1.deactivateTestSignal();
 
     uint8_t interruptVectors[] = {0x10, 0x18, 0x20, 0x28, 0x30, 0x38};
     const char *interruptNames[] = {"RST 10H", "RST 18H", "RST 20H", "RST 28H", "RST 30H", "RST 38H"};
@@ -286,11 +204,13 @@ void demonstrateInterruptOperations()
 
         delay(100); // Brief pause between interrupt tests
     }
+
+    Model1.activateTestSignal();
 }
 
 void demonstrateAdvancedBusControl()
 {
-    Serial.println(F("\\n--- Advanced Bus Control ---"));
+    Serial.println(F("--- Advanced Bus Control ---"));
 
     // Test wait signal functionality
     Serial.println(F("Testing WAIT signal control:"));
@@ -310,7 +230,7 @@ void demonstrateAdvancedBusControl()
     systemState.waitSignalActive = false;
 
     // Test rapid bus control switching
-    Serial.println(F("\\nTesting rapid bus control switching:"));
+    Serial.println(F("Testing rapid bus control switching:"));
 
     for (int cycle = 0; cycle < 5; cycle++)
     {
@@ -338,7 +258,7 @@ void demonstrateAdvancedBusControl()
 
 void demonstrateSystemDiagnostics()
 {
-    Serial.println(F("\\n--- System Diagnostics ---"));
+    Serial.println(F("--- System Diagnostics ---"));
 
     // System state analysis
     Serial.println(F("Current system state:"));
@@ -353,7 +273,7 @@ void demonstrateSystemDiagnostics()
     Serial.println(resetState ? F("ACTIVE") : F("INACTIVE"));
 
     // Memory map verification
-    Serial.println(F("\\nMemory map verification:"));
+    Serial.println(F("Memory map verification:"));
 
     // Test ROM area (should be readable but not writable)
     uint8_t romTest = Model1.readMemory(0x0000);
@@ -396,7 +316,7 @@ void demonstrateSystemDiagnostics()
 
 void demonstratePerformanceAnalysis()
 {
-    Serial.println(F("\\n--- Performance Analysis ---"));
+    Serial.println(F("--- Performance Analysis ---"));
 
     // Memory access timing analysis
     Serial.println(F("Memory access timing analysis:"));
@@ -434,7 +354,7 @@ void demonstratePerformanceAnalysis()
     Serial.println(F(" μs/op"));
 
     // I/O timing analysis
-    Serial.println(F("\\nI/O operation timing:"));
+    Serial.println(F("I/O operation timing:"));
 
     startTime = micros();
     for (int i = 0; i < iterations; i++)
@@ -465,7 +385,7 @@ void demonstratePerformanceAnalysis()
 
     // Calculate theoretical bandwidth
     float memoryBandwidth = 1000000.0 / ((float)(writeTime + readTime) / (iterations * 2));
-    Serial.print(F("\\nTheoretical memory bandwidth: "));
+    Serial.print(F("Theoretical memory bandwidth: "));
     Serial.print(memoryBandwidth, 0);
     Serial.println(F(" bytes/second"));
 

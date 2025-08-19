@@ -1,11 +1,15 @@
 /*
  * ComprehensiveScreen.cpp
  *
- * Implementation of the main controller for the complete Screen base class demonstration.
- * This coordinates three separate demo screens showing different Screen capabilities.
+ * Complete demonstration of Screen base class capabilities.
+ * This shows all the features available in the Screen class.
  */
 
 #include "ComprehensiveScreen.h"
+#include "InputDemoScreen.h"
+#include "LifecycleDemoScreen.h"
+#include "AnimationDemoScreen.h"
+#include <math.h>
 
 ComprehensiveScreen::ComprehensiveScreen()
     : currentDemo(0), isActive(false), activationTime(0), screenActivations(0),
@@ -13,277 +17,232 @@ ComprehensiveScreen::ComprehensiveScreen()
 {
     // Set the main screen title
     setTitle("Comprehensive Screen Demo");
-    
-    // Create our three demo screens
-    inputDemo = new InputDemoScreen();
-    lifecycleDemo = new LifecycleDemoScreen();
-    animationDemo = new AnimationDemoScreen();
+    Serial.println("ComprehensiveScreen constructor called");
 }
 
 ComprehensiveScreen::~ComprehensiveScreen()
 {
-    // Proper cleanup - important for embedded systems!
-    delete inputDemo;
-    delete lifecycleDemo;
-    delete animationDemo;
+    // Clean screen lifecycle demonstration
 }
 
 bool ComprehensiveScreen::open()
 {
-    // Screen lifecycle demonstration
+    Serial.println("=== ComprehensiveScreen::open() called ===");
+
+    // Call base class open() first to set _active and trigger initial draw
+    bool result = Screen::open();
+    Serial.print("Base Screen::open() returned: ");
+    Serial.println(result);
+
     isActive = true;
     activationTime = millis();
     screenActivations++;
 
-    Serial.println("=== ComprehensiveScreen::open() ===");
-    Serial.print("Screen activation #");
-    Serial.println(screenActivations);
-    Serial.print("Opened at: ");
-    Serial.print(activationTime);
-    Serial.println("ms");
+    // Reset performance tracking
+    frameCount = 0;
+    lastFrameTime = 0;
+    averageFPS = 0.0;
 
-    // Open the current demo screen
-    switch (currentDemo)
+    if (getLogger())
     {
-    case 0:
-        inputDemo->open();
-        break;
-    case 1:
-        lifecycleDemo->open();
-        break;
-    case 2:
-        animationDemo->open();
-        break;
+        getLogger()->infoF(F("Screen activated - Count: %d"), screenActivations);
     }
 
-    return true;
-}
+    Serial.print("Screen activations: ");
+    Serial.println(screenActivations);
+    Serial.print("Activation time: ");
+    Serial.println(activationTime);
 
+    // Note: Don't call switchToNextDemo() here since base open() already calls _drawScreen()
+    // The screen will start with demo 0 (Input Demo) as initialized
+    Serial.println("ComprehensiveScreen::open() completed");
+
+    return result;
+}
 void ComprehensiveScreen::close()
 {
-    // Screen lifecycle demonstration
+    Serial.println("=== ComprehensiveScreen::close() called ===");
     isActive = false;
-    unsigned long closeTime = millis();
-    unsigned long sessionDuration = closeTime - activationTime;
+    unsigned long duration = millis() - activationTime;
 
-    Serial.println("=== ComprehensiveScreen::close() ===");
-    Serial.print("Session duration: ");
-    Serial.print(sessionDuration);
-    Serial.println("ms");
-    Serial.print("Average FPS during session: ");
-    Serial.println(averageFPS);
-
-    // Close the current demo screen
-    switch (currentDemo)
+    if (getLogger())
     {
-    case 0:
-        inputDemo->close();
-        break;
-    case 1:
-        lifecycleDemo->close();
-        break;
-    case 2:
-        animationDemo->close();
-        break;
+        getLogger()->infoF(F("Screen deactivated after %lu ms"), duration);
     }
+
+    // Call base class close() to set _active = false
+    Screen::close();
+    Serial.println("ComprehensiveScreen::close() completed");
 }
 
 void ComprehensiveScreen::_drawScreen()
 {
+    Serial.println("=== ComprehensiveScreen::_drawScreen() called ===");
+
     // Get access to the display
     Adafruit_GFX &display = M1Shield.getGFX();
+    Serial.println("Got display reference");
 
-    // Clear screen with adaptive background color
-    uint16_t bgColor = isSmallDisplay() ? M1Shield.convertColor(0x0008) : // Dark blue for small displays
-                           M1Shield.convertColor(0x0010);                 // Brighter blue for large displays
+    // Clear the display
+    display.fillScreen(M1Shield.convertColor(0x0000));
+    display.setTextColor(M1Shield.convertColor(0xFFFF));
+    Serial.println("Display cleared and text color set");
 
-    display.fillScreen(bgColor);
+    // Draw title
+    display.setTextSize(2);
+    display.setCursor(10, 10);
+    display.print("Screen Demos");
+    Serial.println("Title drawn");
 
-    // Draw common header
-    drawHeader();
+    // Draw menu options
+    display.setTextSize(1);
+    display.setCursor(10, 40);
+    display.print("Available demos:");
 
-    // Draw the current demo
-    drawCurrentDemo();
+    // Show current demo option highlighted
+    const char *demos[] = {"Input Demo", "Lifecycle Demo", "Animation Demo"};
 
-    updatePerformanceStats();
+    for (int i = 0; i < 3; i++)
+    {
+        display.setCursor(20, 60 + (i * 15));
+
+        if (i == currentDemo)
+        {
+            display.print(">> ");
+            display.print(demos[i]);
+            display.print(" <<");
+        }
+        else
+        {
+            display.print("   ");
+            display.print(demos[i]);
+        }
+    }
+
+    // Instructions
+    display.setCursor(10, 120);
+    display.print("MENU: Launch selected demo");
+    display.setCursor(10, 135);
+    display.print("UP/DOWN: Navigate");
+
+    // Show statistics
+    char buffer[30];
+    sprintf(buffer, "Activations: %d", screenActivations);
+    display.setCursor(10, 160);
+    display.print(buffer);
+
+    Serial.println("=== _drawScreen() completed ===");
 }
 
 void ComprehensiveScreen::loop()
 {
-    // Delegate to current demo screen
-    switch (currentDemo)
-    {
-    case 0:
-        inputDemo->loop();
-        break;
-    case 1:
-        lifecycleDemo->loop();
-        break;
-    case 2:
-        animationDemo->loop();
-        break;
-    }
-
-    // Update our own performance monitoring
-    frameCount++;
+    // This is a simple menu screen, so no continuous updates needed
+    // Individual demo screens will handle their own loop() requirements
 }
 
-Screen *ComprehensiveScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)
+Screen *ComprehensiveScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY)
 {
-    // Handle navigation between demos
+    Serial.print("=== actionTaken called with action: 0x");
+    Serial.print(action, HEX);
+    Serial.print(", offset: ");
+    Serial.print(offsetX);
+    Serial.print(",");
+    Serial.println(offsetY);
+
+    // Handle menu navigation
+    if (action & BUTTON_UP)
+    {
+        Serial.println("UP button - previous demo");
+        currentDemo = (currentDemo + 2) % 3; // Previous (with wrap-around)
+        refresh();
+        return nullptr;
+    }
+
+    if (action & BUTTON_DOWN)
+    {
+        Serial.println("DOWN button - next demo");
+        currentDemo = (currentDemo + 1) % 3; // Next
+        refresh();
+        return nullptr;
+    }
+
+    // Launch selected demo
     if (action & BUTTON_MENU)
     {
-        switchToNextDemo();
-        return nullptr; // Stay on this screen
+        Serial.println("MENU button detected - launching selected demo");
+        return launchSelectedDemo();
     }
 
-    // Delegate all other actions to current demo
-    switch (currentDemo)
+    // Log other input for demonstration
+    if (getLogger())
     {
-    case 0:
-        inputDemo->actionTaken(action, offsetX, offsetY);
-        break;
-    case 1:
-        lifecycleDemo->actionTaken(action, offsetX, offsetY);
-        break;
-    case 2:
-        animationDemo->actionTaken(action, offsetX, offsetY);
-        break;
+        if (action & BUTTON_LEFT)
+        {
+            getLogger()->infoF(F("LEFT button pressed on menu"));
+            Serial.println("LEFT button logged");
+        }
+        if (action & BUTTON_RIGHT)
+        {
+            getLogger()->infoF(F("RIGHT button pressed on menu"));
+            Serial.println("RIGHT button logged");
+        }
+        if (action & BUTTON_JOYSTICK)
+        {
+            getLogger()->infoF(F("Joystick pressed at: %d,%d"), offsetX, offsetY);
+            Serial.println("Joystick press logged");
+        }
     }
 
+    Serial.println("actionTaken returning nullptr");
     return nullptr; // Stay on this screen
 }
 
-void ComprehensiveScreen::switchToNextDemo()
+Screen *ComprehensiveScreen::launchSelectedDemo()
 {
-    // Close current demo
-    switch (currentDemo)
+    Serial.println("=== launchSelectedDemo() called ===");
+    Serial.print("Selected demo: ");
+    Serial.println(currentDemo);
+
+    if (getLogger())
     {
-    case 0:
-        inputDemo->close();
-        break;
-    case 1:
-        lifecycleDemo->close();
-        break;
-    case 2:
-        animationDemo->close();
-        break;
+        getLogger()->infoF(F("Launching demo %d: %s"), currentDemo, getDemoName());
     }
 
-    // Move to next demo
-    currentDemo = (currentDemo + 1) % 3;
-
-    Serial.println("=== SWITCHING DEMO ===");
-    Serial.print("New demo: ");
-    Serial.print(currentDemo);
-    Serial.print(" - ");
+    Serial.print("Demo name: ");
     Serial.println(getDemoName());
 
-    // Open new demo
+    // Create and return new screen instance based on selected demo
+    Screen *newScreen = nullptr;
     switch (currentDemo)
     {
     case 0:
-        inputDemo->open();
+        Serial.println("Creating new InputDemoScreen");
+        newScreen = new InputDemoScreen();
         break;
     case 1:
-        lifecycleDemo->open();
+        Serial.println("Creating new LifecycleDemoScreen");
+        newScreen = new LifecycleDemoScreen();
         break;
     case 2:
-        animationDemo->open();
+        Serial.println("Creating new AnimationDemoScreen");
+        newScreen = new AnimationDemoScreen();
         break;
+    default:
+        Serial.println("Unknown demo number - staying on current screen");
+        return nullptr;
     }
 
-    // Force screen redraw
-    refresh();
+    Serial.print("Created new screen instance: ");
+    Serial.println((unsigned long)newScreen, HEX);
+    Serial.println("=== launchSelectedDemo() returning new screen ===");
+    return newScreen;
 }
 
-void ComprehensiveScreen::drawHeader()
+void ComprehensiveScreen::drawNavigationInfo()
 {
-    // Get access to the display
-    Adafruit_GFX &display = M1Shield.getGFX();
-
-    // Adaptive header for different display sizes
-    if (isSmallDisplay())
-    {
-        // Compact header for small displays (128x64 OLED)
-        display.setTextColor(M1Shield.convertColor(0xFFE0)); // Yellow
-        display.setTextSize(1);
-        display.setCursor(0, 0);
-        display.print("Screen Demo ");
-        display.print(currentDemo + 1);
-        display.print("/3");
-
-        // Demo name on second line
-        display.setCursor(0, 10);
-        display.setTextColor(M1Shield.convertColor(0xFFFF)); // White
-        display.print(getDemoName());
-    }
-    else
-    {
-        // Full header for large displays
-        display.setTextColor(M1Shield.convertColor(0xFFE0)); // Yellow
-        display.setTextSize(2);
-        display.setCursor(10, 10);
-        display.print("Screen Complete Demo");
-
-        // Demo indicator
-        display.setTextSize(1);
-        display.setCursor(10, 35);
-        display.setTextColor(M1Shield.convertColor(0x07FF)); // Cyan
-        display.print("Demo ");
-        display.print(currentDemo + 1);
-        display.print(" of 3: ");
-        display.setTextColor(M1Shield.convertColor(0xFFFF)); // White
-        display.print(getDemoName());
-
-        // Description
-        display.setCursor(10, 50);
-        display.setTextColor(M1Shield.convertColor(0xC618)); // Light gray
-        display.print(getDemoDescription());
-
-        // Navigation hint
-        display.setCursor(10, display.height() - 20);
-        display.setTextColor(M1Shield.convertColor(0xFFE0)); // Yellow
-        display.print("MENU: Next Demo");
-    }
-}
-
-void ComprehensiveScreen::drawCurrentDemo()
-{
-    // Set viewport for demo content (below header)
-    int contentY = isSmallDisplay() ? 25 : 75;
-
-    // Draw the active demo screen content
-    switch (currentDemo)
-    {
-    case 0:
-        inputDemo->_drawScreen();
-        break;
-    case 1:
-        lifecycleDemo->_drawScreen();
-        break;
-    case 2:
-        animationDemo->_drawScreen();
-        break;
-    }
-}
-
-void ComprehensiveScreen::updatePerformanceStats()
-{
-    unsigned long currentTime = millis();
-    if (lastFrameTime == 0)
-    {
-        lastFrameTime = currentTime;
-        return;
-    }
-
-    // Calculate FPS every second
-    if (currentTime - lastFrameTime >= 1000)
-    {
-        averageFPS = frameCount * 1000.0 / (currentTime - lastFrameTime);
-        lastFrameTime = currentTime;
-        frameCount = 0;
-    }
+    // This is called from draw() after each demo to show consistent navigation
+    // Currently each demo shows its own navigation, so this can be minimal
+    // or used for common status information
 }
 
 const char *ComprehensiveScreen::getDemoName()
@@ -298,20 +257,5 @@ const char *ComprehensiveScreen::getDemoName()
         return "Animation Demo";
     default:
         return "Unknown";
-    }
-}
-
-const char *ComprehensiveScreen::getDemoDescription()
-{
-    switch (currentDemo)
-    {
-    case 0:
-        return "Test all buttons and joystick input";
-    case 1:
-        return "Screen lifecycle and state management";
-    case 2:
-        return "Real-time updates and performance";
-    default:
-        return "";
     }
 }

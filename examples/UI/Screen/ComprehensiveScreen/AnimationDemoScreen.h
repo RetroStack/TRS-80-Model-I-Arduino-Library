@@ -23,12 +23,14 @@ private:
     struct AnimationState
     {
         float ballX, ballY;
+        float prevBallX, prevBallY;
         float ballVelX, ballVelY;
         float ballRadius;
         uint16_t ballColor;
         unsigned long animationStartTime;
         int bounceCount;
         bool animationPaused;
+        bool needsFullRedraw;
     } animationState;
 
     // Performance monitoring
@@ -41,6 +43,7 @@ private:
         float minFPS;
         unsigned long frameTime;
         unsigned long maxFrameTime;
+        bool needsStatsUpdate;
     } performanceStats;
 
     // User controls
@@ -52,7 +55,7 @@ public:
 
     void _drawScreen() override;
     void loop() override;
-    Screen *actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override;
+    Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override;
     bool open() override;
     void close() override;
 
@@ -60,6 +63,7 @@ private:
     void updateAnimation();
     void drawAnimatedBall();
     void drawPerformanceStats();
+    void updatePerformanceStatsArea();
     void drawControls();
     void updatePerformanceMonitoring();
     void resetAnimation();

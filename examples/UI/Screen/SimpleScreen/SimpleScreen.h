@@ -23,7 +23,7 @@ public:
     SimpleScreen();
 
     void loop() override;                                                               // This runs continuously
-    Screen *actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override; // This handles button presses
+    Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override; // This handles button presses
 };
 
 #endif /* SIMPLE_SCREEN_H */

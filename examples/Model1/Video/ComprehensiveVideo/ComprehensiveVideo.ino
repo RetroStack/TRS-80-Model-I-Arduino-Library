@@ -69,7 +69,7 @@ void loop()
 
 void demonstrateAdvancedScreenOperations()
 {
-    Serial.println(F("\\n--- Advanced Screen Operations ---"));
+    Serial.println(F("--- Advanced Screen Operations ---"));
 
     video.cls();
 
@@ -80,13 +80,13 @@ void demonstrateAdvancedScreenOperations()
 
     // Advanced positioning with bounds checking
     video.cls();
-    video.print("TESTING BOUNDARIES");
+    video.print(20, 0, "TESTING BOUNDARIES");
 
     // Test edge positions
-    video.print(0, 0, "TOP-LEFT");
-    video.print(56, 0, "TOP-RIGHT");
+    video.print(0, 0, "TOP-LEFT ");
+    video.print(55, 0, "TOP-RIGHT");
     video.print(0, 15, "BOTTOM-LEFT");
-    video.print(50, 15, "BOTTOM-RIGHT");
+    video.print(51, 15, "BOTTOM-RIGHT");
 
     // Test center positioning
     uint8_t centerX = (video.getWidth() - 6) / 2; // 6 = length of "CENTER"
@@ -99,7 +99,7 @@ void demonstrateAdvancedScreenOperations()
 
 void demonstrateCharacterConversion()
 {
-    Serial.println(F("\\n--- Character Conversion ---"));
+    Serial.println(F("--- Character Conversion ---"));
 
     video.cls();
     video.println("CHARACTER CONVERSION TEST:");
@@ -112,7 +112,7 @@ void demonstrateCharacterConversion()
     video.println(testChars);
 
     video.print("TO MODEL1: ");
-    for (int i = 0; testChars[i] != '\\0'; i++)
+    for (int i = 0; testChars[i] != '\0'; i++)
     {
         char converted = video.convertLocalCharacterToModel1(testChars[i]);
         video.print(converted, true); // Print raw to avoid double conversion
@@ -120,7 +120,7 @@ void demonstrateCharacterConversion()
     video.println();
 
     video.print("BACK TO LOCAL: ");
-    for (int i = 0; testChars[i] != '\\0'; i++)
+    for (int i = 0; testChars[i] != '\0'; i++)
     {
         char toModel1 = video.convertLocalCharacterToModel1(testChars[i]);
         char backToLocal = video.convertModel1CharacterToLocal(toModel1);
@@ -133,22 +133,20 @@ void demonstrateCharacterConversion()
 
 void demonstrateMemoryOperations()
 {
-    Serial.println(F("\\n--- Memory Operations ---"));
+    Serial.println(F("--- Memory Operations ---"));
 
     video.cls();
     video.println("MEMORY DUMP EXAMPLE");
     video.println("CHECK SERIAL OUTPUT");
 
     // Quickly read video memory
-    Model1.activateTestSignal();
     for (uint16_t i = 0; i < 1024; i++)
     {
         videoMemoryBuffer[i] = Model1.readMemory(0x3C00 + i);
     }
-    Model1.deactivateTestSignal();
 
     // Analyze and display memory contents
-    Serial.println(F("\\n=== VIDEO MEMORY DUMP ==="));
+    Serial.println(F("=== VIDEO MEMORY DUMP ==="));
     Serial.println(F("Address  | Hex Data                    | ASCII"));
     Serial.println(F("---------|-----------------------------|---------"));
 
@@ -193,7 +191,7 @@ void demonstrateMemoryOperations()
 
 void demonstrateViewportInformation()
 {
-    Serial.println(F("\\n--- Viewport Information ---"));
+    Serial.println(F("--- Viewport Information ---"));
 
     video.cls();
     video.println("VIEWPORT INFO:");
@@ -238,7 +236,7 @@ void demonstrateViewportInformation()
 
 void demonstratePerformanceFeatures()
 {
-    Serial.println(F("\\n--- Performance Features ---"));
+    Serial.println(F("--- Performance Features ---"));
 
     video.cls();
     video.println("PERFORMANCE TEST");
@@ -283,7 +281,7 @@ void demonstratePerformanceFeatures()
 
 void demonstrateCharacterModes()
 {
-    Serial.println(F("\\n--- Character Mode Switching ---"));
+    Serial.println(F("--- Character Mode Switching ---"));
 
     video.cls();
     video.println("CHARACTER MODE TEST");
@@ -291,6 +289,7 @@ void demonstrateCharacterModes()
 
     // Test 64-character mode
     video.println("64-CHAR MODE:");
+    // These characters will automatically be mapped as best as possible
     video.println("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?");
     delay(2000);
 
