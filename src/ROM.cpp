@@ -167,7 +167,7 @@ void ROM::printROMContents(uint8_t rom, PRINT_STYLE style, bool relative, uint16
 
 bool ROM::_checkROMNumber(uint8_t rom) const
 {
-  if (rom < 0 || rom > 3)
+  if (rom > 3)
   {
     if (_logger)
       _logger->err(F("Invalid ROM number: %d. Valid range is 0-3."), rom);

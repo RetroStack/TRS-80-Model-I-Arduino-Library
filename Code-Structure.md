@@ -102,6 +102,11 @@ This document provides a comprehensive reference of all classes and functions av
 - `bool isSmallDisplay() const` // Check if display is small (height <= 128px)
 - `void setLogger(ILogger &logger)` // Set logger for debugging output
 - `ILogger* getLogger() const` // Get logger instance
+- `void setTitle(const char *title)` // Set screen title/name
+- `void setTitle(String title)` // Set screen title from Arduino String
+- `void setTitleF(const __FlashStringHelper *title)` // Set screen title from FlashString
+- `void clearTitle()` // Clear current title
+- `const char* getTitle() const` // Get current screen title
 - `void refresh()` // Force complete screen redraw
 - `virtual bool open()` // Activate screen and perform initial setup
 - `virtual void close()` // Deactivate screen and cleanup
@@ -119,11 +124,6 @@ This document provides a comprehensive reference of all classes and functions av
 - `virtual ~ContentScreen()` // Destructor with memory cleanup
 - `virtual void loop() = 0` // Pure virtual: main update loop for content logic
 - `virtual Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) = 0` // Pure virtual: input handler within structured layout
-- `void setTitle(const char* title)` // Set screen title displayed in header
-- `void setTitle(String title)` // Set screen title from Arduino String object
-- `void setTitleF(const __FlashStringHelper* title)` // Set screen title from FlashString (F() macro)
-- `void clearTitle()` // Clear current title and free memory
-- `const char* getTitle() const` // Get current screen title
 - `void setProgressValue(int value)` // Set progress bar value (0-100)
 - `uint8_t getProgressValue() const` // Get current progress bar value
 - `void setButtonItems(const char** buttonItems, uint8_t buttonItemCount)` // Set button labels for footer with dynamic allocation

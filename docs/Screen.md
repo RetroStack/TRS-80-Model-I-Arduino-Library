@@ -6,6 +6,7 @@ The `Screen` class provides the foundational interface for all user interface sc
 
 - [Constructor](#constructor)
 - [Lifecycle Management](#lifecycle-management)
+- [Title Management](#title-management)
 - [Input Handling](#input-handling)
 - [Action Enumeration](#action-enumeration)
 - [Screen Navigation](#screen-navigation)
@@ -66,6 +67,66 @@ if (myScreen->open()) {
     assert(!myScreen->isActive());
 }
 ```
+
+## Title Management
+
+Every screen can have an optional title/name for identification and debugging purposes. The title system supports the standard three string formats used throughout the library.
+
+### Title Methods
+
+```cpp
+void setTitle(const char* title)                    // Set title from C-string
+void setTitle(String title)                         // Set title from Arduino String
+void setTitleF(const __FlashStringHelper* title)    // Set title from FlashString (F() macro)
+void clearTitle()                                   // Clear current title and free memory
+const char* getTitle() const                        // Get current title (may return nullptr)
+```
+
+### String Function Patterns
+
+All title functions follow the library's consistent string API:
+
+| **Function Type** | **C-String** | **Arduino String** | **FlashString** |
+|---|---|---|---|
+| **Title** | `setTitle("Text")` | `setTitle(String("Text"))` | `setTitleF(F("Text"))` |
+
+### Usage Examples
+
+```cpp
+// Set title for debugging/logging
+MyScreen::MyScreen() {
+    setTitle("Settings Menu");          // Static title
+    // or
+    setTitleF(F("Settings Menu"));      // Memory-efficient FlashString
+}
+
+// Dynamic titles
+void updateTitle(const String& userName) {
+    setTitle("Welcome " + userName);    // Dynamic content
+}
+
+// Clear title
+clearTitle();                           // Frees memory, sets to nullptr
+
+// Check if title exists
+const char* title = getTitle();
+if (title) {
+    Serial.println(title);              // Safe to use
+}
+```
+
+### Memory Management
+
+- **Automatic**: Memory is automatically allocated and freed
+- **Copy**: Title text is copied into internal buffer
+- **Cleanup**: Title memory is freed in destructor or when `clearTitle()` is called
+- **FlashString**: Temporary buffer created during `setTitleF()` calls
+
+### Display Behavior
+
+- **Base Screen**: Title is stored but not displayed (for debugging/logging only)
+- **ContentScreen**: Title is displayed in the header area when set
+- **Custom Screens**: Can access title via `getTitle()` for custom display handling
 
 ## Input Handling
 

@@ -2,6 +2,8 @@
 
 The `ContentScreen` class provides a structured layout template for screens with standardized header, content area, footer, and progress bar regions. It extends the basic `Screen` interface with automatic layout management, allowing developers to focus on content-specific functionality while maintaining consistent visual structure.
 
+**Inherits from:** [Screen](Screen.md) - Includes all base screen functionality such as lifecycle management, input handling, and title management.
+
 **NEW: Comprehensive String Support** - All text functions now support three formats:
 
 - **C-strings** (`const char*`) - For simple static text
@@ -17,10 +19,6 @@ The `ContentScreen` class provides a structured layout template for screens with
   - [\_drawContent](#void-_drawcontent)
   - [Layout Getters](#layout-getters)
 - [Public Methods](#public-methods)
-  - [Title Management](#title-management)
-    - [setTitle](#title-functions)
-    - [clearTitle](#void-cleartitle)
-    - [getTitle](#const-char-gettitle-const)
   - [Progress Control](#progress-control)
     - [setProgressValue](#void-setprogressvalueint-value)
     - [getProgressValue](#uint8_t-getprogressvalue-const)
@@ -47,7 +45,6 @@ All text-related functions in ContentScreen support three string formats for max
 
 | Function Type     | C-String                        | Arduino String                                      | F-String (Flash)                      |
 | ----------------- | ------------------------------- | --------------------------------------------------- | ------------------------------------- |
-| **Title**         | `setTitle("Text")`              | `setTitle(String("Text"))`                          | `setTitleF(F("Text"))`                |
 | **Drawing**       | `drawText(x, y, "Text", color)` | `drawText(x, y, String("Text"), color)`             | `drawTextF(x, y, F("Text"), color)`   |
 | **Notifications** | `notify("Text")`                | `notify(String("Text"))`                            | `notifyF(F("Text"))`                  |
 | **Alerts**        | `alert("Text")`                 | `alert(String("Text"))`                             | `alertF(F("Text"))`                   |
@@ -58,6 +55,8 @@ All text-related functions in ContentScreen support three string formats for max
 - **C-strings**: Simple static text, constants
 - **Arduino Strings**: Dynamic content, concatenation, runtime-built text
 - **F-strings**: Static text that should be stored in Flash memory to save RAM
+
+> **Note**: Title management (`setTitle`, `setTitleF`, `clearTitle`, `getTitle`) is inherited from the base [Screen](Screen.md#title-management) class and automatically displays in the header area.
 
 ## Constructor
 
@@ -125,67 +124,6 @@ Access content area boundaries for positioning:
 - `uint16_t _getContentHeight()`: Returns content area height in pixels
 
 ## Public Methods
-
-### Title Management
-
-Control the header area display with three convenient methods:
-
-#### Title Functions
-
-**C-String Version:**
-
-```cpp
-void setTitle(const char* title)
-```
-
-**Arduino String Version:**
-
-```cpp
-void setTitle(String title)
-```
-
-**F-String Version:**
-
-```cpp
-void setTitleF(const __FlashStringHelper* title)
-```
-
-Sets the title text displayed in the header region. The title is dynamically allocated and automatically freed when changed or when the screen is destroyed.
-
-**Parameters:**
-
-- `title`: Title text in your preferred format (pass nullptr/empty to clear)
-
-**Examples:**
-
-```cpp
-// Static text (simple)
-setTitle("System Configuration");
-
-// Dynamic text (convenient)
-String playerName = "Alice";
-setTitle(String("Welcome ") + playerName);
-
-// Memory efficient static text
-setTitleF(F("System Configuration"));
-
-// Clear title
-setTitle(nullptr);  // or setTitle("") or setTitleF(nullptr)
-```
-
-**Memory Benefits:**
-
-- Stores string literals in flash memory instead of RAM
-- Reduces RAM usage significantly for static text
-- Automatically converted and allocated as needed
-
-#### `void clearTitle()`
-
-Clears the current title and frees any dynamically allocated title memory.
-
-#### `const char* getTitle() const`
-
-Returns the current title string, or nullptr if no title is set.
 
 ### Progress Control
 

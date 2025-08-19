@@ -14,6 +14,9 @@ SimpleScreen::SimpleScreen()
     // Initialize our variables
     _buttonPressCount = 0;
     _ledColor = 0;
+
+    // Set the screen title
+    setTitle("Simple Screen Demo");
 }
 
 // This method draws everything you see on the screen
@@ -32,9 +35,17 @@ void SimpleScreen::_drawScreen()
     else
         display.setTextSize(2); // Use larger text on bigger displays
 
-    // Show a title at the top
+    // Show the title
     display.setCursor(10, 10);
-    display.print("Simple Screen");
+    const char *title = getTitle();
+    if (title != nullptr)
+    {
+        display.print(title);
+    }
+    else
+    {
+        display.print("Simple Screen"); // Fallback if no title set
+    }
 
     // Show some instructions
     display.setTextSize(1);

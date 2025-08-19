@@ -8,6 +8,9 @@
 
 InputDemoScreen::InputDemoScreen()
 {
+    // Set the screen title
+    setTitle("Input Demo");
+    
     // Initialize input state
     memset(&inputState, 0, sizeof(inputState));
 

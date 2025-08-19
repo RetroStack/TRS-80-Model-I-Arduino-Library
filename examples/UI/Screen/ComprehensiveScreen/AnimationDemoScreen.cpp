@@ -9,6 +9,9 @@
 AnimationDemoScreen::AnimationDemoScreen()
     : showPerformanceStats(true), animationSpeed(1)
 {
+    // Set the screen title
+    setTitle("Animation Demo");
+    
     // Initialize animation state
     animationState.ballX = 50.0;
     animationState.ballY = 50.0;

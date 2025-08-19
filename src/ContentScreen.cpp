@@ -54,7 +54,6 @@ constexpr uint16_t CONFIRM_COLOR_FG = 0x0000; // Confirm text color (black)
 // Constructor
 ContentScreen::ContentScreen() : Screen()
 {
-    _title = nullptr;       // No title allocated initially
     _buttonItems = nullptr; // No button storage allocated initially
     _buttonItemCount = 0;
     _progressValue = 0;
@@ -69,7 +68,6 @@ ContentScreen::ContentScreen() : Screen()
 // Destructor
 ContentScreen::~ContentScreen()
 {
-    clearTitle();
     clearButtonItems();
     _clearNotification();
 }
@@ -143,13 +141,14 @@ void ContentScreen::_drawHeader()
     gfx.fillRect(0, top, screenWidth, _getHeaderHeight(), M1Shield.convertColor(HEADER_COLOR_BG));
 
     // Check whether title is set
-    if (_title != nullptr && _title[0] != '\0')
+    const char *title = getTitle();
+    if (title != nullptr && title[0] != '\0')
     {
         gfx.setTextColor(M1Shield.convertColor(HEADER_COLOR_FG));
         if (isSmallDisplay())
         {
             // Calculate centered position for title text
-            uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(_title);
+            uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(title);
             gfx.setTextSize(1);
 
             // Adding 2 pixels as header needs to be 16 pixel altogether
@@ -158,11 +157,11 @@ void ContentScreen::_drawHeader()
         else
         {
             // Calculate centered position for title text
-            uint16_t textWidth = TEXT_SIZE_3_WIDTH * strlen(_title);
+            uint16_t textWidth = TEXT_SIZE_3_WIDTH * strlen(title);
             gfx.setTextSize(3);
             gfx.setCursor((screenWidth - textWidth) / 2, top + TEXT_SIZE_3_HALF_HEIGHT);
         }
-        gfx.print(_title);
+        gfx.print(title);
     }
 }
 
@@ -432,96 +431,6 @@ void ContentScreen::clearButtonItems()
         gfx.endWrite();
         M1Shield.display(); // Push changes to display
     }
-}
-
-void ContentScreen::setTitle(const char *title)
-{
-    clearTitle();
-
-    // Allocate and copy new title if provided
-    if (title != nullptr && title[0] != '\0')
-    {
-        size_t titleLen = strlen(title);
-        _title = (char *)malloc(titleLen + 1); // +1 for null terminator
-        if (_title != nullptr)
-        {
-            strcpy(_title, title); // Safe because we allocated exact size needed
-        }
-        else if (getLogger())
-        {
-            getLogger()->err(F("ContentScreen: Failed to allocate memory for title"));
-        }
-    }
-
-    // Update header immediately if screen is active
-    if (isActive())
-    {
-        Adafruit_GFX &gfx = M1Shield.getGFX();
-        gfx.startWrite();
-        _drawHeader();
-        gfx.endWrite();
-        M1Shield.display(); // Push changes to display
-    }
-}
-
-void ContentScreen::setTitle(String title)
-{
-    setTitle(title.c_str());
-}
-
-void ContentScreen::setTitleF(const __FlashStringHelper *title)
-{
-    if (title == nullptr)
-    {
-        clearTitle();
-        return;
-    }
-
-    // Get length and allocate buffer
-    size_t len = strlen_P((const char *)title);
-    char *buffer = (char *)malloc(len + 1);
-    if (buffer == nullptr)
-    {
-        if (getLogger())
-        {
-            getLogger()->err(F("ContentScreen: Failed to allocate memory for flash title"));
-        }
-        clearTitle();
-        return;
-    }
-
-    // Copy from flash to RAM buffer
-    strcpy_P(buffer, (const char *)title);
-
-    // Delegate to regular setTitle method
-    setTitle(buffer);
-
-    // Free temporary buffer
-    free(buffer);
-}
-
-void ContentScreen::clearTitle()
-{
-    if (_title != nullptr)
-    {
-        free(_title);
-        _title = nullptr;
-    }
-
-    // Update footer immediately if screen is active
-    if (isActive())
-    {
-        Adafruit_GFX &gfx = M1Shield.getGFX();
-        gfx.startWrite();
-        _drawFooter();
-        gfx.endWrite();
-        M1Shield.display(); // Push changes to display
-    }
-}
-
-const char *ContentScreen::getTitle() const
-{
-    return _title; // May be nullptr if no title set
 }
 
 void ContentScreen::setProgressValue(int value)

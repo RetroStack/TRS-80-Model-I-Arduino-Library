@@ -11,6 +11,9 @@ ComprehensiveScreen::ComprehensiveScreen()
     : currentDemo(0), isActive(false), activationTime(0), screenActivations(0),
       lastFrameTime(0), frameCount(0), averageFPS(0.0)
 {
+    // Set the main screen title
+    setTitle("Comprehensive Screen Demo");
+    
     // Create our three demo screens
     inputDemo = new InputDemoScreen();
     lifecycleDemo = new LifecycleDemoScreen();

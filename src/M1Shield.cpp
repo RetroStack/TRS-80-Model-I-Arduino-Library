@@ -9,7 +9,6 @@
 #include <SPI.h>
 #include <Arduino.h>
 #include "Model1.h"
-#include "ContentScreen.h"
 
 // Hardware timing constants
 constexpr unsigned long DEBOUNCE_TIME = 250; // Button debounce time in milliseconds
@@ -243,11 +242,11 @@ bool M1ShieldClass::setScreen(Screen *screen)
     {
         if (_logger)
         {
-            // Try to get title context if this is a ContentScreen
-            ContentScreen *contentScreen = dynamic_cast<ContentScreen *>(_screen);
-            if (contentScreen && contentScreen->getTitle())
+            // Log screen closing with title if available
+            const char *title = _screen->getTitle();
+            if (title)
             {
-                _logger->info(F("M1Shield: Closing screen '%s'"), contentScreen->getTitle());
+                _logger->info(F("M1Shield: Closing screen '%s'"), title);
             }
             else
             {
@@ -269,10 +268,10 @@ bool M1ShieldClass::setScreen(Screen *screen)
     // Log new screen opening with context if available
     if (_logger)
     {
-        ContentScreen *contentScreen = dynamic_cast<ContentScreen *>(screen);
-        if (contentScreen && contentScreen->getTitle())
+        const char *title = screen->getTitle();
+        if (title)
         {
-            _logger->info(F("M1Shield: Opening screen '%s'"), contentScreen->getTitle());
+            _logger->info(F("M1Shield: Opening screen '%s'"), title);
         }
         else
         {
@@ -321,6 +320,7 @@ void M1ShieldClass::setLEDColor(uint8_t r, uint8_t g, uint8_t b) const
 
 void M1ShieldClass::setLEDColor(LEDColor color, uint8_t intensity) const
 {
+    (void)intensity; // Parameter reserved for future use
     switch (color)
     {
     case LEDColor::COLOR_OFF:

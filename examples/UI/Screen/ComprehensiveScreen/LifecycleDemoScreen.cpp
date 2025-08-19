@@ -9,6 +9,9 @@
 LifecycleDemoScreen::LifecycleDemoScreen()
     : simulatedMemoryUsage(0), resourcesAllocated(false), resourceAllocationTime(0)
 {
+    // Set the screen title
+    setTitle("Lifecycle Demo");
+    
     // Initialize lifecycle state
     memset(&lifecycleState, 0, sizeof(lifecycleState));
     lifecycleState.currentState = "Created";

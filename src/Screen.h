@@ -52,17 +52,25 @@ class Screen
 private:
     bool _active;     // Track whether this screen is currently active
     ILogger *_logger; // Logger instance for debugging output
+    char *_title;     // Dynamic title buffer (allocated as needed)
 
 protected:
     virtual void _drawScreen() = 0; // Pure virtual method for initial screen rendering
 
 public:
     Screen();                    // Default constructor initializes screen in inactive state
-    virtual ~Screen() = default; // Virtual destructor ensures proper cleanup of derived classes
+    virtual ~Screen(); // Virtual destructor ensures proper cleanup of derived classes
     bool isSmallDisplay() const; // Check if the current display is considered small (height <= 128 pixels)
 
     void setLogger(ILogger &logger); // Set logger for debugging output
     ILogger *getLogger() const;      // Get logger instance
+
+    // Title management
+    void setTitle(const char *title);                 // Set the screen title/name
+    void setTitle(String title);                      // Set the screen title from Arduino String object
+    void setTitleF(const __FlashStringHelper *title); // Set the screen title from FlashString (F() macro)
+    void clearTitle();                                // Clear the current title
+    const char *getTitle() const;                     // Get current screen title
 
     bool isActive() const; // Check if this screen is currently active
 

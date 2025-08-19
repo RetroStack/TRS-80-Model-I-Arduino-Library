@@ -36,13 +36,13 @@ protected:
     virtual Screen *_getSelectedMenuItemScreen(int index) = 0;
 
     // Get configuration value string for a menu item (optional override)
-    virtual const char *_getMenuItemConfigValue(uint8_t index) { return nullptr; }
+    virtual const char *_getMenuItemConfigValue(uint8_t index) { (void)index; return nullptr; }
 
     // Get configuration value FlashString for a menu item (optional override)
-    virtual const __FlashStringHelper *_getMenuItemConfigValueF(uint8_t index) { return nullptr; }
+    virtual const __FlashStringHelper *_getMenuItemConfigValueF(uint8_t index) { (void)index; return nullptr; }
 
     // Check if a menu item is enabled/selectable (optional override)
-    virtual bool _isMenuItemEnabled(uint8_t index) const { return true; }
+    virtual bool _isMenuItemEnabled(uint8_t index) const { (void)index; return true; }
 
 public:
     MenuScreen(); // Constructor

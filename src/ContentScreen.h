@@ -21,7 +21,6 @@ enum ConfirmResult
 class ContentScreen : public Screen
 {
 private:
-    char *_title;             // Dynamic title buffer (allocated as needed)
     char **_buttonItems;      // Dynamic array of button label buffers (allocated as needed)
     uint8_t _buttonItemCount; // Number of button labels currently set
     uint8_t _progressValue;   // Progress bar value (0-100)
@@ -63,18 +62,11 @@ public:
 
 public:
     ContentScreen();
-    virtual ~ContentScreen(); // Destructor - frees dynamically allocated title and button memory
+    virtual ~ContentScreen(); // Destructor - frees dynamically allocated button memory
 
     // Required Screen interface methods - must be implemented by derived classes
     virtual void loop() = 0;                                                               // Main update loop for content-specific logic
     virtual Screen *actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) = 0; // Handle input events
-
-    // Title management
-    void setTitle(const char *title);                 // Set the screen title displayed in header
-    void setTitle(String title);                      // Set the screen title from Arduino String object
-    void setTitleF(const __FlashStringHelper *title); // Set the screen title from FlashString (F() macro)
-    void clearTitle();                                // Clear the current title
-    const char *getTitle() const;                     // Get current screen title
 
     // Progress control
     void setProgressValue(int value); // Set progress bar value (0-100)
