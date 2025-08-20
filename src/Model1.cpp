@@ -159,26 +159,31 @@ bool Model1Class::isHigherMemoryAddress(uint16_t address)
 // ---------- Mutability
 // ----------------------------------------
 
+// Set mutable
 void Model1Class::_setMutable()
 {
     _setMutability(true);
 }
 
+// Set immutability
 void Model1Class::_setImmutable()
 {
     _setMutability(false);
 }
 
+// Set mutability
 void Model1Class::_setMutability(bool value)
 {
     _mutability = value;
 }
 
+// Check mutability
 bool Model1Class::_isMutable()
 {
     return _mutability;
 }
 
+// Check mutability
 bool Model1Class::_checkMutability()
 {
     bool mutability = _isMutable();
@@ -194,6 +199,7 @@ bool Model1Class::_checkMutability()
 // ---------- Refresh
 // ----------------------------------------
 
+// Setup memory refresh timer 1
 void Model1Class::_setupMemoryRefreshTimer1()
 {
     uint8_t oldSREG = SREG;
@@ -213,6 +219,7 @@ void Model1Class::_setupMemoryRefreshTimer1()
     SREG = oldSREG;
 }
 
+// Setup memory refresh timer 2
 void Model1Class::_setupMemoryRefreshTimer2()
 {
     uint8_t oldSREG = SREG;
@@ -232,6 +239,7 @@ void Model1Class::_setupMemoryRefreshTimer2()
     SREG = oldSREG;
 }
 
+// Activate memory refresh
 void Model1Class::activateMemoryRefresh()
 {
     _activeRefresh = true;
@@ -247,6 +255,7 @@ void Model1Class::activateMemoryRefresh()
     }
 }
 
+// Deactivate memory refresh
 void Model1Class::deactivateMemoryRefresh()
 {
     if (_timer == 1)
@@ -260,11 +269,13 @@ void Model1Class::deactivateMemoryRefresh()
     _activeRefresh = false;
 }
 
+// Refresh the next memory row
 void Model1Class::nextUpdate()
 {
     _refreshNextMemoryRow();
 }
 
+// Refresh the next memory row
 void Model1Class::_refreshNextMemoryRow()
 {
     // This function expects mutibility as well as that the refresh is activated
@@ -290,6 +301,7 @@ void Model1Class::_refreshNextMemoryRow()
 // ---------- Memory
 // ----------------------------------------
 
+// Read memory with single byte
 uint8_t Model1Class::readMemory(uint16_t address)
 {
     // Verification of access
@@ -323,6 +335,7 @@ uint8_t Model1Class::readMemory(uint16_t address)
     return data;
 }
 
+// Write memory with single byte
 void Model1Class::writeMemory(uint16_t address, uint8_t data)
 {
     // Verification of access
@@ -359,6 +372,7 @@ void Model1Class::writeMemory(uint16_t address, uint8_t data)
     SREG = oldSREG;
 }
 
+// Read memory with length
 uint8_t *Model1Class::readMemory(uint16_t address, uint16_t length)
 {
     if (length == 0)
@@ -382,6 +396,7 @@ uint8_t *Model1Class::readMemory(uint16_t address, uint16_t length)
     return buffer;
 }
 
+// Write memory block
 void Model1Class::writeMemory(uint16_t address, uint8_t *data, uint16_t length)
 {
     if (!data)
@@ -393,6 +408,7 @@ void Model1Class::writeMemory(uint16_t address, uint8_t *data, uint16_t length)
     writeMemory(address, data, length, 0);
 }
 
+// Write memory with offset
 void Model1Class::writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint16_t offset)
 {
     if (!data)
@@ -413,6 +429,7 @@ void Model1Class::writeMemory(uint16_t address, uint8_t *data, uint16_t length, 
     }
 }
 
+// Copy memory from one location to another
 void Model1Class::copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length)
 {
     if (length == 0)
@@ -442,6 +459,7 @@ void Model1Class::copyMemory(uint16_t src_address, uint16_t dst_address, uint16_
     }
 }
 
+// Fill memory with a single value
 void Model1Class::fillMemory(uint8_t fill_data, uint16_t address, uint16_t length)
 {
     for (uint16_t i = 0; i < length; i++)
@@ -450,6 +468,7 @@ void Model1Class::fillMemory(uint8_t fill_data, uint16_t address, uint16_t lengt
     }
 }
 
+// Fill memory with data from a buffer
 void Model1Class::fillMemory(uint8_t *fill_data, uint16_t length, uint16_t address, uint16_t address_length)
 {
     if (!fill_data)
@@ -487,6 +506,7 @@ void Model1Class::fillMemory(uint8_t *fill_data, uint16_t length, uint16_t addre
 // ---------- IO
 // ----------------------------------------
 
+// Read from I/O port
 uint8_t Model1Class::readIO(uint8_t address)
 {
     // Verification of access
@@ -517,6 +537,7 @@ uint8_t Model1Class::readIO(uint8_t address)
     return data;
 }
 
+// Write to I/O port
 void Model1Class::writeIO(uint8_t address, uint8_t data)
 {
     // Verification of access
@@ -552,6 +573,7 @@ void Model1Class::writeIO(uint8_t address, uint8_t data)
 // ---------- System Control Signals
 // ----------------------------------------
 
+// Initialize system control signals
 void Model1Class::_initSystemControlSignals()
 {
     Model1LowLevel::writeSYS_RES(LOW);
@@ -561,11 +583,13 @@ void Model1Class::_initSystemControlSignals()
     Model1LowLevel::configWriteINT_ACK(INPUT);
 }
 
+// Read the system reset signal
 bool Model1Class::readSystemResetSignal()
 {
     return Model1LowLevel::readSYS_RES() == LOW ? true : false;
 }
 
+// Read the INT_ACK signal
 bool Model1Class::readInterruptAcknowledgeSignal()
 {
     return Model1LowLevel::readINT_ACK() == LOW ? true : false;
@@ -575,6 +599,7 @@ bool Model1Class::readInterruptAcknowledgeSignal()
 // ---------- Memory Control Signals
 // ----------------------------------------
 
+// Activate bus control signals
 void Model1Class::_activateBusControlSignals()
 {
     _resetBusControlSignals();
@@ -584,6 +609,7 @@ void Model1Class::_activateBusControlSignals()
     Model1LowLevel::configWriteCAS(OUTPUT);
 }
 
+// Deactivate bus control signals
 void Model1Class::_deactivateBusControlSignals()
 {
     Model1LowLevel::configWriteRAS(INPUT);
@@ -591,6 +617,7 @@ void Model1Class::_deactivateBusControlSignals()
     Model1LowLevel::configWriteCAS(INPUT);
 }
 
+// Reset bus control signals
 void Model1Class::_resetBusControlSignals()
 {
     Model1LowLevel::writeRAS(HIGH);
@@ -602,6 +629,7 @@ void Model1Class::_resetBusControlSignals()
 // ---------- Memory Access Signals
 // ----------------------------------------
 
+// Activate bus access signals
 void Model1Class::_activateBusAccessSignals()
 {
     _resetBusAccessSignals();
@@ -613,6 +641,7 @@ void Model1Class::_activateBusAccessSignals()
     Model1LowLevel::configWriteOUT(OUTPUT);
 }
 
+// Deactivate bus access signals
 void Model1Class::_deactivateBusAccessSignals()
 {
     Model1LowLevel::configWriteRD(INPUT);
@@ -622,6 +651,7 @@ void Model1Class::_deactivateBusAccessSignals()
     Model1LowLevel::configWriteOUT(INPUT);
 }
 
+// Reset bus access signals
 void Model1Class::_resetBusAccessSignals()
 {
     Model1LowLevel::writeRD(HIGH);
@@ -634,6 +664,7 @@ void Model1Class::_resetBusAccessSignals()
 // ---------- External Control Signals
 // ----------------------------------------
 
+// Initialize external control signals
 void Model1Class::_initExternalControlSignals()
 {
     Model1LowLevel::writeINT(HIGH);
@@ -647,11 +678,13 @@ void Model1Class::_initExternalControlSignals()
 
 // ---------- Interrupt Request Signal
 
+// Set the INT* signal
 void Model1Class::_setInterruptRequestSignal(bool value)
 {
     Model1LowLevel::writeINT(value ? LOW : HIGH);
 }
 
+// Trigger an interrupt
 bool Model1Class::triggerInterrupt(uint8_t interrupt, uint16_t timeout)
 {
     activateInterruptRequestSignal();
@@ -681,6 +714,7 @@ bool Model1Class::triggerInterrupt(uint8_t interrupt, uint16_t timeout)
     return false; // CPU did not respond within timeout
 }
 
+// Activate the INT* signal
 void Model1Class::activateInterruptRequestSignal()
 {
     if (Model1LowLevel::readINT() == LOW)
@@ -693,6 +727,7 @@ void Model1Class::activateInterruptRequestSignal()
     _setInterruptRequestSignal(true);
 }
 
+// Deactivate the INT* signal
 void Model1Class::deactivateInterruptRequestSignal()
 {
     if (Model1LowLevel::readINT() == HIGH)
@@ -707,16 +742,19 @@ void Model1Class::deactivateInterruptRequestSignal()
 
 // ---------- Test Signal
 
+// Set the TEST* signal
 void Model1Class::_setTestSignal(bool value)
 {
     Model1LowLevel::writeTEST(value ? LOW : HIGH);
 }
 
+// Check if TEST signal is active
 bool Model1Class::hasActiveTestSignal()
 {
     return Model1LowLevel::readTEST() == LOW;
 }
 
+// Get current state as a string
 void Model1Class::activateTestSignal()
 {
     if (Model1LowLevel::readTEST() == LOW)
@@ -748,6 +786,7 @@ void Model1Class::activateTestSignal()
     }
 }
 
+// Deactivate TEST signal
 void Model1Class::deactivateTestSignal()
 {
     if (Model1LowLevel::readTEST() == HIGH)
@@ -781,11 +820,13 @@ void Model1Class::deactivateTestSignal()
 
 // ---------- Wait Signal
 
+// Set the WAIT* signal
 void Model1Class::_setWaitSignal(bool value)
 {
     Model1LowLevel::writeWAIT(value ? LOW : HIGH);
 }
 
+// Activate WAIT signal
 void Model1Class::activateWaitSignal()
 {
     if (Model1LowLevel::readWAIT() == LOW)
@@ -798,6 +839,7 @@ void Model1Class::activateWaitSignal()
     _setWaitSignal(true);
 }
 
+// Get current state as a string
 void Model1Class::deactivateWaitSignal()
 {
     if (Model1LowLevel::readWAIT() == HIGH)

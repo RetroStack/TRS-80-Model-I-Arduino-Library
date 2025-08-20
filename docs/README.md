@@ -106,9 +106,9 @@ void setup() {
 ```cpp
 #include <M1Shield.h>
 #include <MenuScreen.h>
-#include <Display_ST7789.h>  // Or your preferred display
+#include <Display_ST7789_320x240.h>  // Or your preferred display
 
-Display_ST7789 displayProvider;
+Display_ST7789_320x240 displayProvider;
 MenuScreen menuScreen;
 
 void setup() {

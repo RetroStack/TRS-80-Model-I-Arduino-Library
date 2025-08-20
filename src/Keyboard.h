@@ -19,23 +19,15 @@ private:
   uint8_t _previousState[8]; // Previous keyboard state for change detection
 
 public:
-  // Constructor
-  Keyboard();
+  Keyboard(); // Constructor
 
-  // Set logger for debugging output
-  void setLogger(ILogger &logger);
+  void setLogger(ILogger &logger); // Set logger for debugging output
 
-  // Check if any key is currently pressed
-  bool isKeyPressed() const;
+  void update(); // Update keyboard state by reading current values
 
-  // Update keyboard state by reading current values
-  void update();
-
-  // Get iterator for keyboard state changes since last update
-  KeyboardChangeIterator changes();
-
-  // Get first key that was just pressed (0 if none)
-  uint8_t getFirstJustPressedKey();
+  bool isKeyPressed() const;        // Check if any key is currently pressed
+  KeyboardChangeIterator changes(); // Get iterator for keyboard state changes since last update
+  uint8_t getFirstJustPressedKey(); // Get first key that was just pressed (0 if none)
 };
 
 #endif // KEYBOARD_H

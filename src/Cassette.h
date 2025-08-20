@@ -113,50 +113,28 @@ private:
     void _write(uint8_t data); // Write data to cassette interface
 
 public:
-    // Constructor
-    Cassette();
+    Cassette(); // Constructor
 
-    // Update cassette interface state
-    void update();
+    void update(); // Update cassette interface state
 
-    // Set logger for debugging output
-    void setLogger(ILogger &logger);
+    void setLogger(ILogger &logger); // Set logger for debugging output
 
-    // Write raw boolean values to cassette output
-    void writeRaw(bool value1, bool value2);
+    void writeRaw(bool value1, bool value2); // Write raw boolean values to cassette output
+    bool readRaw();                          // Read raw boolean value from cassette input
 
-    // Read raw boolean value from cassette input
-    bool readRaw();
+    void play(uint16_t frequency, uint32_t duration);                                      // Play tone with specified frequency and duration
+    void playSong(int *melody, float *durations, size_t numNotes, int bpm);                // Play melody from arrays in RAM
+    void playSongPGM(const int *melody, const float *durations, size_t numNotes, int bpm); // Play melody from arrays in program memory (PROGMEM)
 
-    // Play tone with specified frequency and duration
-    void play(uint16_t frequency, uint32_t duration);
+    void activateRemote();   // Activate cassette recorder remote control
+    void deactivateRemote(); // Deactivate cassette recorder remote control
 
-    // Play melody from arrays in RAM
-    void playSong(int *melody, float *durations, size_t numNotes, int bpm);
+    void setCharGenA(); // Set character generator to A variant
+    void setCharGenB(); // Set character generator to B variant
 
-    // Play melody from arrays in program memory (PROGMEM)
-    void playSongPGM(const int *melody, const float *durations, size_t numNotes, int bpm);
-
-    // Activate cassette recorder remote control
-    void activateRemote();
-
-    // Deactivate cassette recorder remote control
-    void deactivateRemote();
-
-    // Set character generator to A variant
-    void setCharGenA();
-
-    // Set character generator to B variant
-    void setCharGenB();
-
-    // Check if display is in 64-character mode
-    bool is64CharacterMode();
-
-    // Set display to 32-character mode
-    void set32CharacterMode();
-
-    // Set display to 64-character mode
-    void set64CharacterMode();
+    bool is64CharacterMode();  // Check if display is in 64-character mode
+    void set32CharacterMode(); // Set display to 32-character mode
+    void set64CharacterMode(); // Set display to 64-character mode
 };
 
 #endif /* CASSETTE_H */

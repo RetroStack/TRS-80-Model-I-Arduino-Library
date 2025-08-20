@@ -318,17 +318,21 @@ void ConsoleScreen::refresh()
 
 // Console Configuration Methods
 
+// Set text color and background color
 void ConsoleScreen::setTextColor(uint16_t foreground, uint16_t background)
 {
     _textColor = M1Shield.convertColor(foreground);
     _textBgColor = M1Shield.convertColor(background);
 }
 
+// Set console background color
+// This color is used to clear the console area
 void ConsoleScreen::setConsoleBackground(uint16_t color)
 {
     _consoleBgColor = M1Shield.convertColor(color);
 }
 
+// Set text size
 void ConsoleScreen::setTextSize(uint8_t size)
 {
     // Only allow small text on very small displays
@@ -362,6 +366,7 @@ void ConsoleScreen::setTextSize(uint8_t size)
     }
 }
 
+// Set tab size
 void ConsoleScreen::setTabSize(uint8_t size)
 {
     if (size < 1)
@@ -369,6 +374,7 @@ void ConsoleScreen::setTabSize(uint8_t size)
     _tabSize = size;
 }
 
+// Process a single character input
 void ConsoleScreen::_processChar(char c)
 {
     if (c == '\n')
@@ -386,6 +392,7 @@ void ConsoleScreen::_processChar(char c)
     // Ignore other control characters
 }
 
+// Render a single character to the console
 void ConsoleScreen::_renderChar(char c)
 {
     _updateDimensions();
@@ -419,6 +426,7 @@ void ConsoleScreen::_renderChar(char c)
     _currentX += _charWidth;
 }
 
+// Wait for paging input if needed
 void ConsoleScreen::_waitForPagingIfNeeded()
 {
     if (!_isWaitingForPaging)
@@ -483,6 +491,7 @@ void ConsoleScreen::_waitForPagingIfNeeded()
 
 // ========== Paging Management Methods ==========
 
+// Handle paging behavior based on current mode
 bool ConsoleScreen::_handlePaging()
 {
     switch (_pagingMode)
@@ -508,6 +517,7 @@ bool ConsoleScreen::_handlePaging()
     return true; // Default fallback
 }
 
+// Check if console is currently waiting for paging action
 bool ConsoleScreen::_shouldEndPagingWait()
 {
     if (!_isWaitingForPaging || _pagingPaused)
@@ -520,6 +530,7 @@ bool ConsoleScreen::_shouldEndPagingWait()
            (elapsed >= _pagingTimeoutMs);
 }
 
+// Show paging message
 void ConsoleScreen::_showPagingMessage()
 {
     Adafruit_GFX &gfx = M1Shield.getGFX();
@@ -579,6 +590,7 @@ void ConsoleScreen::_showPagingMessage()
     gfx.setTextSize(savedTextSize);
 }
 
+// Clear paging message
 void ConsoleScreen::_clearPagingMessage()
 {
     // Simply clear the prompt area by filling with background color
@@ -589,21 +601,25 @@ void ConsoleScreen::_clearPagingMessage()
 
 // ========== Paging Configuration Methods ==========
 
+// Set paging mode
 void ConsoleScreen::setPagingMode(ConsolePagingMode mode)
 {
     _pagingMode = mode;
 }
 
+// Set paging timeout
 void ConsoleScreen::setPagingTimeout(uint16_t timeoutMs)
 {
     _pagingTimeoutMs = timeoutMs;
 }
 
+// Get current paging mode
 ConsolePagingMode ConsoleScreen::getPagingMode() const
 {
     return _pagingMode;
 }
 
+// Get current paging timeout
 uint16_t ConsoleScreen::getPagingTimeout() const
 {
     return _pagingTimeoutMs;
@@ -632,6 +648,7 @@ void ConsoleScreen::continuePaging()
     }
 }
 
+// Set auto-forward behavior
 void ConsoleScreen::setAutoForward(bool enabled, unsigned long delayMs)
 {
     _autoForwardEnabled = enabled;
@@ -645,11 +662,13 @@ void ConsoleScreen::setAutoForward(bool enabled, unsigned long delayMs)
     }
 }
 
+// Check if auto-forward is enabled
 bool ConsoleScreen::isAutoForwardEnabled() const
 {
     return _autoForwardEnabled;
 }
 
+// Get the auto-forward delay
 unsigned long ConsoleScreen::getAutoForwardDelay() const
 {
     return _autoForwardDelayMs;

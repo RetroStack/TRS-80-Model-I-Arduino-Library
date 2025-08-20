@@ -31,16 +31,13 @@ private:
 
 public:
     LoggerScreen(const char *title = "Logger"); // Constructor - create logger screen with optional title
-
-    virtual ~LoggerScreen(); // Destructor
+    virtual ~LoggerScreen();                    // Destructor
 
     void setTimestampEnabled(bool enabled); // Enable or disable timestamp display in log messages
-
-    bool isTimestampEnabled() const; // Check if timestamps are enabled
+    bool isTimestampEnabled() const;        // Check if timestamps are enabled
 
     void setColorCodingEnabled(bool enabled); // Enable or disable color coding for different log levels
-
-    bool isColorCodingEnabled() const; // Check if color coding is enabled
+    bool isColorCodingEnabled() const;        // Check if color coding is enabled
 
     void resetTimestamp(); // Reset the timestamp reference point to current time
 
@@ -51,8 +48,6 @@ public:
     void debug(const char *fmt, ...);
 
     ILogger *asLogger(); // Get an ILogger adapter for this LoggerScreen
-
-    // Print interface is inherited from ConsoleScreen
 
 private:
     // Inner class that implements ILogger and forwards to the parent LoggerScreen

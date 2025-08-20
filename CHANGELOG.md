@@ -67,7 +67,7 @@ This is the initial version written by Ven Reddy
 - Added `keyName()` method to KeyboardChangeIterator for human-readable key names
 - General code cleanup, warning fixes, and improved method accessibility
 
-## TBD - Updated Release (1.3.0)
+## 20th August 2025 - Updated Release (1.3.0)
 
 - **NEW FEATURE**: Added `getStateData()` method to Model1 class for efficient packed state access
   - Returns complete TRS-80 system state in a single 64-bit value

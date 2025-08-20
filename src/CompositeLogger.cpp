@@ -110,6 +110,7 @@ bool CompositeLogger::hasLogger(ILogger *logger) const
     return false;
 }
 
+// Log informational messages
 void CompositeLogger::info(const char *fmt, ...)
 {
     // Create formatted string once
@@ -131,6 +132,7 @@ void CompositeLogger::info(const char *fmt, ...)
     }
 }
 
+// Log warning messages
 void CompositeLogger::warn(const char *fmt, ...)
 {
     // Create formatted string once
@@ -152,6 +154,7 @@ void CompositeLogger::warn(const char *fmt, ...)
     }
 }
 
+// Log error messages
 void CompositeLogger::err(const char *fmt, ...)
 {
     // Create formatted string once
@@ -173,6 +176,7 @@ void CompositeLogger::err(const char *fmt, ...)
     }
 }
 
+// Log debug messages
 void CompositeLogger::debug(const char *fmt, ...)
 {
     // Create formatted string once
@@ -194,6 +198,7 @@ void CompositeLogger::debug(const char *fmt, ...)
     }
 }
 
+// Log raw byte data
 size_t CompositeLogger::write(uint8_t ch)
 {
     size_t totalWritten = 0;
@@ -210,13 +215,14 @@ size_t CompositeLogger::write(uint8_t ch)
     return totalWritten;
 }
 
+// Log raw byte data from buffer
 size_t CompositeLogger::write(const uint8_t *buffer, size_t size)
 {
     if (!buffer)
     {
         return 0; // Can't log an error in a logger about null buffer, just return 0
     }
-    
+
     size_t totalWritten = 0;
 
     // Forward to each registered logger

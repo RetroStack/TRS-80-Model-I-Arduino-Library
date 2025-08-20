@@ -90,61 +90,40 @@ protected:
     virtual void _executeOnce() {};
 
 public:
-    ConsoleScreen(); // Constructor - initialize console with default settings
-
+    ConsoleScreen();          // Constructor - initialize console with default settings
     virtual ~ConsoleScreen(); // Destructor
 
     bool open() override; // Override Screen::open() to initialize timing for one-time execution
 
     // Print Interface Implementation (required for Arduino Print class)
-
-    size_t write(uint8_t c) override; // Write a single character to the console (Print interface)
-
+    size_t write(uint8_t c) override;                          // Write a single character to the console (Print interface)
     size_t write(const uint8_t *buffer, size_t size) override; // Write buffer of characters to console (Print interface optimization)
 
     // Screen Interface Implementation
-
-    void loop() override; // Main loop processing for console screen updates
-
+    void loop() override;                                                             // Main loop processing for console screen updates
     Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override; // Handle user input actions
 
     // Console Control Methods
-
-    void cls(); // Clear screen and reset cursor to top-left
-
+    void cls();     // Clear screen and reset cursor to top-left
     void refresh(); // Refresh screen and reset cursor to top-left
 
     // Console Configuration Methods
-
     void setTextColor(uint16_t foreground, uint16_t background = 0x0000); // Set text color for subsequent output
-
-    void setConsoleBackground(uint16_t color); // Set console background color
-
-    void setTextSize(uint8_t size); // Set text size for subsequent output
-
-    void setTabSize(uint8_t size); // Set tab size in characters
+    void setConsoleBackground(uint16_t color);                            // Set console background color
+    void setTextSize(uint8_t size);                                       // Set text size for subsequent output
+    void setTabSize(uint8_t size);                                        // Set tab size in characters
 
     // Console Paging Configuration Methods
-
-    void setPagingMode(ConsolePagingMode mode); // Set console paging behavior mode
-
-    void setPagingTimeout(uint16_t timeoutMs); // Set paging timeout duration
-
-    ConsolePagingMode getPagingMode() const; // Get current paging mode
-
-    uint16_t getPagingTimeout() const; // Get current paging timeout
-
-    bool isPagingWaiting() const; // Check if console is currently waiting for paging action
-
-    bool isWaitingForPaging() const; // Check if console is currently waiting for paging action
-
+    void setPagingMode(ConsolePagingMode mode);                      // Set console paging behavior mode
+    void setPagingTimeout(uint16_t timeoutMs);                       // Set paging timeout duration
+    ConsolePagingMode getPagingMode() const;                         // Get current paging mode
+    uint16_t getPagingTimeout() const;                               // Get current paging timeout
+    bool isPagingWaiting() const;                                    // Check if console is currently waiting for paging action
+    bool isWaitingForPaging() const;                                 // Check if console is currently waiting for paging action
     void setAutoForward(bool enabled, unsigned long delayMs = 5000); // Enable or disable auto-forward functionality
-
-    bool isAutoForwardEnabled() const; // Check if auto-forward is currently enabled
-
-    unsigned long getAutoForwardDelay() const; // Get current auto-forward delay
-
-    void continuePaging(); // Manually trigger page continuation
+    bool isAutoForwardEnabled() const;                               // Check if auto-forward is currently enabled
+    unsigned long getAutoForwardDelay() const;                       // Get current auto-forward delay
+    void continuePaging();                                           // Manually trigger page continuation
 
 protected:
     void _drawContent() override; // Draw the console content area

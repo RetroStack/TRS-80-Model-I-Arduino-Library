@@ -89,6 +89,7 @@ void Cassette::update()
     _state = data;
 }
 
+// Write raw cassette data
 void Cassette::writeRaw(bool value1, bool value2)
 {
     if (value1)
@@ -112,6 +113,7 @@ void Cassette::writeRaw(bool value1, bool value2)
     _write(_state);
 }
 
+// Read raw cassette data
 bool Cassette::readRaw()
 {
     uint8_t input = Model1.readIO(CASSETTE_PORT);
@@ -129,6 +131,7 @@ bool Cassette::readRaw()
     }
 }
 
+// Play audio at specified frequency and duration
 void Cassette::play(uint16_t frequency, uint32_t durationMs)
 {
     if (frequency == 0)
@@ -164,6 +167,7 @@ void Cassette::play(uint16_t frequency, uint32_t durationMs)
     }
 }
 
+// Play a song using the specified melody and durations
 void Cassette::playSong(int *melody, float *durations, size_t numNotes, int bpm)
 {
     // Compute duration of a whole note in milliseconds
@@ -186,6 +190,7 @@ void Cassette::playSong(int *melody, float *durations, size_t numNotes, int bpm)
     }
 }
 
+// Play a song using the specified melody and durations
 void Cassette::playSongPGM(const int *melody, const float *durations, size_t numNotes, int bpm)
 {
     // Compute duration of a whole note in milliseconds
@@ -209,6 +214,7 @@ void Cassette::playSongPGM(const int *melody, const float *durations, size_t num
     }
 }
 
+// Activate remote control
 void Cassette::activateRemote()
 {
     update();
@@ -216,6 +222,7 @@ void Cassette::activateRemote()
     _write(_state);
 }
 
+// Deactivate remote control
 void Cassette::deactivateRemote()
 {
     update();
@@ -223,6 +230,7 @@ void Cassette::deactivateRemote()
     _write(_state);
 }
 
+// Set character generator A
 void Cassette::setCharGenA()
 {
     update();
@@ -230,6 +238,7 @@ void Cassette::setCharGenA()
     _write(_state);
 }
 
+// Set character generator B
 void Cassette::setCharGenB()
 {
     update();
@@ -237,12 +246,14 @@ void Cassette::setCharGenB()
     _write(_state);
 }
 
+// Check if cassette is in 64-character mode
 bool Cassette::is64CharacterMode()
 {
     update();
     return !bitRead(_state, CASSETTE_BIT_MODESEL_INV);
 }
 
+// Set cassette to 32-character mode
 void Cassette::set32CharacterMode()
 {
     update();
@@ -250,6 +261,7 @@ void Cassette::set32CharacterMode()
     _write(_state);
 }
 
+// Set cassette to 64-character mode
 void Cassette::set64CharacterMode()
 {
     update();

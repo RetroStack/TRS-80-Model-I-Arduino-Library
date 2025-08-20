@@ -57,21 +57,16 @@ protected:
     }
 
 public:
-    MenuScreen(); // Constructor
-
+    MenuScreen();          // Constructor
     virtual ~MenuScreen(); // Destructor - frees dynamically allocated menu items
-
-    // Screen Interface Implementation
 
     void loop() override; // Main loop processing for menu screen updates
 
     // Handle user input actions and navigate accordingly
     Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override;
 
-    void setMenuItems(const char **menuItems, uint8_t menuItemCount); // Set the menu items to be displayed and navigated
-
-    void setMenuItems(String *menuItems, uint8_t menuItemCount); // Set the menu items from an array of String objects
-
+    void setMenuItems(const char **menuItems, uint8_t menuItemCount);                 // Set the menu items to be displayed and navigated
+    void setMenuItems(String *menuItems, uint8_t menuItemCount);                      // Set the menu items from an array of String objects
     void setMenuItemsF(const __FlashStringHelper **menuItems, uint8_t menuItemCount); // Set the menu items (Flash version)
 
     void clearMenuItems(); // Clear and free all dynamically allocated menu items

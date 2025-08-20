@@ -268,6 +268,14 @@ void Video::scroll(uint8_t rows)
     return;
   }
 
+  // Validate viewport height is reasonable
+  if (_viewPort.height == 0)
+  {
+    if (_logger)
+      _logger->warnF(F("Video: Scroll called with viewport height 0 - no action taken"));
+    return;
+  }
+
   // If there are more rows than available, just cap it at the maximum number of rows
   if (rows > _viewPort.height)
   {
@@ -287,21 +295,20 @@ void Video::scroll(uint8_t rows)
     }
   }
 
-  // Fill the copied area with spaces
-  for (uint16_t y = _viewPort.height - rows; y < _viewPort.height; y++)
+  // Fill the bottom rows with spaces
+  for (uint8_t y = _viewPort.height - rows; y < _viewPort.height; y++)
   {
     Model1.fillMemory(SPACE_CHARACTER, getColumnAddress(getRowAddress(y), 0), _viewPort.width);
   }
 
-  // Move the current cursor position the rows up
-  uint16_t cursorPositionY = _cursorPositionY - rows;
-  if (cursorPositionY < 0)
+  // Move the current cursor position up by the number of scrolled rows
+  if (_cursorPositionY >= rows)
   {
-    _cursorPositionY = 0;
+    _cursorPositionY -= rows;
   }
   else
   {
-    _cursorPositionY = cursorPositionY;
+    _cursorPositionY = 0;
   }
 }
 
@@ -401,7 +408,6 @@ void Video::_print(const char character, bool raw)
   {
     _cursorPositionX = 0;
     _cursorPositionY++;
-    return;
   }
   else if (character == '\r')
   {
@@ -442,11 +448,11 @@ void Video::_print(const char character, bool raw)
   {
     if (_autoScroll)
     {
-      scroll(1);
+      scroll(_cursorPositionY - _viewPort.height + 1);
     }
     else
     {
-      _cursorPositionY = 0;
+      cls();
     }
   }
 }

@@ -48,7 +48,7 @@ constexpr uint8_t PIN_CASS_OUT = A15; // Cassette output from the perspective of
 // Define global instance
 M1ShieldClass M1Shield;
 
-// Constructor
+// Constructor - Initialize M1Shield with default values
 M1ShieldClass::M1ShieldClass() : _screen(nullptr),
                                  _displayProvider(nullptr),
                                  _logger(nullptr),
@@ -64,6 +64,7 @@ M1ShieldClass::M1ShieldClass() : _screen(nullptr),
 {
 }
 
+// Destructor - Clean up screen and display resources
 M1ShieldClass::~M1ShieldClass()
 {
     // Close and delete the current screen if it exists
@@ -81,6 +82,7 @@ M1ShieldClass::~M1ShieldClass()
     }
 }
 
+// Initialize M1Shield with display provider and configure pins
 bool M1ShieldClass::begin(DisplayProvider &provider)
 {
     _displayProvider = &provider;
@@ -137,21 +139,25 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
     return success;
 }
 
+// Enable joystick input processing
 void M1ShieldClass::activateJoystick()
 {
     _activeJoystick = true;
 }
 
+// Disable joystick input processing
 void M1ShieldClass::deactivateJoystick()
 {
     _activeJoystick = false;
 }
 
+// Check if display has been properly initialized
 bool M1ShieldClass::isDisplayInitialized() const
 {
     return (_displayProvider != nullptr && _screenWidth > 0 && _screenHeight > 0);
 }
 
+// Get reference to the Adafruit_GFX display object
 Adafruit_GFX &M1ShieldClass::getGFX()
 {
     if (!_displayProvider)
@@ -165,16 +171,19 @@ Adafruit_GFX &M1ShieldClass::getGFX()
     return _displayProvider->getGFX();
 }
 
+// Get display screen width in pixels
 uint16_t M1ShieldClass::getScreenWidth() const
 {
     return _screenWidth;
 }
 
+// Get display screen height in pixels
 uint16_t M1ShieldClass::getScreenHeight() const
 {
     return _screenHeight;
 }
 
+// Get reference to the display provider
 DisplayProvider &M1ShieldClass::getDisplayProvider() const
 {
     if (!_displayProvider)
@@ -188,16 +197,19 @@ DisplayProvider &M1ShieldClass::getDisplayProvider() const
     return *_displayProvider;
 }
 
+// Set the logger for debugging and information output
 void M1ShieldClass::setLogger(ILogger &logger)
 {
     _logger = &logger;
 }
 
+// Get the current logger instance
 ILogger *M1ShieldClass::getLogger() const
 {
     return _logger;
 }
 
+// Update display with current frame buffer contents
 bool M1ShieldClass::display()
 {
     if (_displayProvider)
@@ -217,6 +229,7 @@ bool M1ShieldClass::display()
     return false;
 }
 
+// Convert color from RGB to display format
 uint16_t M1ShieldClass::convertColor(uint16_t color)
 {
     if (_displayProvider)
@@ -226,6 +239,7 @@ uint16_t M1ShieldClass::convertColor(uint16_t color)
     return color; // Return original color if no display provider
 }
 
+// Set and switch to a new screen, replacing the current one
 bool M1ShieldClass::setScreen(Screen *screen)
 {
     if (!screen)
@@ -301,16 +315,19 @@ bool M1ShieldClass::setScreen(Screen *screen)
     return true;
 }
 
+// Set active LED state
 void M1ShieldClass::_active() const
 {
     digitalWrite(PIN_ACTIVE_LED, LOW);
 }
 
+// Set inactive LED state
 void M1ShieldClass::_inactive() const
 {
     digitalWrite(PIN_ACTIVE_LED, HIGH);
 }
 
+// Set RGB LED color using individual channel values
 void M1ShieldClass::setLEDColor(uint8_t r, uint8_t g, uint8_t b) const
 {
     analogWrite(PIN_LED_RED, 255 - r);
@@ -318,6 +335,7 @@ void M1ShieldClass::setLEDColor(uint8_t r, uint8_t g, uint8_t b) const
     analogWrite(PIN_LED_BLUE, 255 - b);
 }
 
+// Set RGB LED color using predefined color constants
 void M1ShieldClass::setLEDColor(LEDColor color, uint8_t intensity) const
 {
     (void)intensity; // Parameter reserved for future use
@@ -350,6 +368,7 @@ void M1ShieldClass::setLEDColor(LEDColor color, uint8_t intensity) const
     }
 }
 
+// Get debounced button state with timing control
 unsigned long M1ShieldClass::_getDebouncedState(int pin, unsigned long previousState) const
 {
     if (digitalRead(pin) == LOW)
@@ -372,11 +391,13 @@ unsigned long M1ShieldClass::_getDebouncedState(int pin, unsigned long previousS
 
 // --- Button Input ---
 
+// Check if menu button is currently pressed
 bool M1ShieldClass::isMenuPressed() const
 {
     return (digitalRead(PIN_MENU) == LOW);
 }
 
+// Check if menu button was just pressed (debounced)
 bool M1ShieldClass::wasMenuPressed()
 {
     unsigned long newState = _getDebouncedState(PIN_MENU, _menuPressed);
@@ -385,11 +406,13 @@ bool M1ShieldClass::wasMenuPressed()
     return wasPressed;
 }
 
+// Check if left button is currently pressed
 bool M1ShieldClass::isLeftPressed() const
 {
     return (digitalRead(PIN_LEFT) == LOW);
 }
 
+// Check if left button was just pressed (debounced)
 bool M1ShieldClass::wasLeftPressed()
 {
     unsigned long newState = _getDebouncedState(PIN_LEFT, _leftPressed);
@@ -398,11 +421,13 @@ bool M1ShieldClass::wasLeftPressed()
     return wasPressed;
 }
 
+// Check if right button is currently pressed
 bool M1ShieldClass::isRightPressed() const
 {
     return (digitalRead(PIN_RIGHT) == LOW);
 }
 
+// Check if right button was just pressed (debounced)
 bool M1ShieldClass::wasRightPressed()
 {
     unsigned long newState = _getDebouncedState(PIN_RIGHT, _rightPressed);
@@ -411,11 +436,13 @@ bool M1ShieldClass::wasRightPressed()
     return wasPressed;
 }
 
+// Check if up button is currently pressed
 bool M1ShieldClass::isUpPressed() const
 {
     return (digitalRead(PIN_UP) == LOW);
 }
 
+// Check if up button was just pressed (debounced)
 bool M1ShieldClass::wasUpPressed()
 {
     unsigned long newState = _getDebouncedState(PIN_UP, _upPressed);
@@ -424,11 +451,13 @@ bool M1ShieldClass::wasUpPressed()
     return wasPressed;
 }
 
+// Check if down button is currently pressed
 bool M1ShieldClass::isDownPressed() const
 {
     return (digitalRead(PIN_DOWN) == LOW);
 }
 
+// Check if down button was just pressed (debounced)
 bool M1ShieldClass::wasDownPressed()
 {
     unsigned long newState = _getDebouncedState(PIN_DOWN, _downPressed);
@@ -439,11 +468,13 @@ bool M1ShieldClass::wasDownPressed()
 
 // --- Joystick Input ---
 
+// Check if joystick button is currently pressed
 bool M1ShieldClass::isJoystickPressed() const
 {
     return (digitalRead(PIN_JOYSTICK_BUTTON) == LOW);
 }
 
+// Check if joystick button was just pressed (debounced)
 bool M1ShieldClass::wasJoystickPressed()
 {
     unsigned long newState = _getDebouncedState(PIN_JOYSTICK_BUTTON, _joystickPressed);
@@ -452,6 +483,7 @@ bool M1ShieldClass::wasJoystickPressed()
     return wasPressed;
 }
 
+// Get joystick direction based on analog position
 JoystickDirection M1ShieldClass::getJoystickDirection() const
 {
     uint8_t x = getJoystickX();
@@ -480,16 +512,19 @@ JoystickDirection M1ShieldClass::getJoystickDirection() const
     return CENTER;
 }
 
+// Check if joystick is in center position
 bool M1ShieldClass::isJoystickCentered() const
 {
     return getJoystickDirection() == CENTER;
 }
 
+// Get joystick X-axis position (0-255 scaled to 0-63)
 uint8_t M1ShieldClass::getJoystickX() const
 {
     return analogRead(PIN_JOYSTICK_X) >> 2;
 }
 
+// Get joystick Y-axis position (0-255 scaled to 0-63)
 uint8_t M1ShieldClass::getJoystickY() const
 {
     return analogRead(PIN_JOYSTICK_Y) >> 2;
@@ -497,46 +532,55 @@ uint8_t M1ShieldClass::getJoystickY() const
 
 // ========== Cassette Interface Implementation ==========
 
+// Configure CR1 pin as input or output
 void M1ShieldClass::setCR1Mode(bool isOutput) const
 {
     pinMode(PIN_CR1, isOutput ? OUTPUT : INPUT);
 }
 
+// Configure CR2 pin as input or output
 void M1ShieldClass::setCR2Mode(bool isOutput) const
 {
     pinMode(PIN_CR2, isOutput ? OUTPUT : INPUT);
 }
 
+// Write digital value to CR1 pin
 void M1ShieldClass::writeCR1(bool value) const
 {
     digitalWrite(PIN_CR1, value ? HIGH : LOW);
 }
 
+// Write digital value to CR2 pin
 void M1ShieldClass::writeCR2(bool value) const
 {
     digitalWrite(PIN_CR2, value ? HIGH : LOW);
 }
 
+// Read digital value from CR1 pin
 bool M1ShieldClass::readCR1() const
 {
     return digitalRead(PIN_CR1) == HIGH;
 }
 
+// Read digital value from CR2 pin
 bool M1ShieldClass::readCR2() const
 {
     return digitalRead(PIN_CR2) == HIGH;
 }
 
+// Write analog value to cassette input pin
 void M1ShieldClass::writeCassetteIn(uint8_t value) const
 {
     analogWrite(PIN_CASS_IN, value);
 }
 
+// Read analog value from cassette output pin
 uint16_t M1ShieldClass::readCassetteOut() const
 {
     return analogRead(PIN_CASS_OUT);
 }
 
+// Main loop - Process input and update current screen
 void M1ShieldClass::loop()
 {
     // Keep track of TEST* signal and show state

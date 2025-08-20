@@ -57,26 +57,31 @@ void DataBus::writeData(uint8_t data)
   Model1LowLevel::writeDataBus(data);
 }
 
+// Check if data bus is readable
 bool DataBus::isReadable()
 {
   return !_writable;
 }
 
+// Check if data bus is writable
 bool DataBus::isWritable()
 {
   return _writable;
 }
 
+// Set data bus to readable
 void DataBus::setAsReadable()
 {
   _setBus(false);
 }
 
+// Set data bus to writable
 void DataBus::setAsWritable()
 {
   _setBus(true);
 }
 
+// Get the current state of the data bus
 char *DataBus::getState()
 {
   const int LEN = 20;
@@ -102,6 +107,7 @@ char *DataBus::getState()
   return buffer;
 }
 
+// Set the data bus direction
 void DataBus::_setBus(bool writableOption)
 {
   if (_writable == writableOption)

@@ -12,17 +12,10 @@
 class ILogger : public Print
 {
 public:
-    // Log informational message with format string
-    virtual void info(const char *fmt, ...) = 0;
-
-    // Log warning message with format string
-    virtual void warn(const char *fmt, ...) = 0;
-
-    // Log error message with format string
-    virtual void err(const char *fmt, ...) = 0;
-
-    // Log debug message with format string
-    virtual void debug(const char *fmt, ...) = 0;
+    virtual void info(const char *fmt, ...) = 0;  // Log informational message with format string
+    virtual void warn(const char *fmt, ...) = 0;  // Log warning message with format string
+    virtual void err(const char *fmt, ...) = 0;   // Log error message with format string
+    virtual void debug(const char *fmt, ...) = 0; // Log debug message with format string
 
     // String versions with optional format arguments
 
@@ -176,11 +169,8 @@ public:
         va_end(args);
     }
 
-    // Write single character (Print interface)
-    virtual size_t write(uint8_t ch) = 0;
-
-    // Write buffer of characters (Print interface)
-    virtual size_t write(const uint8_t *buffer, size_t size) = 0;
+    virtual size_t write(uint8_t ch) = 0;                         // Write single character (Print interface)
+    virtual size_t write(const uint8_t *buffer, size_t size) = 0; // Write buffer of characters (Print interface)
 };
 
 #endif /* ILOGGER_H */

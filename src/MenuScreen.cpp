@@ -220,6 +220,7 @@ Screen *MenuScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t offse
 
 // Menu Content Rendering
 
+// Refresh the menu content area
 void MenuScreen::_drawContent()
 {
     if (!isActive())
@@ -446,6 +447,7 @@ void MenuScreen::_drawContent()
 
 // Menu Configuration and State Management
 
+// Set the menu items from an array of FlashStringHelper objects
 void MenuScreen::setMenuItemsF(const __FlashStringHelper **menuItems, uint8_t menuItemCount)
 {
     if (menuItems == nullptr || menuItemCount == 0)
@@ -510,6 +512,7 @@ void MenuScreen::setMenuItemsF(const __FlashStringHelper **menuItems, uint8_t me
     free(tempItems);
 }
 
+// Set the menu items to be displayed and navigated
 void MenuScreen::setMenuItems(const char **menuItems, uint8_t menuItemCount)
 {
     // Clear any existing menu items first
@@ -579,6 +582,7 @@ void MenuScreen::setMenuItems(const char **menuItems, uint8_t menuItemCount)
     }
 }
 
+// Set the menu items from an array of String objects
 void MenuScreen::setMenuItems(String *menuItems, uint8_t menuItemCount)
 {
     // Clear any existing menu items first
@@ -645,6 +649,7 @@ void MenuScreen::setMenuItems(String *menuItems, uint8_t menuItemCount)
     }
 }
 
+// Set the currently selected menu item by index
 void MenuScreen::_setSelectedMenuItemIndex(uint8_t index)
 {
     if (index >= _menuItemCount)
@@ -709,6 +714,7 @@ void MenuScreen::clearMenuItems()
     }
 }
 
+// Main loop for menu screen updates
 void MenuScreen::loop()
 {
     // Call parent ContentScreen::loop() to handle notification timeouts
@@ -718,6 +724,7 @@ void MenuScreen::loop()
     // but derived classes can override this method for custom behavior
 }
 
+// Refresh the menu content area (use this instead of _drawContent() for updating the menu efficiently)
 void MenuScreen::refreshMenu()
 {
     // Refresh just the menu content area (efficient for when menu item values change)

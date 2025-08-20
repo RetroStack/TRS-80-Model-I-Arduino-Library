@@ -56,16 +56,19 @@ void AddressBus::writeMemoryAddress(uint16_t address)
     Model1LowLevel::writeAddressBus(address);
 }
 
+// Write refresh address to bus
 void AddressBus::writeRefreshAddress(uint8_t address)
 {
     Model1LowLevel::writeAddressBus(address);
 }
 
+// Read 8-bit IO address from bus
 uint8_t AddressBus::readIOAddress()
 {
     return Model1LowLevel::readAddressBus() & 0xFF;
 }
 
+// Write 8-bit IO address to bus
 void AddressBus::writeIOAddress(uint8_t address)
 {
     if (!_writable)
@@ -77,26 +80,31 @@ void AddressBus::writeIOAddress(uint8_t address)
     Model1LowLevel::writeAddressBus(address);
 }
 
+// Check if address bus is readable
 bool AddressBus::isReadable()
 {
     return !_writable;
 }
 
+// Check if address bus is writable
 bool AddressBus::isWritable()
 {
     return _writable;
 }
 
+// Set address bus to readable
 void AddressBus::setAsReadable()
 {
     _setBus(false);
 }
 
+// Set address bus to writable
 void AddressBus::setAsWritable()
 {
     _setBus(true);
 }
 
+// Get current state of address bus
 char *AddressBus::getState()
 {
     const int LEN = 31;
@@ -122,6 +130,7 @@ char *AddressBus::getState()
     return buffer;
 }
 
+// Set address bus state
 void AddressBus::_setBus(bool writableOption)
 {
     if (_writable == writableOption)

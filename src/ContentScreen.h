@@ -84,19 +84,24 @@ public:
     void drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper *text, uint16_t color, uint8_t size = 1); // Draw text in content area from FlashString (F() macro)
 
     // Notification system methods
+    // Non-blocking temporary notification message with yellow background
     void notify(const char *text, unsigned long durationMs = 3000);                 // Show a notification that temporarily replaces the footer
     void notify(String text, unsigned long durationMs = 3000);                      // Show a notification from Arduino String object
     void notifyF(const __FlashStringHelper *text, unsigned long durationMs = 3000); // Show a notification from FlashString (F() macro)
     bool isNotificationActive() const;                                              // Check if a notification is currently active
     void dismissNotification();                                                     // Manually dismiss current notification
 
-    // Alert and Confirmation system methods
-    void alert(const char *text);                                                                                                       // Show a blocking alert dialog with cyan background
-    void alert(String text);                                                                                                            // Show a blocking alert dialog from Arduino String object
-    void alertF(const __FlashStringHelper *text);                                                                                       // Show a blocking alert dialog from FlashString (F() macro)
-    ConfirmResult confirm(const char *text, const char *leftText = "Cancel", const char *rightText = "OK");                             // Show a blocking confirmation dialog with magenta background
-    ConfirmResult confirm(String text, String leftText, String rightText);                                                              // Show a blocking confirmation dialog with Arduino String objects
-    ConfirmResult confirmF(const __FlashStringHelper *text, const __FlashStringHelper *leftText, const __FlashStringHelper *rightText); // Show a blocking confirmation dialog with all F-strings
+    // Alert system methods
+    // Blocking alert dialog with cyan background
+    void alert(const char *text);                 // Show alert with character string
+    void alert(String text);                      // Show alert from Arduino String object
+    void alertF(const __FlashStringHelper *text); // Show alert from FlashString (F() macro)
+
+    // Confirmation system methods
+    // Blocking confirmation dialog with magenta background
+    ConfirmResult confirm(const char *text, const char *leftText = "Cancel", const char *rightText = "OK");                             // Show character string with left/right button messages
+    ConfirmResult confirm(String text, String leftText, String rightText);                                                              // Show confirmation from Arduino String objects
+    ConfirmResult confirmF(const __FlashStringHelper *text, const __FlashStringHelper *leftText, const __FlashStringHelper *rightText); // Show confirmation from FlashString (F() macro)
 };
 
 #endif /* CONTENT_SCREEN_H */

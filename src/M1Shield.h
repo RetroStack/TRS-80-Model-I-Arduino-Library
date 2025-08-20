@@ -79,28 +79,23 @@ public:
     void setLogger(ILogger &logger); // Set logger for debugging output
     ILogger *getLogger() const;      // Get logger instance
 
-    void activateJoystick(); // Activate joystick input
-
+    void activateJoystick();   // Activate joystick input
     void deactivateJoystick(); // Deactivate joystick input
 
     bool isDisplayInitialized() const; // Check if display hardware was successfully initialized
+    Adafruit_GFX &getGFX();            // Get reference to underlying graphics context
 
-    Adafruit_GFX &getGFX(); // Get reference to underlying graphics context
-
-    uint16_t getScreenWidth() const; // Get display width in pixels
-
+    uint16_t getScreenWidth() const;  // Get display width in pixels
     uint16_t getScreenHeight() const; // Get display height in pixels
 
     DisplayProvider &getDisplayProvider() const; // Get reference to the display provider
 
-    bool display(); // Update the display
-
+    bool display();                        // Update the display
     uint16_t convertColor(uint16_t color); // Convert a color value for the current display type
 
     bool setScreen(Screen *screen); // Set the active screen and perform transition
 
-    void setLEDColor(uint8_t r, uint8_t g, uint8_t b) const; // Set RGB LED color using individual channel control
-
+    void setLEDColor(uint8_t r, uint8_t g, uint8_t b) const;         // Set RGB LED color using individual channel control
     void setLEDColor(LEDColor color, uint8_t intensity = 255) const; // Set RGB LED color using predefined color enumeration
 
     // Button state detection methods
@@ -124,32 +119,25 @@ public:
     bool wasJoystickPressed();      // Check and consume joystick button press event
 
     JoystickDirection getJoystickDirection() const; // Get current joystick directional state
-
-    bool isJoystickCentered() const; // Check if joystick is in center (rest) position
-
-    uint8_t getJoystickX() const; // Get raw joystick X-axis position
-
-    uint8_t getJoystickY() const; // Get raw joystick Y-axis position
+    bool isJoystickCentered() const;                // Check if joystick is in center (rest) position
+    uint8_t getJoystickX() const;                   // Get raw joystick X-axis position
+    uint8_t getJoystickY() const;                   // Get raw joystick Y-axis position
 
     // ========== Cassette Interface Methods ==========
     // WARNING: Incorrect usage can damage your Arduino!
     // CR1 and CR2 may be connected together on some systems.
 
     void setCR1Mode(bool isOutput) const; // Configure CR1 pin as input or output
-
     void setCR2Mode(bool isOutput) const; // Configure CR2 pin as input or output
 
     void writeCR1(bool value) const; // Write digital value to CR1 pin (when configured as output)
-
     void writeCR2(bool value) const; // Write digital value to CR2 pin (when configured as output)
 
     bool readCR1() const; // Read digital value from CR1 pin (when configured as input)
-
     bool readCR2() const; // Read digital value from CR2 pin (when configured as input)
 
     void writeCassetteIn(uint8_t value) const; // Write analog value to Model 1 cassette input (A14)
-
-    uint16_t readCassetteOut() const; // Read analog value from Model 1 cassette output (A15)
+    uint16_t readCassetteOut() const;          // Read analog value from Model 1 cassette output (A15)
 
     void loop(); // Main update loop for shield operations
 

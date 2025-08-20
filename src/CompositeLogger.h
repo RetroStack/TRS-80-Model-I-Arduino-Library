@@ -21,13 +21,10 @@ private:
 public:
     CompositeLogger(); // Constructor - initializes empty composite logger
 
-    bool addLogger(ILogger *logger); // Add a logger to the composite logger
-
+    bool addLogger(ILogger *logger);    // Add a logger to the composite logger
     bool removeLogger(ILogger *logger); // Remove a specific logger from the composite logger
-
-    void clearLoggers(); // Remove all registered loggers
-
-    uint8_t getLoggerCount() const; // Get the number of currently registered loggers
+    void clearLoggers();                // Remove all registered loggers
+    uint8_t getLoggerCount() const;     // Get the number of currently registered loggers
 
     bool hasLogger(ILogger *logger) const; // Check if a specific logger is registered
 

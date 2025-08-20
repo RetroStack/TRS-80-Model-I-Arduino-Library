@@ -21,47 +21,27 @@ private:
     void _configurePort(uint16_t config); // Set port configuration for direction control
 
 public:
-    // Constructor
-    AddressBus();
+    AddressBus(); // Constructor
 
-    // Initialize address bus pins and configuration
-    void begin();
+    void begin(); // Initialize address bus pins and configuration
+    void end();   // Reset address bus to default state
 
-    // Reset address bus to default state
-    void end();
+    void setLogger(ILogger &logger); // Set logger for debugging output
 
-    // Set logger for debugging output
-    void setLogger(ILogger &logger);
+    bool isReadable(); // Check if address bus is configured for reading
+    bool isWritable(); // Check if address bus is configured for writing
 
-    // Check if address bus is configured for reading
-    bool isReadable();
+    void setAsReadable(); // Configure address bus pins as inputs for reading
+    void setAsWritable(); // Configure address bus pins as outputs for writing
 
-    // Check if address bus is configured for writing
-    bool isWritable();
+    uint16_t readMemoryAddress();              // Read 16-bit memory address from bus
+    void writeMemoryAddress(uint16_t address); // Write 16-bit memory address to bus
+    void writeRefreshAddress(uint8_t address); // Write 8-bit refresh address for DRAM operations
 
-    // Configure address bus pins as inputs for reading
-    void setAsReadable();
+    uint8_t readIOAddress();              // Read 8-bit I/O port address from bus
+    void writeIOAddress(uint8_t address); // Write 8-bit I/O port address to bus
 
-    // Configure address bus pins as outputs for writing
-    void setAsWritable();
-
-    // Read 16-bit memory address from bus
-    uint16_t readMemoryAddress();
-
-    // Write 16-bit memory address to bus
-    void writeMemoryAddress(uint16_t address);
-
-    // Write 8-bit refresh address for DRAM operations
-    void writeRefreshAddress(uint8_t address);
-
-    // Read 8-bit I/O port address from bus
-    uint8_t readIOAddress();
-
-    // Write 8-bit I/O port address to bus
-    void writeIOAddress(uint8_t address);
-
-    // Get current bus state as string for debugging
-    char *getState();
+    char *getState(); // Get current bus state as string for debugging
 };
 
 #endif /* ADDRESS_BUS_H */

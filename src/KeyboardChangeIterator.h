@@ -4,8 +4,8 @@
  * Released under the MIT License.
  */
 
-#ifndef KEYBOARDCHANGEITERATOR_H
-#define KEYBOARDCHANGEITERATOR_H
+#ifndef KEYBOARD_CHANGE_ITERATOR_H
+#define KEYBOARD_CHANGE_ITERATOR_H
 
 #include <Arduino.h>
 #include <string.h>
@@ -13,44 +13,24 @@
 class KeyboardChangeIterator
 {
 public:
-    // Constructor with previous and current keyboard states
-    KeyboardChangeIterator(const uint8_t *previous, const uint8_t *current);
+    KeyboardChangeIterator(const uint8_t *previous, const uint8_t *current); // Constructor with previous and current keyboard states
 
-    // Check if there are more changes to iterate
-    bool hasNext() const;
+    bool hasNext() const; // Check if there are more changes to iterate
+    void next();          // Advance to next change
 
-    // Advance to next change
-    void next();
+    uint8_t keyIndex() const; // Get linear key index (0-63)
+    uint8_t row() const;      // Get keyboard row (0-7)
+    uint8_t column() const;   // Get keyboard column (0-7)
 
-    // Get linear key index (0-63)
-    uint8_t keyIndex() const;
+    bool wasPressed() const;     // Check if key was pressed in previous state
+    bool isPressed() const;      // Check if key is pressed in current state
+    bool wasJustPressed() const; // Check if key was just pressed (transition from released to pressed)
+    bool wasReleased() const;    // Check if key was just released (transition from pressed to released)
 
-    // Get keyboard row (0-7)
-    uint8_t row() const;
+    uint8_t keyValue() const; // Get TRS-80 key value/scan code
+    String keyName() const;   // Get human-readable key name
 
-    // Get keyboard column (0-7)
-    uint8_t column() const;
-
-    // Check if key was pressed in previous state
-    bool wasPressed() const;
-
-    // Check if key is pressed in current state
-    bool isPressed() const;
-
-    // Check if key was just pressed (transition from released to pressed)
-    bool wasJustPressed() const;
-
-    // Check if key was just released (transition from pressed to released)
-    bool wasReleased() const;
-
-    // Get TRS-80 key value/scan code
-    uint8_t keyValue() const;
-
-    // Get human-readable key name
-    String keyName() const;
-
-    // Check if shift key is currently pressed
-    bool isShiftPressed() const;
+    bool isShiftPressed() const; // Check if shift key is currently pressed
 
 private:
     uint8_t _previous[8]; // Previous keyboard state for comparison
@@ -63,4 +43,4 @@ private:
     uint8_t _bitIndex() const;   // Get bit index within current byte
 };
 
-#endif /* KEYBOARDCHANGEITERATOR_H */
+#endif /* KEYBOARD_CHANGE_ITERATOR_H */

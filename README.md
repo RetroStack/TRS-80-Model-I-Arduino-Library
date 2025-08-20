@@ -14,9 +14,9 @@ Arduino library for interfacing with TRS-80 Model I hardware via the 40-pin edge
 
 ```cpp
 #include <M1Shield.h>
-#include <Display_ST7789.h>  // Choose your display
+#include <Display_ST7789_320x240.h>  // Choose your display
 
-Display_ST7789 displayProvider;
+Display_ST7789_320x240 displayProvider;
 
 void setup() {
     M1Shield.begin(displayProvider);
@@ -82,7 +82,7 @@ protected:
 
 1. Install via Arduino Library Manager or download from GitHub
 2. Connect Arduino Mega 2560 to TRS-80 (M1Shield recommended, direct wiring supported)
-3. Try examples: **M1Shield/HardwareTest** or **Model1/BasicAccess**
+3. Try examples: **M1Shield/SimpleM1Shield** or **Model1/Model1/SimpleModel1**
 
 ## Examples
 

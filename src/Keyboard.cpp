@@ -58,6 +58,7 @@ KeyboardChangeIterator Keyboard::changes()
   return it;
 }
 
+// Get the first key that was just pressed
 uint8_t Keyboard::getFirstJustPressedKey()
 {
   KeyboardChangeIterator it = changes();

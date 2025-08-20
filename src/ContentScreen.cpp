@@ -113,6 +113,7 @@ void ContentScreen::_drawScreen()
     }
 }
 
+// Main loop for content screen
 void ContentScreen::loop()
 {
     // Base ContentScreen loop handles notification timeout management
@@ -148,17 +149,20 @@ void ContentScreen::loop()
     }
 }
 
+// Get the top position of the header
 uint16_t ContentScreen::_getHeaderY() const
 {
     return 0;
 }
 
+// Get the height of the header
 uint16_t ContentScreen::_getHeaderHeight() const
 {
     // Use smaller header height for small displays
     return isSmallDisplay() ? HEADER_SMALL_HEIGHT : HEADER_HEIGHT;
 }
 
+// Draw the header
 void ContentScreen::_drawHeader()
 {
     if (!isActive())
@@ -227,28 +231,33 @@ void ContentScreen::_drawHeader()
     }
 }
 
+// Get the top position of the content area
 uint16_t ContentScreen::_getContentTop() const
 {
     uint8_t padding = _getPadding();
     return _getHeaderHeight() + padding;
 }
 
+// Get the left position of the content area
 uint16_t ContentScreen::_getContentLeft() const
 {
     return 1;
 }
 
+// Get the height of the content area
 uint16_t ContentScreen::_getContentHeight() const
 {
     uint8_t padding = _getPadding();
     return M1Shield.getScreenHeight() - _getHeaderHeight() - padding - _getFooterHeight() - padding - _getProgressBarHeight() - padding;
 }
 
+// Get the width of the content area
 uint16_t ContentScreen::_getContentWidth() const
 {
     return M1Shield.getScreenWidth() - 2;
 }
 
+// Get the Y position of the footer
 uint16_t ContentScreen::_getFooterY() const
 {
     uint16_t screenHeight = M1Shield.getScreenHeight();
@@ -257,12 +266,14 @@ uint16_t ContentScreen::_getFooterY() const
     return bottom - _getFooterHeight();
 }
 
+// Get the height of the footer
 uint16_t ContentScreen::_getFooterHeight() const
 {
     // Use smaller footer height for small displays
     return isSmallDisplay() ? FOOTER_SMALL_HEIGHT : FOOTER_HEIGHT;
 }
 
+// Draw the footer
 void ContentScreen::_drawFooter()
 {
     if (!isActive() || isSmallDisplay())
@@ -303,18 +314,21 @@ void ContentScreen::_drawFooter()
     }
 }
 
+// Get the Y position of the progress bar
 uint16_t ContentScreen::_getProgressBarY() const
 {
     uint16_t screenHeight = M1Shield.getScreenHeight();
     return screenHeight - _getProgressBarHeight();
 }
 
+// Get the height of the progress bar
 uint16_t ContentScreen::_getProgressBarHeight() const
 {
     // Use smaller progress bar height for small displays
     return isSmallDisplay() ? PROGRESSBAR_SMALL_HEIGHT : PROGRESSBAR_HEIGHT;
 }
 
+// Get the padding between content regions
 uint8_t ContentScreen::_getPadding() const
 {
     // Use smaller padding for small displays to maximize content area
@@ -326,6 +340,7 @@ uint8_t ContentScreen::_getPadding() const
     return 2; // 2 pixels padding between regions
 }
 
+// Draw the progress bar
 void ContentScreen::_drawProgressBar()
 {
     if (!isActive())
@@ -362,6 +377,7 @@ void ContentScreen::_drawProgressBar()
     }
 }
 
+// Sets the button items (FlashString version)
 void ContentScreen::setButtonItemsF(const __FlashStringHelper **buttonItems, uint8_t buttonItemCount)
 {
     if (buttonItems == nullptr || buttonItemCount <= 0)
@@ -417,6 +433,7 @@ void ContentScreen::setButtonItemsF(const __FlashStringHelper **buttonItems, uin
     free(stringArray);
 }
 
+// Sets the button items
 void ContentScreen::setButtonItems(const char **buttonItems, uint8_t buttonItemCount)
 {
     clearButtonItems();
@@ -471,6 +488,7 @@ void ContentScreen::setButtonItems(const char **buttonItems, uint8_t buttonItemC
     }
 }
 
+// Clear button items
 void ContentScreen::clearButtonItems()
 {
     if (_buttonItems != nullptr)
@@ -498,6 +516,7 @@ void ContentScreen::clearButtonItems()
     }
 }
 
+// Set progress value (0-100)
 void ContentScreen::setProgressValue(int value)
 {
     // Clamp value to valid range (0-100)
@@ -519,11 +538,13 @@ void ContentScreen::setProgressValue(int value)
     }
 }
 
+// Get current progress value (0-100)
 uint8_t ContentScreen::getProgressValue() const
 {
     return _progressValue;
 }
 
+// Efficient function to clear main area
 void ContentScreen::clearContentArea()
 {
     if (!isActive())
@@ -542,6 +563,7 @@ void ContentScreen::clearContentArea()
     M1Shield.display(); // Push changes to display
 }
 
+// Draw text
 void ContentScreen::drawText(uint16_t x, uint16_t y, const char *text, uint16_t color, uint8_t size)
 {
     if (!isActive())
@@ -575,11 +597,13 @@ void ContentScreen::drawText(uint16_t x, uint16_t y, const char *text, uint16_t 
     gfx.print(text);
 }
 
+// Draw text using String
 void ContentScreen::drawText(uint16_t x, uint16_t y, String text, uint16_t color, uint8_t size)
 {
     drawText(x, y, text.c_str(), color, size);
 }
 
+// Draw text from program memory
 void ContentScreen::drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper *text, uint16_t color, uint8_t size)
 {
     if (!isActive())
@@ -611,6 +635,7 @@ void ContentScreen::drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper 
 // Notification System Implementation
 // =====================================================================================
 
+// Display a temporary notification message
 void ContentScreen::notify(const char *text, unsigned long durationMs)
 {
     if (text == nullptr)
@@ -650,11 +675,13 @@ void ContentScreen::notify(const char *text, unsigned long durationMs)
     }
 }
 
+// Show a notification with Strings
 void ContentScreen::notify(String text, unsigned long durationMs)
 {
     notify(text.c_str(), durationMs);
 }
 
+// Show a notification with FlashStrings
 void ContentScreen::notifyF(const __FlashStringHelper *text, unsigned long durationMs)
 {
     if (text == nullptr)
@@ -675,11 +702,13 @@ void ContentScreen::notifyF(const __FlashStringHelper *text, unsigned long durat
     free(buffer);
 }
 
+// Check if notification is currently active
 bool ContentScreen::isNotificationActive() const
 {
     return _notificationActive;
 }
 
+// Dismiss the current notification
 void ContentScreen::dismissNotification()
 {
     if (_notificationActive)
@@ -698,6 +727,7 @@ void ContentScreen::dismissNotification()
     }
 }
 
+// Draw the notification
 void ContentScreen::_drawNotification()
 {
     if (!isActive() || !_notificationActive || _notificationText == nullptr || isSmallDisplay())
@@ -743,6 +773,7 @@ void ContentScreen::_drawNotification()
     }
 }
 
+// Clear the notification
 void ContentScreen::_clearNotification()
 {
     if (_notificationText != nullptr)
@@ -760,6 +791,7 @@ void ContentScreen::_clearNotification()
 // Alert and Confirmation System Implementation
 // =====================================================================================
 
+// Show an alert dialog
 void ContentScreen::alert(const char *text)
 {
     if (!isActive() || text == nullptr || isSmallDisplay())
@@ -801,11 +833,13 @@ void ContentScreen::alert(const char *text)
     M1Shield.display();
 }
 
+// Show an alert dialog with Strings
 void ContentScreen::alert(String text)
 {
     alert(text.c_str());
 }
 
+// Show an alert dialog with FlashString
 void ContentScreen::alertF(const __FlashStringHelper *text)
 {
     if (text == nullptr)
@@ -832,6 +866,7 @@ void ContentScreen::alertF(const __FlashStringHelper *text)
     free(buffer);
 }
 
+// Show a confirmation dialog
 ConfirmResult ContentScreen::confirm(const char *text, const char *leftText, const char *rightText)
 {
     if (!isActive() || text == nullptr || isSmallDisplay())
@@ -887,12 +922,14 @@ ConfirmResult ContentScreen::confirm(const char *text, const char *leftText, con
     }
 }
 
+// Show a confirmation dialog with Strings
 ConfirmResult ContentScreen::confirm(String text, String leftText, String rightText)
 {
     // Delegate to regular confirm method using c_str()
     return confirm(text.c_str(), leftText.c_str(), rightText.c_str());
 }
 
+// Show a confirmation dialog with FlashString
 ConfirmResult ContentScreen::confirmF(const __FlashStringHelper *text, const __FlashStringHelper *leftText, const __FlashStringHelper *rightText)
 {
     if (text == nullptr || leftText == nullptr || rightText == nullptr)
@@ -939,6 +976,7 @@ ConfirmResult ContentScreen::confirmF(const __FlashStringHelper *text, const __F
     return result;
 }
 
+// Draw alert dialog
 void ContentScreen::_drawAlert(const char *text)
 {
     if (!isActive() || text == nullptr || isSmallDisplay())
@@ -994,6 +1032,7 @@ void ContentScreen::_drawAlert(const char *text)
     gfx.print(">");
 }
 
+// Draw confirmation dialog
 void ContentScreen::_drawConfirm(const char *text, const char *leftText, const char *rightText)
 {
     if (!isActive() || text == nullptr || isSmallDisplay())
@@ -1070,6 +1109,7 @@ void ContentScreen::_drawConfirm(const char *text, const char *leftText, const c
     }
 }
 
+// Truncate text to fit within available width
 char *ContentScreen::_truncateText(const char *text, uint16_t availableWidth, uint8_t charWidth)
 {
     if (text == nullptr || text[0] == '\0')

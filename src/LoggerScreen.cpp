@@ -17,6 +17,7 @@ public:
     LoggerAdapter(LoggerScreen *parent) : _parent(parent) {}
     virtual ~LoggerAdapter() = default;
 
+    // Log informational messages
     void info(const char *fmt, ...) override
     {
         va_list args;
@@ -25,6 +26,7 @@ public:
         va_end(args);
     }
 
+    // Log warning messages
     void warn(const char *fmt, ...) override
     {
         va_list args;
@@ -33,6 +35,7 @@ public:
         va_end(args);
     }
 
+    // Log error messages
     void err(const char *fmt, ...) override
     {
         va_list args;
@@ -41,6 +44,7 @@ public:
         va_end(args);
     }
 
+    // Log debug messages
     void debug(const char *fmt, ...) override
     {
         va_list args;
@@ -54,11 +58,15 @@ public:
     using ILogger::info;
     using ILogger::warn;
 
+    // Log raw byte output
+    // This will be called for each byte written to the logger
     size_t write(uint8_t ch) override
     {
         return _parent->write(ch);
     }
 
+    // Log raw byte output
+    // This will be called for each byte written to the logger
     size_t write(const uint8_t *buffer, size_t size) override
     {
         return _parent->write(buffer, size);
@@ -102,31 +110,37 @@ ILogger *LoggerScreen::asLogger()
     return _loggerAdapter;
 }
 
+// Set whether to show timestamps in log messages
 void LoggerScreen::setTimestampEnabled(bool enabled)
 {
     _showTimestamps = enabled;
 }
 
+// Check whether timestamps are enabled
 bool LoggerScreen::isTimestampEnabled() const
 {
     return _showTimestamps;
 }
 
+// Set whether to show color coding in log messages
 void LoggerScreen::setColorCodingEnabled(bool enabled)
 {
     _useColorCoding = enabled;
 }
 
+// Check whether color coding is enabled
 bool LoggerScreen::isColorCodingEnabled() const
 {
     return _useColorCoding;
 }
 
+// Reset the timestamp
 void LoggerScreen::resetTimestamp()
 {
     _startTime = millis();
 }
 
+// Log informational messages
 void LoggerScreen::info(const char *fmt, ...)
 {
     va_list args;
@@ -135,6 +149,7 @@ void LoggerScreen::info(const char *fmt, ...)
     va_end(args);
 }
 
+// Log warning messages
 void LoggerScreen::warn(const char *fmt, ...)
 {
     va_list args;
@@ -143,6 +158,7 @@ void LoggerScreen::warn(const char *fmt, ...)
     va_end(args);
 }
 
+// Log error messages
 void LoggerScreen::err(const char *fmt, ...)
 {
     va_list args;
@@ -151,6 +167,7 @@ void LoggerScreen::err(const char *fmt, ...)
     va_end(args);
 }
 
+// Log debug messages
 void LoggerScreen::debug(const char *fmt, ...)
 {
     va_list args;
@@ -159,6 +176,7 @@ void LoggerScreen::debug(const char *fmt, ...)
     va_end(args);
 }
 
+// Log messages
 void LoggerScreen::_logMessage(const char *level, uint16_t color, const char *fmt, va_list args)
 {
     if (!isActive())
@@ -209,6 +227,7 @@ void LoggerScreen::_logMessage(const char *level, uint16_t color, const char *fm
     }
 }
 
+// Get the current timestamp
 void LoggerScreen::_getTimestamp(char *buffer, size_t bufferSize)
 {
     unsigned long elapsed = millis() - _startTime;

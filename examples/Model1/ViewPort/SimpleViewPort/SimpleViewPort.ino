@@ -138,7 +138,6 @@ void demonstrateViewportClipping()
 
 void demonstrateViewportScrolling()
 {
-    // TODO: There is a bug in the viewport scrolling
     video.cls();
 
     video.println("SCROLLING IN VIEWPORT:");

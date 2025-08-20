@@ -21,38 +21,23 @@ private:
     void _configurePort(uint8_t config); // Set port configuration for direction control
 
 public:
-    // Constructor
-    DataBus();
+    DataBus(); // Constructor
 
-    // Initialize data bus pins and configuration
-    void begin();
+    void begin(); // Initialize data bus pins and configuration
+    void end();   // Reset data bus to default state
 
-    // Reset data bus to default state
-    void end();
+    void setLogger(ILogger &logger); // Set logger for debugging output
 
-    // Set logger for debugging output
-    void setLogger(ILogger &logger);
+    bool isReadable(); // Check if data bus is configured for reading
+    bool isWritable(); // Check if data bus is configured for writing
 
-    // Check if data bus is configured for reading
-    bool isReadable();
+    void setAsReadable(); // Configure data bus pins as inputs for reading
+    void setAsWritable(); // Configure data bus pins as outputs for writing
 
-    // Check if data bus is configured for writing
-    bool isWritable();
+    uint8_t readData();           // Read 8-bit data value from bus
+    void writeData(uint8_t data); // Write 8-bit data value to bus
 
-    // Configure data bus pins as inputs for reading
-    void setAsReadable();
-
-    // Configure data bus pins as outputs for writing
-    void setAsWritable();
-
-    // Read 8-bit data value from bus
-    uint8_t readData();
-
-    // Write 8-bit data value to bus
-    void writeData(uint8_t data);
-
-    // Get current bus state as string for debugging
-    char *getState();
+    char *getState(); // Get current bus state as string for debugging
 };
 
 #endif /* DATA_BUS_H */
