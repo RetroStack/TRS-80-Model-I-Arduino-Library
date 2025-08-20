@@ -52,12 +52,9 @@ Display_ST7789_320x240 displayProvider;
 // ----------------------------------
 
 // STEP 2: Include the libraries we need
-#include <M1Shield.h>          // Main M1Shield functions
-#include <MenuScreen.h>        // MenuScreen class
-#include "SimpleMenu.h"        // Our simple menu
-
-// STEP 3: Create our menu as a global object
-SimpleMenu mainMenu;
+#include <M1Shield.h>   // Main M1Shield functions
+#include <MenuScreen.h> // MenuScreen class
+#include "SimpleMenu.h" // Our simple menu
 
 void setup()
 {
@@ -74,7 +71,7 @@ void setup()
 
     // Set our menu as the active screen
     Serial.println("Setting main menu...");
-    M1Shield.setScreen(&mainMenu);
+    M1Shield.setScreen(new SimpleMenu());
 
     Serial.println("Menu loaded!");
     Serial.println("");

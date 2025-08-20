@@ -8,6 +8,7 @@
 #include <math.h>
 
 InputDemoScreen::InputDemoScreen()
+    : Screen()
 {
     // Set the screen title
     setTitle("Input Demo");
@@ -226,8 +227,8 @@ void InputDemoScreen::drawControllerLayout()
     else
     {
         // Full controller layout for large displays
-        int centerX = display.width() / 2;
-        int topY = 80;
+        int centerX = (display.width() / 2) - 40;
+        int topY = 20;
         int buttonSize = 35;
         int spacing = 45;
 
@@ -289,7 +290,7 @@ void InputDemoScreen::drawJoystickArea()
     {
         // Large joystick visualization on the right side
         int centerX = display.width() - 60;
-        int centerY = 140;
+        int centerY = 100;
         int outerRadius = 40;
         int innerRadius = 6;
 
@@ -482,6 +483,8 @@ void InputDemoScreen::updateButtonVisuals()
 {
     Adafruit_GFX &display = M1Shield.getGFX();
 
+    display.startWrite();
+
     if (isSmallDisplay())
     {
         // Clear and redraw controller area for small displays
@@ -492,18 +495,22 @@ void InputDemoScreen::updateButtonVisuals()
     else
     {
         // Clear controller layout area for large displays
-        int topY = 80;
+        int topY = 20;
         int height = 135; // Covers the entire button layout area
         display.fillRect(0, topY, display.width() - 120, height, M1Shield.convertColor(0x0000));
     }
 
     // Redraw controller layout (handles both small and large internally)
     drawControllerLayout();
+
+    display.endWrite();
 }
 
 void InputDemoScreen::updateJoystickVisual()
 {
     Adafruit_GFX &display = M1Shield.getGFX();
+
+    display.startWrite();
 
     if (isSmallDisplay())
     {
@@ -516,19 +523,23 @@ void InputDemoScreen::updateJoystickVisual()
     {
         // Clear joystick area for large displays (right side of screen)
         int rightX = display.width() - 120;
-        int topY = 60;
+        int topY = 20;
         int width = 120;
-        int height = 160;
+        int height = 180;
         display.fillRect(rightX, topY, width, height, M1Shield.convertColor(0x0000));
     }
 
     // Redraw joystick area (handles both small and large internally)
     drawJoystickArea();
+
+    display.endWrite();
 }
 
 void InputDemoScreen::updateStatusVisual()
 {
     Adafruit_GFX &display = M1Shield.getGFX();
+
+    display.startWrite();
 
     if (isSmallDisplay())
     {
@@ -551,4 +562,6 @@ void InputDemoScreen::updateStatusVisual()
 
     // Redraw status area (handles both small and large internally)
     drawStatusArea();
+
+    display.endWrite();
 }

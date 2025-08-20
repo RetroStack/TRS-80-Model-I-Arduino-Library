@@ -6,13 +6,14 @@
 
 #include "utils.h"
 
+// Convert an 8-bit unsigned integer to a binary string
 char *uint8ToBinary(uint8_t value, char *buffer)
 {
   if (!buffer)
   {
     return nullptr; // Cannot convert to null buffer
   }
-  
+
   for (int i = 7; i >= 0; i--)
   {
     buffer[7 - i] = ((value >> i) & 1) ? '1' : '0';
@@ -21,13 +22,14 @@ char *uint8ToBinary(uint8_t value, char *buffer)
   return buffer;
 }
 
+// Convert a 16-bit unsigned integer to a binary string
 char *uint16ToBinary(uint16_t value, char *buffer)
 {
   if (!buffer)
   {
     return nullptr; // Cannot convert to null buffer
   }
-  
+
   for (int i = 15; i >= 0; i--)
   {
     buffer[15 - i] = ((value >> i) & 1) ? '1' : '0';
@@ -36,10 +38,14 @@ char *uint16ToBinary(uint16_t value, char *buffer)
   return buffer;
 }
 
+// Convert a boolean value to a pin status character
 char pinStatus(bool value)
 {
   return value ? 'o' : 'i';
 }
+
+// Convert a bus status value to a character
+// 'o' for output, 'i' for input, '?' for unknown state
 char busStatus(uint8_t value)
 {
   if (value == 0xff) // Output

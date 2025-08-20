@@ -53,9 +53,6 @@ Display_ST7789_320x240 displayProvider;
 
 // ----------------------------------
 
-// Global screen instance
-ComprehensiveMenuScreen *mainMenuScreen;
-
 void setup()
 {
     // Start serial communication for debugging
@@ -66,8 +63,7 @@ void setup()
     M1Shield.begin(displayProvider);
 
     // Create and set up the main menu screen
-    mainMenuScreen = new ComprehensiveMenuScreen();
-    M1Shield.setScreen(mainMenuScreen);
+    M1Shield.setScreen(new ComprehensiveMenuScreen());
 
     Serial.println("Setup complete - menu ready!");
 }

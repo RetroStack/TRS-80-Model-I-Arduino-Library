@@ -9,6 +9,7 @@
 
 #include "SimpleSubmenu.h"
 #include <M1Shield.h>
+#include "ComprehensiveMenuScreen.h"
 
 // Menu item indices for the submenu
 enum SubmenuItems
@@ -20,6 +21,7 @@ enum SubmenuItems
 };
 
 SimpleSubmenu::SimpleSubmenu()
+    : MenuScreen()
 {
     // Set up the submenu items
     const char *menuItems[] = {
@@ -88,21 +90,10 @@ Screen *SimpleSubmenu::_getSelectedMenuItemScreen(int index)
 
     case SUBMENU_BACK:
         Serial.println("Back to Main Menu");
-        // This demonstrates MenuScreen's navigation capabilities!
-        // We can either:
-        // 1. Return nullptr and let LEFT button handle back navigation automatically
-        // 2. Return a specific screen to navigate to
-        // 3. Use confirm dialog and handle the navigation explicitly
-        //
-        // For this demo, we'll show option 3 for educational purposes
         if (confirm("Return to main menu?", "Stay", "Back") == CONFIRM_RIGHT)
         {
             Serial.println("User confirmed return to main menu");
-            alert("Use LEFT button for automatic back navigation!");
-            notify("Or implement explicit navigation here", 3000);
-            Serial.println("TIP: Press LEFT button to see automatic back navigation");
-            // Note: Returning nullptr here means we stay on this screen
-            // The user can then press LEFT button to see automatic back navigation
+            return new ComprehensiveMenuScreen();
         }
         else
         {

@@ -27,6 +27,10 @@ public:
     void loop() override;
     Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override;
 
+protected:
+    // One-time initialization after screen opens
+    void _executeOnce() override;
+
 private:
     // Helper methods
     void showWelcomeMessage();

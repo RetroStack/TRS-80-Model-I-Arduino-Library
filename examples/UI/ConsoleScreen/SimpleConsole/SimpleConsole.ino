@@ -29,9 +29,6 @@ Display_ST7789_320x240 displayProvider;
 #include <M1Shield.h>
 #include "SimpleConsole.h"
 
-// Create the console screen instance
-SimpleConsole consoleScreen;
-
 void setup()
 {
     // Initialize serial for debugging
@@ -42,7 +39,7 @@ void setup()
     M1Shield.begin(displayProvider);
 
     // Set our console screen as active
-    M1Shield.setScreen(&consoleScreen);
+    M1Shield.setScreen(new SimpleConsole());
 
     Serial.println("ConsoleScreen loaded and ready!");
 }

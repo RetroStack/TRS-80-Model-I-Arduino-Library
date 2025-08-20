@@ -37,113 +37,58 @@ private:
   void _print(const char character, bool raw); // Internal character printing with raw mode option
 
 public:
-  // Constructor
-  Video();
+  Video(); // Constructor
 
-  // Set logger for debugging output
-  void setLogger(ILogger &logger);
+  void setLogger(ILogger &logger);     // Set logger for debugging output
+  void setViewPort(ViewPort viewPort); // Set viewport boundaries for video operations
 
-  // Set viewport boundaries for video operations
-  void setViewPort(ViewPort viewPort);
+  uint16_t getRowAddress(uint8_t y);                         // Get memory address for specified row
+  uint16_t getColumnAddress(uint16_t rowAddress, uint8_t x); // Get memory address for column within a row
+  uint16_t getAddress(uint8_t x, uint8_t y);                 // Get memory address for coordinates
 
-  // Get memory address for specified row
-  uint16_t getRowAddress(uint8_t y);
+  uint8_t getX();       // Get current cursor X position
+  void setX(uint8_t x); // Set cursor X position
 
-  // Get memory address for column within a row
-  uint16_t getColumnAddress(uint16_t rowAddress, uint8_t x);
+  uint8_t getY();       // Get current cursor Y position
+  void setY(uint8_t y); // Set cursor Y position
 
-  // Get memory address for coordinates
-  uint16_t getAddress(uint8_t x, uint8_t y);
+  void setXY(uint8_t x, uint8_t y); // Set cursor position
 
-  // Get current cursor X position
-  uint8_t getX();
+  uint8_t getStartX(); // Get viewport start X coordinate
+  uint8_t getEndX();   // Get viewport end X coordinate
 
-  // Set cursor X position
-  void setX(uint8_t x);
+  uint8_t getStartY(); // Get viewport start Y coordinate
+  uint8_t getEndY();   // Get viewport end Y coordinate
 
-  // Get current cursor Y position
-  uint8_t getY();
+  uint8_t getWidth();  // Get viewport width
+  uint8_t getHeight(); // Get viewport height
+  uint16_t getSize();  // Get total viewport size in characters
 
-  // Set cursor Y position
-  void setY(uint8_t y);
+  uint8_t getAbsoluteX(uint8_t x); // Convert relative X to absolute screen coordinate
+  uint8_t getAbsoluteY(uint8_t y); // Convert relative Y to absolute screen coordinate
 
-  // Set cursor position
-  void setXY(uint8_t x, uint8_t y);
+  void cls();                                  // Clear screen with spaces
+  void cls(char character);                    // Clear screen with specified character
+  void cls(char *characters);                  // Clear screen with character array
+  void cls(char *characters, uint16_t length); // Clear screen with character array of specified length
 
-  // Get viewport start X coordinate
-  uint8_t getStartX();
+  void scroll();             // Scroll screen up by one row
+  void scroll(uint8_t rows); // Scroll screen up by specified number of rows
 
-  // Get viewport end X coordinate
-  uint8_t getEndX();
+  char *read(uint8_t x, uint8_t y, uint16_t length, bool raw); // Read characters from screen at specified position and length
 
-  // Get viewport start Y coordinate
-  uint8_t getStartY();
+  size_t write(uint8_t ch) override;                         // Write single character (Print interface)
+  size_t write(const uint8_t *buffer, size_t size) override; // Write buffer of characters (Print interface)
 
-  // Get viewport end Y coordinate
-  uint8_t getEndY();
+  void print(const char character, bool raw);                         // Print character with raw option
+  void print(uint8_t x, uint8_t y, const char *str);                  // Print string at specified position
+  void print(uint8_t x, uint8_t y, const char *str, uint16_t length); // Print string at specified position with length limit
 
-  // Get viewport width
-  uint8_t getWidth();
+  void setAutoScroll(bool autoScroll);        // Enable or disable automatic scrolling
+  void setLowerCaseMod(bool hasLowerCaseMod); // Set whether lowercase modification is available
 
-  // Get viewport height
-  uint8_t getHeight();
-
-  // Get total viewport size in characters
-  uint16_t getSize();
-
-  // Convert relative X to absolute screen coordinate
-  uint8_t getAbsoluteX(uint8_t x);
-
-  // Convert relative Y to absolute screen coordinate
-  uint8_t getAbsoluteY(uint8_t y);
-
-  // Clear screen with spaces
-  void cls();
-
-  // Clear screen with specified character
-  void cls(char character);
-
-  // Clear screen with character array
-  void cls(char *characters);
-
-  // Clear screen with character array of specified length
-  void cls(char *characters, uint16_t length);
-
-  // Scroll screen up by one row
-  void scroll();
-
-  // Scroll screen up by specified number of rows
-  void scroll(uint8_t rows);
-
-  // Read characters from screen at specified position and length
-  char *read(uint8_t x, uint8_t y, uint16_t length, bool raw);
-
-  // Write single character (Print interface)
-  size_t write(uint8_t ch) override;
-
-  // Write buffer of characters (Print interface)
-  size_t write(const uint8_t *buffer, size_t size) override;
-
-  // Print character with raw option
-  void print(const char character, bool raw);
-
-  // Print string at specified position
-  void print(uint8_t x, uint8_t y, const char *str);
-
-  // Print string at specified position with length limit
-  void print(uint8_t x, uint8_t y, const char *str, uint16_t length);
-
-  // Enable or disable automatic scrolling
-  void setAutoScroll(bool autoScroll);
-
-  // Set whether lowercase modification is available
-  void setLowerCaseMod(bool hasLowerCaseMod);
-
-  // Convert TRS-80 character to local character
-  char convertModel1CharacterToLocal(char character);
-
-  // Convert local character to TRS-80 character
-  char convertLocalCharacterToModel1(char character);
+  char convertModel1CharacterToLocal(char character); // Convert TRS-80 character to local character
+  char convertLocalCharacterToModel1(char character); // Convert local character to TRS-80 character
 
   using Print::print;
   using Print::println;

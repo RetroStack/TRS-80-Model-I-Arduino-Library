@@ -10,6 +10,7 @@
 
 // Constructor - runs once when screen is created
 SimpleScreen::SimpleScreen()
+    : Screen()
 {
     // Initialize our variables
     _buttonPressCount = 0;

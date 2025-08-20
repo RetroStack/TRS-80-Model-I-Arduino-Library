@@ -305,6 +305,7 @@ void Video::scroll(uint8_t rows)
   }
 }
 
+// Read a block of characters from the screen
 char *Video::read(uint8_t x, uint8_t y, uint16_t length, bool raw)
 {
   uint8_t *buffer = (uint8_t *)malloc((length + 1) * sizeof(uint8_t));
@@ -353,12 +354,14 @@ char *Video::read(uint8_t x, uint8_t y, uint16_t length, bool raw)
   return (char *)buffer;
 }
 
+// Write a single character to the screen
 size_t Video::write(uint8_t ch)
 {
   _print((char)ch, false);
   return 1;
 }
 
+// Write a block of characters to the screen
 size_t Video::write(const uint8_t *buffer, size_t size)
 {
   if (!buffer)
@@ -381,11 +384,13 @@ size_t Video::write(const uint8_t *buffer, size_t size)
   return result;
 }
 
+// Print a single character to the screen
 void Video::print(const char character, bool raw)
 {
   _print(character, raw);
 }
 
+// Print a single character to the screen
 void Video::_print(const char character, bool raw)
 {
   if (character == '\0')
@@ -446,6 +451,7 @@ void Video::_print(const char character, bool raw)
   }
 }
 
+// Print a single character to the screen
 void Video::print(uint8_t x, uint8_t y, const char *str)
 {
   if (!str)
@@ -459,6 +465,7 @@ void Video::print(uint8_t x, uint8_t y, const char *str)
   write((const uint8_t *)str, length);
 }
 
+// Print a block of characters to the screen
 void Video::print(uint8_t x, uint8_t y, const char *str, uint16_t length)
 {
   if (!str)
@@ -477,16 +484,19 @@ void Video::print(uint8_t x, uint8_t y, const char *str, uint16_t length)
   write((const uint8_t *)str, length);
 }
 
+// Set auto scroll mode
 void Video::setAutoScroll(bool autoScroll)
 {
   _autoScroll = autoScroll;
 }
 
+// Set lower case mode
 void Video::setLowerCaseMod(bool hasLowerCaseMod)
 {
   _hasLowerCaseMod = hasLowerCaseMod;
 }
 
+// Convert a character from Model 1 to local representation
 char Video::convertModel1CharacterToLocal(char character)
 {
   character &= 0x7F; // Clear the high bit - No graphics support
@@ -499,6 +509,7 @@ char Video::convertModel1CharacterToLocal(char character)
   return character;
 }
 
+// Convert a character from local representation to Model 1
 char Video::convertLocalCharacterToModel1(char character)
 {
   character &= 0x7F; // Clear the high bit - No graphics support

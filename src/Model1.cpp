@@ -812,6 +812,7 @@ void Model1Class::deactivateWaitSignal()
 
 // ---------- State
 
+// Get current state as a string
 char *Model1Class::getState()
 {
     char *addrStatus = _addressBus.getState();
@@ -877,16 +878,19 @@ char *Model1Class::getState()
     return buffer;
 }
 
+// Get current state data
 uint64_t Model1Class::getStateData()
 {
     return Model1LowLevel::getStateData();
 }
 
+// Get current state configuration data
 uint64_t Model1Class::getStateConfigData()
 {
     return Model1LowLevel::getStateConfigData();
 }
 
+// Get current state as a string
 void Model1Class::logState()
 {
     if (_logger)
@@ -899,21 +903,25 @@ void Model1Class::logState()
 
 // ---------- Version
 
+// Get version major
 uint8_t Model1Class::getVersionMajor()
 {
     return M1_VERSION_MAJOR;
 }
 
+// Get version minor
 uint8_t Model1Class::getVersionMinor()
 {
     return M1_VERSION_MINOR;
 }
 
+// Get version revision
 uint8_t Model1Class::getVersionRevision()
 {
     return M1_VERSION_REVISION;
 }
 
+// Get version string
 char *Model1Class::getVersion()
 {
     const int LEN = 255;
@@ -937,6 +945,7 @@ char *Model1Class::getVersion()
     return buffer;
 }
 
+// Print memory contents with specified formatting options
 void Model1Class::printMemoryContents(uint16_t start, uint16_t length, PRINT_STYLE style, bool relative, uint16_t bytesPerLine)
 {
     if (!_logger)
@@ -945,6 +954,7 @@ void Model1Class::printMemoryContents(uint16_t start, uint16_t length, PRINT_STY
     printMemoryContents(*_logger, start, length, style, relative, bytesPerLine);
 }
 
+// Print memory contents with specified formatting options
 void Model1Class::printMemoryContents(Print &output, uint16_t start, uint16_t length, PRINT_STYLE style, bool relative, uint16_t bytesPerLine)
 {
     if (bytesPerLine == 0 || bytesPerLine > 60)

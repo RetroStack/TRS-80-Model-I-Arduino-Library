@@ -8,7 +8,7 @@ SerialLogger logger;
 void setup()
 {
     // Setup the serial interface
-    Serial.begin(9600); // baud rate
+    Serial.begin(115200); // Standard baud rate for consistent user experience
 
     // Be sure to setup the hardware pins
     Model1.begin();

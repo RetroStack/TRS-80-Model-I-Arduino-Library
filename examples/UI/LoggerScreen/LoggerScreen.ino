@@ -117,6 +117,11 @@ void loop()
             logger->err("Error #%d: This is an error message", messageCount / 5);
         }
 
+        if (messageCount % 2 == 0)
+        {
+            logger->debug("This is a debug message.");
+        }
+
         // Reset counter after 20 messages to prevent overflow
         if (messageCount >= 20)
         {

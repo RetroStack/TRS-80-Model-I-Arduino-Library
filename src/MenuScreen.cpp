@@ -264,8 +264,8 @@ void MenuScreen::_drawContent()
         rowHeight = ROW_HEIGHT;
         textSizeWidth = TEXT_SIZE_2_WIDTH;
         textSizeHalfHeight = TEXT_SIZE_2_HALF_HEIGHT;
-        leftPadding = 15;
-        configGap = 10;
+        leftPadding = 5;
+        configGap = 6;
         rightPadding = 5;
     }
 
@@ -671,11 +671,13 @@ void MenuScreen::_setSelectedMenuItemIndex(uint8_t index)
     }
 }
 
+// Get the currently selected menu item index
 uint8_t MenuScreen::_getSelectedMenuItemIndex() const
 {
     return _selectedMenuItemIndex;
 }
 
+// Clear the menu items
 void MenuScreen::clearMenuItems()
 {
     if (_menuItems != nullptr)
@@ -703,6 +705,28 @@ void MenuScreen::clearMenuItems()
     if (isActive())
     {
         _drawContent();
+        M1Shield.display();
+    }
+}
+
+void MenuScreen::loop()
+{
+    // Call parent ContentScreen::loop() to handle notification timeouts
+    ContentScreen::loop();
+
+    // MenuScreen doesn't need additional loop processing by default,
+    // but derived classes can override this method for custom behavior
+}
+
+void MenuScreen::refreshMenu()
+{
+    // Refresh just the menu content area (efficient for when menu item values change)
+    if (isActive())
+    {
+        Adafruit_GFX &gfx = M1Shield.getGFX();
+        gfx.startWrite();
+        _drawContent();
+        gfx.endWrite();
         M1Shield.display();
     }
 }

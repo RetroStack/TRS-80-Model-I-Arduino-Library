@@ -40,6 +40,10 @@ public:
     // MenuScreen overrides
     Screen *_getSelectedMenuItemScreen(int index);
 
+protected:
+    // Override for debugging
+    void _drawContent() override;
+
 private:
     void setLedColor(int colorIndex);
     void showSelectionFeedback(const char *itemName);

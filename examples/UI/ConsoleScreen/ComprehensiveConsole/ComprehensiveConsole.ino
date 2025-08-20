@@ -29,9 +29,6 @@ Display_ST7789_320x240 displayProvider;
 #include <M1Shield.h>
 #include "ComprehensiveConsole.h"
 
-// Create the console screen instance
-ComprehensiveConsole consoleScreen;
-
 void setup()
 {
     // Initialize serial for debugging
@@ -45,7 +42,7 @@ void setup()
     M1Shield.activateJoystick();
 
     // Set our console screen as active
-    M1Shield.setScreen(&consoleScreen);
+    M1Shield.setScreen(new ComprehensiveConsole());
 
     Serial.println("Comprehensive ConsoleScreen loaded and ready!");
 }

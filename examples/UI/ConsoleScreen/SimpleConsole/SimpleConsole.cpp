@@ -14,14 +14,20 @@ SimpleConsole::SimpleConsole() : ConsoleScreen()
     messageCount = 0;
     showingWelcome = true;
 
-    // Configure console appearance
+    // Configure console appearance - these are safe to set in constructor
     setTitleF(F("Simple Console"));
+    // Note: Do not call display operations here - use _executeOnce() instead
+}
+
+void SimpleConsole::_executeOnce()
+{
+    // This method is called automatically 1 second after the screen opens
     setConsoleBackground(M1Shield.convertColor(0x0000)); // Black background
     setTextColor(M1Shield.convertColor(0xFFFF));         // White text
     setTextSize(1);
     setTabSize(4);
 
-    // Start with a clear screen
+    // It's the proper place for initial display operations
     cls();
     showWelcomeMessage();
 }
@@ -60,6 +66,9 @@ void SimpleConsole::showControls()
 
 void SimpleConsole::loop()
 {
+    // Call parent ConsoleScreen::loop() to handle auto-forward and notifications
+    ConsoleScreen::loop();
+
     // Add automatic status messages every 3 seconds
     if (millis() - lastUpdate >= 3000)
     {

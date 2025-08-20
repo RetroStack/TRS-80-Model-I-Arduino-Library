@@ -11,7 +11,7 @@ const char *colorNames[] = {
     "Red", "Green", "Blue", "Yellow", "Magenta", "Cyan", "White", "Off"};
 
 SimpleMenu::SimpleMenu()
-    : currentLedColor(0) // Start with red LED
+    : MenuScreen(), currentLedColor(0) // Start with red LED
 {
     Serial.println("=== SimpleMenu::constructor() ===");
     Serial.println("Setting up simple menu...");
@@ -24,18 +24,33 @@ SimpleMenu::SimpleMenu()
         "Cycle Colors",
         "LED Off"};
 
+    Serial.println("About to call setMenuItems...");
     // Tell MenuScreen about our menu items
     setMenuItems(menuItems, 5);
+    Serial.println("setMenuItems completed");
 
+    Serial.println("About to call setTitle...");
     // Set menu title
     setTitle("Simple Menu");
+    Serial.println("setTitle completed");
 
+    Serial.println("About to call setButtonItems...");
     // Set up footer buttons
     const char *buttons[] = {"Back", "Select"};
     setButtonItems(buttons, 2);
+    Serial.println("setButtonItems completed");
 
+    Serial.println("About to call setLedColor...");
     // Set initial LED color
     setLedColor(currentLedColor);
+    Serial.println("Constructor completed successfully");
+}
+
+void SimpleMenu::_drawContent()
+{
+    Serial.println("=== SimpleMenu::_drawContent() called ===");
+    MenuScreen::_drawContent(); // Call parent implementation
+    Serial.println("MenuScreen::_drawContent() completed");
 }
 
 Screen *SimpleMenu::_getSelectedMenuItemScreen(int index)
@@ -133,5 +148,5 @@ void SimpleMenu::showSelectionFeedback(const char *itemName)
     // This uses ContentScreen's notification system
     String feedback = "Selected: ";
     feedback += itemName;
-    notify(feedback.c_str(), 1500); // Show for 1.5 seconds
+    notify(feedback, 1500); // Show for 1.5 seconds
 }

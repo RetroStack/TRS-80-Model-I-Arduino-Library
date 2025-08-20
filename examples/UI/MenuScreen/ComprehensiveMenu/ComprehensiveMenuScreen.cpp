@@ -38,6 +38,7 @@ enum MenuItems
 // STEP 1: CONSTRUCTOR - Setting up the menu
 // This runs ONCE when you create the menu screen
 ComprehensiveMenuScreen::ComprehensiveMenuScreen()
+    : MenuScreen()
 {
     // Initialize configuration settings with reasonable defaults
     _soundEnabled = true; // Sound effects enabled
@@ -65,7 +66,7 @@ ComprehensiveMenuScreen::ComprehensiveMenuScreen()
     setMenuItems(menuItems, 10);
 
     // Set the title that appears in the header
-    setTitle("TRS-80 Settings Menu");
+    setTitle("Settings Menu");
 
     // Set up footer buttons (MenuScreen will show these automatically)
     const char *buttons[] = {"Back", "Change"};
@@ -98,6 +99,7 @@ Screen *ComprehensiveMenuScreen::_getSelectedMenuItemScreen(int index)
     case MENU_SOUND:
         Serial.println("Sound Effects");
         _toggleSound();
+        refreshMenu(); // Update menu to show new value
         notify("Sound effects toggled!", 2000);
         break;
 
@@ -106,6 +108,7 @@ Screen *ComprehensiveMenuScreen::_getSelectedMenuItemScreen(int index)
         {
             Serial.println("Game Difficulty");
             _cycleDifficulty();
+            refreshMenu(); // Update menu to show new value
             notify("Difficulty changed!", 2000);
         }
         else
@@ -118,6 +121,7 @@ Screen *ComprehensiveMenuScreen::_getSelectedMenuItemScreen(int index)
     case MENU_TIMEOUT:
         Serial.println("Screen Timeout");
         _adjustTimeout(5); // Increase by 5 seconds
+        refreshMenu();     // Update menu to show new value
         notify("Timeout adjusted!", 2000);
         break;
 
@@ -126,6 +130,7 @@ Screen *ComprehensiveMenuScreen::_getSelectedMenuItemScreen(int index)
         {
             Serial.println("Brightness");
             _adjustBrightness(10); // Increase by 10%
+            refreshMenu();         // Update menu to show new value
             notify("Brightness adjusted!", 2000);
         }
         else
@@ -138,6 +143,7 @@ Screen *ComprehensiveMenuScreen::_getSelectedMenuItemScreen(int index)
     case MENU_AUTOSAVE:
         Serial.println("Auto Save");
         _toggleAutoSave();
+        refreshMenu(); // Update menu to show new value
         notify("Auto save toggled!", 2000);
         break;
 
@@ -146,6 +152,7 @@ Screen *ComprehensiveMenuScreen::_getSelectedMenuItemScreen(int index)
         {
             Serial.println("Language");
             _cycleLanguage();
+            refreshMenu(); // Update menu to show new value
             notify("Language changed!", 2000);
         }
         else
@@ -284,7 +291,10 @@ bool ComprehensiveMenuScreen::_isMenuItemEnabled(uint8_t index) const
 // This runs continuously while the menu is active
 void ComprehensiveMenuScreen::loop()
 {
-    // In this example, we don't need continuous processing
+    // Call parent MenuScreen::loop() to handle notification timeouts
+    MenuScreen::loop();
+
+    // In this example, we don't need additional continuous processing
     // But you could add things like:
     // - Periodic updates to configuration values
     // - Background animations

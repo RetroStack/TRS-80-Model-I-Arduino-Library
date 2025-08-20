@@ -43,15 +43,7 @@ Screen <- Base class - you control everything manually
 - Analog joystick offsets: `offsetX` and `offsetY` parameters
 - Real-time input state visualization
 
-### 2. Screen Lifecycle (LifecycleDemoScreen)
-
-- `open()` method implementation for screen initialization
-- `close()` method implementation for cleanup
-- Active/inactive state management via `isActive()`
-- Screen transition handling and navigation
-- Proper memory management patterns
-
-### 3. Animation & Performance (AnimationDemoScreen)
+### 2. Animation & Performance (AnimationDemoScreen)
 
 - Frame-based animations using `loop()` method
 - Real-time performance monitoring and FPS tracking
@@ -62,13 +54,12 @@ Screen <- Base class - you control everything manually
 
 ### ComprehensiveScreen (Main Controller)
 
-Acts as a master controller that cycles between three specialized demo screens:
+Acts as a master controller that cycles between two specialized demo screens:
 
 ```cpp
 class ComprehensiveScreen : public Screen {
 private:
     InputDemoScreen *inputDemo;
-    LifecycleDemoScreen *lifecycleDemo;
     AnimationDemoScreen *animationDemo;
     int currentDemo;
 };
@@ -86,18 +77,6 @@ private:
         int joystickX, joystickY;
         String lastAction;
     } inputState;
-};
-```
-
-### LifecycleDemoScreen
-
-Shows proper screen lifecycle management:
-
-```cpp
-class LifecycleDemoScreen : public Screen {
-public:
-    bool open() override;    // Custom initialization
-    void close() override;   // Custom cleanup
 };
 ```
 
@@ -119,15 +98,14 @@ public:
 
 1. Choose your display type in `ComprehensiveScreen.ino`
 2. Upload to your Arduino Mega 2560
-3. Use MENU button to cycle through the three demo screens:
+3. Use MENU button to cycle through the two demo screens:
    - **Input Demo**: Press all buttons and move joystick to see real-time input detection
-   - **Lifecycle Demo**: Watch screen state transitions and management
    - **Animation Demo**: See smooth animations and performance monitoring
 4. Study the source code to understand implementation patterns
 
 ## Controls
 
-- **MENU Button**: Navigate between demo screens (Input → Lifecycle → Animation → repeat)
+- **MENU Button**: Navigate between demo screens (Input → Animation → repeat)
 - **ALL OTHER INPUTS**: Depend on current demo screen - each demonstrates different input handling
 
 ## Professional Patterns Demonstrated
@@ -138,13 +116,11 @@ public:
 // Proper dynamic allocation and cleanup
 ComprehensiveScreen::ComprehensiveScreen() {
     inputDemo = new InputDemoScreen();
-    lifecycleDemo = new LifecycleDemoScreen();
     animationDemo = new AnimationDemoScreen();
 }
 
 ComprehensiveScreen::~ComprehensiveScreen() {
     delete inputDemo;
-    delete lifecycleDemo;
     delete animationDemo;
 }
 ```

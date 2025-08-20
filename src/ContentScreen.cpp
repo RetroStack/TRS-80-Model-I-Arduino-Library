@@ -177,23 +177,53 @@ void ContentScreen::_drawHeader()
     if (title != nullptr && title[0] != '\0')
     {
         gfx.setTextColor(M1Shield.convertColor(HEADER_COLOR_FG));
+        char *truncatedTitle = nullptr;
+
         if (isSmallDisplay())
         {
-            // Calculate centered position for title text
-            uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(title);
-            gfx.setTextSize(1);
+            // Truncate title for small display if needed
+            truncatedTitle = _truncateText(title, screenWidth - 4, TEXT_SIZE_1_WIDTH); // 4 pixel margin
 
-            // Adding 2 pixels as header needs to be 16 pixel altogether
-            gfx.setCursor((screenWidth - textWidth) / 2, top + TEXT_SIZE_1_HALF_HEIGHT + 2);
+            gfx.setTextSize(1);
+            if (truncatedTitle != nullptr)
+            {
+                // Calculate centered position for truncated title text
+                uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(truncatedTitle);
+                // Adding 2 pixels as header needs to be 16 pixel altogether
+                gfx.setCursor((screenWidth - textWidth) / 2, top + TEXT_SIZE_1_HALF_HEIGHT + 2);
+                gfx.print(truncatedTitle);
+                free(truncatedTitle);
+            }
+            else
+            {
+                // Fallback: display original title if truncation failed
+                uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(title);
+                gfx.setCursor((screenWidth - textWidth) / 2, top + TEXT_SIZE_1_HALF_HEIGHT + 2);
+                gfx.print(title);
+            }
         }
         else
         {
-            // Calculate centered position for title text
-            uint16_t textWidth = TEXT_SIZE_3_WIDTH * strlen(title);
+            // Truncate title for regular display if needed
+            truncatedTitle = _truncateText(title, screenWidth - 4, TEXT_SIZE_3_WIDTH); // 4 pixel margin
+
             gfx.setTextSize(3);
-            gfx.setCursor((screenWidth - textWidth) / 2, top + TEXT_SIZE_3_HALF_HEIGHT);
+            if (truncatedTitle != nullptr)
+            {
+                // Calculate centered position for truncated title text
+                uint16_t textWidth = TEXT_SIZE_3_WIDTH * strlen(truncatedTitle);
+                gfx.setCursor((screenWidth - textWidth) / 2, top + TEXT_SIZE_3_HALF_HEIGHT);
+                gfx.print(truncatedTitle);
+                free(truncatedTitle);
+            }
+            else
+            {
+                // Fallback: display original title if truncation failed
+                uint16_t textWidth = TEXT_SIZE_3_WIDTH * strlen(title);
+                gfx.setCursor((screenWidth - textWidth) / 2, top + TEXT_SIZE_3_HALF_HEIGHT);
+                gfx.print(title);
+            }
         }
-        gfx.print(title);
     }
 }
 
@@ -686,15 +716,31 @@ void ContentScreen::_drawNotification()
     gfx.setTextColor(M1Shield.convertColor(NOTIFICATION_COLOR_FG));
     gfx.setTextSize(2);
 
-    // Center text horizontally
-    uint16_t textWidth = TEXT_SIZE_2_WIDTH * strlen(_notificationText);
-    uint16_t xPos = (screenWidth - textWidth) / 2;
+    // Truncate notification text if needed (leave 4 pixel margin)
+    char *truncatedText = _truncateText(_notificationText, screenWidth - 4, TEXT_SIZE_2_WIDTH);
+    if (truncatedText != nullptr)
+    {
+        // Center text horizontally
+        uint16_t textWidth = TEXT_SIZE_2_WIDTH * strlen(truncatedText);
+        uint16_t xPos = (screenWidth - textWidth) / 2;
 
-    // Center text vertically in footer area
-    uint16_t yPos = top + (height - 16) / 2; // 16 is approximate height of size-2 text
+        // Center text vertically in footer area
+        uint16_t yPos = top + (height - 16) / 2; // 16 is approximate height of size-2 text
 
-    gfx.setCursor(xPos, yPos);
-    gfx.print(_notificationText);
+        gfx.setCursor(xPos, yPos);
+        gfx.print(truncatedText);
+        free(truncatedText);
+    }
+    else
+    {
+        // Fallback: display original notification text if truncation failed
+        uint16_t textWidth = TEXT_SIZE_2_WIDTH * strlen(_notificationText);
+        uint16_t xPos = (screenWidth - textWidth) / 2;
+        uint16_t yPos = top + (height - 16) / 2;
+
+        gfx.setCursor(xPos, yPos);
+        gfx.print(_notificationText);
+    }
 }
 
 void ContentScreen::_clearNotification()
@@ -918,11 +964,29 @@ void ContentScreen::_drawAlert(const char *text)
     gfx.setCursor(2, textY);
     gfx.print("<");
 
-    // Center main text horizontally
-    uint16_t textWidth = TEXT_SIZE_2_WIDTH * strlen(text);
-    uint16_t xPos = (screenWidth - textWidth) / 2;
-    gfx.setCursor(xPos, textY);
-    gfx.print(text);
+    // Calculate available width for main text (account for indicators and margins)
+    uint16_t indicatorWidth = TEXT_SIZE_2_WIDTH;                      // Width of "<" or ">"
+    uint16_t availableWidth = screenWidth - (2 * indicatorWidth) - 8; // 8 pixels total margin
+
+    // Truncate main text if needed
+    char *truncatedText = _truncateText(text, availableWidth, TEXT_SIZE_2_WIDTH);
+    if (truncatedText != nullptr)
+    {
+        // Center main text horizontally
+        uint16_t textWidth = TEXT_SIZE_2_WIDTH * strlen(truncatedText);
+        uint16_t xPos = (screenWidth - textWidth) / 2;
+        gfx.setCursor(xPos, textY);
+        gfx.print(truncatedText);
+        free(truncatedText);
+    }
+    else
+    {
+        // Fallback: display original text if truncation failed
+        uint16_t textWidth = TEXT_SIZE_2_WIDTH * strlen(text);
+        uint16_t xPos = (screenWidth - textWidth) / 2;
+        gfx.setCursor(xPos, textY);
+        gfx.print(text);
+    }
 
     // Draw right indicator ">" (right-aligned)
     uint16_t rightIndicatorX = screenWidth - TEXT_SIZE_2_WIDTH - 2; // TEXT_SIZE_2_WIDTH for ">" character
@@ -951,6 +1015,23 @@ void ContentScreen::_drawConfirm(const char *text, const char *leftText, const c
     // Calculate positions for text elements
     uint16_t textY = top + (height - 16) / 2; // 16 is approximate height of size-2 text, vertically center all text
 
+    // Calculate space used by button text to determine available space for main message
+    uint16_t leftButtonWidth = 0;
+    uint16_t rightButtonWidth = 0;
+
+    if (leftText != nullptr && leftText[0] != '\0')
+    {
+        leftButtonWidth = TEXT_SIZE_2_WIDTH * (strlen(leftText) + 1) + 4; // +1 for "<", +4 for margins
+    }
+
+    if (rightText != nullptr && rightText[0] != '\0')
+    {
+        rightButtonWidth = TEXT_SIZE_2_WIDTH * (strlen(rightText) + 1) + 4; // +1 for ">", +4 for margins
+    }
+
+    // Calculate available width for main message
+    uint16_t availableWidth = screenWidth - leftButtonWidth - rightButtonWidth - 8; // 8 additional margin
+
     // Left button text (left-aligned) - when provided, show as indicator
     if (leftText != nullptr && leftText[0] != '\0')
     {
@@ -959,11 +1040,24 @@ void ContentScreen::_drawConfirm(const char *text, const char *leftText, const c
         gfx.print(leftText);
     }
 
-    // Main message (center-aligned)
-    uint16_t mainTextWidth = TEXT_SIZE_2_WIDTH * strlen(text);
-    uint16_t mainTextX = (screenWidth - mainTextWidth) / 2;
-    gfx.setCursor(mainTextX, textY);
-    gfx.print(text);
+    // Main message (center-aligned) - truncated if needed
+    char *truncatedText = _truncateText(text, availableWidth, TEXT_SIZE_2_WIDTH);
+    if (truncatedText != nullptr)
+    {
+        uint16_t mainTextWidth = TEXT_SIZE_2_WIDTH * strlen(truncatedText);
+        uint16_t mainTextX = (screenWidth - mainTextWidth) / 2;
+        gfx.setCursor(mainTextX, textY);
+        gfx.print(truncatedText);
+        free(truncatedText);
+    }
+    else
+    {
+        // Fallback: display original text if truncation failed
+        uint16_t mainTextWidth = TEXT_SIZE_2_WIDTH * strlen(text);
+        uint16_t mainTextX = (screenWidth - mainTextWidth) / 2;
+        gfx.setCursor(mainTextX, textY);
+        gfx.print(text);
+    }
 
     // Right button text (right-aligned) - when provided, show as indicator
     if (rightText != nullptr && rightText[0] != '\0')
@@ -974,4 +1068,67 @@ void ContentScreen::_drawConfirm(const char *text, const char *leftText, const c
         gfx.print(rightText);
         gfx.print(">");
     }
+}
+
+char *ContentScreen::_truncateText(const char *text, uint16_t availableWidth, uint8_t charWidth)
+{
+    if (text == nullptr || text[0] == '\0')
+        return nullptr;
+
+    uint16_t textLen = strlen(text);
+    uint16_t textWidth = textLen * charWidth;
+
+    // If text fits within available width, return a copy
+    if (textWidth <= availableWidth)
+    {
+        char *copy = (char *)malloc(textLen + 1);
+        if (copy == nullptr)
+        {
+            if (getLogger())
+            {
+                getLogger()->errF(F("ContentScreen: Failed to allocate memory for text copy"));
+            }
+            return nullptr;
+        }
+        strcpy(copy, text);
+        return copy;
+    }
+
+    // Calculate maximum characters that fit including "..." (3 characters)
+    uint16_t maxChars = availableWidth / charWidth;
+    if (maxChars < 4) // Need at least 4 chars for "a..."
+    {
+        // If we can't even fit "a...", return just "..."
+        if (maxChars >= 3)
+        {
+            char *truncated = (char *)malloc(4);
+            if (truncated == nullptr)
+            {
+                if (getLogger())
+                {
+                    getLogger()->errF(F("ContentScreen: Failed to allocate memory for truncated text ..."));
+                }
+                return nullptr;
+            }
+            strcpy(truncated, "...");
+            return truncated;
+        }
+        return nullptr; // Can't fit anything meaningful
+    }
+
+    // Create truncated text with "..." at end
+    uint16_t textChars = maxChars - 3; // Reserve 3 chars for "..."
+    char *truncated = (char *)malloc(maxChars + 1);
+    if (truncated == nullptr)
+    {
+        if (getLogger())
+        {
+            getLogger()->errF(F("ContentScreen: Failed to allocate memory for truncated text"));
+        }
+        return nullptr;
+    }
+
+    strncpy(truncated, text, textChars);
+    strcpy(truncated + textChars, "...");
+    return truncated;
 }

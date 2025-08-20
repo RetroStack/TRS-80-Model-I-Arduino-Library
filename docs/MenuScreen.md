@@ -55,6 +55,7 @@ MenuScreen supports three ways to set menu items for maximum flexibility:
 - **`void setMenuItems(String* menuItems, uint8_t menuItemCount)`** - Set menu items from Arduino String array
 - **`void setMenuItemsF(const \_\_FlashStringHelper** menuItems, uint8_t menuItemCount)`\*\* - Set menu items from F-string array
 - **`void clearMenuItems()`** - Clear and free all dynamically allocated menu items
+- **`void refreshMenu()`** - Refresh the menu content area display
 
 ### Setting Menu Items
 
@@ -143,6 +144,35 @@ setMenuItemsF(flashItems, 4);
 - **RAM Savings**: Menu text stored in abundant flash memory instead of scarce RAM
 - **Static Text**: Ideal for fixed menu items that don't change at runtime
 - **Automatic Conversion**: FlashStrings automatically converted and allocated as needed
+
+### Refreshing Menu Display
+
+The `refreshMenu()` method allows efficient updating of the menu content area without redrawing the entire screen:
+
+- **Efficient Updates**: Only redraws the menu content area, preserving header/footer/notifications
+- **Safe Operation**: Only updates when screen is active, ignores calls when screen is inactive
+- **Common Usage**: Call after operations that change menu item text or appearance
+
+**Example Usage:**
+
+```cpp
+void MyMenuScreen::_toggleSetting() {
+    _settingEnabled = !_settingEnabled;
+
+    // Update menu item text to reflect new state
+    _menuItems[2] = _settingEnabled ? "Disable Feature" : "Enable Feature";
+
+    // Refresh the menu display to show updated text
+    refreshMenu();
+}
+```
+
+**When to Use:**
+
+- After changing menu item text dynamically
+- Following toggle operations that affect menu display
+- When menu appearance needs updating without full screen refresh
+- For responsive UI updates during user interactions
 
 ## Navigation System
 

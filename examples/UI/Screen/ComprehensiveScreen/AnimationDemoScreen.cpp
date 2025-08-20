@@ -7,7 +7,7 @@
 #include "AnimationDemoScreen.h"
 
 AnimationDemoScreen::AnimationDemoScreen()
-    : showPerformanceStats(true), animationSpeed(1)
+    : Screen(), showPerformanceStats(true), animationSpeed(1)
 {
     // Set the screen title
     setTitle("Animation Demo");
@@ -327,19 +327,11 @@ void AnimationDemoScreen::drawControls()
     display.setTextSize(1);
     display.setTextColor(M1Shield.convertColor(0xFFE0)); // Yellow
 
-    if (isSmallDisplay())
+    if (!isSmallDisplay())
     {
         display.setCursor(10, y);
-        display.print("Joy: Pause Speed: ");
-        display.print(animationSpeed);
-    }
-    else
-    {
-        display.setCursor(10, y);
-        display.print("UP/DOWN: Speed  LEFT: Stats  RIGHT: Reset  JOY: ");
+        display.print("UP/DN:Speed LEFT:Stats RIGHT:Reset JOY:");
         display.print(animationState.animationPaused ? "Resume" : "Pause");
-        display.print("  Speed: ");
-        display.print(animationSpeed);
     }
 }
 

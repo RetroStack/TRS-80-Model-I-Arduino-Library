@@ -220,6 +220,10 @@ refresh KEYWORD2
 open    KEYWORD2
 close   KEYWORD2
 actionTaken KEYWORD2
+setMenuItems    KEYWORD2
+setMenuItemsF   KEYWORD2
+clearMenuItems  KEYWORD2
+refreshMenu KEYWORD2
 _getContentLeft KEYWORD2
 _getContentTop KEYWORD2
 _getContentWidth KEYWORD2

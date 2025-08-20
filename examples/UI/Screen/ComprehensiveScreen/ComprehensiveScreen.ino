@@ -57,9 +57,6 @@ Display_ST7789_320x240 displayProvider;
 // Serial logger for debugging M1Shield and Model1 issues
 SerialLogger logger;
 
-// The comprehensive screen demonstration
-ComprehensiveScreen screenDemo;
-
 void setup()
 {
     // Start serial communication for debug messages
@@ -70,12 +67,10 @@ void setup()
     Serial.println("Demonstrating ALL Screen class capabilities");
 
     // Set up logging for M1Shield and Model1 to capture any errors
-    M1Shield.setLogger(logger);
+    M1Shield.setLogger(logger); // <-- Sets logger onto all attached screen automatically
     Model1.setLogger(logger);
 
     // Set up logging for our screen
-    screenDemo.setLogger(logger);
-
     // Initialize the M1Shield hardware
     M1Shield.begin(displayProvider);
 
@@ -83,7 +78,7 @@ void setup()
     M1Shield.activateJoystick();
 
     // Set our comprehensive screen as the active screen
-    if (M1Shield.setScreen(&screenDemo))
+    if (M1Shield.setScreen(new ComprehensiveScreen()))
     {
         Serial.println("Screen demo loaded successfully!");
     }

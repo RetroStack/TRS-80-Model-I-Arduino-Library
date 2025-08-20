@@ -7,12 +7,11 @@
 
 #include "ComprehensiveScreen.h"
 #include "InputDemoScreen.h"
-#include "LifecycleDemoScreen.h"
 #include "AnimationDemoScreen.h"
 #include <math.h>
 
 ComprehensiveScreen::ComprehensiveScreen()
-    : currentDemo(0), isActive(false), activationTime(0), screenActivations(0),
+    : Screen(), currentDemo(0), isActive(false), activationTime(0), screenActivations(0),
       lastFrameTime(0), frameCount(0), averageFPS(0.0)
 {
     // Set the main screen title
@@ -22,7 +21,7 @@ ComprehensiveScreen::ComprehensiveScreen()
 
 ComprehensiveScreen::~ComprehensiveScreen()
 {
-    // Clean screen lifecycle demonstration
+    // Clean screen management demonstration
 }
 
 bool ComprehensiveScreen::open()
@@ -100,9 +99,9 @@ void ComprehensiveScreen::_drawScreen()
     display.print("Available demos:");
 
     // Show current demo option highlighted
-    const char *demos[] = {"Input Demo", "Lifecycle Demo", "Animation Demo"};
+    const char *demos[] = {"Input Demo", "Animation Demo"};
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 2; i++)
     {
         display.setCursor(20, 60 + (i * 15));
 
@@ -153,7 +152,7 @@ Screen *ComprehensiveScreen::actionTaken(ActionTaken action, int8_t offsetX, int
     if (action & BUTTON_UP)
     {
         Serial.println("UP button - previous demo");
-        currentDemo = (currentDemo + 2) % 3; // Previous (with wrap-around)
+        currentDemo = (currentDemo + 2 - 1) % 2; // Previous (add 2 to avoid negative)
         refresh();
         return nullptr;
     }
@@ -161,7 +160,7 @@ Screen *ComprehensiveScreen::actionTaken(ActionTaken action, int8_t offsetX, int
     if (action & BUTTON_DOWN)
     {
         Serial.println("DOWN button - next demo");
-        currentDemo = (currentDemo + 1) % 3; // Next
+        currentDemo = (currentDemo + 1) % 2; // Next
         refresh();
         return nullptr;
     }
@@ -220,10 +219,6 @@ Screen *ComprehensiveScreen::launchSelectedDemo()
         newScreen = new InputDemoScreen();
         break;
     case 1:
-        Serial.println("Creating new LifecycleDemoScreen");
-        newScreen = new LifecycleDemoScreen();
-        break;
-    case 2:
         Serial.println("Creating new AnimationDemoScreen");
         newScreen = new AnimationDemoScreen();
         break;
@@ -252,8 +247,6 @@ const char *ComprehensiveScreen::getDemoName()
     case 0:
         return "Input Demo";
     case 1:
-        return "Lifecycle Demo";
-    case 2:
         return "Animation Demo";
     default:
         return "Unknown";

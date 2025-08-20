@@ -88,6 +88,9 @@ public:
     Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override;
     void loop() override;
 
+    // Optimized content refresh (content area only)
+    void refreshContent();
+
 private:
     // Mode-specific drawing methods
     void drawMainMenu();

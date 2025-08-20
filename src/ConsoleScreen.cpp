@@ -135,7 +135,8 @@ void ConsoleScreen::loop()
         }
     }
 
-    // Call parent loop is not necessary since nothing is defined there
+    // Call parent ContentScreen::loop() to handle notification timeouts
+    ContentScreen::loop();
 }
 
 // Handle user input actions

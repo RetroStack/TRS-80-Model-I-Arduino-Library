@@ -67,6 +67,9 @@ void ComprehensiveConsole::_executeOnce()
 
 void ComprehensiveConsole::loop()
 {
+    // Call parent ConsoleScreen::loop() to handle auto-forward and notifications
+    ConsoleScreen::loop();
+
     unsigned long now = millis();
 
     // Mode-specific updates

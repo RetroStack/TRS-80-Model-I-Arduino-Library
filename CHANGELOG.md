@@ -120,3 +120,4 @@ This is the initial version written by Ven Reddy
   - **Multi-step workflows**: Chainable dialogs for complex confirmation sequences
   - **Safe defaults**: Graceful handling on small displays and allocation failures
   - **Performance optimized**: Only redraws footer area when dialogs close (not entire screen)
+- Added `refreshMenu()` method to MenuScreen class for efficient menu content updates

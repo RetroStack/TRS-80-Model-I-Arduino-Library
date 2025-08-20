@@ -63,7 +63,7 @@ public:
 
     // Screen Interface Implementation
 
-    virtual void loop() {} // Main loop processing for menu screen updates
+    void loop() override; // Main loop processing for menu screen updates
 
     // Handle user input actions and navigate accordingly
     Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override;
@@ -75,6 +75,8 @@ public:
     void setMenuItemsF(const __FlashStringHelper **menuItems, uint8_t menuItemCount); // Set the menu items (Flash version)
 
     void clearMenuItems(); // Clear and free all dynamically allocated menu items
+
+    void refreshMenu(); // Refresh just the menu content area (for when menu item values change)
 };
 
 #endif /* MENU_SCREEN_H */

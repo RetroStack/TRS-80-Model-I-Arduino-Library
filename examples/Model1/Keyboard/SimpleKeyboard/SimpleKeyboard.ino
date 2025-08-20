@@ -8,7 +8,7 @@ Keyboard keyboard;
 void setup()
 {
     // Initialize serial communication
-    Serial.begin(9600);
+    Serial.begin(115200);
     delay(1000);
 
     // Initialize the Model 1 hardware interface

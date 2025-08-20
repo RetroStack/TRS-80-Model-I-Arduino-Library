@@ -122,6 +122,8 @@ Creates a new console screen instance with default settings:
 - Sets default colors (white text on black background)
 - Configures standard tab size (4 characters)
 
+**Important**: Do not call display methods (`print()`, `println()`, `cls()`, etc.) in the constructor. Use the `_executeOnce()` method instead for display operations that should happen after the screen is properly initialized and active.
+
 ## Text Output Methods
 
 ### Print Methods (No Newline)
@@ -823,6 +825,8 @@ void setupDemo() {
 
 The `ConsoleScreen` supports one-time execution for initialization tasks that should only run once after the screen is opened.
 
+**Critical Rule**: All display operations (text output, screen clearing, etc.) should be performed in `_executeOnce()`, never in the constructor. The constructor should only set configuration options like title, colors, and text size.
+
 ### Protected Method Override
 
 ```cpp
@@ -838,6 +842,7 @@ This method is automatically called once, approximately 1 second after the scree
 class StatusConsole : public ConsoleScreen {
 protected:
     void _executeOnce() override {
+        // All display operations go here - called after screen is active
         cls();
         setTextColor(M1Shield.convertColor(0x07FF));
         println("=== STATUS CONSOLE ===");
@@ -847,8 +852,11 @@ protected:
     }
 
 public:
-    StatusConsole() {
-        _setTitle("System Status");
+    StatusConsole() : ConsoleScreen() {
+        // Only configuration in constructor - NO display operations
+        setTitleF(F("System Status"));
+        setTextColor(M1Shield.convertColor(0xFFFF));
+        setTextSize(1);
         // _executeOnce() will be called automatically after ~1 second
     }
 };

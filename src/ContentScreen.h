@@ -31,14 +31,15 @@ private:
     unsigned long _notificationDuration;  // How long to show notification (ms)
     bool _notificationActive;             // Whether notification is currently active
 
-    void _drawHeader();                                                               // Draw the header region with title
-    void _drawFooter();                                                               // Draw the footer region with button labels
-    void _drawProgressBar();                                                          // Draw the progress bar region
-    uint8_t _getPadding() const;                                                      // Gets the padding between areas
-    void _drawNotification();                                                         // Draw notification overlay in place of footer
-    void _clearNotification();                                                        // Clear notification text and free memory
-    void _drawAlert(const char *text);                                                // Draw alert dialog overlay in place of footer
-    void _drawConfirm(const char *text, const char *leftText, const char *rightText); // Draw confirm dialog overlay in place of footer
+    void _drawHeader();                                                                // Draw the header region with title
+    void _drawFooter();                                                                // Draw the footer region with button labels
+    void _drawProgressBar();                                                           // Draw the progress bar region
+    uint8_t _getPadding() const;                                                       // Gets the padding between areas
+    void _drawNotification();                                                          // Draw notification overlay in place of footer
+    void _clearNotification();                                                         // Clear notification text and free memory
+    void _drawAlert(const char *text);                                                 // Draw alert dialog overlay in place of footer
+    void _drawConfirm(const char *text, const char *leftText, const char *rightText);  // Draw confirm dialog overlay in place of footer
+    char *_truncateText(const char *text, uint16_t availableWidth, uint8_t charWidth); // Create truncated copy of text with "..." if needed
 
 protected:
     void _drawScreen() override;     // Implement Screen's _drawScreen() to manage layout regions

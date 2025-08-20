@@ -23,22 +23,13 @@
  */
 #define asmNoop() __asm__ __volatile__("nop\nnop")
 
-// Convert 8-bit value to binary string representation
-char *uint8ToBinary(uint8_t value, char *buffer);
+char *uint8ToBinary(uint8_t value, char *buffer);   // Convert 8-bit value to binary string representation
+char *uint16ToBinary(uint16_t value, char *buffer); // Convert 16-bit value to binary string representation
 
-// Convert 16-bit value to binary string representation
-char *uint16ToBinary(uint16_t value, char *buffer);
+char pinStatus(bool value);    // Get pin status character ('o' for output, 'i' for input)
+char busStatus(uint8_t value); // Get bus status character ('o' for output, 'i' for input, '?' for unknown)
 
-// Get pin status character ('o' for output, 'i' for input)
-char pinStatus(bool value);
-
-// Get bus status character ('o' for output, 'i' for input, '?' for unknown)
-char busStatus(uint8_t value);
-
-// Precise nanosecond delay using inline assembly (16MHz ATMega)
-void asmWait(uint16_t wait);
-
-// Nested loop delay for longer durations using inline assembly
-void asmWait(uint16_t outerLoopCount, uint16_t innerLoopCount);
+void asmWait(uint16_t wait);                                    // Precise nanosecond delay using inline assembly (16MHz ATMega)
+void asmWait(uint16_t outerLoopCount, uint16_t innerLoopCount); // Nested loop delay for longer durations using inline assembly
 
 #endif // UTILS_H

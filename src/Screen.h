@@ -76,8 +76,7 @@ public:
 
     void refresh(); // Force a complete redraw of the screen content
 
-    virtual bool open(); // Activate the screen and perform initial setup
-
+    virtual bool open();  // Activate the screen and perform initial setup
     virtual void close(); // Deactivate the screen and perform cleanup
 
     virtual void loop() = 0; // Main update loop called every frame while screen is active
@@ -85,8 +84,7 @@ public:
     // Handle user input events and return navigation result
     virtual Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) = 0;
 
-    Screen(const Screen &) = delete; // Disable copy constructor to prevent screen duplication
-
+    Screen(const Screen &) = delete;            // Disable copy constructor to prevent screen duplication
     Screen &operator=(const Screen &) = delete; // Disable copy assignment to prevent screen duplication
 };
 

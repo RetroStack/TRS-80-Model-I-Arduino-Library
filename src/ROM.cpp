@@ -93,6 +93,7 @@ uint16_t ROM::getROMStartAddress(uint8_t rom)
   return ROM_START + (ROM_4K_LENGTH * rom);
 }
 
+// Get length of specified ROM
 uint16_t ROM::getROMLength(uint8_t rom)
 {
   if (!_checkROMNumber(rom))
@@ -105,6 +106,7 @@ uint16_t ROM::getROMLength(uint8_t rom)
   return ROM_4K_LENGTH;
 }
 
+// Calculate checksum for specified ROM
 uint32_t ROM::getChecksum(uint8_t rom)
 {
   if (!_checkROMNumber(rom))
@@ -125,6 +127,7 @@ uint32_t ROM::getChecksum(uint8_t rom)
   return checksum;
 }
 
+// Identify ROM contents and return description string
 const __FlashStringHelper *ROM::identifyROM()
 {
   uint16_t a = getChecksum(0);
@@ -152,6 +155,7 @@ const __FlashStringHelper *ROM::identifyROM()
   return nullptr;
 }
 
+// Print ROM contents with specified formatting options
 void ROM::printROMContents(uint8_t rom, PRINT_STYLE style, bool relative, uint16_t bytesPerLine)
 {
   if (!_logger)
@@ -165,6 +169,7 @@ void ROM::printROMContents(uint8_t rom, PRINT_STYLE style, bool relative, uint16
   Model1.printMemoryContents(*_logger, addr, size, style, relative, bytesPerLine);
 }
 
+// Check if the specified ROM number is valid
 bool ROM::_checkROMNumber(uint8_t rom) const
 {
   if (rom > 3)

@@ -39,6 +39,12 @@ bool ComprehensiveContent::open()
 {
     Serial.println("ComprehensiveContent::open() - Initializing advanced content screen");
 
+    // Call parent implementation first
+    if (!ContentScreen::open())
+    {
+        return false;
+    }
+
     startTime = millis();
 
     // Set initial mode
@@ -77,6 +83,30 @@ void ComprehensiveContent::_drawContent()
     default:
         drawAbout();
         break;
+    }
+}
+
+void ComprehensiveContent::refreshContent()
+{
+    // Optimized refresh that only redraws the content area
+    // without redrawing header/footer, then updates display
+    // Use this for content-only updates. Use refresh() when header/footer changes.
+    if (isActive())
+    {
+        Adafruit_GFX &gfx = M1Shield.getGFX();
+        gfx.startWrite();
+
+        // Clear only the content area
+        uint16_t contentTop = _getContentTop();
+        uint16_t contentHeight = _getContentHeight();
+        uint16_t contentWidth = _getContentWidth();
+        gfx.fillRect(0, contentTop, contentWidth, contentHeight, M1Shield.convertColor(0x0000));
+
+        // Redraw just the content
+        _drawContent();
+
+        gfx.endWrite();
+        M1Shield.display(); // Push changes to display
     }
 }
 
@@ -388,25 +418,25 @@ Screen *ComprehensiveContent::actionTaken(ActionTaken action, int8_t offsetX, in
         if (action & BUTTON_UP)
         {
             interactiveY = max(0, interactiveY - 5);
-            refresh();
+            refreshContent();
             return nullptr;
         }
         if (action & BUTTON_DOWN)
         {
             interactiveY = min(40, interactiveY + 5);
-            refresh();
+            refreshContent();
             return nullptr;
         }
         if (action & BUTTON_LEFT)
         {
             interactiveX = max(20, interactiveX - 5);
-            refresh();
+            refreshContent();
             return nullptr;
         }
         if (action & BUTTON_RIGHT)
         {
             interactiveX = min(M1Shield.getDisplayProvider().width() - 30, interactiveX + 5);
-            refresh();
+            refreshContent();
             return nullptr;
         }
         if (action & BUTTON_MENU)
@@ -422,7 +452,7 @@ Screen *ComprehensiveContent::actionTaken(ActionTaken action, int8_t offsetX, in
         {
             currentOption = (currentOption - 1 + maxOptions) % maxOptions;
             updateModeProgress();
-            refresh();
+            refreshContent();
             return nullptr;
         }
 
@@ -430,7 +460,7 @@ Screen *ComprehensiveContent::actionTaken(ActionTaken action, int8_t offsetX, in
         {
             currentOption = (currentOption + 1) % maxOptions;
             updateModeProgress();
-            refresh();
+            refreshContent();
             return nullptr;
         }
 
@@ -501,17 +531,17 @@ void ComprehensiveContent::handleSettingsSelection()
     case 0:
         showTimestamp = !showTimestamp;
         notifyF(showTimestamp ? F("Timestamp enabled") : F("Timestamp disabled"));
-        refresh();
+        refreshContent();
         break;
     case 1:
         enableSound = !enableSound;
         notifyF(enableSound ? F("Sound enabled") : F("Sound disabled"));
-        refresh();
+        refreshContent();
         break;
     case 2:
         refreshRate = (refreshRate == 500) ? 1000 : ((refreshRate == 1000) ? 250 : 500);
         notifyF(F("Refresh rate updated"));
-        refresh();
+        refreshContent();
         break;
     case 3:
         switchToMode(MODE_MAIN_MENU);
@@ -540,7 +570,7 @@ void ComprehensiveContent::switchToMode(ContentMode newMode)
     setTitle(getModeTitle(newMode));
     // Note: ContentScreen doesn't have setFooter - this should be handled through button items
     updateModeProgress();
-    refresh();
+    refresh(); // Use full refresh when changing modes to update title in header
 }
 
 void ComprehensiveContent::updateModeProgress()
@@ -659,6 +689,9 @@ void ComprehensiveContent::drawProgressIndicator(int x, int y, int value, int ma
 
 void ComprehensiveContent::loop()
 {
+    // Call parent ContentScreen::loop() to handle notification timeouts
+    ContentScreen::loop();
+
     unsigned long now = millis();
 
     // Update data at specified refresh rate
@@ -669,11 +702,12 @@ void ComprehensiveContent::loop()
         updateSystemMetrics();
 
         // Refresh display if showing real-time content
+        // Use optimized content-only refresh instead of full screen refresh
         if (currentMode == MODE_DATA_DISPLAY ||
             currentMode == MODE_CHART_VIEW ||
             currentMode == MODE_SYSTEM_INFO)
         {
-            refresh();
+            refreshContent(); // Use optimized content-only refresh
         }
     }
 }

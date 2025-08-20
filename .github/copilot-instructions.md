@@ -86,6 +86,154 @@ Any changes to classnames (including adding/removing) require an update in the l
 - Documentation should be moved from `.ino` files to README files for accessibility
 - Examples for the UI which use a displayProvider should already provide commented-out headers and variables as shown in the simple screen example
 
+### Screen Object Creation Rules
+
+**CRITICAL: Never create Screen objects as global variables**
+
+- **Rule**: Always create Screen objects dynamically using `new`
+- **Reason**: Global object constructors run before some important code.
+
+```cpp
+// CORRECT
+M1Shield.setScreen(new SimpleMenu());
+
+// WRONG - Global object creation
+SimpleMenu mainMenu;  // Constructor runs before any other code
+...
+M1Shield.setScreen(mainMenu);
+```
+
+### Serial Communication Standards
+
+**CRITICAL: Use consistent serial baud rate across all examples**
+
+- **Rule**: Use `Serial.begin(115200);` for all examples where serial logging is needed unless there is a specific technical need to change this
+- **Reason**: Provides consistent user experience and faster communication for debugging
+- **Exceptions**: Only change baud rate if:
+  - Hardware limitations require a different rate
+  - Specific example demonstrates baud rate configuration
+  - Compatibility with external devices requires different rate
+
+```cpp
+// CORRECT - Standard baud rate
+Serial.begin(115200);
+
+// ACCEPTABLE - With documentation for specific need
+Serial.begin(9600);  // Using 9600 for compatibility with older terminal software
+```
+
+### Parent Constructor and Method Calling Rules
+
+**CRITICAL: Always call parent constructors and virtual methods properly**
+
+- **Rule**: All derived screen classes must explicitly call parent constructors in initialization lists
+- **Rule**: When overriding virtual methods (`open()`, `close()`, `loop()`), always call parent implementation first
+- **Reason**: Ensures proper initialization, cleanup, and functionality inheritance
+
+```cpp
+// CORRECT - Constructor calls
+class MyMenu : public MenuScreen {
+public:
+    MyMenu() : MenuScreen() { /* custom init */ }
+};
+
+class MyContent : public ContentScreen {
+public:
+    MyContent() : ContentScreen() { /* custom init */ }
+};
+
+class MyScreen : public Screen {
+public:
+    MyScreen() : Screen() { /* custom init */ }
+};
+
+// CORRECT - Virtual method overrides
+bool MyScreen::open() override {
+    if (!Screen::open()) return false;  // Call parent first
+    // Add custom logic here
+    return true;
+}
+
+void MyScreen::close() override {
+    // Custom cleanup here
+    Screen::close();  // Call parent last for close()
+}
+
+void MyScreen::loop() override {
+    Screen::loop();   // Call parent first for loop()
+    // Add custom logic here
+}
+
+// WRONG - Missing parent calls
+class BadMenu : public MenuScreen {
+public:
+    BadMenu() { /* Missing : MenuScreen() */ }
+};
+```
+
+### ConsoleScreen Constructor Rules
+
+**CRITICAL: Never perform display operations in ConsoleScreen constructors**
+
+- **Rule**: ConsoleScreen constructors should only set configuration (title, colors, text size, etc.) - never call display methods like `print()`, `println()`, `cls()`, etc.
+- **Rule**: Use the `_executeOnce()` override method for initial display operations
+- **Reason**: Display operations in constructor happen before screen is properly initialized and active
+
+```cpp
+// CORRECT - ConsoleScreen constructor
+class MyConsole : public ConsoleScreen {
+public:
+    MyConsole() : ConsoleScreen() {
+        setTitleF(F("My Console"));
+        setTextColor(M1Shield.convertColor(0xFFFF));
+        setTextSize(1);
+        // NO display operations here
+    }
+
+protected:
+    void _executeOnce() override {
+        // Display operations go here - called 1 second after screen opens
+        cls();
+        println(F("Welcome message"));
+    }
+};
+
+// WRONG - Display operations in constructor
+class BadConsole : public ConsoleScreen {
+public:
+    BadConsole() : ConsoleScreen() {
+        cls();                    // BAD - display operation in constructor
+        println(F("Welcome"));   // BAD - display operation in constructor
+    }
+};
+```
+
+### Parent Loop Method Calling Rules
+
+**CRITICAL: Always call parent loop() method in derived screen classes**
+
+- **Rule**: When overriding `loop()` method in ContentScreen or MenuScreen derivatives, always call parent `loop()` first
+- **Reason**: Parent classes handle essential functionality like notification timeouts, lifecycle management, etc.
+
+```cpp
+// CORRECT - ContentScreen derivative
+void MyContentScreen::loop() {
+    ContentScreen::loop();  // Handle notification timeouts
+    // Add custom loop logic here
+}
+
+// CORRECT - MenuScreen derivative
+void MyMenuScreen::loop() {
+    MenuScreen::loop();     // Calls ContentScreen::loop() internally
+    // Add custom loop logic here
+}
+
+// WRONG - Missing parent call
+void MyMenuScreen::loop() {
+    // Custom logic only - notifications will never timeout!
+}
+```
+
 ## Documentation Requirements
 
 ### Source Code Documentation
