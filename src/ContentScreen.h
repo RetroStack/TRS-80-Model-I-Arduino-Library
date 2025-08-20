@@ -30,10 +30,8 @@ private:
     unsigned long _notificationStartTime; // When notification was shown
     unsigned long _notificationDuration;  // How long to show notification (ms)
     bool _notificationActive;             // Whether notification is currently active
+    uint16_t _notificationBgColor;        // Custom notification background color
 
-    void _drawHeader();                                                                // Draw the header region with title
-    void _drawFooter();                                                                // Draw the footer region with button labels
-    void _drawProgressBar();                                                           // Draw the progress bar region
     uint8_t _getPadding() const;                                                       // Gets the padding between areas
     void _drawNotification();                                                          // Draw notification overlay in place of footer
     void _clearNotification();                                                         // Clear notification text and free memory
@@ -42,6 +40,10 @@ private:
     char *_truncateText(const char *text, uint16_t availableWidth, uint8_t charWidth); // Create truncated copy of text with "..." if needed
 
 protected:
+    void _drawHeader();      // Draw the header region with title
+    void _drawFooter();      // Draw the footer region with button labels
+    void _drawProgressBar(); // Draw the progress bar region
+
     void _drawScreen() override;     // Implement Screen's _drawScreen() to manage layout regions
     virtual void _drawContent() = 0; // Pure virtual method for content area rendering
 
@@ -84,12 +86,13 @@ public:
     void drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper *text, uint16_t color, uint8_t size = 1); // Draw text in content area from FlashString (F() macro)
 
     // Notification system methods
-    // Non-blocking temporary notification message with yellow background
-    void notify(const char *text, unsigned long durationMs = 3000);                 // Show a notification that temporarily replaces the footer
-    void notify(String text, unsigned long durationMs = 3000);                      // Show a notification from Arduino String object
-    void notifyF(const __FlashStringHelper *text, unsigned long durationMs = 3000); // Show a notification from FlashString (F() macro)
-    bool isNotificationActive() const;                                              // Check if a notification is currently active
-    void dismissNotification();                                                     // Manually dismiss current notification
+    // Non-blocking temporary notification message with customizable background color (defaults to yellow)
+    void notify(const char *text, unsigned long durationMs = 3000, uint16_t backgroundColor = 0xFFE0);                 // Show a notification that temporarily replaces the footer
+    void notify(String text, unsigned long durationMs = 3000, uint16_t backgroundColor = 0xFFE0);                      // Show a notification from Arduino String object
+    void notifyF(const __FlashStringHelper *text, unsigned long durationMs = 3000, uint16_t backgroundColor = 0xFFE0); // Show a notification from FlashString (F() macro)
+
+    bool isNotificationActive() const; // Check if a notification is currently active
+    void dismissNotification();        // Manually dismiss current notification
 
     // Alert system methods
     // Blocking alert dialog with cyan background

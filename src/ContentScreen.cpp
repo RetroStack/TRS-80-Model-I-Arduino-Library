@@ -42,7 +42,6 @@ constexpr uint16_t PROGRESSBAR_COLOR_FG = 0xFFE0;       // Progress bar foregrou
 constexpr uint16_t PROGRESSBAR_SMALL_COLOR_FG = 0xFFFF; // Progress bar foreground (white)
 
 // Notification styling
-constexpr uint16_t NOTIFICATION_COLOR_BG = 0xFFE0; // Notification background (yellow)
 constexpr uint16_t NOTIFICATION_COLOR_FG = 0x0000; // Notification text color (black)
 
 // Alert and Confirmation styling
@@ -62,6 +61,7 @@ ContentScreen::ContentScreen() : Screen()
     _notificationText = nullptr;
     _notificationStartTime = 0;
     _notificationDuration = 0;
+    _notificationBgColor = 0xFFE0; // Default to yellow background
     _notificationActive = false;
 }
 
@@ -636,7 +636,7 @@ void ContentScreen::drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper 
 // =====================================================================================
 
 // Display a temporary notification message
-void ContentScreen::notify(const char *text, unsigned long durationMs)
+void ContentScreen::notify(const char *text, unsigned long durationMs, uint16_t backgroundColor)
 {
     if (text == nullptr)
         return;
@@ -663,9 +663,10 @@ void ContentScreen::notify(const char *text, unsigned long durationMs)
 
     strcpy(_notificationText, text);
 
-    // Set notification timing
+    // Set notification timing and background color
     _notificationStartTime = millis();
     _notificationDuration = durationMs;
+    _notificationBgColor = backgroundColor;
     _notificationActive = true;
 
     // Trigger immediate redraw to show notification
@@ -676,13 +677,13 @@ void ContentScreen::notify(const char *text, unsigned long durationMs)
 }
 
 // Show a notification with Strings
-void ContentScreen::notify(String text, unsigned long durationMs)
+void ContentScreen::notify(String text, unsigned long durationMs, uint16_t backgroundColor)
 {
-    notify(text.c_str(), durationMs);
+    notify(text.c_str(), durationMs, backgroundColor);
 }
 
 // Show a notification with FlashStrings
-void ContentScreen::notifyF(const __FlashStringHelper *text, unsigned long durationMs)
+void ContentScreen::notifyF(const __FlashStringHelper *text, unsigned long durationMs, uint16_t backgroundColor)
 {
     if (text == nullptr)
         return;
@@ -696,7 +697,7 @@ void ContentScreen::notifyF(const __FlashStringHelper *text, unsigned long durat
     strcpy_P(buffer, (const char *)text);
 
     // Delegate to regular notify method
-    notify(buffer, durationMs);
+    notify(buffer, durationMs, backgroundColor);
 
     // Free temporary buffer
     free(buffer);
@@ -739,8 +740,8 @@ void ContentScreen::_drawNotification()
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
-    // Draw notification background (yellow)
-    gfx.fillRect(0, top, screenWidth, height, M1Shield.convertColor(NOTIFICATION_COLOR_BG));
+    // Draw notification background using custom color
+    gfx.fillRect(0, top, screenWidth, height, M1Shield.convertColor(_notificationBgColor));
 
     // Draw notification text (black on yellow) - using text size 2 for better visibility
     gfx.setTextColor(M1Shield.convertColor(NOTIFICATION_COLOR_FG));

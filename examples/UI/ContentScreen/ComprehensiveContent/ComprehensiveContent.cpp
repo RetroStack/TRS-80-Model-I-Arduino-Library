@@ -530,17 +530,20 @@ void ComprehensiveContent::handleSettingsSelection()
     {
     case 0:
         showTimestamp = !showTimestamp;
-        notifyF(showTimestamp ? F("Timestamp enabled") : F("Timestamp disabled"));
+        // Demonstrate custom notification colors: green for enabled, red for disabled
+        notifyF(showTimestamp ? F("Timestamp enabled") : F("Timestamp disabled"), 3000, showTimestamp ? 0x07E0 : 0xF800);
         refreshContent();
         break;
     case 1:
         enableSound = !enableSound;
-        notifyF(enableSound ? F("Sound enabled") : F("Sound disabled"));
+        // Demonstrate custom notification colors: green for enabled, red for disabled
+        notifyF(enableSound ? F("Sound enabled") : F("Sound disabled"), 3000, enableSound ? 0x07E0 : 0xF800);
         refreshContent();
         break;
     case 2:
         refreshRate = (refreshRate == 500) ? 1000 : ((refreshRate == 1000) ? 250 : 500);
-        notifyF(F("Refresh rate updated"));
+        // Demonstrate custom notification colors: cyan for updates
+        notifyF(F("Refresh rate updated"), 3000, 0x07FF);
         refreshContent();
         break;
     case 3:

@@ -257,52 +257,85 @@ drawTextF(10, 60, F("Connection: Active"), M1Shield.BLUE, 2);
 
 ### Notification System
 
-The notification system provides a way to temporarily display important messages to the user by replacing the footer area with a highlighted notification banner.
+The notification system provides a way to temporarily display important messages to the user by replacing the footer area with a highlighted notification banner. Custom background colors are supported for semantic color coding.
 
-#### `void notify(const char* text, unsigned long durationMs = 3000)`
+#### `void notify(const char* text, unsigned long durationMs = 3000, uint16_t backgroundColor = 0xFFE0)`
 
-Shows a notification that temporarily replaces the footer area.
+Shows a notification that temporarily replaces the footer area with customizable background color.
 
 **Parameters:**
 
 - `text`: Notification text to display (dynamically allocated copy made)
 - `durationMs`: How long to show notification in milliseconds (default: 3000ms)
+- `backgroundColor`: RGB565 background color (default: 0xFFE0 = yellow)
 
 **Visual Appearance:**
 
-- **Background**: Yellow color for high visibility and informational content
+- **Background**: Customizable color for semantic meaning (default: yellow)
 - **Text Color**: Black text for maximum contrast
 - **Positioning**: Replaces footer area temporarily
 - **Duration**: Configurable timeout with automatic restoration
 
+**Common Colors:**
+
+- **Yellow (0xFFE0)**: Default - general information
+- **Green (0x07E0)**: Success, enabled states
+- **Red (0xF800)**: Errors, warnings, disabled states
+- **Cyan (0x07FF)**: Updates, changes, neutral information
+- **Blue (0x001F)**: System messages
+- **Magenta (0xF81F)**: Special alerts
+
 **Example:**
 
 ```cpp
-// Show a 3-second notification
-notify("File saved successfully!", 3000);
+// Default yellow notification
+notify("File saved successfully!");
 
-// Show a 5-second warning
-notify("Warning: Low battery", 5000);
+// Green for success
+notify("Operation completed", 3000, 0x07E0);
 
-// Show with default 3-second duration
-notify("Operation completed");
+// Red for warnings
+notify("Warning: Low battery", 5000, 0xF800);
+
+// Cyan for updates
+notify("Settings updated", 2000, 0x07FF);
 ```
 
-#### `void notifyF(const __FlashStringHelper* text, unsigned long durationMs = 3000)`
+#### `void notify(String text, unsigned long durationMs = 3000, uint16_t backgroundColor = 0xFFE0)`
 
-Shows a notification from FlashString (F() macro) for memory efficiency.
+Shows a notification from Arduino String object with customizable background color.
+
+**Parameters:**
+
+- `text`: Arduino String notification text
+- `durationMs`: How long to show notification in milliseconds (default: 3000ms)
+- `backgroundColor`: RGB565 background color (default: 0xFFE0 = yellow)
+
+**Example:**
+
+```cpp
+String status = enabled ? "Feature enabled" : "Feature disabled";
+uint16_t color = enabled ? 0x07E0 : 0xF800; // Green or red
+notify(status, 3000, color);
+```
+
+#### `void notifyF(const __FlashStringHelper* text, unsigned long durationMs = 3000, uint16_t backgroundColor = 0xFFE0)`
+
+Shows a notification from FlashString (F() macro) for memory efficiency with customizable background color.
 
 **Parameters:**
 
 - `text`: FlashString notification text (automatically converted and copied)
 - `durationMs`: How long to show notification in milliseconds (default: 3000ms)
+- `backgroundColor`: RGB565 background color (default: 0xFFE0 = yellow)
 
 **Example:**
 
 ```cpp
-// Memory-efficient notification
-notifyF(F("System initialized"), 2000);
-notifyF(F("Configuration updated"), 4000);
+// Memory-efficient notification with custom colors
+notifyF(F("System initialized"), 2000, 0x07E0);  // Green
+notifyF(F("Error occurred"), 4000, 0xF800);      // Red
+notifyF(F("Update available"), 3000, 0x07FF);    // Cyan
 ```
 
 #### `bool isNotificationActive() const`

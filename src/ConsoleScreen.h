@@ -68,21 +68,15 @@ private:
     void _updateDimensions(); // Update cached screen dimensions from ContentScreen
 
     void _processChar(char c); // Process a single character for output
+    void _renderChar(char c);  // Render a single character at the current cursor position
 
-    void _renderChar(char c); // Render a single character at the current cursor position
-
-    void _newLine(); // Move to the next line (newline operation)
-
+    void _newLine();    // Move to the next line (newline operation)
     void _processTab(); // Process tab character - move to next tab stop
 
-    bool _handlePaging(); // Check if console has reached the bottom and handle paging
-
-    bool _shouldEndPagingWait(); // Check if paging timeout has expired
-
-    void _showPagingMessage(); // Display paging prompt message
-
-    void _clearPagingMessage(); // Clear paging prompt and prepare for new content
-
+    bool _handlePaging();          // Check if console has reached the bottom and handle paging
+    bool _shouldEndPagingWait();   // Check if paging timeout has expired
+    void _showPagingMessage();     // Display paging prompt message in footer area
+    void _clearPagingMessage();    // Clear paging prompt from footer and restore normal footer
     void _waitForPagingIfNeeded(); // Block execution until paging wait is resolved
 
 protected:

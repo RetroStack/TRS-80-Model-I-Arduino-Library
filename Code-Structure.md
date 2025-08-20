@@ -133,9 +133,9 @@ This document provides a comprehensive reference of all classes and functions av
 - `void drawText(uint16_t x, uint16_t y, const char* text, uint16_t color, uint8_t size = 1)` // Draw text within content area with clipping
 - `void drawText(uint16_t x, uint16_t y, String text, uint16_t color, uint8_t size = 1)` // Draw text in content area from String object
 - `void drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper* text, uint16_t color, uint8_t size = 1)` // Draw text from FlashString
-- `void notify(const char* text, unsigned long durationMs = 3000)` // Show notification replacing footer temporarily
-- `void notify(String text, unsigned long durationMs = 3000)` // Show notification from String object
-- `void notifyF(const __FlashStringHelper* text, unsigned long durationMs = 3000)` // Show notification from FlashString
+- `void notify(const char* text, unsigned long durationMs = 3000, uint16_t backgroundColor = 0xFFE0)` // Show notification with customizable background color (default: yellow)
+- `void notify(String text, unsigned long durationMs = 3000, uint16_t backgroundColor = 0xFFE0)` // Show notification from String object with custom background
+- `void notifyF(const __FlashStringHelper* text, unsigned long durationMs = 3000, uint16_t backgroundColor = 0xFFE0)` // Show notification from FlashString with custom background
 - `bool isNotificationActive() const` // Check if notification is currently active
 - `void dismissNotification()` // Manually dismiss current notification
 - `void alert(const char* text)` // Show blocking alert dialog with cyan background

@@ -120,6 +120,28 @@ This comprehensive ContentScreen example demonstrates:
 - **Content**: Mode-specific displays with real-time updates
 - **Colors**: Consistent color coding across all modes
 
+### Custom Notification Colors
+
+This example demonstrates the new custom notification background color feature:
+
+- **Green notifications** (0x07E0): For "enabled" states (timestamp/sound on)
+- **Red notifications** (0xF800): For "disabled" states (timestamp/sound off)
+- **Cyan notifications** (0x07FF): For update confirmations (refresh rate changes)
+- **Default yellow** (0xFFE0): For welcome messages and general notifications
+
+Usage example:
+
+```cpp
+// Green for enabled state
+notifyF(F("Feature enabled"), 3000, 0x07E0);
+
+// Red for disabled state
+notifyF(F("Feature disabled"), 3000, 0xF800);
+
+// Cyan for updates
+notifyF(F("Settings updated"), 3000, 0x07FF);
+```
+
 ### Performance
 
 - **Smooth Navigation**: Instant response to button presses

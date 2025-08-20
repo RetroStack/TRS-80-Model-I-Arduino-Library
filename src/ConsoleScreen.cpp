@@ -8,6 +8,10 @@
 #include "M1Shield.h"
 #include <Adafruit_GFX.h>
 
+// Paging message styling
+constexpr uint16_t PAGING_COLOR_BG = 0x07FF; // Paging background (cyan)
+constexpr uint16_t PAGING_COLOR_FG = 0x0000; // Paging text color (black)
+
 // Text size constants for different sizes
 constexpr uint8_t CHAR_WIDTH_SIZE_1 = 6;   // Width of size-1 characters
 constexpr uint8_t CHAR_HEIGHT_SIZE_1 = 8;  // Height of size-1 characters
@@ -195,7 +199,7 @@ void ConsoleScreen::_newLine()
     _currentY += _lineHeight;
 
     // Check if we've reached the bottom of the screen
-    if (_currentY + _lineHeight + _lineHeight >= _contentHeight)
+    if (_currentY + _lineHeight >= _contentHeight)
     {
         if (!_handlePaging())
         {
@@ -530,73 +534,105 @@ bool ConsoleScreen::_shouldEndPagingWait()
            (elapsed >= _pagingTimeoutMs);
 }
 
-// Show paging message
+// Show paging message in footer area (similar to ContentScreen alerts)
 void ConsoleScreen::_showPagingMessage()
 {
+    if (!isActive())
+        return;
+
+    uint16_t screenWidth = M1Shield.getScreenWidth();
+    uint16_t top = _getFooterY();
+    uint16_t height = _getFooterHeight();
+
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
-    // Save current text settings
-    uint16_t savedTextColor = _textColor;
-    uint16_t savedBgColor = _textBgColor;
-    uint8_t savedTextSize = _textSize;
+    // Draw paging background (bright yellow)
+    gfx.fillRect(0, top, screenWidth, height, M1Shield.convertColor(PAGING_COLOR_BG));
 
-    // Set prompt styling (smaller, different color)
-    gfx.setTextColor(M1Shield.convertColor(0x7BEF), M1Shield.convertColor(0x0000)); // Light gray on black
-    gfx.setTextSize(1);
+    // Draw paging text (black on yellow) - using text size 2 for better visibility
+    gfx.setTextColor(M1Shield.convertColor(PAGING_COLOR_FG));
 
-    // Position at bottom of content area
-    uint16_t promptY = _contentTop + _contentHeight - CHAR_HEIGHT_SIZE_1 - 2;
-    gfx.setCursor(_contentLeft + 2, promptY);
+    // Use smaller text size for small displays to fit more content
+    uint8_t textSize = isSmallDisplay() ? 1 : 2;
+    gfx.setTextSize(textSize);
 
-    // Show appropriate message based on mode
+    uint8_t charWidth = (textSize == 1) ? CHAR_WIDTH_SIZE_1 : CHAR_WIDTH_SIZE_2;
+    uint8_t textHeight = (textSize == 1) ? CHAR_HEIGHT_SIZE_1 : CHAR_HEIGHT_SIZE_2;
+
+    // Calculate vertical center position
+    uint16_t textY = top + (height - textHeight) / 2;
+
+    // Prepare message text based on current paging mode
+    String message = "";
     switch (_pagingMode)
     {
     case PAGING_WAIT_TIMEOUT:
         if (_pagingPaused)
         {
-            gfx.print("PAUSED - Press RIGHT to continue");
+            message = "PAUSED - RT to continue";
         }
         else
         {
-            gfx.print("Auto in ");
-            gfx.print((_pagingTimeoutMs - (millis() - _pagingWaitStartTime)) / 1000 + 1);
-            gfx.print("s | LEFT:pause RIGHT:skip");
+            unsigned long remaining = (_pagingTimeoutMs - (millis() - _pagingWaitStartTime)) / 1000 + 1;
+            message = "Auto in " + String(remaining) + "s - LT:pause RT:next";
         }
         break;
 
     case PAGING_WAIT_BUTTON:
-        gfx.print("Press MENU/UP/DOWN/JOYSTICK to continue");
+        message = "Any button to continue";
         break;
 
     case PAGING_WAIT_BOTH:
         if (_pagingPaused)
         {
-            gfx.print("PAUSED - Press RIGHT to continue");
+            message = "PAUSED - RT to continue";
         }
         else
         {
-            gfx.print("Auto ");
-            gfx.print((_pagingTimeoutMs - (millis() - _pagingWaitStartTime)) / 1000 + 1);
-            gfx.print("s | LEFT:pause RIGHT:skip");
+            unsigned long remaining = (_pagingTimeoutMs - (millis() - _pagingWaitStartTime)) / 1000 + 1;
+            message = "Auto " + String(remaining) + "s - LT:pause RT:next";
         }
         break;
 
     default:
-        break;
+        return; // No message to show
     }
 
-    // Restore original text settings
-    gfx.setTextColor(savedTextColor, savedBgColor);
-    gfx.setTextSize(savedTextSize);
+    // Calculate available width and truncate if necessary
+    uint16_t availableWidth = screenWidth - 8; // 4 pixels margin on each side
+    uint16_t maxChars = availableWidth / charWidth;
+
+    if (message.length() > maxChars)
+    {
+        // Truncate with ellipsis
+        if (maxChars > 3)
+        {
+            message = message.substring(0, maxChars - 3) + "...";
+        }
+        else
+        {
+            message = message.substring(0, maxChars);
+        }
+    }
+
+    // Center text horizontally
+    uint16_t textWidth = charWidth * message.length();
+    uint16_t xPos = (screenWidth - textWidth) / 2;
+
+    gfx.setCursor(xPos, textY);
+    gfx.print(message);
+
+    // Display the update
+    M1Shield.display();
 }
 
-// Clear paging message
+// Clear paging message and restore normal footer
 void ConsoleScreen::_clearPagingMessage()
 {
-    // Simply clear the prompt area by filling with background color
-    Adafruit_GFX &gfx = M1Shield.getGFX();
-    uint16_t promptY = _contentTop + _contentHeight - CHAR_HEIGHT_SIZE_1 - 2;
-    gfx.fillRect(_contentLeft, promptY, _contentWidth, CHAR_HEIGHT_SIZE_1 + 2, _consoleBgColor);
+    if (!isActive())
+        return;
+
+    _drawFooter();
 }
 
 // ========== Paging Configuration Methods ==========
