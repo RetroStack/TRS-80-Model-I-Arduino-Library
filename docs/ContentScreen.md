@@ -17,6 +17,8 @@ The `ContentScreen` class provides a structured layout template for screens with
 - [Layout Structure](#layout-structure)
 - [Protected Methods](#protected-methods)
   - [\_drawContent](#void-_drawcontent)
+  - [\_drawSecondaryContent](#void-_drawsecondarycontent)
+  - [\_drawMainContent](#void-_drawmaincontent)
   - [Layout Getters](#layout-getters)
 - [Public Methods](#public-methods)
   - [Progress Control](#progress-control)
@@ -27,6 +29,7 @@ The `ContentScreen` class provides a structured layout template for screens with
     - [clearButtonItems](#void-clearbuttonitems)
   - [Content Area Utilities](#content-area-utilities)
     - [clearContentArea](#void-clearcontentarea)
+    - [clearSecondaryContentArea](#void-clearsecondarycontentarea)
     - [drawText](#text-drawing-functions)
   - [Notification System](#notification-system)
     - [notify](#notification-functions)
@@ -114,14 +117,60 @@ protected:
 };
 ```
 
+### `void _drawSecondaryContent()`
+
+**Virtual method** - Optional override for derived classes that need a secondary content area. Default implementation does nothing.
+
+```cpp
+class MyDualContentScreen : public ContentScreen {
+protected:
+    void _drawContent() override {
+        // Primary content area rendering
+        drawText(10, 10, "Main content");
+    }
+
+    void _drawSecondaryContent() override {
+        // Secondary content area rendering (only if area has non-zero size)
+        uint16_t x = _getSecondaryContentLeft();
+        uint16_t y = _getSecondaryContentTop();
+        drawText(x, y, "Secondary content");
+    }
+
+    // Override dimension methods to make secondary area visible
+    uint16_t _getSecondaryContentLeft() const override { return 200; }
+    uint16_t _getSecondaryContentTop() const override { return 50; }
+    uint16_t _getSecondaryContentWidth() const override { return 100; }
+    uint16_t _getSecondaryContentHeight() const override { return 80; }
+};
+```
+
+### `void _drawMainContent()`
+
+**Internal method** - Combines primary and secondary content areas with borders. Called automatically by `_drawScreen()`. Handles:
+
+- Calls `_drawContent()` for primary content rendering
+- Calls `_drawSecondaryContent()` if secondary area has non-zero size
+- Draws decorative borders around both content areas (when not on small displays)
+
 ### Layout Getters
 
 Access content area boundaries for positioning:
+
+**Primary Content Area:**
 
 - `uint16_t _getContentLeft()`: Returns X coordinate of content area left edge
 - `uint16_t _getContentTop()`: Returns Y coordinate of content area top edge
 - `uint16_t _getContentWidth()`: Returns content area width in pixels
 - `uint16_t _getContentHeight()`: Returns content area height in pixels
+
+**Secondary Content Area (Virtual - Override for Custom Layout):**
+
+- `uint16_t _getSecondaryContentLeft()`: Returns X coordinate of secondary content area left edge (default: 0)
+- `uint16_t _getSecondaryContentTop()`: Returns Y coordinate of secondary content area top edge (default: 0)
+- `uint16_t _getSecondaryContentWidth()`: Returns secondary content area width in pixels (default: 0)
+- `uint16_t _getSecondaryContentHeight()`: Returns secondary content area height in pixels (default: 0)
+
+**Note:** Secondary content area is invisible by default (zero dimensions). Override the dimension methods in derived classes to make it visible and position it as needed.
 
 ## Public Methods
 
@@ -214,6 +263,10 @@ Utilities for content rendering:
 #### `void clearContentArea()`
 
 Clears the content area to background color while preserving header, footer, and progress bar areas.
+
+#### `void clearSecondaryContentArea()`
+
+Clears the secondary content area to background color. Only performs clearing if the secondary content area has non-zero dimensions. This method is useful when you need to refresh or reset the secondary content display.
 
 #### `void drawText(uint16_t x, uint16_t y, const char* text, uint16_t color, uint8_t size = 1)`
 

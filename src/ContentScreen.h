@@ -44,14 +44,26 @@ protected:
     virtual void _drawFooter(); // Draw the footer region with button labels (virtual for customization)
     void _drawProgressBar();    // Draw the progress bar region
 
-    void _drawScreen() override;     // Implement Screen's _drawScreen() to manage layout regions
-    virtual void _drawContent() = 0; // Pure virtual method for content area rendering
+    void _drawScreen() override;         // Implement Screen's _drawScreen() to manage layout regions
+    virtual void _drawContent() = 0;     // Pure virtual method for primary content area rendering
+    virtual void _drawSecondaryContent() // Virtual method for secondary content area rendering (default: empty)
+    {
+        // Default implementation does nothing - secondary content is optional
+    }
+    void _drawMainContent(); // Combines primary and secondary content areas with borders
 
     // Layout dimension getters for content positioning
-    uint16_t _getContentTop() const;           // Get Y coordinate of content area top edge
-    uint16_t _getContentLeft() const;          // Get X coordinate of content area left edge
-    uint16_t _getContentHeight() const;        // Get available height of content area
-    uint16_t _getContentWidth() const;         // Get available width of content area
+    uint16_t _getContentTop() const;    // Get Y coordinate of content area top edge
+    uint16_t _getContentLeft() const;   // Get X coordinate of content area left edge
+    uint16_t _getContentHeight() const; // Get available height of content area
+    uint16_t _getContentWidth() const;  // Get available width of content area
+
+    // Secondary content area dimensions (default: zero size, not visible)
+    virtual uint16_t _getSecondaryContentTop() const;    // Get Y coordinate of secondary content area top edge
+    virtual uint16_t _getSecondaryContentLeft() const;   // Get X coordinate of secondary content area left edge
+    virtual uint16_t _getSecondaryContentHeight() const; // Get available height of secondary content area
+    virtual uint16_t _getSecondaryContentWidth() const;  // Get available width of secondary content area
+
     uint16_t _getHeaderTop() const;            // Get Y coordinate of header region
     uint16_t _getHeaderHeight() const;         // Get height of header region
     virtual uint16_t _getFooterTop() const;    // Get Y coordinate of footer region (virtual for ButtonScreen override)
@@ -84,6 +96,7 @@ public:
 
     // Content area utilities
     void clearContentArea();                                                                                   // Clear content area to background color
+    void clearSecondaryContentArea();                                                                          // Clear secondary content area to background color
     void drawText(uint16_t x, uint16_t y, const char *text, uint16_t color, uint8_t size = 1);                 // Draw text within content area with clipping
     void drawText(uint16_t x, uint16_t y, String text, uint16_t color, uint8_t size = 1);                      // Draw text in content area from Arduino String object
     void drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper *text, uint16_t color, uint8_t size = 1); // Draw text in content area from FlashString (F() macro)

@@ -125,4 +125,5 @@ This is the initial version written by Ven Reddy
 ## 21st August 2025 - Updated Release (1.3.1)
 
 - **NEW FEATURE**: Added ButtonScreen class for horizontal button navigation
+- **NEW FEATURE**: Added secondary content area support to ContentScreen
 - **METHOD NAMING**: Updated layout getters for consistency: `_getHeaderY()` → `_getHeaderTop()`, `_getFooterY()` → `_getFooterTop()`, `_getProgressBarY()` → `_getProgressBarTop()`

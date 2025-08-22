@@ -242,6 +242,13 @@ _getProgressValue   KEYWORD2
 _setButtonItems KEYWORD2
 _clearButtonItems   KEYWORD2
 _clearContentArea   KEYWORD2
+clearSecondaryContentArea   KEYWORD2
+_drawMainContent    KEYWORD2
+_drawSecondaryContent   KEYWORD2
+_getSecondaryContentTop KEYWORD2
+_getSecondaryContentLeft    KEYWORD2
+_getSecondaryContentHeight  KEYWORD2
+_getSecondaryContentWidth   KEYWORD2
 _drawText   KEYWORD2
 notify  KEYWORD2
 notifyF KEYWORD2

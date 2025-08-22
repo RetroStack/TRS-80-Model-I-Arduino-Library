@@ -85,7 +85,7 @@ void ContentScreen::_drawScreen()
 
     // Render all layout regions in order
     _drawHeader();
-    _drawContent(); // Implemented by derived class
+    _drawMainContent(); // Combines primary and secondary content with borders
 
     // Draw either notification or footer
     if (_notificationActive)
@@ -99,17 +99,56 @@ void ContentScreen::_drawScreen()
 
     _drawProgressBar();
 
-    // Add decorative borders if not a small display
+    // Add decorative border if not a small display
     if (!isSmallDisplay())
     {
-        // Add decorative borders for visual separation
-        uint16_t contentTop = _getContentTop();
-        uint16_t contentHeight = _getContentHeight();
-        gfx.drawRect(0, contentTop - 1, screenWidth, contentHeight + 2, M1Shield.convertColor(SCREEN_COLOR_FG));
-
         // Draw separator line above progress bar
         uint16_t progressTop = _getProgressBarTop();
         gfx.drawFastHLine(0, progressTop - 1, screenWidth, M1Shield.convertColor(SCREEN_COLOR_FG));
+    }
+}
+
+// Combines primary and secondary content areas with borders
+void ContentScreen::_drawMainContent()
+{
+    if (!isActive())
+        return;
+
+    // Get content area dimensions
+    uint16_t primaryLeft = _getContentLeft();
+    uint16_t primaryTop = _getContentTop();
+    uint16_t primaryWidth = _getContentWidth();
+    uint16_t primaryHeight = _getContentHeight();
+
+    // Get secondary content area dimensions
+    uint16_t secondaryLeft = _getSecondaryContentLeft();
+    uint16_t secondaryTop = _getSecondaryContentTop();
+    uint16_t secondaryWidth = _getSecondaryContentWidth();
+    uint16_t secondaryHeight = _getSecondaryContentHeight();
+
+    // Draw primary content
+    _drawContent();
+
+    // Draw secondary content if it has non-zero size
+    if (secondaryWidth > 0 && secondaryHeight > 0)
+    {
+        _drawSecondaryContent();
+    }
+
+    // Add decorative borders if not a small display
+    if (!isSmallDisplay())
+    {
+        Adafruit_GFX &gfx = M1Shield.getGFX();
+        uint16_t borderColor = M1Shield.convertColor(SCREEN_COLOR_FG);
+
+        // Draw border around primary content area
+        gfx.drawRect(primaryLeft - 1, primaryTop - 1, primaryWidth + 2, primaryHeight + 2, borderColor);
+
+        // Draw border around secondary content area if visible
+        if (secondaryWidth > 0 && secondaryHeight > 0)
+        {
+            gfx.drawRect(secondaryLeft - 1, secondaryTop - 1, secondaryWidth + 2, secondaryHeight + 2, borderColor);
+        }
     }
 }
 
@@ -256,6 +295,27 @@ uint16_t ContentScreen::_getContentHeight() const
 uint16_t ContentScreen::_getContentWidth() const
 {
     return M1Shield.getScreenWidth() - 2;
+}
+
+// Secondary content area dimensions (default: zero size, not visible)
+uint16_t ContentScreen::_getSecondaryContentTop() const
+{
+    return 0; // Default: not visible
+}
+
+uint16_t ContentScreen::_getSecondaryContentLeft() const
+{
+    return 0; // Default: not visible
+}
+
+uint16_t ContentScreen::_getSecondaryContentHeight() const
+{
+    return 0; // Default: not visible
+}
+
+uint16_t ContentScreen::_getSecondaryContentWidth() const
+{
+    return 0; // Default: not visible
 }
 
 // Get the Y position of the footer
@@ -586,6 +646,29 @@ void ContentScreen::clearContentArea()
     gfx.endWrite();
 
     M1Shield.display(); // Push changes to display
+}
+
+// Efficient function to clear secondary content area
+void ContentScreen::clearSecondaryContentArea()
+{
+    if (!isActive())
+        return;
+
+    uint16_t x = _getSecondaryContentLeft();
+    uint16_t y = _getSecondaryContentTop();
+    uint16_t width = _getSecondaryContentWidth();
+    uint16_t height = _getSecondaryContentHeight();
+
+    // Only clear if secondary content area has non-zero size
+    if (width > 0 && height > 0)
+    {
+        Adafruit_GFX &gfx = M1Shield.getGFX();
+        gfx.startWrite();
+        gfx.fillRect(x, y, width, height, M1Shield.convertColor(SCREEN_COLOR_BG));
+        gfx.endWrite();
+
+        M1Shield.display(); // Push changes to display
+    }
 }
 
 // Draw text

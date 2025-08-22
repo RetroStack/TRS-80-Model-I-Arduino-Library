@@ -130,6 +130,7 @@ This document provides a comprehensive reference of all classes and functions av
 - `void setButtonItemsF(const __FlashStringHelper** buttonItems, uint8_t buttonItemCount)` // Set button labels from FlashString array
 - `void clearButtonItems()` // Clear all button labels and free memory
 - `void clearContentArea()` // Clear content area to background color
+- `void clearSecondaryContentArea()` // Clear secondary content area to background color
 - `void drawText(uint16_t x, uint16_t y, const char* text, uint16_t color, uint8_t size = 1)` // Draw text within content area with clipping
 - `void drawText(uint16_t x, uint16_t y, String text, uint16_t color, uint8_t size = 1)` // Draw text in content area from String object
 - `void drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper* text, uint16_t color, uint8_t size = 1)` // Draw text from FlashString
@@ -151,15 +152,22 @@ This document provides a comprehensive reference of all classes and functions av
 - `uint16_t _getContentLeft() const` // Get X coordinate of content area left edge
 - `uint16_t _getContentHeight() const` // Get available height of content area
 - `uint16_t _getContentWidth() const` // Get available width of content area
-- `uint16_t _getHeaderY() const` // Get Y coordinate of header region
+- `virtual uint16_t _getSecondaryContentTop() const` // Get Y coordinate of secondary content area top edge (default: 0)
+- `virtual uint16_t _getSecondaryContentLeft() const` // Get X coordinate of secondary content area left edge (default: 0)
+- `virtual uint16_t _getSecondaryContentHeight() const` // Get available height of secondary content area (default: 0)
+- `virtual uint16_t _getSecondaryContentWidth() const` // Get available width of secondary content area (default: 0)
+- `uint16_t _getHeaderTop() const` // Get Y coordinate of header region
 - `uint16_t _getHeaderHeight() const` // Get height of header region
-- `virtual uint16_t _getFooterY() const` // Get Y coordinate of footer region (virtual for ButtonScreen override)
+- `virtual uint16_t _getFooterTop() const` // Get Y coordinate of footer region (virtual for ButtonScreen override)
 - `virtual uint16_t _getFooterHeight() const` // Get height of footer region (virtual for ButtonScreen override)
-- `uint16_t _getProgressBarY() const` // Get Y coordinate of progress bar region
+- `uint16_t _getProgressBarTop() const` // Get Y coordinate of progress bar region
 - `uint16_t _getProgressBarHeight() const` // Get height of progress bar region
 
 **Protected Methods for Derived Classes:**
 
+- `virtual void _drawContent() = 0` // Pure virtual: render primary content area
+- `virtual void _drawSecondaryContent()` // Virtual: render secondary content area (default: empty)
+- `void _drawMainContent()` // Combines primary and secondary content areas with borders
 - `uint8_t _getButtonItemCount() const` // Get number of button items (for derived classes like ButtonScreen)
 - `const char* _getButtonItem(uint8_t index) const` // Get button item text by index (for derived classes like ButtonScreen)
 
