@@ -79,6 +79,7 @@ A complete screen management system for building interactive applications:
 
 - [**Screen**](Screen.md) - Abstract base class providing lifecycle management, input handling, and navigation for all UI screens.
 - [**ContentScreen**](ContentScreen.md) - Structured layout template with header, content area, footer, and progress indicators for organized displays.
+- [**ButtonScreen**](ButtonScreen.md) - Horizontal button navigation interface with directional selection and flexible content rendering.
 - [**ConsoleScreen**](ConsoleScreen.md) - Terminal-style scrolling text interface ideal for debugging, logging, and command-line applications.
 - [**LoggerScreen**](LoggerScreen.md) - Visual logging destination with color-coded messages, timestamps, and ILogger compatibility.
 - [**MenuScreen**](MenuScreen.md) - Intelligent menu system with automatic pagination, navigation, and selection handling.
@@ -140,7 +141,3 @@ Each class documentation includes:
 - **Cross-references** to related classes and concepts
 
 The documentation is designed to support users from beginner to expert level, with clear progression paths and appropriate warnings for advanced features.
-
-## Community & Support
-
-This library represents years of research into TRS-80 Model I hardware and careful reverse engineering of the original system. It enables modern development techniques while preserving the authentic feel and operation of this historic computer system.
