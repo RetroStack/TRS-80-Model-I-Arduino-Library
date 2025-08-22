@@ -240,11 +240,22 @@ This document provides a comprehensive reference of all classes and functions av
 
 - `LoggerScreen(const char* title = "Logger")` // Constructor with optional title
 - `virtual ~LoggerScreen()` // Destructor
+- `bool open() override` // Override to replay buffered entries when opening
 - `void setTimestampEnabled(bool enabled)` // Enable/disable timestamp display in log messages
 - `bool isTimestampEnabled() const` // Check if timestamps are enabled
 - `void setColorCodingEnabled(bool enabled)` // Enable/disable color coding for different log levels
 - `bool isColorCodingEnabled() const` // Check if color coding is enabled
 - `void resetTimestamp()` // Reset timestamp reference point to current time
+
+### Rotational Buffer Management
+
+- `void setLogBufferSize(uint16_t size)` // Set size of rotational log buffer (0 = disabled)
+- `uint16_t getLogBufferSize() const` // Get current buffer size
+- `void clearLogBuffer()` // Clear all entries from log buffer
+- `uint16_t getLogBufferCount() const` // Get number of entries currently in buffer
+
+### Logging Interface
+
 - `void info(const char* fmt, ...)` // Log info message with printf-style formatting
 - `void warn(const char* fmt, ...)` // Log warning message with printf-style formatting
 - `void err(const char* fmt, ...)` // Log error message with printf-style formatting

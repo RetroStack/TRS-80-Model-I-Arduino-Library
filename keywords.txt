@@ -115,6 +115,16 @@ err KEYWORD2
 errF    KEYWORD2
 debug   KEYWORD2
 debugF  KEYWORD2
+setLogBufferSize    KEYWORD2
+getLogBufferSize    KEYWORD2
+clearLogBuffer  KEYWORD2
+getLogBufferCount   KEYWORD2
+setTimestampEnabled KEYWORD2
+isTimestampEnabled  KEYWORD2
+setColorCodingEnabled   KEYWORD2
+isColorCodingEnabled    KEYWORD2
+resetTimestamp  KEYWORD2
+asLogger    KEYWORD2
 write    KEYWORD2
 mute    KEYWORD2
 unmute  KEYWORD2

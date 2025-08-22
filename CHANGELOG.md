@@ -127,3 +127,12 @@ This is the initial version written by Ven Reddy
 - **NEW FEATURE**: Added ButtonScreen class for horizontal button navigation
 - **NEW FEATURE**: Added secondary content area support to ContentScreen
 - **METHOD NAMING**: Updated layout getters for consistency: `_getHeaderY()` → `_getHeaderTop()`, `_getFooterY()` → `_getFooterTop()`, `_getProgressBarY()` → `_getProgressBarTop()`
+
+## 21st August 2025 - LoggerScreen Buffer Feature (1.3.2)
+
+- **NEW FEATURE**: Added rotational logging buffer to LoggerScreen
+- **NEW METHODS**:
+  - `setLogBufferSize(uint16_t size)` - Configure buffer size (0 = disabled)
+  - `getLogBufferSize()`, `clearLogBuffer()`, `getLogBufferCount()` - Buffer management
+- **BEHAVIOR**: Buffered entries automatically replay when screen opens
+- **MEMORY**: Dynamic allocation, zero overhead when disabled

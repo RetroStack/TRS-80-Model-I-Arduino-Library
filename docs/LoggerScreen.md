@@ -1,12 +1,13 @@
 # LoggerScreen
 
-The `LoggerScreen` is a visual logging destination that extends `ConsoleScreen` with logging functionality compatible with the `ILogger` interface. It provides real-time, on-screen logging with formatted output, color coding, and timestamps - perfect for debugging and monitoring applications on the M1Shield display.
+The `LoggerScreen` is a visual logging destination that extends `ConsoleScreen` with logging functionality compatible with the `ILogger` interface. It provides real-time, on-screen logging with formatted output, color coding, timestamps, and an optional rotational buffer for preserving log history - perfect for debugging and monitoring applications on the M1Shield display.
 
 ## Table of Contents
 
 - [Features](#features)
 - [Usage](#usage)
   - [Basic Logger Screen](#basic-logger-screen)
+  - [Rotational Buffer Usage](#rotational-buffer-usage)
   - [Integration with CompositeLogger](#integration-with-compositelogger)
   - [Configuration Options](#configuration-options)
 - [API Reference](#api-reference)
@@ -17,6 +18,11 @@ The `LoggerScreen` is a visual logging destination that extends `ConsoleScreen` 
     - [setColorCodingEnabled](#void-setcolorcodingenabledbool-enabled)
     - [isColorCodingEnabled](#bool-iscolorcodingenabled-const)
     - [resetTimestamp](#void-resettimestamp)
+  - [Buffer Management](#buffer-management)
+    - [setLogBufferSize](#void-setlogbuffersizeuint16_t-size)
+    - [getLogBufferSize](#uint16_t-getlogbuffersize-const)
+    - [clearLogBuffer](#void-clearlogbuffer)
+    - [getLogBufferCount](#uint16_t-getlogbuffercount-const)
   - [ILogger Compatibility](#ilogger-compatibility)
     - [asLogger](#ilogger-aslogger)
   - [Logging Interface](#logging-interface)
@@ -34,6 +40,8 @@ The `LoggerScreen` is a visual logging destination that extends `ConsoleScreen` 
 ## Features
 
 - **Visual Logging**: Display log messages directly on the M1Shield screen
+- **Rotational Buffer**: Optional circular buffer to preserve log history when screen is inactive
+- **Automatic Replay**: Buffered entries are automatically replayed when screen opens
 - **ILogger Compatibility**: Works with CompositeLogger through adapter pattern
 - **Color-Coded Levels**: Different colors for INFO (white), WARN (yellow), ERR (red), and DEBUG (cyan)
 - **Timestamps**: Optional relative timestamps showing elapsed time
@@ -67,6 +75,66 @@ void loop() {
     delay(1000);
 }
 ```
+
+### Rotational Buffer Usage
+
+The rotational buffer allows you to preserve log history even when the screen is inactive, perfect for capturing system startup logs or background activity.
+
+```cpp
+#include <LoggerScreen.h>
+
+LoggerScreen* logger = new LoggerScreen("Buffered Logger");
+
+void setup() {
+    M1Shield.begin(displayProvider);
+
+    // Configure buffer for 20 log entries
+    logger->setLogBufferSize(20);
+
+    // Pre-fill buffer with historical logs (before activating screen)
+    logger->info("System initialization started");
+    logger->debug("Loading configuration from EEPROM");
+    logger->warn("Default configuration loaded");
+    logger->info("Network interface initializing");
+    logger->err("WiFi connection failed, retrying...");
+    logger->info("Connected to WiFi successfully");
+    logger->info("System ready for operation");
+
+    // Later, when user opens logger screen...
+    // All buffered entries will be replayed in chronological order
+    M1Shield.setScreen(logger);
+
+    // Buffer status
+    Serial.print("Buffer has ");
+    Serial.print(logger->getLogBufferCount());
+    Serial.print("/");
+    Serial.print(logger->getLogBufferSize());
+    Serial.println(" entries");
+}
+
+void loop() {
+    // Continue logging - entries go to both buffer and display
+    logger->info("Runtime status: %d", millis());
+    delay(5000);
+}
+
+// Buffer management
+void clearHistory() {
+    logger->clearLogBuffer();  // Clear all buffered entries
+}
+
+void disableBuffer() {
+    logger->setLogBufferSize(0);  // Disable buffering
+}
+```
+
+**Key Buffer Features:**
+
+- **Circular Buffer**: Oldest entries are overwritten when buffer is full
+- **Persistent Logging**: Entries are captured even when screen is inactive
+- **Automatic Replay**: All buffered entries shown when screen opens
+- **Color Preservation**: Replayed entries maintain original colors
+- **Memory Efficient**: Buffer size is configurable (0 = disabled)
 
 ### Integration with CompositeLogger
 
@@ -137,6 +205,57 @@ Control whether different log levels use different colors.
 #### `void resetTimestamp()`
 
 Reset the timestamp reference point to the current time.
+
+### Buffer Management
+
+#### `void setLogBufferSize(uint16_t size)`
+
+Configure the size of the rotational log buffer. Set to 0 to disable buffering.
+
+**Parameters:**
+
+- `size` - Number of log entries to buffer (0 = disabled)
+
+**Example:**
+
+```cpp
+logger->setLogBufferSize(50);  // Buffer 50 entries
+logger->setLogBufferSize(0);   // Disable buffering
+```
+
+#### `uint16_t getLogBufferSize() const`
+
+Get the current buffer size.
+
+**Returns:** Current buffer size (0 if disabled)
+
+#### `void clearLogBuffer()`
+
+Clear all entries from the log buffer.
+
+**Example:**
+
+```cpp
+logger->clearLogBuffer();  // Remove all buffered entries
+```
+
+#### `uint16_t getLogBufferCount() const`
+
+Get the number of log entries currently stored in the buffer.
+
+**Returns:** Number of entries in buffer (0 to buffer size)
+
+**Example:**
+
+```cpp
+uint16_t used = logger->getLogBufferCount();
+uint16_t total = logger->getLogBufferSize();
+Serial.print("Buffer: ");
+Serial.print(used);
+Serial.print("/");
+Serial.print(total);
+Serial.println(" entries");
+```
 
 ### ILogger Compatibility
 

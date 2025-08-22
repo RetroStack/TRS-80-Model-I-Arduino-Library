@@ -1,36 +1,85 @@
-# LoggerScreen Example
+# LoggerScreen with Rotational Buffer Example
 
-A basic example demonstrating how to use LoggerScreen for visual logging that displays log messages directly on the M1Shield display.
+An example demonstrating LoggerScreen's visual logging capabilities including the rotational buffer feature for preserving log history.
 
 ## What This Example Does
 
-1. **Creates Visual Logger**: Sets up LoggerScreen with basic configuration
-2. **Shows Log Levels**: Demonstrates info, warn, and error messages
-3. **Simple Logging**: Basic periodic logging with automatic message cycling
-4. **Color Coding**: Different colors for different log levels
+1. **Creates Visual Logger**: Sets up LoggerScreen with rotational buffer configuration
+2. **Pre-fills Buffer**: Demonstrates logging before screen activation (historical logs)
+3. **Buffer Replay**: Shows how buffered entries are replayed when screen opens
+4. **Continuous Logging**: Real-time logging continues after buffer replay
+5. **Multiple Log Levels**: Demonstrates info, warn, error, and debug messages
+6. **Color Coding**: Different colors for different log levels with timestamps
 
 ## What You'll Learn
 
-- How to create and configure a LoggerScreen
-- Using different log levels (info, warn, error)
-- Setting up color coding for visual distinction
-- Basic logger configuration options
-- Integrating visual logging into your projects
+- How to create and configure a LoggerScreen with rotational buffer
+- Using different log levels (info, warn, error, debug)
+- Setting up rotational buffer to preserve log history
+- Pre-filling buffer with historical data
+- Buffer replay behavior when opening the logger
+- Integrating persistent logging into your projects
 
 ## Expected Behavior
 
-The screen will display a simple scrolling log with:
+The example follows this sequence:
+
+1. **System starts** and creates logger with 15-entry buffer
+2. **Pre-fills buffer** with 10 historical log entries (while screen inactive)
+3. **Activates screen** - all buffered entries are replayed in chronological order
+4. **Continues logging** new real-time messages every 4 seconds
+5. **Preserves history** - closing and reopening shows recent log history
+
+The screen displays a scrolling log with:
 
 - **White text** for INFO messages
 - **Yellow text** for WARN messages
 - **Red text** for ERROR messages
+- **Cyan text** for DEBUG messages
+- **Timestamps** showing relative time
 - **Automatic scrolling** when screen fills
-- **Message cycling** that resets after 20 messages
+- **Historical context** from buffer replay
 
 ## Controls
 
-- **Menu Button**: Exit logger screen
+- **Menu Button**: Close logger screen (press again to see buffer replay)
 - **Other Buttons**: No action (focus on logging display)
+
+## Key Features Demonstrated
+
+### Rotational Buffer
+
+```cpp
+// Configure buffer for 15 entries
+logger->setLogBufferSize(15);
+
+// Check buffer status
+uint16_t count = logger->getLogBufferCount();
+uint16_t size = logger->getLogBufferSize();
+```
+
+### Pre-filling Buffer
+
+```cpp
+// Log entries before screen activation
+logger->info("System initialization started");
+logger->warn("Low memory detected");
+logger->err("Failed to connect to WiFi");
+// ... more entries
+
+// Activate screen - buffer replays automatically
+M1Shield.setScreen(logger);
+```
+
+### Buffer Management
+
+```cpp
+// Clear buffer if needed
+logger->clearLogBuffer();
+
+// Disable buffer (set to 0)
+logger->setLogBufferSize(0);
+```
 
 ## Hardware Requirements
 

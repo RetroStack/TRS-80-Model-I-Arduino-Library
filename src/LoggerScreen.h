@@ -18,6 +18,19 @@ private:
     bool _useColorCoding;     // Whether to use color coding for different log levels
     unsigned long _startTime; // Start time for relative timestamps
 
+    // Rotational logging buffer
+    struct LogEntry
+    {
+        char message[256];       // Complete formatted log message
+        uint16_t color;          // Color for the message
+        unsigned long timestamp; // Timestamp when logged
+    };
+
+    LogEntry *_logBuffer;  // Circular buffer for log entries
+    uint16_t _bufferSize;  // Size of the log buffer (0 = disabled)
+    uint16_t _bufferHead;  // Head position in circular buffer
+    uint16_t _bufferCount; // Number of entries currently in buffer
+
     // Color definitions for log levels
     static const uint16_t COLOR_INFO = 0xFFFF;      // White for info messages
     static const uint16_t COLOR_WARN = 0xFFE0;      // Yellow for warnings
@@ -29,9 +42,14 @@ private:
 
     void _getTimestamp(char *buffer, size_t bufferSize); // Get current timestamp string for logging
 
+    void _addToBuffer(const char *logLine, uint16_t color); // Add entry to circular buffer
+    void _replayBuffer();                                   // Replay all buffered entries to console
+
 public:
     LoggerScreen(const char *title = "Logger"); // Constructor - create logger screen with optional title
     virtual ~LoggerScreen();                    // Destructor
+
+    bool open() override; // Override to replay buffered entries when opening
 
     void setTimestampEnabled(bool enabled); // Enable or disable timestamp display in log messages
     bool isTimestampEnabled() const;        // Check if timestamps are enabled
@@ -40,6 +58,12 @@ public:
     bool isColorCodingEnabled() const;        // Check if color coding is enabled
 
     void resetTimestamp(); // Reset the timestamp reference point to current time
+
+    // Rotational buffer management
+    void setLogBufferSize(uint16_t size); // Set the size of the rotational log buffer (0 = disabled)
+    uint16_t getLogBufferSize() const;    // Get current buffer size
+    void clearLogBuffer();                // Clear all entries from the log buffer
+    uint16_t getLogBufferCount() const;   // Get number of entries currently in buffer
 
     // Logging interface (compatible with ILogger but not inheriting)
     void info(const char *fmt, ...);

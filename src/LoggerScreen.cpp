@@ -84,6 +84,12 @@ LoggerScreen::LoggerScreen(const char *title) : ConsoleScreen(), _loggerAdapter(
     _useColorCoding = true;
     _startTime = millis();
 
+    // Initialize rotational buffer (disabled by default)
+    _logBuffer = nullptr;
+    _bufferSize = 0;
+    _bufferHead = 0;
+    _bufferCount = 0;
+
     // Set up console appearance for logging
     setTextColor(COLOR_INFO);
     setConsoleBackground(0x0000); // Black background
@@ -101,6 +107,7 @@ LoggerScreen::LoggerScreen(const char *title) : ConsoleScreen(), _loggerAdapter(
 LoggerScreen::~LoggerScreen()
 {
     delete _loggerAdapter;
+    delete[] _logBuffer; // Clean up buffer memory
     // Base class handles cleanup
 }
 
@@ -108,6 +115,21 @@ LoggerScreen::~LoggerScreen()
 ILogger *LoggerScreen::asLogger()
 {
     return _loggerAdapter;
+}
+
+// Override open to replay buffered entries
+bool LoggerScreen::open()
+{
+    // Call parent implementation first
+    bool result = ConsoleScreen::open();
+
+    // Replay buffered entries if buffer exists and has content
+    if (_logBuffer && _bufferCount > 0)
+    {
+        _replayBuffer();
+    }
+
+    return result;
 }
 
 // Set whether to show timestamps in log messages
@@ -138,6 +160,46 @@ bool LoggerScreen::isColorCodingEnabled() const
 void LoggerScreen::resetTimestamp()
 {
     _startTime = millis();
+}
+
+// Set the size of the rotational log buffer
+void LoggerScreen::setLogBufferSize(uint16_t size)
+{
+    // Clean up existing buffer
+    delete[] _logBuffer;
+    _logBuffer = nullptr;
+    _bufferSize = 0;
+    _bufferHead = 0;
+    _bufferCount = 0;
+
+    // Create new buffer if size > 0
+    if (size > 0)
+    {
+        _logBuffer = new LogEntry[size];
+        if (_logBuffer) // Check allocation success
+        {
+            _bufferSize = size;
+        }
+    }
+}
+
+// Get current buffer size
+uint16_t LoggerScreen::getLogBufferSize() const
+{
+    return _bufferSize;
+}
+
+// Clear all entries from the log buffer
+void LoggerScreen::clearLogBuffer()
+{
+    _bufferHead = 0;
+    _bufferCount = 0;
+}
+
+// Get number of entries currently in buffer
+uint16_t LoggerScreen::getLogBufferCount() const
+{
+    return _bufferCount;
 }
 
 // Log informational messages
@@ -179,9 +241,6 @@ void LoggerScreen::debug(const char *fmt, ...)
 // Log messages
 void LoggerScreen::_logMessage(const char *level, uint16_t color, const char *fmt, va_list args)
 {
-    if (!isActive())
-        return;
-
     // Format the user message
     const int MSG_LEN = 200;
     char messageBuffer[MSG_LEN];
@@ -211,19 +270,25 @@ void LoggerScreen::_logMessage(const char *level, uint16_t color, const char *fm
         snprintf(logLine, LINE_LEN, "[%s] %s", level, messageBuffer);
     }
 
-    // Display the log line with appropriate color
-    if (_useColorCoding)
-    {
-        // Set color for this log level
-        setTextColor(color);
+    // Add to buffer regardless of whether screen is active
+    _addToBuffer(logLine, color);
 
-        // Print the log line using ConsoleScreen's println
-        ConsoleScreen::println(logLine);
-    }
-    else
+    // Display the log line if screen is active
+    if (isActive())
     {
-        // Simple monochrome output
-        ConsoleScreen::println(logLine);
+        if (_useColorCoding)
+        {
+            // Set color for this log level
+            setTextColor(color);
+
+            // Print the log line using ConsoleScreen's println
+            ConsoleScreen::println(logLine);
+        }
+        else
+        {
+            // Simple monochrome output
+            ConsoleScreen::println(logLine);
+        }
     }
 }
 
@@ -246,5 +311,61 @@ void LoggerScreen::_getTimestamp(char *buffer, size_t bufferSize)
     else
     {
         snprintf(buffer, bufferSize, "%02lu:%02lu", minutes, seconds);
+    }
+}
+
+// Add entry to circular buffer
+void LoggerScreen::_addToBuffer(const char *logLine, uint16_t color)
+{
+    // Skip if buffer is not allocated
+    if (!_logBuffer || _bufferSize == 0)
+        return;
+
+    // Store entry at head position
+    strncpy(_logBuffer[_bufferHead].message, logLine, sizeof(_logBuffer[_bufferHead].message) - 1);
+    _logBuffer[_bufferHead].message[sizeof(_logBuffer[_bufferHead].message) - 1] = '\0'; // Ensure null termination
+    _logBuffer[_bufferHead].color = color;
+    _logBuffer[_bufferHead].timestamp = millis();
+
+    // Move head to next position (circular)
+    _bufferHead = (_bufferHead + 1) % _bufferSize;
+
+    // Update count (don't exceed buffer size)
+    if (_bufferCount < _bufferSize)
+    {
+        _bufferCount++;
+    }
+}
+
+// Replay all buffered entries to console
+void LoggerScreen::_replayBuffer()
+{
+    if (!_logBuffer || _bufferCount == 0)
+        return;
+
+    // Calculate starting position for replay
+    uint16_t startPos;
+    if (_bufferCount < _bufferSize)
+    {
+        // Buffer not full yet, start from beginning
+        startPos = 0;
+    }
+    else
+    {
+        // Buffer is full, start from head (oldest entry)
+        startPos = _bufferHead;
+    }
+
+    // Replay entries in chronological order
+    for (uint16_t i = 0; i < _bufferCount; i++)
+    {
+        uint16_t pos = (startPos + i) % _bufferSize;
+
+        if (_useColorCoding)
+        {
+            setTextColor(_logBuffer[pos].color);
+        }
+
+        ConsoleScreen::println(_logBuffer[pos].message);
     }
 }

@@ -26,7 +26,7 @@
 // Version constants
 #define M1_VERSION_MAJOR 1
 #define M1_VERSION_MINOR 3
-#define M1_VERSION_REVISION 1
+#define M1_VERSION_REVISION 2
 
 // Define global instance
 Model1Class Model1;
