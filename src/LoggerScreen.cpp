@@ -107,7 +107,17 @@ LoggerScreen::LoggerScreen(const char *title) : ConsoleScreen(), _loggerAdapter(
 LoggerScreen::~LoggerScreen()
 {
     delete _loggerAdapter;
-    delete[] _logBuffer; // Clean up buffer memory
+
+    // Clean up dynamically allocated messages
+    if (_logBuffer)
+    {
+        for (uint16_t i = 0; i < _bufferSize; i++)
+        {
+            delete[] _logBuffer[i].message;
+        }
+        delete[] _logBuffer;
+    }
+
     // Base class handles cleanup
 }
 
@@ -165,8 +175,16 @@ void LoggerScreen::resetTimestamp()
 // Set the size of the rotational log buffer
 void LoggerScreen::setLogBufferSize(uint16_t size)
 {
-    // Clean up existing buffer
-    delete[] _logBuffer;
+    // Clean up existing buffer and all message strings
+    if (_logBuffer)
+    {
+        for (uint16_t i = 0; i < _bufferSize; i++)
+        {
+            delete[] _logBuffer[i].message;
+        }
+        delete[] _logBuffer;
+    }
+
     _logBuffer = nullptr;
     _bufferSize = 0;
     _bufferHead = 0;
@@ -179,6 +197,13 @@ void LoggerScreen::setLogBufferSize(uint16_t size)
         if (_logBuffer) // Check allocation success
         {
             _bufferSize = size;
+            // Initialize all message pointers to nullptr
+            for (uint16_t i = 0; i < size; i++)
+            {
+                _logBuffer[i].message = nullptr;
+                _logBuffer[i].color = COLOR_INFO;
+                _logBuffer[i].timestamp = 0;
+            }
         }
     }
 }
@@ -192,6 +217,16 @@ uint16_t LoggerScreen::getLogBufferSize() const
 // Clear all entries from the log buffer
 void LoggerScreen::clearLogBuffer()
 {
+    if (_logBuffer)
+    {
+        // Free all dynamically allocated message strings
+        for (uint16_t i = 0; i < _bufferSize; i++)
+        {
+            delete[] _logBuffer[i].message;
+            _logBuffer[i].message = nullptr;
+        }
+    }
+
     _bufferHead = 0;
     _bufferCount = 0;
 }
@@ -321,19 +356,30 @@ void LoggerScreen::_addToBuffer(const char *logLine, uint16_t color)
     if (!_logBuffer || _bufferSize == 0)
         return;
 
-    // Store entry at head position
-    strncpy(_logBuffer[_bufferHead].message, logLine, sizeof(_logBuffer[_bufferHead].message) - 1);
-    _logBuffer[_bufferHead].message[sizeof(_logBuffer[_bufferHead].message) - 1] = '\0'; // Ensure null termination
-    _logBuffer[_bufferHead].color = color;
-    _logBuffer[_bufferHead].timestamp = millis();
-
-    // Move head to next position (circular)
-    _bufferHead = (_bufferHead + 1) % _bufferSize;
-
-    // Update count (don't exceed buffer size)
-    if (_bufferCount < _bufferSize)
+    // Free existing message at head position if buffer is full (about to overwrite)
+    if (_bufferCount == _bufferSize && _logBuffer[_bufferHead].message)
     {
-        _bufferCount++;
+        delete[] _logBuffer[_bufferHead].message;
+        _logBuffer[_bufferHead].message = nullptr;
+    }
+
+    // Allocate memory for the new message
+    size_t msgLen = strlen(logLine) + 1;
+    _logBuffer[_bufferHead].message = new char[msgLen];
+    if (_logBuffer[_bufferHead].message)
+    {
+        strcpy(_logBuffer[_bufferHead].message, logLine);
+        _logBuffer[_bufferHead].color = color;
+        _logBuffer[_bufferHead].timestamp = millis();
+
+        // Move head to next position (circular)
+        _bufferHead = (_bufferHead + 1) % _bufferSize;
+
+        // Update count (don't exceed buffer size)
+        if (_bufferCount < _bufferSize)
+        {
+            _bufferCount++;
+        }
     }
 }
 
@@ -360,6 +406,10 @@ void LoggerScreen::_replayBuffer()
     for (uint16_t i = 0; i < _bufferCount; i++)
     {
         uint16_t pos = (startPos + i) % _bufferSize;
+
+        // Skip entries with null message pointers
+        if (!_logBuffer[pos].message)
+            continue;
 
         if (_useColorCoding)
         {

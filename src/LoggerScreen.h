@@ -21,7 +21,7 @@ private:
     // Rotational logging buffer
     struct LogEntry
     {
-        char message[256];       // Complete formatted log message
+        char *message;           // Dynamically allocated log message
         uint16_t color;          // Color for the message
         unsigned long timestamp; // Timestamp when logged
     };
