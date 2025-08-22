@@ -22,6 +22,36 @@ This Arduino library provides hardware interface capabilities for the TRS-80 Mod
 - **MenuScreen** - Complete menu framework with pagination and navigation, simplifying menu implementation (based on ContentScreen class)
 - **ConsoleScreen** - A screen based on the ContentScreen class that functions like a computer terminal or console. You can simply type one text line at a time, simplifying implementation if oyu simply want to write something to the screen.
 
+### ContentScreen Secondary Content Pattern
+
+**NEW: Secondary Content Area Support** - ContentScreen now supports an optional secondary content area positioned below the primary content area:
+
+```cpp
+class MyDualContentScreen : public ContentScreen {
+protected:
+    void _drawContent() override {
+        // Primary content rendering (height auto-adjusts for secondary area)
+        drawText(_getContentLeft() + 10, _getContentTop() + 10, "Main Content");
+    }
+
+    void _drawSecondaryContent() override {
+        // Secondary content rendering (only called if height > 0)
+        drawText(_getSecondaryContentLeft() + 10, _getSecondaryContentTop() + 5, "Status Info");
+    }
+
+    uint16_t _getSecondaryContentHeight() const override {
+        return 40; // Enable secondary area with 40 pixels height
+    }
+};
+```
+
+**Key Design Principles:**
+
+- **Height-only override** - Only override `_getSecondaryContentHeight()` for most use cases
+- **Automatic positioning** - Secondary area appears below primary content automatically
+- **Auto-adjusting layout** - Primary content height reduces when secondary content is enabled
+- **Full-width default** - Secondary area spans full screen width by default
+
 ## String Function Standards
 
 **CRITICAL: All text-related functions support three string formats:**

@@ -85,6 +85,8 @@ public:
     // Override ContentScreen methods
     bool open() override;
     void _drawContent() override;
+    void _drawSecondaryContent() override;
+    uint16_t _getSecondaryContentHeight() const override;
     Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override;
     void loop() override;
 
@@ -117,6 +119,11 @@ private:
     const char *getModeFooter(ContentMode mode);
     uint16_t getRandomColor();
     void drawTextWithBackground(int x, int y, const char *text, uint16_t textColor, uint16_t bgColor);
+
+    // Secondary content area methods (status panel below main content)
+    void drawSecondaryStatus();
+    void drawSecondarySystemInfo();
+    void drawSecondaryDataSummary();
 };
 
 #endif // COMPREHENSIVE_CONTENT_H

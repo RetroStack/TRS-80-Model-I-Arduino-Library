@@ -58,6 +58,13 @@ bool ComprehensiveContent::open()
 
 void ComprehensiveContent::_drawContent()
 {
+    // Clear the primary content area first
+    Adafruit_GFX &gfx = M1Shield.getGFX();
+    uint16_t contentTop = _getContentTop();
+    uint16_t contentHeight = _getContentHeight();
+    uint16_t contentWidth = _getContentWidth();
+    gfx.fillRect(_getContentLeft(), contentTop, contentWidth, contentHeight, M1Shield.convertColor(0x0000));
+
     frameCount++;
 
     switch (currentMode)
@@ -86,26 +93,42 @@ void ComprehensiveContent::_drawContent()
     }
 }
 
+void ComprehensiveContent::_drawSecondaryContent()
+{
+    // Clear the secondary content area first
+    clearSecondaryContentArea();
+
+    // Draw different secondary content based on current mode
+    switch (currentMode)
+    {
+    case MODE_DATA_DISPLAY:
+    case MODE_CHART_VIEW:
+        drawSecondaryDataSummary();
+        break;
+    case MODE_SYSTEM_INFO:
+        drawSecondarySystemInfo();
+        break;
+    default:
+        drawSecondaryStatus();
+        break;
+    }
+}
+
+uint16_t ComprehensiveContent::_getSecondaryContentHeight() const
+{
+    return 50; // Secondary content area height in pixels
+}
+
 void ComprehensiveContent::refreshContent()
 {
-    // Optimized refresh that only redraws the content area
+    // Optimized refresh using _drawMainContent() which handles both primary and secondary areas
     // without redrawing header/footer, then updates display
     // Use this for content-only updates. Use refresh() when header/footer changes.
     if (isActive())
     {
-        Adafruit_GFX &gfx = M1Shield.getGFX();
-        gfx.startWrite();
-
-        // Clear only the content area
-        uint16_t contentTop = _getContentTop();
-        uint16_t contentHeight = _getContentHeight();
-        uint16_t contentWidth = _getContentWidth();
-        gfx.fillRect(0, contentTop, contentWidth, contentHeight, M1Shield.convertColor(0x0000));
-
-        // Redraw just the content
-        _drawContent();
-
-        gfx.endWrite();
+        // Use _drawMainContent() to handle both areas with proper clearing and borders
+        // Each drawing method now handles its own area clearing
+        _drawMainContent();
         M1Shield.display(); // Push changes to display
     }
 }
@@ -142,10 +165,10 @@ void ComprehensiveContent::drawMainMenu()
         display.print(mainMenuOptions[i]);
     }
 
-    // Show selection indicator
+    // Show selection indicator (adjusted for secondary content area)
     display.setTextColor(M1Shield.convertColor(0x07E0)); // Green
     int contentBottom = _getContentTop() + _getContentHeight();
-    display.setCursor(10, contentBottom - 15);
+    display.setCursor(10, contentBottom - 25); // Move higher to avoid secondary content
     display.print(F("Option "));
     display.print(currentOption + 1);
     display.print(F(" of "));
@@ -202,7 +225,7 @@ void ComprehensiveContent::drawDataDisplay()
     {
         display.setTextColor(M1Shield.convertColor(0x8410)); // Gray
         int contentBottom = _getContentTop() + _getContentHeight();
-        display.setCursor(10, contentBottom - 15);
+        display.setCursor(10, contentBottom - 25); // Adjusted for secondary content
         display.print(F("Last update: "));
         display.print(millis() / 1000);
         display.print(F("s"));
@@ -222,14 +245,14 @@ void ComprehensiveContent::drawChartView()
     // Draw chart
     drawChart(10, contentY + 20, display.width() - 20, 80);
 
-    // Chart legend
+    // Chart legend (adjusted for secondary content)
     display.setTextColor(M1Shield.convertColor(0x07E0)); // Green
     int contentBottom = _getContentTop() + _getContentHeight();
-    display.setCursor(10, contentBottom - 25);
+    display.setCursor(10, contentBottom - 35); // Moved higher
     display.print(F("Sensor data over time"));
 
     display.setTextColor(M1Shield.convertColor(0x8410)); // Gray
-    display.setCursor(10, contentBottom - 10);
+    display.setCursor(10, contentBottom - 20);           // Moved higher
     display.print(F("Points: "));
     display.print(dataIndex);
     display.print(F("/10"));
@@ -288,10 +311,10 @@ void ComprehensiveContent::drawSystemInfo()
     drawProgressIndicator(130, y, cpuLoad, 100);
     y += 15;
 
-    // Frame count
+    // Frame count (adjusted for secondary content)
     display.setTextColor(M1Shield.convertColor(0x8410)); // Gray
     int contentBottom = _getContentTop() + _getContentHeight();
-    display.setCursor(10, contentBottom - 10);
+    display.setCursor(10, contentBottom - 20); // Moved higher
     display.print(F("Frames: "));
     display.print(frameCount);
 }
@@ -314,14 +337,14 @@ void ComprehensiveContent::drawInteractiveDemo()
     display.drawRect(10, contentY + 30, display.width() - 20, 60,
                      M1Shield.convertColor(0x8410));
 
-    // Instructions
+    // Instructions (adjusted for secondary content)
     display.setTextColor(M1Shield.convertColor(0x07E0)); // Green
     int contentBottom = _getContentTop() + _getContentHeight();
-    display.setCursor(10, contentBottom - 25);
+    display.setCursor(10, contentBottom - 35); // Moved higher
     display.print(F("Use buttons to move circle"));
 
     display.setTextColor(M1Shield.convertColor(0x8410)); // Gray
-    display.setCursor(10, contentBottom - 10);
+    display.setCursor(10, contentBottom - 20);           // Moved higher
     display.print(F("Position: "));
     display.print(interactiveX);
     display.print(F(","));
@@ -406,7 +429,7 @@ void ComprehensiveContent::drawAbout()
 
     display.setTextColor(M1Shield.convertColor(0xF81F)); // Magenta
     int contentBottom = _getContentTop() + _getContentHeight();
-    display.setCursor(10, contentBottom - 10);
+    display.setCursor(10, contentBottom - 20); // Adjusted for secondary content
     display.print(F("Press Menu to return"));
 }
 
@@ -710,7 +733,260 @@ void ComprehensiveContent::loop()
             currentMode == MODE_CHART_VIEW ||
             currentMode == MODE_SYSTEM_INFO)
         {
-            refreshContent(); // Use optimized content-only refresh
+            refreshContent(); // Use optimized refresh with _drawMainContent()
         }
+        else
+        {
+            // For other modes, use clearSecondaryContentArea() and redraw secondary content
+            // This leverages the built-in ContentScreen infrastructure
+            clearSecondaryContentArea();
+            _drawSecondaryContent();
+            M1Shield.display();
+        }
+    }
+}
+
+// =====================================================================================
+// Secondary Content Area Drawing Methods
+// =====================================================================================
+
+void ComprehensiveContent::drawSecondaryStatus()
+{
+    Adafruit_GFX &display = M1Shield.getGFX();
+    uint16_t x = _getSecondaryContentLeft();
+    uint16_t y = _getSecondaryContentTop();
+
+    // Title with direct graphics
+    display.setTextSize(1);
+    display.setTextColor(M1Shield.convertColor(0xFFFF));
+    display.setCursor(x + 5, y + 5);
+    display.print("STATUS");
+
+    // Current mode indicator with colored background
+    display.fillRect(x + 5, y + 18, 60, 12, M1Shield.convertColor(0x07E0));
+    display.setTextColor(M1Shield.convertColor(0x0000));
+    display.setCursor(x + 8, y + 20);
+    display.print(getModeTitle(currentMode));
+
+    // Runtime progress bar
+    unsigned long elapsed = millis() - startTime;
+    int seconds = (elapsed / 1000) % 60;
+    int minutes = (elapsed / 60000) % 60;
+
+    // Time display
+    display.setTextColor(M1Shield.convertColor(0xFFE0));
+    display.setCursor(x + 75, y + 5);
+    if (minutes < 10)
+        display.print("0");
+    display.print(minutes);
+    display.print(":");
+    if (seconds < 10)
+        display.print("0");
+    display.print(seconds);
+
+    // FPS indicator with visual bar
+    if (fps > 0)
+    {
+        display.setTextColor(M1Shield.convertColor(0x8410));
+        display.setCursor(x + 150, y + 5);
+        display.print("FPS: ");
+        display.print(fps, 1);
+
+        // FPS bar (target 30 FPS)
+        int fpsBarWidth = (fps > 30) ? 40 : (fps * 40 / 30);
+        uint16_t fpsColor = (fps > 25) ? M1Shield.convertColor(0x07E0) : (fps > 15) ? M1Shield.convertColor(0xFFE0)
+                                                                                    : M1Shield.convertColor(0xF800);
+        display.fillRect(x + 150, y + 18, fpsBarWidth, 6, fpsColor);
+        display.drawRect(x + 150, y + 18, 40, 6, M1Shield.convertColor(0x8410));
+    }
+
+    // Activity indicator (blinking dot)
+    uint16_t dotColor = ((millis() / 500) % 2) ? M1Shield.convertColor(0x07E0) : M1Shield.convertColor(0x0000);
+    display.fillCircle(x + 220, y + 8, 3, dotColor);
+}
+
+void ComprehensiveContent::drawSecondarySystemInfo()
+{
+    Adafruit_GFX &display = M1Shield.getGFX();
+    uint16_t x = _getSecondaryContentLeft();
+    uint16_t y = _getSecondaryContentTop();
+
+    // Title
+    display.setTextSize(1);
+    display.setTextColor(M1Shield.convertColor(0xFFFF));
+    display.setCursor(x + 5, y + 5);
+    display.print("SYSTEM METRICS");
+
+    // Memory usage gauge (circular gauge)
+    int centerX = x + 40;
+    int centerY = y + 30;
+    int radius = 12;
+
+    // Draw memory gauge background
+    display.drawCircle(centerX, centerY, radius, M1Shield.convertColor(0x8410));
+
+    // Fill memory gauge based on usage
+    float memAngle = (memoryUsage * 270.0f / 100.0f) - 135; // -135 to 135 degrees
+    int endX = centerX + (radius - 2) * cos(memAngle * PI / 180);
+    int endY = centerY + (radius - 2) * sin(memAngle * PI / 180);
+    display.drawLine(centerX, centerY, endX, endY, M1Shield.convertColor(0x07E0));
+
+    // Memory percentage in center
+    display.setTextColor(M1Shield.convertColor(0xFFFF));
+    display.setCursor(centerX - 6, centerY - 3);
+    display.print(memoryUsage);
+
+    // CPU load with LED-style indicators
+    int cpuX = x + 80;
+    int cpuY = y + 18;
+
+    display.setTextColor(M1Shield.convertColor(0xFFFF));
+    display.setCursor(cpuX, cpuY);
+    display.print("CPU");
+
+    // LED bar for CPU (10 LEDs)
+    for (int i = 0; i < 10; i++)
+    {
+        int ledX = cpuX + i * 8;
+        int ledY = cpuY + 12;
+        uint16_t ledColor;
+
+        if (i < (cpuLoad / 10))
+        {
+            // Active LED color based on level
+            if (i < 6)
+                ledColor = M1Shield.convertColor(0x07E0); // Green
+            else if (i < 8)
+                ledColor = M1Shield.convertColor(0xFFE0); // Yellow
+            else
+                ledColor = M1Shield.convertColor(0xF800); // Red
+        }
+        else
+        {
+            ledColor = M1Shield.convertColor(0x2104); // Dark gray
+        }
+
+        display.fillRect(ledX, ledY, 6, 8, ledColor);
+        display.drawRect(ledX, ledY, 6, 8, M1Shield.convertColor(0x8410));
+    }
+
+    // Refresh rate indicator with animated bar
+    display.setTextColor(M1Shield.convertColor(0x8410));
+    display.setCursor(x + 180, y + 5);
+    display.print("Refresh");
+    display.setCursor(x + 180, y + 15);
+    display.print(refreshRate);
+    display.print("ms");
+
+    // Animated refresh indicator
+    int refreshBarX = x + 180;
+    int refreshBarY = y + 28;
+    int animPhase = (millis() / refreshRate) % 4;
+    for (int i = 0; i < 4; i++)
+    {
+        uint16_t barColor = (i == animPhase) ? M1Shield.convertColor(0x07E0) : M1Shield.convertColor(0x2104);
+        display.fillRect(refreshBarX + i * 8, refreshBarY, 6, 4, barColor);
+    }
+}
+
+void ComprehensiveContent::drawSecondaryDataSummary()
+{
+    Adafruit_GFX &display = M1Shield.getGFX();
+    uint16_t x = _getSecondaryContentLeft();
+    uint16_t y = _getSecondaryContentTop();
+
+    // Title
+    display.setTextSize(1);
+    display.setTextColor(M1Shield.convertColor(0xFFFF));
+    display.setCursor(x + 5, y + 5);
+    display.print("DATA SUMMARY");
+
+    // Calculate data statistics
+    float sum = 0, minVal = sensorData[0], maxVal = sensorData[0];
+    for (int i = 0; i < 10; i++)
+    {
+        sum += sensorData[i];
+        if (sensorData[i] < minVal)
+            minVal = sensorData[i];
+        if (sensorData[i] > maxVal)
+            maxVal = sensorData[i];
+    }
+    float avg = sum / 10.0f;
+
+    // Mini sparkline chart (10 data points in 60 pixels width)
+    int chartX = x + 5;
+    int chartY = y + 18;
+    int chartW = 60;
+    int chartH = 20;
+
+    // Chart background
+    display.drawRect(chartX, chartY, chartW, chartH, M1Shield.convertColor(0x8410));
+
+    // Plot data points
+    for (int i = 0; i < 9; i++)
+    {
+        int x1 = chartX + (i * chartW / 9);
+        int y1 = chartY + chartH - ((sensorData[i] - minVal) * chartH / (maxVal - minVal));
+        int x2 = chartX + ((i + 1) * chartW / 9);
+        int y2 = chartY + chartH - ((sensorData[i + 1] - minVal) * chartH / (maxVal - minVal));
+
+        display.drawLine(x1, y1, x2, y2, M1Shield.convertColor(0x07E0));
+        display.fillCircle(x1, y1, 1, M1Shield.convertColor(0xFFE0));
+    }
+
+    // Last point
+    int lastX = chartX + chartW - 1;
+    int lastY = chartY + chartH - ((sensorData[9] - minVal) * chartH / (maxVal - minVal));
+    display.fillCircle(lastX, lastY, 1, M1Shield.convertColor(0xFFE0));
+
+    // Statistics with visual indicators
+    display.setTextColor(M1Shield.convertColor(0x07E0));
+    display.setCursor(x + 75, y + 18);
+    display.print("Avg: ");
+    display.print(avg, 1);
+
+    // Min/Max range indicator
+    display.setTextColor(M1Shield.convertColor(0x8410));
+    display.setCursor(x + 75, y + 28);
+    display.print("Range: ");
+    display.print(maxVal - minVal, 1);
+
+    // Trend arrow indicator
+    bool upTrend = sensorData[9] > sensorData[0];
+    uint16_t trendColor = upTrend ? M1Shield.convertColor(0x07E0) : M1Shield.convertColor(0xF800);
+
+    display.setTextColor(trendColor);
+    display.setCursor(x + 150, y + 18);
+    display.print("Trend");
+
+    // Draw trend arrow
+    int arrowX = x + 185;
+    int arrowY = y + 23;
+    if (upTrend)
+    {
+        // Up arrow
+        display.drawLine(arrowX, arrowY, arrowX + 5, arrowY - 5, trendColor);
+        display.drawLine(arrowX + 5, arrowY - 5, arrowX + 10, arrowY, trendColor);
+        display.drawLine(arrowX + 5, arrowY - 5, arrowX + 5, arrowY + 3, trendColor);
+    }
+    else
+    {
+        // Down arrow
+        display.drawLine(arrowX, arrowY, arrowX + 5, arrowY + 5, trendColor);
+        display.drawLine(arrowX + 5, arrowY + 5, arrowX + 10, arrowY, trendColor);
+        display.drawLine(arrowX + 5, arrowY + 5, arrowX + 5, arrowY - 3, trendColor);
+    }
+
+    // Sample count with dots
+    display.setTextColor(M1Shield.convertColor(0xFFE0));
+    display.setCursor(x + 150, y + 32);
+    display.print("Samples: 10");
+
+    // Draw 10 sample dots
+    for (int i = 0; i < 10; i++)
+    {
+        int dotX = x + 200 + (i * 3);
+        int dotY = y + 35;
+        display.fillCircle(dotX, dotY, 1, M1Shield.convertColor(0xFFE0));
     }
 }

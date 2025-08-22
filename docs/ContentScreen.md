@@ -39,6 +39,7 @@ The `ContentScreen` class provides a structured layout template for screens with
     - [alert](#alert-functions)
     - [confirm](#confirmation-functions)
 - [Layout Regions](#layout-regions)
+- [Secondary Content Area Usage](#secondary-content-area-usage)
 - [Implementation Pattern](#implementation-pattern)
 - [Examples](#examples)
 
@@ -76,25 +77,34 @@ Creates a new `ContentScreen` instance with default layout settings:
 
 ## Layout Structure
 
-ContentScreen organizes the display into four distinct regions:
+ContentScreen organizes the display into distinct regions, including an optional secondary content area:
 
 ```
 +-----------------------------+
 | Header (Title)              |
 +-----------------------------+
 |                             |
-|                             |
-|     Content Area            |
+|     Primary Content Area    |
 |   (implemented by           |
 |    derived classes)         |
 |                             |
-|                             |
++-----------------------------+
+|   Secondary Content Area    |
+|   (optional - override      |
+|    _getSecondaryContentHeight|
+|     to enable)              |
 +-----------------------------+
 | Footer (Buttons/Status)     |
 +-----------------------------+
 | Progress Bar                |
 +-----------------------------+
 ```
+
+**Layout Behavior:**
+
+- **Primary content automatically shrinks** when secondary content is enabled
+- **Secondary content appears below primary content** with automatic positioning
+- **Only height needs to be specified** - position and width are handled automatically
 
 ## Protected Methods
 
@@ -119,26 +129,25 @@ protected:
 
 ### `void _drawSecondaryContent()`
 
-**Virtual method** - Optional override for derived classes that need a secondary content area. Default implementation does nothing.
+**Virtual method** - Optional override for derived classes that need a secondary content area positioned below the primary content. Default implementation does nothing.
 
 ```cpp
 class MyDualContentScreen : public ContentScreen {
 protected:
     void _drawContent() override {
         // Primary content area rendering
-        drawText(10, 10, "Main content");
+        drawText(_getContentLeft() + 10, _getContentTop() + 10, "Main content");
     }
 
     void _drawSecondaryContent() override {
-        // Secondary content area rendering (only if area has non-zero size)
+        // Secondary content area rendering (only called if height > 0)
         uint16_t x = _getSecondaryContentLeft();
         uint16_t y = _getSecondaryContentTop();
-        drawText(x, y, "Secondary content");
+        drawText(x + 10, y + 5, "Secondary content below main");
     }
 
-    // Override dimension methods to make secondary area visible
-    uint16_t _getSecondaryContentLeft() const override { return 200; }
-    uint16_t _getSecondaryContentTop() const override { return 50; }
+    // Only height needs to be overridden - position is automatic
+    uint16_t _getSecondaryContentHeight() const override { return 40; }
     uint16_t _getSecondaryContentWidth() const override { return 100; }
     uint16_t _getSecondaryContentHeight() const override { return 80; }
 };
@@ -165,12 +174,17 @@ Access content area boundaries for positioning:
 
 **Secondary Content Area (Virtual - Override for Custom Layout):**
 
-- `uint16_t _getSecondaryContentLeft()`: Returns X coordinate of secondary content area left edge (default: 0)
-- `uint16_t _getSecondaryContentTop()`: Returns Y coordinate of secondary content area top edge (default: 0)
-- `uint16_t _getSecondaryContentWidth()`: Returns secondary content area width in pixels (default: 0)
-- `uint16_t _getSecondaryContentHeight()`: Returns secondary content area height in pixels (default: 0)
+- `uint16_t _getSecondaryContentLeft()`: Returns X coordinate of secondary content area left edge (default: 1, same as primary content)
+- `uint16_t _getSecondaryContentTop()`: Returns Y coordinate of secondary content area top edge (default: positioned below primary content)
+- `uint16_t _getSecondaryContentWidth()`: Returns secondary content area width in pixels (default: full screen width)
+- `uint16_t _getSecondaryContentHeight()`: Returns secondary content area height in pixels (default: 0 - **override this to enable secondary content**)
 
-**Note:** Secondary content area is invisible by default (zero dimensions). Override the dimension methods in derived classes to make it visible and position it as needed.
+**Secondary Content Design Pattern:**
+
+- **Secondary content appears below the primary content area**
+- **Primary content height automatically reduces** when secondary content is enabled (height > 0)
+- **Only the height needs to be overridden** - position and width are handled automatically
+- **Invisible by default** - override `_getSecondaryContentHeight()` to make it visible
 
 ## Public Methods
 
@@ -606,6 +620,78 @@ if (step1 == CONFIRM_RIGHT) {
 - **Purpose**: Progress indicator for long operations
 - **Height**: Fixed height when visible, hidden when value is 0
 - **Content**: Horizontal progress bar with percentage fill
+
+## Secondary Content Area Usage
+
+The secondary content area is positioned below the primary content area and provides an additional rendering space for derived classes. This is perfect for status panels, summary information, or secondary controls.
+
+### Basic Secondary Content Pattern
+
+The simplest way to enable secondary content is to override only the height method:
+
+```cpp
+class MyContentScreen : public ContentScreen {
+protected:
+    void _drawContent() override {
+        // Primary content rendering
+        drawText(_getContentLeft() + 10, _getContentTop() + 10, "Main Content");
+    }
+
+    void _drawSecondaryContent() override {
+        // Secondary content rendering (only called if height > 0)
+        drawText(_getSecondaryContentLeft() + 10, _getSecondaryContentTop() + 10, "Status Info");
+    }
+
+    uint16_t _getSecondaryContentHeight() const override {
+        return 40; // Enable secondary area with 40 pixels height
+    }
+};
+```
+
+### Advanced Secondary Content Layout
+
+For more control over secondary content positioning, override additional layout methods:
+
+```cpp
+class AdvancedContentScreen : public ContentScreen {
+protected:
+    uint16_t _getSecondaryContentHeight() const override {
+        return 60; // Secondary area height
+    }
+
+    uint16_t _getSecondaryContentLeft() const override {
+        return _getContentLeft() + 20; // Indent secondary content
+    }
+
+    uint16_t _getSecondaryContentWidth() const override {
+        return _getContentWidth() - 40; // Narrower secondary content
+    }
+
+    void _drawSecondaryContent() override {
+        // Custom positioned secondary content
+        uint16_t x = _getSecondaryContentLeft();
+        uint16_t y = _getSecondaryContentTop();
+
+        drawText(x, y + 5, "Secondary Area");
+        drawText(x, y + 20, "Custom Layout");
+    }
+};
+```
+
+### Secondary Content Best Practices
+
+1. **Height-Only Override**: For most use cases, only override `_getSecondaryContentHeight()` - positioning is automatic
+2. **Automatic Layout**: Primary content height automatically adjusts when secondary content is enabled
+3. **Border Management**: Borders around both areas are drawn automatically by `_drawMainContent()`
+4. **Clearing**: Use `clearSecondaryContentArea()` to refresh the secondary area
+5. **Performance**: Secondary content is only rendered when height > 0
+
+### Use Cases for Secondary Content
+
+- **Status Panels**: Real-time system information, connection status, performance metrics
+- **Summary Information**: Data statistics, progress summaries, current settings
+- **Secondary Controls**: Additional buttons, mini-menus, quick actions
+- **Information Display**: Help text, tooltips, contextual information
 
 ## Implementation Pattern
 

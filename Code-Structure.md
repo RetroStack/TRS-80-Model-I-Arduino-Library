@@ -150,12 +150,12 @@ This document provides a comprehensive reference of all classes and functions av
 
 - `uint16_t _getContentTop() const` // Get Y coordinate of content area top edge
 - `uint16_t _getContentLeft() const` // Get X coordinate of content area left edge
-- `uint16_t _getContentHeight() const` // Get available height of content area
+- `uint16_t _getContentHeight() const` // Get available height of content area (auto-adjusts for secondary content)
 - `uint16_t _getContentWidth() const` // Get available width of content area
-- `virtual uint16_t _getSecondaryContentTop() const` // Get Y coordinate of secondary content area top edge (default: 0)
-- `virtual uint16_t _getSecondaryContentLeft() const` // Get X coordinate of secondary content area left edge (default: 0)
-- `virtual uint16_t _getSecondaryContentHeight() const` // Get available height of secondary content area (default: 0)
-- `virtual uint16_t _getSecondaryContentWidth() const` // Get available width of secondary content area (default: 0)
+- `virtual uint16_t _getSecondaryContentTop() const` // Get Y coordinate of secondary content area (positioned below primary content)
+- `virtual uint16_t _getSecondaryContentLeft() const` // Get X coordinate of secondary content area (default: same as primary)
+- `virtual uint16_t _getSecondaryContentHeight() const` // Get available height of secondary content area (default: 0 - override to enable)
+- `virtual uint16_t _getSecondaryContentWidth() const` // Get available width of secondary content area (default: full width)
 - `uint16_t _getHeaderTop() const` // Get Y coordinate of header region
 - `uint16_t _getHeaderHeight() const` // Get height of header region
 - `virtual uint16_t _getFooterTop() const` // Get Y coordinate of footer region (virtual for ButtonScreen override)
@@ -166,8 +166,8 @@ This document provides a comprehensive reference of all classes and functions av
 **Protected Methods for Derived Classes:**
 
 - `virtual void _drawContent() = 0` // Pure virtual: render primary content area
-- `virtual void _drawSecondaryContent()` // Virtual: render secondary content area (default: empty)
-- `void _drawMainContent()` // Combines primary and secondary content areas with borders
+- `virtual void _drawSecondaryContent()` // Virtual: render secondary content area below primary (default: empty)
+- `void _drawMainContent()` // Combines primary and secondary content areas with automatic borders and layout
 - `uint8_t _getButtonItemCount() const` // Get number of button items (for derived classes like ButtonScreen)
 - `const char* _getButtonItem(uint8_t index) const` // Get button item text by index (for derived classes like ButtonScreen)
 

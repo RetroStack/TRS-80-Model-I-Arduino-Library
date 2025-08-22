@@ -145,7 +145,7 @@ void ContentScreen::_drawMainContent()
         gfx.drawRect(primaryLeft - 1, primaryTop - 1, primaryWidth + 2, primaryHeight + 2, borderColor);
 
         // Draw border around secondary content area if visible
-        if (secondaryWidth > 0 && secondaryHeight > 0)
+        if (secondaryHeight > 0)
         {
             gfx.drawRect(secondaryLeft - 1, secondaryTop - 1, secondaryWidth + 2, secondaryHeight + 2, borderColor);
         }
@@ -288,7 +288,8 @@ uint16_t ContentScreen::_getContentLeft() const
 uint16_t ContentScreen::_getContentHeight() const
 {
     uint8_t padding = _getPadding();
-    return M1Shield.getScreenHeight() - _getHeaderHeight() - padding - _getFooterHeight() - padding - _getProgressBarHeight() - padding;
+    uint16_t secondaryContentHeight = _getSecondaryContentHeight();
+    return M1Shield.getScreenHeight() - _getHeaderHeight() - padding - _getFooterHeight() - padding - _getProgressBarHeight() - padding - (secondaryContentHeight > 0 ? secondaryContentHeight + padding : 0);
 }
 
 // Get the width of the content area
@@ -297,25 +298,29 @@ uint16_t ContentScreen::_getContentWidth() const
     return M1Shield.getScreenWidth() - 2;
 }
 
-// Secondary content area dimensions (default: zero size, not visible)
+// Get the top position of the secondary content area
 uint16_t ContentScreen::_getSecondaryContentTop() const
 {
-    return 0; // Default: not visible
+    return _getContentTop() + _getContentHeight();
 }
 
+// Get the left position of the secondary content area
 uint16_t ContentScreen::_getSecondaryContentLeft() const
 {
-    return 0; // Default: not visible
+    return 1;
 }
 
+// Get the height of the secondary content area
+// Overwrite this function to redefine the height
 uint16_t ContentScreen::_getSecondaryContentHeight() const
 {
     return 0; // Default: not visible
 }
 
+// Get the width of the secondary content area
 uint16_t ContentScreen::_getSecondaryContentWidth() const
 {
-    return 0; // Default: not visible
+    return M1Shield.getScreenWidth() - 2;
 }
 
 // Get the Y position of the footer
