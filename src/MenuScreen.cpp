@@ -321,7 +321,9 @@ void MenuScreen::_drawContent()
                 }
                 else if (getLogger())
                 {
-                    getLogger()->errF(F("MenuScreen: Failed to allocate memory for config value display"));
+                    const char *currentTitle = getTitle();
+                    getLogger()->errF(F("MenuScreen[%s]: Failed to allocate memory for config value display"),
+                                      currentTitle ? currentTitle : "Unknown");
                 }
             }
             else
@@ -462,7 +464,9 @@ void MenuScreen::setMenuItemsF(const __FlashStringHelper **menuItems, uint8_t me
     {
         if (getLogger())
         {
-            getLogger()->errF(F("MenuScreen: Failed to allocate memory for flash menu items array"));
+            const char *currentTitle = getTitle();
+            getLogger()->errF(F("MenuScreen[%s]: Failed to allocate memory for flash menu items array"),
+                              currentTitle ? currentTitle : "Unknown");
         }
         clearMenuItems();
         return; // Allocation failed
@@ -492,7 +496,9 @@ void MenuScreen::setMenuItemsF(const __FlashStringHelper **menuItems, uint8_t me
                 }
                 else if (getLogger())
                 {
-                    getLogger()->errF(F("MenuScreen: Failed to allocate memory for flash menu item %d"), i);
+                    const char *currentTitle = getTitle();
+                    getLogger()->errF(F("MenuScreen[%s]: Failed to allocate memory for flash menu item %d"),
+                                      currentTitle ? currentTitle : "Unknown", i);
                 }
             }
         }
@@ -529,7 +535,9 @@ void MenuScreen::setMenuItems(const char **menuItems, uint8_t menuItemCount)
     {
         if (getLogger())
         {
-            getLogger()->errF(F("MenuScreen: Failed to allocate memory for menu items array"));
+            const char *currentTitle = getTitle();
+            getLogger()->errF(F("MenuScreen[%s]: Failed to allocate memory for menu items array"),
+                              currentTitle ? currentTitle : "Unknown");
         }
         return; // Allocation failed
     }
@@ -556,7 +564,9 @@ void MenuScreen::setMenuItems(const char **menuItems, uint8_t menuItemCount)
             }
             else if (getLogger())
             {
-                getLogger()->errF(F("MenuScreen: Failed to allocate memory for menu item %d"), i);
+                const char *currentTitle = getTitle();
+                getLogger()->errF(F("MenuScreen[%s]: Failed to allocate memory for menu item %d"),
+                                  currentTitle ? currentTitle : "Unknown", i);
             }
         }
     }
@@ -623,7 +633,9 @@ void MenuScreen::setMenuItems(String *menuItems, uint8_t menuItemCount)
             }
             else if (getLogger())
             {
-                getLogger()->errF(F("MenuScreen: Failed to allocate memory for menu item %d"), i);
+                const char *currentTitle = getTitle();
+                getLogger()->errF(F("MenuScreen[%s]: Failed to allocate memory for menu item %d"),
+                                  currentTitle ? currentTitle : "Unknown", i);
             }
         }
     }

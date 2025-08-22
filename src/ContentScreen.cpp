@@ -23,8 +23,8 @@ constexpr uint16_t SCREEN_COLOR_BG = 0x0000; // Background color for content are
 constexpr uint16_t SCREEN_COLOR_FG = 0xFFFF; // Foreground color for borders and text
 
 // Header region styling
-constexpr uint16_t HEADER_HEIGHT = 40;       // Height of header region in pixels
-constexpr uint16_t HEADER_SMALL_HEIGHT = 16; // Height of small header region in pixels
+constexpr uint16_t HEADER_HEIGHT = 34;       // Height of header region in pixels (reduced by 6 pixels)
+constexpr uint16_t HEADER_SMALL_HEIGHT = 10; // Height of small header region in pixels (reduced by 6 pixels)
 constexpr uint16_t HEADER_COLOR_BG = 0x07E0; // Header background (bright green)
 constexpr uint16_t HEADER_COLOR_FG = 0x0000; // Header text color (black on green)
 
@@ -193,8 +193,8 @@ void ContentScreen::_drawHeader()
             {
                 // Calculate centered position for truncated title text
                 uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(truncatedTitle);
-                // Adding 2 pixels as header needs to be 16 pixel altogether
-                gfx.setCursor((screenWidth - textWidth) / 2, top + TEXT_SIZE_1_HALF_HEIGHT + 2);
+                // Center vertically in the 10-pixel header (10 - 8) / 2 = 1 pixel from top
+                gfx.setCursor((screenWidth - textWidth) / 2, top + 1);
                 gfx.print(truncatedTitle);
                 free(truncatedTitle);
             }
@@ -202,7 +202,7 @@ void ContentScreen::_drawHeader()
             {
                 // Fallback: display original title if truncation failed
                 uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(title);
-                gfx.setCursor((screenWidth - textWidth) / 2, top + TEXT_SIZE_1_HALF_HEIGHT + 2);
+                gfx.setCursor((screenWidth - textWidth) / 2, top + 1);
                 gfx.print(title);
             }
         }
@@ -216,7 +216,8 @@ void ContentScreen::_drawHeader()
             {
                 // Calculate centered position for truncated title text
                 uint16_t textWidth = TEXT_SIZE_3_WIDTH * strlen(truncatedTitle);
-                gfx.setCursor((screenWidth - textWidth) / 2, top + TEXT_SIZE_3_HALF_HEIGHT);
+                // Center vertically in the 34-pixel header (34 - 24) / 2 = 5 pixels from top
+                gfx.setCursor((screenWidth - textWidth) / 2, top + 5);
                 gfx.print(truncatedTitle);
                 free(truncatedTitle);
             }
@@ -224,7 +225,7 @@ void ContentScreen::_drawHeader()
             {
                 // Fallback: display original title if truncation failed
                 uint16_t textWidth = TEXT_SIZE_3_WIDTH * strlen(title);
-                gfx.setCursor((screenWidth - textWidth) / 2, top + TEXT_SIZE_3_HALF_HEIGHT);
+                gfx.setCursor((screenWidth - textWidth) / 2, top + 5);
                 gfx.print(title);
             }
         }
@@ -314,6 +315,22 @@ void ContentScreen::_drawFooter()
     }
 }
 
+// Get number of button items (for derived classes)
+uint8_t ContentScreen::_getButtonItemCount() const
+{
+    return _buttonItemCount;
+}
+
+// Get button item text by index (for derived classes)
+const char *ContentScreen::_getButtonItem(uint8_t index) const
+{
+    if (index < _buttonItemCount && _buttonItems != nullptr && _buttonItems[index] != nullptr)
+    {
+        return _buttonItems[index];
+    }
+    return nullptr;
+}
+
 // Get the Y position of the progress bar
 uint16_t ContentScreen::_getProgressBarY() const
 {
@@ -392,7 +409,9 @@ void ContentScreen::setButtonItemsF(const __FlashStringHelper **buttonItems, uin
     {
         if (getLogger())
         {
-            getLogger()->errF(F("ContentScreen: Failed to allocate memory for button items array"));
+            const char *title = getTitle();
+            getLogger()->errF(F("ContentScreen[%s]: Failed to allocate memory for button items array"),
+                              title ? title : "Unknown");
         }
         clearButtonItems();
         return;
@@ -417,7 +436,9 @@ void ContentScreen::setButtonItemsF(const __FlashStringHelper **buttonItems, uin
             }
             else if (getLogger())
             {
-                getLogger()->errF(F("ContentScreen: Failed to allocate memory for button item %d"), i);
+                const char *title = getTitle();
+                getLogger()->errF(F("ContentScreen[%s]: Failed to allocate memory for button item %d"),
+                                  title ? title : "Unknown", i);
             }
         }
     }
@@ -466,14 +487,18 @@ void ContentScreen::setButtonItems(const char **buttonItems, uint8_t buttonItemC
                     }
                     else if (getLogger())
                     {
-                        getLogger()->errF(F("ContentScreen: Failed to allocate memory for button label %d"), i);
+                        const char *currentTitle = getTitle();
+                        getLogger()->errF(F("ContentScreen[%s]: Failed to allocate memory for button label %d"),
+                                          currentTitle ? currentTitle : "Unknown", i);
                     }
                 }
             }
         }
         else if (getLogger())
         {
-            getLogger()->errF(F("ContentScreen: Failed to allocate memory for button items array"));
+            const char *currentTitle = getTitle();
+            getLogger()->errF(F("ContentScreen[%s]: Failed to allocate memory for button items array"),
+                              currentTitle ? currentTitle : "Unknown");
         }
     }
 
@@ -643,7 +668,9 @@ void ContentScreen::notify(const char *text, unsigned long durationMs, uint16_t 
 
     if (getLogger())
     {
-        getLogger()->infoF(F("ContentScreen: Showing notification '%s' for %lu ms"), text, durationMs);
+        const char *title = getTitle();
+        getLogger()->infoF(F("ContentScreen[%s]: Showing notification '%s' for %lu ms"),
+                           title ? title : "Unknown", text, durationMs);
     }
 
     // Clear any existing notification
@@ -656,7 +683,9 @@ void ContentScreen::notify(const char *text, unsigned long durationMs, uint16_t 
     {
         if (getLogger())
         {
-            getLogger()->errF(F("ContentScreen: Failed to allocate memory for notification"));
+            const char *title = getTitle();
+            getLogger()->errF(F("ContentScreen[%s]: Failed to allocate memory for notification"),
+                              title ? title : "Unknown");
         }
         return; // Failed allocation
     }
@@ -853,7 +882,9 @@ void ContentScreen::alertF(const __FlashStringHelper *text)
     {
         if (getLogger())
         {
-            getLogger()->errF(F("ContentScreen: Failed to allocate memory for flash alert text"));
+            const char *currentTitle = getTitle();
+            getLogger()->errF(F("ContentScreen[%s]: Failed to allocate memory for flash alert text"),
+                              currentTitle ? currentTitle : "Unknown");
         }
         return; // Failed allocation
     }
@@ -949,7 +980,9 @@ ConfirmResult ContentScreen::confirmF(const __FlashStringHelper *text, const __F
     {
         if (getLogger())
         {
-            getLogger()->errF(F("ContentScreen: Failed to allocate memory for flash confirm dialog"));
+            const char *currentTitle = getTitle();
+            getLogger()->errF(F("ContentScreen[%s]: Failed to allocate memory for flash confirm dialog"),
+                              currentTitle ? currentTitle : "Unknown");
         }
 
         // Free any successfully allocated buffers before returning
@@ -1127,7 +1160,9 @@ char *ContentScreen::_truncateText(const char *text, uint16_t availableWidth, ui
         {
             if (getLogger())
             {
-                getLogger()->errF(F("ContentScreen: Failed to allocate memory for text copy"));
+                const char *currentTitle = getTitle();
+                getLogger()->errF(F("ContentScreen[%s]: Failed to allocate memory for text copy"),
+                                  currentTitle ? currentTitle : "Unknown");
             }
             return nullptr;
         }
@@ -1147,7 +1182,9 @@ char *ContentScreen::_truncateText(const char *text, uint16_t availableWidth, ui
             {
                 if (getLogger())
                 {
-                    getLogger()->errF(F("ContentScreen: Failed to allocate memory for truncated text ..."));
+                    const char *currentTitle = getTitle();
+                    getLogger()->errF(F("ContentScreen[%s]: Failed to allocate memory for truncated text ..."),
+                                      currentTitle ? currentTitle : "Unknown");
                 }
                 return nullptr;
             }
@@ -1164,7 +1201,9 @@ char *ContentScreen::_truncateText(const char *text, uint16_t availableWidth, ui
     {
         if (getLogger())
         {
-            getLogger()->errF(F("ContentScreen: Failed to allocate memory for truncated text"));
+            const char *currentTitle = getTitle();
+            getLogger()->errF(F("ContentScreen[%s]: Failed to allocate memory for truncated text"),
+                              currentTitle ? currentTitle : "Unknown");
         }
         return nullptr;
     }
