@@ -121,3 +121,8 @@ This is the initial version written by Ven Reddy
   - **Safe defaults**: Graceful handling on small displays and allocation failures
   - **Performance optimized**: Only redraws footer area when dialogs close (not entire screen)
 - Added `refreshMenu()` method to MenuScreen class for efficient menu content updates
+
+## 21st August 2025 - Updated Release (1.3.1)
+
+- **NEW FEATURE**: Added ButtonScreen class for horizontal button navigation
+- **METHOD NAMING**: Updated layout getters for consistency: `_getHeaderY()` → `_getHeaderTop()`, `_getFooterY()` → `_getFooterTop()`, `_getProgressBarY()` → `_getProgressBarTop()`

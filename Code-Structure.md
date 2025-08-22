@@ -145,6 +145,24 @@ This document provides a comprehensive reference of all classes and functions av
 - `ConfirmResult confirm(String text, String leftText, String rightText)` // Show confirmation with String objects
 - `ConfirmResult confirmF(const __FlashStringHelper* text, const __FlashStringHelper* leftText, const __FlashStringHelper* rightText)` // Show confirmation with FlashStrings
 
+**Layout Methods for Content Positioning:**
+
+- `uint16_t _getContentTop() const` // Get Y coordinate of content area top edge
+- `uint16_t _getContentLeft() const` // Get X coordinate of content area left edge
+- `uint16_t _getContentHeight() const` // Get available height of content area
+- `uint16_t _getContentWidth() const` // Get available width of content area
+- `uint16_t _getHeaderY() const` // Get Y coordinate of header region
+- `uint16_t _getHeaderHeight() const` // Get height of header region
+- `virtual uint16_t _getFooterY() const` // Get Y coordinate of footer region (virtual for ButtonScreen override)
+- `virtual uint16_t _getFooterHeight() const` // Get height of footer region (virtual for ButtonScreen override)
+- `uint16_t _getProgressBarY() const` // Get Y coordinate of progress bar region
+- `uint16_t _getProgressBarHeight() const` // Get height of progress bar region
+
+**Protected Methods for Derived Classes:**
+
+- `uint8_t _getButtonItemCount() const` // Get number of button items (for derived classes like ButtonScreen)
+- `const char* _getButtonItem(uint8_t index) const` // Get button item text by index (for derived classes like ButtonScreen)
+
 **Enums:**
 
 - `enum ConfirmResult` // Confirmation dialog result: CONFIRM_LEFT, CONFIRM_RIGHT
@@ -163,6 +181,22 @@ This document provides a comprehensive reference of all classes and functions av
 - `virtual const char* _getMenuItemConfigValue(uint8_t index)` // Optional: get configuration value string for menu item
 - `virtual const __FlashStringHelper* _getMenuItemConfigValueF(uint8_t index)` // Optional: get configuration FlashString for menu item
 - `virtual bool _isMenuItemEnabled(uint8_t index) const` // Optional: check if menu item is enabled/selectable
+
+## ButtonScreen (ButtonScreen.h)
+
+- `ButtonScreen()` // Constructor with horizontal button defaults
+- `virtual ~ButtonScreen()` // Destructor - ContentScreen handles button items cleanup
+- `bool open()` // Initialize view when screen opens, finding first enabled item
+- `virtual void loop()` // Main loop processing for horizontal button screen updates
+- `Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)` // Handle user input for horizontal navigation (left/right/select/back)
+- `void refreshButtons()` // Refresh the horizontal button display
+- `uint16_t _getFooterHeight() const override` // Override to provide expanded footer height for horizontal buttons
+- `virtual Screen* _getSelectedButtonItemScreen(int index) = 0` // Pure virtual: get screen for selected button item
+- `virtual const char* _getButtonItemConfigValue(uint8_t index)` // Optional: get configuration value string for button item
+- `virtual const __FlashStringHelper* _getButtonItemConfigValueF(uint8_t index)` // Optional: get configuration FlashString for button item
+- `virtual bool _isButtonItemEnabled(uint8_t index) const` // Optional: check if button item is enabled/selectable
+
+**Note**: Uses ContentScreen's `setButtonItems()` methods for button content since footer buttons aren't visible when horizontal button display is active.
 
 ## ConsoleScreen (ConsoleScreen.h)
 

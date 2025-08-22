@@ -1,12 +1,22 @@
 /*
- * M1Shield Simple ConsoleScreen Example
+ * SimpleButtonScreen.ino - Simple button screen demonstration
  *
- * Basic console screen demonstrating text output, colors, and scrolling.
- * See README.md for complete documentation.
+ * Demonstrates the ButtonScreen class with horizontal navigation,
+ * config values, and enabled/disabled button items.
  *
- * Authors: Marcel Erz (RetroStack)
- * License: MIT
+ * Hardware: Arduino Mega 2560 with M1Shield
+ *
+ * Usage:
+ * - Use left/right arrows to navigate button items horizontally
+ * - Press up arrow or joystick to select an item
+ * - Press menu button to exit
+ *
+ * Author: Marcel Erz (RetroStack)
+ * Released under the MIT License.
  */
+
+#include <M1Shield.h>
+#include "SimpleButton.h"
 
 // Uncomment the display type you're using:
 // For ST7789 240x240 square displays
@@ -49,27 +59,27 @@ Display_ST7789_320x240 displayProvider;
 // #include <Display_SH1106.h>
 // Display_SH1106 displayProvider;
 
-// Include required libraries
-#include <M1Shield.h>
-#include "SimpleConsole.h"
-
 void setup()
 {
-    // Initialize serial for debugging
     Serial.begin(115200);
-    Serial.println("=== Simple ConsoleScreen Example ===");
+    Serial.println(F("Button Screen"));
 
-    // Initialize M1Shield
-    M1Shield.begin(displayProvider);
+    // Initialize the M1Shield with display
+    if (!M1Shield.begin(displayProvider))
+    {
+        Serial.println(F("Failed to initialize M1Shield!"));
+        while (1)
+            delay(100);
+    }
 
-    // Set our console screen as active
-    M1Shield.setScreen(new SimpleConsole());
+    Serial.println(F("M1Shield initialized successfully"));
+    Serial.println(F("Use left/right to navigate, up to select, menu to exit"));
 
-    Serial.println("ConsoleScreen loaded and ready!");
+    // Set the button screen as the active screen
+    M1Shield.setScreen(new SimpleButton());
 }
 
 void loop()
 {
-    // Main loop - let M1Shield handle everything
     M1Shield.loop();
 }

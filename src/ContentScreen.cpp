@@ -108,7 +108,7 @@ void ContentScreen::_drawScreen()
         gfx.drawRect(0, contentTop - 1, screenWidth, contentHeight + 2, M1Shield.convertColor(SCREEN_COLOR_FG));
 
         // Draw separator line above progress bar
-        uint16_t progressTop = _getProgressBarY();
+        uint16_t progressTop = _getProgressBarTop();
         gfx.drawFastHLine(0, progressTop - 1, screenWidth, M1Shield.convertColor(SCREEN_COLOR_FG));
     }
 }
@@ -150,7 +150,7 @@ void ContentScreen::loop()
 }
 
 // Get the top position of the header
-uint16_t ContentScreen::_getHeaderY() const
+uint16_t ContentScreen::_getHeaderTop() const
 {
     return 0;
 }
@@ -169,7 +169,7 @@ void ContentScreen::_drawHeader()
         return;
 
     uint16_t screenWidth = M1Shield.getScreenWidth();
-    uint16_t top = _getHeaderY();
+    uint16_t top = _getHeaderTop();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
@@ -259,7 +259,7 @@ uint16_t ContentScreen::_getContentWidth() const
 }
 
 // Get the Y position of the footer
-uint16_t ContentScreen::_getFooterY() const
+uint16_t ContentScreen::_getFooterTop() const
 {
     uint16_t screenHeight = M1Shield.getScreenHeight();
     uint8_t padding = _getPadding();
@@ -281,7 +281,7 @@ void ContentScreen::_drawFooter()
         return;
 
     uint16_t screenWidth = M1Shield.getScreenWidth();
-    uint16_t top = _getFooterY();
+    uint16_t top = _getFooterTop();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
@@ -332,7 +332,7 @@ const char *ContentScreen::_getButtonItem(uint8_t index) const
 }
 
 // Get the Y position of the progress bar
-uint16_t ContentScreen::_getProgressBarY() const
+uint16_t ContentScreen::_getProgressBarTop() const
 {
     uint16_t screenHeight = M1Shield.getScreenHeight();
     return screenHeight - _getProgressBarHeight();
@@ -364,7 +364,7 @@ void ContentScreen::_drawProgressBar()
         return;
 
     uint16_t screenWidth = M1Shield.getScreenWidth();
-    uint16_t top = _getProgressBarY();
+    uint16_t top = _getProgressBarTop();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
@@ -764,7 +764,7 @@ void ContentScreen::_drawNotification()
         return;
 
     uint16_t screenWidth = M1Shield.getScreenWidth();
-    uint16_t top = _getFooterY();
+    uint16_t top = _getFooterTop();
     uint16_t height = _getFooterHeight();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
@@ -1017,7 +1017,7 @@ void ContentScreen::_drawAlert(const char *text)
         return;
 
     uint16_t screenWidth = M1Shield.getScreenWidth();
-    uint16_t top = _getFooterY();
+    uint16_t top = _getFooterTop();
     uint16_t height = _getFooterHeight();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
@@ -1073,7 +1073,7 @@ void ContentScreen::_drawConfirm(const char *text, const char *leftText, const c
         return;
 
     uint16_t screenWidth = M1Shield.getScreenWidth();
-    uint16_t top = _getFooterY();
+    uint16_t top = _getFooterTop();
     uint16_t height = _getFooterHeight();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();

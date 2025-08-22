@@ -1,12 +1,21 @@
 /*
- * M1Shield Simple ConsoleScreen Example
+ * ComprehensiveButtonScreen.ino - Comprehensive button screen demonstration
  *
- * Basic console screen demonstrating text output, colors, and scrolling.
- * See README.md for complete documentation.
+ * Demonstrates advanced features of the ButtonScreen class including:
+ * - Dynamic button item updates
+ * - FlashString button items
+ * - Real-time configuration values
+ * - Complex state management
+ * - Multiple button screens
  *
- * Authors: Marcel Erz (RetroStack)
- * License: MIT
+ * Hardware: Arduino Mega 2560 with M1Shield
+ *
+ * Author: Marcel Erz (RetroStack)
+ * Released under the MIT License.
  */
+
+#include <M1Shield.h>
+#include "ComprehensiveButton.h"
 
 // Uncomment the display type you're using:
 // For ST7789 240x240 square displays
@@ -49,27 +58,31 @@ Display_ST7789_320x240 displayProvider;
 // #include <Display_SH1106.h>
 // Display_SH1106 displayProvider;
 
-// Include required libraries
-#include <M1Shield.h>
-#include "SimpleConsole.h"
-
 void setup()
 {
-    // Initialize serial for debugging
     Serial.begin(115200);
-    Serial.println("=== Simple ConsoleScreen Example ===");
+    Serial.println(F("Comprehensive Button Screen Example"));
 
-    // Initialize M1Shield
-    M1Shield.begin(displayProvider);
+    if (!M1Shield.begin(displayProvider))
+    {
+        Serial.println(F("Failed to initialize M1Shield!"));
+        while (1)
+            delay(100);
+    }
 
-    // Set our console screen as active
-    M1Shield.setScreen(new SimpleConsole());
+    Serial.println(F("M1Shield initialized"));
+    Serial.println(F("Features demonstrated:"));
+    Serial.println(F("- Dynamic config values"));
+    Serial.println(F("- Real-time updates"));
+    Serial.println(F("- State-dependent enabling"));
+    Serial.println(F("- FlashString button items"));
+    Serial.println(F("- Complex navigation"));
 
-    Serial.println("ConsoleScreen loaded and ready!");
+    // Start with main menu
+    M1Shield.setScreen(new ComprehensiveButton());
 }
 
 void loop()
 {
-    // Main loop - let M1Shield handle everything
     M1Shield.loop();
 }

@@ -12,6 +12,7 @@ M1Shield    KEYWORD1
 Screen  KEYWORD1
 ContentScreen   KEYWORD1
 MenuScreen  KEYWORD1
+ButtonScreen    KEYWORD1
 ConsoleScreen   KEYWORD1
 ConsolePagingMode   KEYWORD1
 LoggerScreen    KEYWORD1
@@ -224,6 +225,7 @@ setMenuItems    KEYWORD2
 setMenuItemsF   KEYWORD2
 clearMenuItems  KEYWORD2
 refreshMenu KEYWORD2
+refreshButtons  KEYWORD2
 _getContentLeft KEYWORD2
 _getContentTop KEYWORD2
 _getContentWidth KEYWORD2
@@ -261,6 +263,12 @@ _getMenuItemConfigValue KEYWORD2
 _isMenuItemEnabled  KEYWORD2
 _findNextEnabledItem    KEYWORD2
 _getItemsPerPage    KEYWORD2
+_setSelectedButtonItemIndex KEYWORD2
+_getSelectedButtonItemIndex KEYWORD2
+_getSelectedButtonItemScreen    KEYWORD2
+_getButtonItemConfigValue   KEYWORD2
+_getButtonItemConfigValueF  KEYWORD2
+_isButtonItemEnabled    KEYWORD2
 print   KEYWORD2
 println KEYWORD2
 cls KEYWORD2

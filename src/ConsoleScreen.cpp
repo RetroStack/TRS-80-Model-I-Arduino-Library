@@ -114,7 +114,7 @@ void ConsoleScreen::_updateDimensions()
 void ConsoleScreen::loop()
 {
     // Check for one-time execution
-    if (!_hasExecutedOnce && (millis() - _screenOpenTime >= 1000))
+    if (!_hasExecutedOnce && (millis() - _screenOpenTime >= 100))
     {
         _executeOnce();
         _hasExecutedOnce = true;
@@ -541,7 +541,7 @@ void ConsoleScreen::_showPagingMessage()
         return;
 
     uint16_t screenWidth = M1Shield.getScreenWidth();
-    uint16_t top = _getFooterY();
+    uint16_t top = _getFooterTop();
     uint16_t height = _getFooterHeight();
 
     Adafruit_GFX &gfx = M1Shield.getGFX();

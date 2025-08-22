@@ -40,24 +40,27 @@ private:
     char *_truncateText(const char *text, uint16_t availableWidth, uint8_t charWidth); // Create truncated copy of text with "..." if needed
 
 protected:
-    void _drawHeader();      // Draw the header region with title
-    void _drawFooter();      // Draw the footer region with button labels
-    void _drawProgressBar(); // Draw the progress bar region
+    void _drawHeader();         // Draw the header region with title
+    virtual void _drawFooter(); // Draw the footer region with button labels (virtual for customization)
+    void _drawProgressBar();    // Draw the progress bar region
 
     void _drawScreen() override;     // Implement Screen's _drawScreen() to manage layout regions
     virtual void _drawContent() = 0; // Pure virtual method for content area rendering
 
     // Layout dimension getters for content positioning
-    uint16_t _getContentTop() const;        // Get Y coordinate of content area top edge
-    uint16_t _getContentLeft() const;       // Get X coordinate of content area left edge
-    uint16_t _getContentHeight() const;     // Get available height of content area
-    uint16_t _getContentWidth() const;      // Get available width of content area
-    uint16_t _getHeaderY() const;           // Get Y coordinate of header region
-    uint16_t _getHeaderHeight() const;      // Get height of header region
-    uint16_t _getFooterY() const;           // Get Y coordinate of footer region
-    uint16_t _getFooterHeight() const;      // Get height of footer region
-    uint16_t _getProgressBarY() const;      // Get Y coordinate of progress bar region
-    uint16_t _getProgressBarHeight() const; // Get height of progress bar region
+    uint16_t _getContentTop() const;           // Get Y coordinate of content area top edge
+    uint16_t _getContentLeft() const;          // Get X coordinate of content area left edge
+    uint16_t _getContentHeight() const;        // Get available height of content area
+    uint16_t _getContentWidth() const;         // Get available width of content area
+    uint16_t _getHeaderTop() const;            // Get Y coordinate of header region
+    uint16_t _getHeaderHeight() const;         // Get height of header region
+    virtual uint16_t _getFooterTop() const;    // Get Y coordinate of footer region (virtual for ButtonScreen override)
+    virtual uint16_t _getFooterHeight() const; // Get height of footer region (virtual for ButtonScreen override)
+    uint16_t _getProgressBarTop() const;       // Get Y coordinate of progress bar region
+    uint16_t _getProgressBarHeight() const;    // Get height of progress bar region
+
+    uint8_t _getButtonItemCount() const;             // Get number of button items (for derived classes)
+    const char *_getButtonItem(uint8_t index) const; // Get button item text by index (for derived classes)
 
 public:
     // Content management methods
