@@ -17,6 +17,7 @@ The `M1Shield` class provides a comprehensive hardware abstraction layer for the
   - [Joystick Input](#joystick-input)
 - [LED Control](#led-control)
 - [Screen Management](#screen-management)
+- [SD Card Detection](#sd-card-detection)
 - [Cassette Interface](#cassette-interface)
 - [Main Loop](#main-loop)
 - [Hardware Status](#hardware-status)
@@ -343,6 +344,29 @@ void setup() {
 }
 ```
 
+## SD Card Detection
+
+The M1Shield provides hardware-level SD card detection functionality to check if an SD card is properly inserted and accessible.
+
+### `bool isSDCardInserted()`
+
+Attempts to initialize the SD card and returns whether it was successful. This method provides a reliable way to detect if an SD card is present and accessible.
+
+**Returns:** `true` if SD card is inserted and can be initialized, `false` otherwise.
+
+**Note:** This method attempts SD card initialization which may take a moment. Use sparingly in time-critical code.
+
+```cpp
+// Check if SD card is available before file operations
+if (M1Shield.isSDCardInserted()) {
+    Serial.println("SD card detected and ready");
+    // Proceed with file operations
+} else {
+    Serial.println("No SD card detected or initialization failed");
+    // Handle missing SD card case
+}
+```
+
 ## Cassette Interface
 
 WARNING: **ADVANCED FEATURE: Incorrect usage can permanently damage your Arduino!**
@@ -591,18 +615,18 @@ void setup() {
 
 ### Supported Display Types
 
-| Provider Class           | Display Controller | Resolution        | Notes                      |
-| ------------------------ | ------------------ | ----------------- | -------------------------- |
-| `Display_ST7789_240x240` | ST7789             | 240x240           | Square displays            |
-| `Display_ST7789_320x170` | ST7789             | 320x170           | Wide displays              |
-| `Display_ST7789_320x240` | ST7789             | 320x240           | Landscape displays         |
-| `Display_ST7735`         | ST7735             | 128x160           | Smaller displays           |
+| Provider Class           | Display Controller | Resolution         | Notes                      |
+| ------------------------ | ------------------ | ------------------ | -------------------------- |
+| `Display_ST7789_240x240` | ST7789             | 240x240            | Square displays            |
+| `Display_ST7789_320x170` | ST7789             | 320x170            | Wide displays              |
+| `Display_ST7789_320x240` | ST7789             | 320x240            | Landscape displays         |
+| `Display_ST7735`         | ST7735             | 128x160            | Smaller displays           |
 | `Display_ILI9341`        | ILI9341            | 240x320 -> 320x240 | Alternative common display |
 | `Display_ST7796`         | ST7796             | 320x480 -> 480x320 | Large displays, landscape  |
-| `Display_HX8357`         | HX8357             | 320x480           | Large displays, portrait   |
+| `Display_HX8357`         | HX8357             | 320x480            | Large displays, portrait   |
 | `Display_ILI9325`        | ILI9325            | 240x320 -> 320x240 | Parallel interface         |
-| `Display_SSD1306`        | SSD1306            | 128x64            | OLED monochrome display    |
-| `Display_SH1106`         | SH1106             | 128x64            | OLED monochrome display    |
+| `Display_SSD1306`        | SSD1306            | 128x64             | OLED monochrome display    |
+| `Display_SH1106`         | SH1106             | 128x64             | OLED monochrome display    |
 
 ### Migration from Legacy System
 

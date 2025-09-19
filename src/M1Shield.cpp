@@ -614,6 +614,24 @@ uint8_t M1ShieldClass::getSDCardSelectPin() const
     return PIN_SD_SELECT;
 }
 
+// Check if SD card is inserted and can be initialized
+bool M1ShieldClass::isSDCardInserted() const
+{
+    // Try to initialize the SD card with the configured chip select pin
+    bool cardDetected = SD.begin(PIN_SD_SELECT);
+
+    if (cardDetected && _logger)
+    {
+        _logger->infoF(F("M1Shield: SD card detected and initialized successfully"));
+    }
+    else if (!cardDetected && _logger)
+    {
+        _logger->warnF(F("M1Shield: SD card not detected or initialization failed"));
+    }
+
+    return cardDetected;
+}
+
 // ========== Buzzer Methods ==========
 
 // Activate buzzer sound

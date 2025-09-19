@@ -161,6 +161,7 @@ This is the initial version written by Ven Reddy
 - **HARDWARE UPDATE**: Updated M1Shield pin assignments for new hardware revision
   - **Pin Remapping**: Updated button pins (MENU: 41, SELECT: 40, directional: A8-A11), LED pins (10-13), display pins
   - **Enhanced Features**: Added buzzer support (pin 4) and SD card support (pin 49) with dedicated methods
+  - **SD Card Detection**: Added `isSDCardInserted()` method for automatic SD card detection and initialization
   - **Cassette Interface**: Updated cassette remote pins (CR1: 43, CR2: 42) with improved safety warnings
   - **Display Support**: Updated TFT reset pin (38) and chip select configuration for better display compatibility
 - **BEHAVIOR IMPROVEMENT**: Refined UI input handling for better user experience

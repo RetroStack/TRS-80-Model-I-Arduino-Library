@@ -398,3 +398,12 @@ navigateToDirectory KEYWORD2
 getCurrentDirectory KEYWORD2
 refresh KEYWORD2
 FileEntry   KEYWORD1
+
+# M1Shield SD Card Methods
+getSDCardSelectPin  KEYWORD2
+isSDCardInserted    KEYWORD2
+
+# M1Shield Buzzer Methods
+buzzerOn    KEYWORD2
+buzzerOff   KEYWORD2
+buzz    KEYWORD2

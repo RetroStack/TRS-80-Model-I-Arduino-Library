@@ -9,6 +9,7 @@
 
 #include <Arduino.h>
 #include <Adafruit_GFX.h>
+#include <SD.h>
 #include "Screen.h"
 #include "DisplayProvider.h"
 #include "ILogger.h"
@@ -145,6 +146,7 @@ public:
 
     // ========== SD Card Methods ==========
     uint8_t getSDCardSelectPin() const; // Get SD card chip select pin number
+    bool isSDCardInserted() const;      // Check if SD card is inserted and can be initialized
 
     // ========== Buzzer Methods ==========
     void buzzerOn() const;                    // Activate buzzer sound

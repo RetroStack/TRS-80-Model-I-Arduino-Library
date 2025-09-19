@@ -84,6 +84,17 @@ void setup()
     Serial.println("Initializing M1Shield...");
     M1Shield.begin(displayProvider);
 
+    // Check for SD card
+    Serial.print("SD Card Status: ");
+    if (M1Shield.isSDCardInserted())
+    {
+        Serial.println("Detected and initialized");
+    }
+    else
+    {
+        Serial.println("Not detected or initialization failed");
+    }
+
     // Draw simple test display
     drawSimpleDisplay();
 

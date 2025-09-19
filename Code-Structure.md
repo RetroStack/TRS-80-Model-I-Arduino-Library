@@ -46,6 +46,10 @@ This document provides a comprehensive reference of all classes and functions av
 - `void writeCassetteIn(uint8_t value) const` // Write analog to Model 1 cassette input
 - `uint16_t readCassetteOut() const` // Read analog from Model 1 cassette output
 - `uint8_t getSDCardSelectPin() const` // Get SD card chip select pin number
+- `bool isSDCardInserted() const` // Check if SD card is inserted and can be initialized
+- `void buzzerOn() const` // Activate buzzer sound
+- `void buzzerOff() const` // Deactivate buzzer sound
+- `void buzz(unsigned int durationMs) const` // Buzz for specified duration
 - `void loop()` // Main update loop for all shield operations
 
 **Enums:**
