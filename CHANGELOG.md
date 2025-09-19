@@ -136,3 +136,38 @@ This is the initial version written by Ven Reddy
   - `getLogBufferSize()`, `clearLogBuffer()`, `getLogBufferCount()` - Buffer management
 - **BEHAVIOR**: Buffered entries automatically replay when screen opens
 - **MEMORY**: Dynamic allocation, zero overhead when disabled
+
+## 19th September 2025 - FileBrowser and File Viewer Updates (1.4.0)
+
+- **NEW FEATURE**: Added FileBrowser class for comprehensive SD card file and directory browsing
+  - **MenuScreen-based**: Built on MenuScreen framework for consistent navigation and pagination
+  - **Dynamic Memory Management**: Uses dynamic arrays that grow as needed, no fixed limits
+  - **Unified Constructor**: Single constructor with intelligent parameter handling supports all usage patterns
+  - **Directory Navigation**: Full directory traversal with ".." entries and optional root restrictions
+  - **File Type Detection**: Automatic file type recognition and appropriate viewer selection
+  - **Smart Path Parsing**: Automatically parses full file paths into directory and filename components
+  - **Pre-selection Support**: Can pre-select and scroll to specific files upon opening
+  - **Configurable Extensions**: Customizable text file extensions for TextFileViewer integration
+  - **Arduino Compatible**: No std::vector dependencies, optimized for embedded systems
+- **NEW FEATURE**: Added TextFileViewer and BinaryFileViewer integration with FileBrowser
+  - **Automatic Selection**: FileBrowser automatically opens appropriate viewer based on file extension
+  - **Cross-References**: File viewer examples include helpful comments suggesting FileBrowser for browsing
+  - **Seamless Integration**: Viewers work together to provide complete file management solution
+- **NEW FEATURE**: Added dedicated SELECT button support throughout the UI framework
+  - **Hardware Support**: New BUTTON_SELECT action type with full M1Shield hardware integration and debouncing
+  - **Improved Navigation**: SELECT button now handles item selection in MenuScreen and ButtonScreen
+  - **Consistent UX**: Unified selection behavior across all UI components using dedicated select action
+  - **Input Refinement**: Menu navigation now uses SELECT for item activation, improving user experience
+- **HARDWARE UPDATE**: Updated M1Shield pin assignments for new hardware revision
+  - **Pin Remapping**: Updated button pins (MENU: 41, SELECT: 40, directional: A8-A11), LED pins (10-13), display pins
+  - **Enhanced Features**: Added buzzer support (pin 4) and SD card support (pin 49) with dedicated methods
+  - **Cassette Interface**: Updated cassette remote pins (CR1: 43, CR2: 42) with improved safety warnings
+  - **Display Support**: Updated TFT reset pin (38) and chip select configuration for better display compatibility
+- **BEHAVIOR IMPROVEMENT**: Refined UI input handling for better user experience
+  - **MenuScreen**: Changed from directional button selection to dedicated SELECT button for item activation
+  - **ButtonScreen**: Updated to use SELECT button for horizontal button activation instead of vertical navigation
+  - **ConsoleScreen**: Simplified exit behavior to only use MENU button (removed LEFT button exit)
+- **HARDWARE IMPROVEMENT**: Updated low-level pin configuration for new hardware revision
+  - **Signal Mapping**: Updated MUX (Port H/Pin 16), WR (Port J/Pin 15), OUT (Port J/Pin 14) pin assignments
+  - **Configuration Cleanup**: Removed deprecated CR1/CR2 port configuration entries
+  - **Compatibility**: Maintains backward compatibility through software abstraction layer

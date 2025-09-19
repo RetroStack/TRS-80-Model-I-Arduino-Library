@@ -50,6 +50,7 @@ private:
 
     // Button debouncing state tracking
     unsigned long _menuPressed;     // Last menu button press timestamp
+    unsigned long _selectPressed;   // Last select button press timestamp
     unsigned long _upPressed;       // Last up button press timestamp
     unsigned long _downPressed;     // Last down button press timestamp
     unsigned long _leftPressed;     // Last left button press timestamp
@@ -103,6 +104,9 @@ public:
     bool isMenuPressed() const; // Check current menu button state (non-consuming)
     bool wasMenuPressed();      // Check and consume menu button press event
 
+    bool isSelectPressed() const; // Check current select button state (non-consuming)
+    bool wasSelectPressed();      // Check and consume select button press event
+
     bool isLeftPressed() const; // Check current left button state (non-consuming)
     bool wasLeftPressed();      // Check and consume left button press event
 
@@ -138,6 +142,14 @@ public:
 
     void writeCassetteIn(uint8_t value) const; // Write analog value to Model 1 cassette input (A14)
     uint16_t readCassetteOut() const;          // Read analog value from Model 1 cassette output (A15)
+
+    // ========== SD Card Methods ==========
+    uint8_t getSDCardSelectPin() const; // Get SD card chip select pin number
+
+    // ========== Buzzer Methods ==========
+    void buzzerOn() const;                    // Activate buzzer sound
+    void buzzerOff() const;                   // Deactivate buzzer sound
+    void buzz(unsigned int durationMs) const; // Buzz for specified duration in milliseconds
 
     void loop(); // Main update loop for shield operations
 

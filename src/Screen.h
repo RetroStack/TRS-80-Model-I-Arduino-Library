@@ -32,12 +32,13 @@ enum ActionTaken : uint16_t
     BUTTON_UP = 2048,       // Up directional button pressed
     BUTTON_DOWN = 4096,     // Down directional button pressed
     BUTTON_JOYSTICK = 8192, // Joystick button (center press) pressed
+    BUTTON_SELECT = 16384,  // Select button pressed
 
     // Convenience masks for input detection
     JOYSTICK_ANY = JOYSTICK_LEFT | JOYSTICK_RIGHT | JOYSTICK_UP | JOYSTICK_DOWN |
-                   JOYSTICK_UP_LEFT | JOYSTICK_UP_RIGHT | JOYSTICK_DOWN_LEFT | JOYSTICK_DOWN_RIGHT,    // Any joystick movement
-    BUTTON_ANY = BUTTON_MENU | BUTTON_LEFT | BUTTON_RIGHT | BUTTON_UP | BUTTON_DOWN | BUTTON_JOYSTICK, // Any button press
-    BUTTON_DIRECTIONAL = BUTTON_LEFT | BUTTON_RIGHT | BUTTON_UP | BUTTON_DOWN,                         // Any directional button (excludes menu/joystick buttons)
+                   JOYSTICK_UP_LEFT | JOYSTICK_UP_RIGHT | JOYSTICK_DOWN_LEFT | JOYSTICK_DOWN_RIGHT,                    // Any joystick movement
+    BUTTON_ANY = BUTTON_MENU | BUTTON_LEFT | BUTTON_RIGHT | BUTTON_UP | BUTTON_DOWN | BUTTON_JOYSTICK | BUTTON_SELECT, // Any button press
+    BUTTON_DIRECTIONAL = BUTTON_LEFT | BUTTON_RIGHT | BUTTON_UP | BUTTON_DOWN,                                         // Any directional button (excludes menu/joystick buttons)
 
     // Directional input masks (joystick + button combinations)
     LEFT_ANY = JOYSTICK_LEFT | JOYSTICK_UP_LEFT | JOYSTICK_DOWN_LEFT | BUTTON_LEFT,      // Any leftward input

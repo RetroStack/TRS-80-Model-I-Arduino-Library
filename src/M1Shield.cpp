@@ -14,17 +14,18 @@
 constexpr unsigned long DEBOUNCE_TIME = 250; // Button debounce time in milliseconds
 
 // RGB LED pin assignments
-constexpr uint8_t PIN_ACTIVE_LED = 41; // Activity indicator LED pin
-constexpr uint8_t PIN_LED_BLUE = A9;   // Blue channel of RGB LED
-constexpr uint8_t PIN_LED_GREEN = A10; // Green channel of RGB LED
-constexpr uint8_t PIN_LED_RED = A11;   // Red channel of RGB LED
+constexpr uint8_t PIN_ACTIVE_LED = 13; // Activity indicator LED pin
+constexpr uint8_t PIN_LED_BLUE = 10;   // Blue channel of RGB LED
+constexpr uint8_t PIN_LED_GREEN = 11;  // Green channel of RGB LED
+constexpr uint8_t PIN_LED_RED = 12;    // Red channel of RGB LED
 
 // Button pins
-constexpr uint8_t PIN_MENU = 10;
-constexpr uint8_t PIN_LEFT = 7;
-constexpr uint8_t PIN_RIGHT = 6;
-constexpr uint8_t PIN_DOWN = 5;
-constexpr uint8_t PIN_UP = 4;
+constexpr uint8_t PIN_MENU = 41;
+constexpr uint8_t PIN_SELECT = 40;
+constexpr uint8_t PIN_LEFT = A8;
+constexpr uint8_t PIN_RIGHT = A9;
+constexpr uint8_t PIN_DOWN = A10;
+constexpr uint8_t PIN_UP = A11;
 
 // Joystick pins
 constexpr uint8_t PIN_JOYSTICK_BUTTON = 39;
@@ -37,13 +38,19 @@ constexpr uint8_t JOYSTICK_CENTER_MAX = 155;
 // Display pin definitions
 constexpr int8_t PIN_TFT_CS = 9;   // Chip Select
 constexpr int8_t PIN_TFT_DC = 8;   // Data/Command
-constexpr int8_t PIN_TFT_RST = -1; // Reset pin (-1 if not used)
+constexpr int8_t PIN_TFT_RST = 38; // Reset pin (-1 if not used)
 
 // Cassette interface pins
-constexpr uint8_t PIN_CR1 = 2;        // Cassette Remote 1 (configurable input/output)
-constexpr uint8_t PIN_CR2 = 3;        // Cassette Remote 2 (configurable input/output)
+constexpr uint8_t PIN_CR1 = 43;       // Cassette Remote 1 (configurable input/output)
+constexpr uint8_t PIN_CR2 = 42;       // Cassette Remote 2 (configurable input/output)
 constexpr uint8_t PIN_CASS_IN = A14;  // Cassette input from the perspective of the Model 1
 constexpr uint8_t PIN_CASS_OUT = A15; // Cassette output from the perspective of the Model 1
+
+// Buzzer pin
+constexpr uint8_t PIN_BUZZER = 4; // Buzzer pin
+
+// SD Card pin
+constexpr uint8_t PIN_SD_SELECT = 49; // SD card chip select pin
 
 // Define global instance
 M1ShieldClass M1Shield;
@@ -53,6 +60,7 @@ M1ShieldClass::M1ShieldClass() : _screen(nullptr),
                                  _displayProvider(nullptr),
                                  _logger(nullptr),
                                  _menuPressed(0),
+                                 _selectPressed(0),
                                  _upPressed(0),
                                  _downPressed(0),
                                  _leftPressed(0),
@@ -96,6 +104,7 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
     setLEDColor(LEDColor::COLOR_OFF);
 
     pinMode(PIN_MENU, INPUT_PULLUP);
+    pinMode(PIN_SELECT, INPUT_PULLUP);
     pinMode(PIN_LEFT, INPUT_PULLUP);
     pinMode(PIN_RIGHT, INPUT_PULLUP);
     pinMode(PIN_DOWN, INPUT_PULLUP);
@@ -104,6 +113,8 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
     pinMode(PIN_JOYSTICK_BUTTON, INPUT_PULLUP);
     pinMode(PIN_JOYSTICK_X, INPUT);
     pinMode(PIN_JOYSTICK_Y, INPUT);
+
+    pinMode(PIN_BUZZER, OUTPUT);
 
     // Initialize display with error handling
     // Manual Reset Sequence
@@ -406,6 +417,21 @@ bool M1ShieldClass::wasMenuPressed()
     return wasPressed;
 }
 
+// Check if select button is currently pressed
+bool M1ShieldClass::isSelectPressed() const
+{
+    return (digitalRead(PIN_SELECT) == LOW);
+}
+
+// Check if select button was just pressed (debounced)
+bool M1ShieldClass::wasSelectPressed()
+{
+    unsigned long newState = _getDebouncedState(PIN_SELECT, _selectPressed);
+    bool wasPressed = (_selectPressed == 0 && newState != 0);
+    _selectPressed = newState;
+    return wasPressed;
+}
+
 // Check if left button is currently pressed
 bool M1ShieldClass::isLeftPressed() const
 {
@@ -580,6 +606,36 @@ uint16_t M1ShieldClass::readCassetteOut() const
     return analogRead(PIN_CASS_OUT);
 }
 
+// ========== SD Card Methods ==========
+
+// Get SD card chip select pin number
+uint8_t M1ShieldClass::getSDCardSelectPin() const
+{
+    return PIN_SD_SELECT;
+}
+
+// ========== Buzzer Methods ==========
+
+// Activate buzzer sound
+void M1ShieldClass::buzzerOn() const
+{
+    digitalWrite(PIN_BUZZER, HIGH);
+}
+
+// Deactivate buzzer sound
+void M1ShieldClass::buzzerOff() const
+{
+    digitalWrite(PIN_BUZZER, LOW);
+}
+
+// Buzz for specified duration in milliseconds
+void M1ShieldClass::buzz(unsigned int durationMs) const
+{
+    buzzerOn();
+    delay(durationMs);
+    buzzerOff();
+}
+
 // Main loop - Process input and update current screen
 void M1ShieldClass::loop()
 {
@@ -675,6 +731,10 @@ void M1ShieldClass::loop()
     if (wasMenuPressed())
     {
         action = static_cast<ActionTaken>(action | BUTTON_MENU);
+    }
+    if (wasSelectPressed())
+    {
+        action = static_cast<ActionTaken>(action | BUTTON_SELECT);
     }
     if (wasLeftPressed())
     {

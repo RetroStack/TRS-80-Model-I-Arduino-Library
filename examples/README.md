@@ -114,6 +114,25 @@ Visual logging and debugging interface
 
 - **[LoggerScreen](UI/LoggerScreen/README.md)** - Visual logging with color coding and timestamps
 
+#### 📁 [FileBrowser](UI/FileBrowser/README.md)
+
+SD card file and directory browser with automatic file type detection
+
+- **[SimpleFileBrowser](UI/FileBrowser/SimpleFileBrowser/README.md)** - Basic file browsing and navigation
+- **[ComprehensiveFileBrowser](UI/FileBrowser/ComprehensiveFileBrowser/README.md)** - Advanced file browser features and restrictions
+
+#### 📄 [TextFileViewer](UI/TextFileViewer/README.md)
+
+Text file viewer for log files and configuration files
+
+- **[TextFileViewer](UI/TextFileViewer/README.md)** - Simple text file display with navigation
+
+#### 🔢 [BinaryFileViewer](UI/BinaryFileViewer/README.md)
+
+Binary file viewer with hex dump display
+
+- **[BinaryFileViewer](UI/BinaryFileViewer/README.md)** - Hex dump viewer for binary files
+
 ### 📝 [Logger](Logger/README.md)
 
 **Debugging and monitoring system**
