@@ -50,6 +50,7 @@ private:
     String _normalizePath(const String &path);                                        // Normalize directory path
     String _getParentDirectory(const String &path);                                   // Get parent directory path
     void _parseFilePath(const String &filePath, String &directory, String &filename); // Parse file path into directory and filename components
+    bool _isFilePath(const String &path);                                             // Check if path contains a filename
     bool _isValidFile(const String &filename);                                        // Check if file should be shown
     bool _isTextFile(const String &filename);                                         // Check if file should open with TextFileViewer
     void _findAndSelectFile(const String &filename);                                  // Find file in current directory and select it

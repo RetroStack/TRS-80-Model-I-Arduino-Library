@@ -297,8 +297,12 @@ bool FileBrowser::_loadDirectoryContents()
             }
             else
             {
-                // Alphabetical within same type
-                swap = _files[j].name.compareToIgnoreCase(_files[j + 1].name) > 0;
+                // Alphabetical within same type (case-insensitive comparison)
+                String name1 = _files[j].name;
+                String name2 = _files[j + 1].name;
+                name1.toLowerCase();
+                name2.toLowerCase();
+                swap = name1.compareTo(name2) > 0;
             }
 
             if (swap)
@@ -466,13 +470,13 @@ String FileBrowser::_getFileSizeString(uint32_t size)
     {
         return String(size) + "B";
     }
-    else if (size < 1024 * 1024)
+    else if (size < 1024UL * 1024UL)
     {
         return String(size / 1024) + "K";
     }
     else
     {
-        return String(size / (1024 * 1024)) + "M";
+        return String(size / (1024UL * 1024UL)) + "M";
     }
 }
 
