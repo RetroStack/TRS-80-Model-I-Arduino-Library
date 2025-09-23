@@ -112,7 +112,8 @@ Screen *MenuScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t offse
     }
 
     // Menu selection - activate the selected item (only if enabled)
-    if (action & (BUTTON_SELECT | BUTTON_JOYSTICK))
+    if (action & (BUTTON_SELECT | BUTTON_LEFT | BUTTON_RIGHT | BUTTON_JOYSTICK | JOYSTICK_LEFT | JOYSTICK_RIGHT) ||
+        ((action & (JOYSTICK_UP_LEFT | JOYSTICK_UP_RIGHT | JOYSTICK_DOWN_LEFT | JOYSTICK_DOWN_RIGHT)) && offsetX > offsetY))
     {
         uint8_t selectedIndex = _getSelectedMenuItemIndex();
         if (_isMenuItemEnabled(selectedIndex))

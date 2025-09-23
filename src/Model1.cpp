@@ -6,6 +6,7 @@
 
 #include "Model1.h"
 #include "utils.h"
+#include <SD.h>
 #include "Model1LowLevel.h"
 
 // Refresh trigger

@@ -9,7 +9,6 @@
 
 #include <Arduino.h>
 #include <Adafruit_GFX.h>
-#include <SD.h>
 #include "Screen.h"
 #include "DisplayProvider.h"
 #include "ILogger.h"

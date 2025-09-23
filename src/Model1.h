@@ -8,7 +8,6 @@
 #define MODEL1_H
 
 #include <Arduino.h>
-#include <SD.h>
 #include "ILogger.h"
 #include "AddressBus.h"
 #include "DataBus.h"

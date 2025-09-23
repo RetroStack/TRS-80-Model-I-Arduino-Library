@@ -7,6 +7,7 @@
 #include "M1Shield.h"
 #include <Adafruit_GFX.h>
 #include <SPI.h>
+#include <SD.h>
 #include <Arduino.h>
 #include "Model1.h"
 
