@@ -47,8 +47,8 @@ const uint8_t PIN_RD_OFF = ~(0b00000001 << 2);
 #define PIN_RD_PORT D
 
 // Port J, Bit(0) 0, Pin 15
-const uint8_t PIN_WR_ON = 0b00000001;
-const uint8_t PIN_WR_OFF = 0b00000001;
+const uint8_t PIN_WR_ON = 0b00000001 << 0;
+const uint8_t PIN_WR_OFF = ~(0b00000001 << 0);
 #define PIN_WR_PORT J
 
 // Port D, Bit(0) 3, Pin 18
