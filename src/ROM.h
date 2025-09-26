@@ -31,6 +31,9 @@ public:
   uint32_t getChecksum(uint8_t rom);        // Calculate checksum for specified ROM
   const __FlashStringHelper *identifyROM(); // Identify ROM contents and return description string
 
+  bool dumpROMToSD(uint8_t rom, const char *filename); // Dump single ROM contents as binary to SD card file
+  bool dumpAllROMsToSD(const char *filename);          // Dump all ROMs combined as binary to SD card file
+
   // Print ROM contents with specified formatting options
   void printROMContents(uint8_t rom, PRINT_STYLE style = BOTH, bool relative = true, uint16_t bytesPerLine = 32);
 };

@@ -80,6 +80,63 @@ This directory contains comprehensive examples demonstrating all UI components a
 
 **[View ConsoleScreen Examples and Documentation →](ConsoleScreen/README.md)**
 
+### TextFileViewer (File Display)
+
+**Location:** `TextFileViewer/`
+**Purpose:** Display and navigate through text files from SD card
+**Key Features:**
+
+- Memory-efficient paging system
+- Horizontal scrolling for wide lines
+- Auto-paging for log file monitoring
+- Real-time file updates
+- Configurable text appearance
+
+**Examples:**
+
+- **SimpleTextFileViewer** - Basic file viewing with navigation and auto-update
+- **ComprehensiveTextFileViewer** - Menu integration and enhanced features
+
+**[View TextFileViewer Examples and Documentation →](TextFileViewer/README.md)**
+
+### BinaryFileViewer (Hex Dump Display)
+
+**Location:** `BinaryFileViewer/`
+**Purpose:** Display binary files in hex dump format from SD card
+**Key Features:**
+
+- Standard hex dump format (address + hex + ASCII)
+- Color-coded display (yellow address, cyan hex, white ASCII)
+- Memory-efficient page buffering
+- Dynamic layout calculation
+- Large file support
+
+**Examples:**
+
+- **SimpleBinaryFileViewer** - Basic binary file viewing in hex dump format
+
+**[View BinaryFileViewer Examples and Documentation →](BinaryFileViewer/README.md)**
+
+### FileBrowser (SD Card Navigation)
+
+**Location:** `FileBrowser/`
+**Purpose:** Browse SD card directories and files with automatic viewer selection
+**Key Features:**
+
+- Directory navigation with ".." support
+- Automatic file type detection and viewer selection
+- Directory restrictions and root limiting
+- File pre-selection and auto-scrolling
+- Custom file type extensions
+- Integration with TextFileViewer and BinaryFileViewer
+
+**Examples:**
+
+- **SimpleFileBrowser** - Basic SD card file and directory browsing
+- **ComprehensiveFileBrowser** - Advanced features, restrictions, and configurations
+
+**[View FileBrowser Examples and Documentation →](FileBrowser/README.md)**
+
 ### LoggerScreen (Specialized Display)
 
 **Location:** `LoggerScreen/`
@@ -101,13 +158,15 @@ This directory contains comprehensive examples demonstrating all UI components a
 
 ### 1. Choose Your UI Component
 
-| Component         | Best For                                             | Complexity |
-| ----------------- | ---------------------------------------------------- | ---------- |
-| **Screen**        | Custom interfaces, games, specialized displays       | Low        |
-| **ContentScreen** | Structured applications, dashboards, status displays | Medium     |
-| **MenuScreen**    | Navigation, settings, hierarchical interfaces        | Medium     |
-| **ConsoleScreen** | Logging, debugging, terminal-style interfaces        | Low-Medium |
-| **LoggerScreen**  | System monitoring, data logging, diagnostics         | Low        |
+| Component            | Best For                                             | Complexity |
+| -------------------- | ---------------------------------------------------- | ---------- |
+| **Screen**           | Custom interfaces, games, specialized displays       | Low        |
+| **ContentScreen**    | Structured applications, dashboards, status displays | Medium     |
+| **MenuScreen**       | Navigation, settings, hierarchical interfaces        | Medium     |
+| **ConsoleScreen**    | Logging, debugging, terminal-style interfaces        | Low-Medium |
+| **TextFileViewer**   | File viewing, log monitoring, documentation display  | Low-Medium |
+| **BinaryFileViewer** | Hex dump viewing, firmware analysis, ROM inspection  | Low-Medium |
+| **LoggerScreen**     | System monitoring, data logging, diagnostics         | Low        |
 
 ### 2. Start with Simple Examples
 
@@ -117,6 +176,8 @@ Each component has a **Simple** example that demonstrates basic usage:
 - `ContentScreen/SimpleContent/` - Structured layout basics
 - `MenuScreen/SimpleMenu/` - Basic menu navigation
 - `ConsoleScreen/SimpleConsole/` - Terminal-style output
+- `TextFileViewer/SimpleTextFileViewer/` - File viewing and navigation
+- `BinaryFileViewer/SimpleBinaryFileViewer/` - Hex dump viewing
 - `LoggerScreen/` - Logging interface
 
 ### 3. Explore Advanced Features

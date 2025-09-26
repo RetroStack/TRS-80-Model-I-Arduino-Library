@@ -45,6 +45,11 @@ This document provides a comprehensive reference of all classes and functions av
 - `bool readCR2() const` // Read digital value from CR2 pin
 - `void writeCassetteIn(uint8_t value) const` // Write analog to Model 1 cassette input
 - `uint16_t readCassetteOut() const` // Read analog from Model 1 cassette output
+- `uint8_t getSDCardSelectPin() const` // Get SD card chip select pin number
+- `bool isSDCardInserted() const` // Check if SD card is inserted and can be initialized
+- `void buzzerOn() const` // Activate buzzer sound
+- `void buzzerOff() const` // Deactivate buzzer sound
+- `void buzz(unsigned int durationMs) const` // Buzz for specified duration
 - `void loop()` // Main update loop for all shield operations
 
 **Enums:**
@@ -89,6 +94,7 @@ This document provides a comprehensive reference of all classes and functions av
 - `char* getVersion()` // Get version string
 - `void printMemoryContents(uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32)` // Print memory contents to Serial
 - `void printMemoryContents(Print &output, uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32)` // Print memory contents to custom output
+- `bool dumpMemoryToSD(uint16_t address, uint16_t length, const char *filename)` // Dump memory region to SD card file as binary
 
 **Enums:**
 
@@ -236,6 +242,53 @@ This document provides a comprehensive reference of all classes and functions av
 
 - `enum ConsolePagingMode` // Auto-paging behavior: PAGING_AUTO_CLEAR, PAGING_WAIT_TIMEOUT, PAGING_WAIT_BUTTON, PAGING_WAIT_BOTH
 
+## TextFileViewer (TextFileViewer.h)
+
+- `TextFileViewer(const char* filename)` // Constructor with filename to display
+- `~TextFileViewer()` // Destructor
+- `void setAutoPaging(bool enabled)` // Enable/disable auto-paging for log files
+- `void setTextColor(uint16_t color)` // Set text color
+- `void setBackgroundColor(uint16_t color)` // Set background color
+- `void setTextSize(uint8_t size)` // Set text size (affects line height and character width)
+- `bool nextPage()` // Go to next page
+- `bool previousPage()` // Go to previous page
+- `bool goToPage(uint32_t page)` // Go to specific page (0-based)
+- `bool goToLastPage()` // Go to last page
+- `void scrollLeft()` // Scroll left horizontally
+- `void scrollRight()` // Scroll right horizontally
+- `void resetHorizontalScroll()` // Reset horizontal scroll to beginning
+- `uint32_t getCurrentPage() const` // Get current page number (1-based for display)
+- `uint32_t getTotalPages() const` // Get total number of pages
+- `bool isAutoPagingEnabled() const` // Check if auto-paging is enabled
+- `bool isFileLoaded() const` // Check if file is loaded
+- `bool refreshFile()` // Refresh file information and current page
+
+## BinaryFileViewer (BinaryFileViewer.h)
+
+- `BinaryFileViewer(const char* filename)` // Constructor with filename to display, sets default button items
+- `~BinaryFileViewer()` // Destructor
+- `uint32_t getCurrentOffset() const` // Get current file offset
+- `uint32_t getFileSize() const` // Get total file size
+- `bool isFileOpen() const` // Check if file is open
+- `uint32_t getCurrentPage() const` // Get current page number (1-based)
+- `uint32_t getTotalPages() const` // Get total number of pages
+- `bool nextPage()` // Go to next page
+- `bool previousPage()` // Go to previous page
+- `bool goToPage(uint32_t page)` // Go to specific page (0-based)
+- `bool goToOffset(uint32_t offset)` // Go to specific file offset
+- `bool goToLastPage()` // Go to last page
+
+## FileBrowser (FileBrowser.h)
+
+- `FileBrowser(const String& directoryOrPath = "/", const String& targetFile = "", bool restrictToRoot = false)` // Unified constructor with intelligent parameter handling (supports file path parsing)
+- `~FileBrowser()` // Destructor
+- `void addTextExtension(const String& extension)` // Add file extension to open with TextFileViewer
+- `void clearTextExtensions()` // Clear all text extensions (will use defaults)
+- `void setTextExtensions(const String* extensions, uint8_t count)` // Set text extensions array
+- `bool navigateToDirectory(const String& directory)` // Public method to navigate to directory
+- `String getCurrentDirectory() const` // Get current directory path
+- `void refresh()` // Refresh current directory contents
+
 ## LoggerScreen (LoggerScreen.h)
 
 - `LoggerScreen(const char* title = "Logger")` // Constructor with optional title
@@ -323,6 +376,7 @@ This document provides a comprehensive reference of all classes and functions av
 - `char* read(uint8_t x, uint8_t y, uint16_t length, bool raw)` // Read characters from video memory
 - `void setAutoScroll(bool autoScroll)` // Enable/disable automatic scrolling
 - `void setLowerCaseMod(bool hasLowerCaseMod)` // Configure lowercase character support
+- `bool captureToSD(const char* filename, bool useLocalCharacterSet = true)` // Capture current viewport to SD card file
 - `char convertModel1CharacterToLocal(char character)` // Convert Model 1 character to local encoding
 - `char convertLocalCharacterToModel1(char character)` // Convert local character to Model 1 encoding
 
@@ -356,6 +410,8 @@ This document provides a comprehensive reference of all classes and functions av
 - `uint16_t getROMLength(uint8_t rom)` // Get length for ROM number
 - `uint32_t getChecksum(uint8_t rom)` // Calculate checksum for ROM number
 - `const __FlashStringHelper* identifyROM()` // Identify ROM type from checksum
+- `bool dumpROMToSD(uint8_t rom, const char* filename)` // Dump single ROM contents as binary to SD card file
+- `bool dumpAllROMsToSD(const char* filename)` // Dump all ROMs combined as binary to SD card file
 - `void printROMContents(uint8_t rom, PRINT_STYLE style = BOTH, bool relative = true, uint16_t bytesPerLine = 32)` // Print ROM contents to Serial
 
 ## AddressBus (AddressBus.h)
@@ -469,6 +525,19 @@ This document provides a comprehensive reference of all classes and functions av
 - `void debug(const char* fmt, ...)` // Log debug message to Serial
 - `size_t write(uint8_t ch)` // Write single character to Serial
 - `size_t write(const uint8_t* buffer, size_t size)` // Write character buffer to Serial
+- `void mute()` // Disable all logging output
+- `void unmute()` // Re-enable logging output
+
+## SDCardLogger (SDCardLogger.h)
+
+- `SDCardLogger(const char* filename = "log.txt")` // Constructor with optional filename
+- `bool begin()` // Initialize SD card and prepare log file
+- `void info(const char* fmt, ...)` // Log info message to SD card
+- `void warn(const char* fmt, ...)` // Log warning message to SD card
+- `void err(const char* fmt, ...)` // Log error message to SD card
+- `void debug(const char* fmt, ...)` // Log debug message to SD card
+- `size_t write(uint8_t ch)` // Write single character to SD card
+- `size_t write(const uint8_t* buffer, size_t size)` // Write character buffer to SD card
 - `void mute()` // Disable all logging output
 - `void unmute()` // Re-enable logging output
 

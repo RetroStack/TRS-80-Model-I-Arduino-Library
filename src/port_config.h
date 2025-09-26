@@ -36,30 +36,30 @@ const uint8_t PIN_CAS_ON = 0b00000001 << 5;
 const uint8_t PIN_CAS_OFF = ~(0b00000001 << 5);
 #define PIN_CAS_PORT E
 
-// Port L, Bit(0) 0, Pin 49
-const uint8_t PIN_MUX_ON = 0b00000001 << 0;
-const uint8_t PIN_MUX_OFF = ~(0b00000001 << 0);
-#define PIN_MUX_PORT L
+// Port H, Bit(0) 1, Pin 16
+const uint8_t PIN_MUX_ON = 0b00000001 << 1;
+const uint8_t PIN_MUX_OFF = ~(0b00000001 << 1);
+#define PIN_MUX_PORT H
 
 // Port D, Bit(0) 2, Pin 19
 const uint8_t PIN_RD_ON = 0b00000001 << 2;
 const uint8_t PIN_RD_OFF = ~(0b00000001 << 2);
 #define PIN_RD_PORT D
 
-// Port G, Bit(0) 1, Pin 40
-const uint8_t PIN_WR_ON = 0b00000001 << 1;
-const uint8_t PIN_WR_OFF = ~(0b00000001 << 1);
-#define PIN_WR_PORT G
+// Port J, Bit(0) 0, Pin 15
+const uint8_t PIN_WR_ON = 0b00000001;
+const uint8_t PIN_WR_OFF = 0b00000001;
+#define PIN_WR_PORT J
 
 // Port D, Bit(0) 3, Pin 18
 const uint8_t PIN_IN_ON = 0b00000001 << 3;
 const uint8_t PIN_IN_OFF = ~(0b00000001 << 3);
 #define PIN_IN_PORT D
 
-// Port D, Bit(0) 7, Pin 38
-const uint8_t PIN_OUT_ON = 0b00000001 << 7;
-const uint8_t PIN_OUT_OFF = (uint8_t)~(0b00000001 << 7);
-#define PIN_OUT_PORT D
+// Port J, Bit(0) 1, Pin 14
+const uint8_t PIN_OUT_ON = 0b00000001 << 1;
+const uint8_t PIN_OUT_OFF = ~(0b00000001 << 1);
+#define PIN_OUT_PORT J
 
 // Port L, Bit(0) 1, Pin 48
 const uint8_t PIN_INT_ON = 0b00000001 << 1;
@@ -75,15 +75,5 @@ const uint8_t PIN_TEST_OFF = ~(0b00000001 << 2);
 const uint8_t PIN_WAIT_ON = 0b00000001 << 3;
 const uint8_t PIN_WAIT_OFF = ~(0b00000001 << 3);
 #define PIN_WAIT_PORT L
-
-// Port L, Bit(0) 6, Pin 43
-const uint8_t PIN_CR1_ON = 0b00000001 << 6;
-const uint8_t PIN_CR1_OFF = ~(0b00000001 << 6);
-#define PIN_CR1_PORT L
-
-// Port L, Bit(0) 7, Pin 42
-const uint8_t PIN_CR2_ON = 0b00000001 << 7;
-const uint8_t PIN_CR2_OFF = (uint8_t)~(0b00000001 << 7);
-#define PIN_CR2_PORT L
 
 #endif // PORT_CONFIG_H

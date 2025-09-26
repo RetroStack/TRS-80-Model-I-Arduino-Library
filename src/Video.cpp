@@ -5,7 +5,9 @@
  */
 
 #include "Video.h"
+#include <SD.h>
 #include "Model1.h"
+#include "M1Shield.h"
 
 const uint8_t VIDEO_COLS = 64;
 const uint8_t VIDEO_ROWS = 16;
@@ -500,6 +502,77 @@ void Video::setAutoScroll(bool autoScroll)
 void Video::setLowerCaseMod(bool hasLowerCaseMod)
 {
   _hasLowerCaseMod = hasLowerCaseMod;
+}
+
+// Capture current viewport to SD card file
+bool Video::captureToSD(const char *filename, bool useLocalCharacterSet)
+{
+  if (!filename)
+  {
+    if (_logger)
+      _logger->errF(F("Video: captureToSD() called with null filename"));
+    return false;
+  }
+
+  // Initialize SD card if not already done
+  if (!SD.begin(M1Shield.getSDCardSelectPin()))
+  {
+    if (_logger)
+      _logger->errF(F("Video: Failed to initialize SD card"));
+    return false;
+  }
+
+  // Check if file already exists
+  bool fileExists = SD.exists(filename);
+
+  // Open file for writing
+  File videoFile = SD.open(filename, FILE_WRITE);
+  if (!videoFile)
+  {
+    if (_logger)
+      _logger->errF(F("Video: Failed to open file %s for writing"), filename);
+    return false;
+  }
+
+  if (_logger)
+    _logger->infoF(F("Video: Capturing viewport to %s"), filename);
+
+  // If file existed before, add an empty line separator
+  if (fileExists)
+  {
+    videoFile.println();
+  }
+
+  // Capture the viewport area
+  for (uint8_t row = 0; row < _viewPort.height; row++)
+  {
+    for (uint8_t col = 0; col < _viewPort.width; col++)
+    {
+      uint16_t address = getAddress(col, row);
+      uint8_t character = Model1.readMemory(address);
+
+      if (useLocalCharacterSet)
+      {
+        character = convertModel1CharacterToLocal(character);
+      }
+
+      // Replace null characters and non-printable characters with spaces for readability
+      if (character == 0 || (character < 32 && character != '\t' && character != '\n'))
+      {
+        character = ' ';
+      }
+
+      videoFile.write(character);
+    }
+    videoFile.println(); // Add newline at end of each row
+  }
+
+  videoFile.close();
+
+  if (_logger)
+    _logger->infoF(F("Video: Successfully captured viewport to %s"), filename);
+
+  return true;
 }
 
 // Convert a character from Model 1 to local representation

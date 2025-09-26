@@ -6,6 +6,7 @@ Keyboard    KEYWORD1
 KeyboardChangeIterator    KEYWORD1
 ILogger KEYWORD1
 SerialLogger    KEYWORD1
+SDCardLogger    KEYWORD1
 CompositeLogger KEYWORD1
 Cassette    KEYWORD1
 M1Shield    KEYWORD1
@@ -15,6 +16,8 @@ MenuScreen  KEYWORD1
 ButtonScreen    KEYWORD1
 ConsoleScreen   KEYWORD1
 ConsolePagingMode   KEYWORD1
+TextFileViewer  KEYWORD1
+BinaryFileViewer    KEYWORD1
 LoggerScreen    KEYWORD1
 DisplayProvider KEYWORD1
 Display_ST7789_240x240  KEYWORD1
@@ -196,6 +199,7 @@ getVersionMinor KEYWORD2
 getVersionRevision  KEYWORD2
 getVersion  KEYWORD2
 printMemoryContents  KEYWORD2
+dumpMemoryToSD   KEYWORD2
 display KEYWORD2
 getDisplayProvider  KEYWORD2
 getGFX  KEYWORD2
@@ -303,6 +307,20 @@ continuePaging  KEYWORD2
 setAutoForward  KEYWORD2
 isAutoForwardEnabled    KEYWORD2
 getAutoForwardDelay KEYWORD2
+setAutoPaging   KEYWORD2
+setBackgroundColor  KEYWORD2
+nextPage    KEYWORD2
+previousPage    KEYWORD2
+goToPage    KEYWORD2
+goToLastPage    KEYWORD2
+scrollLeft  KEYWORD2
+scrollRight KEYWORD2
+resetHorizontalScroll   KEYWORD2
+getCurrentPage  KEYWORD2
+getTotalPages   KEYWORD2
+isAutoPagingEnabled KEYWORD2
+isFileLoaded    KEYWORD2
+reloadFile  KEYWORD2
 configWriteRAS   KEYWORD2
 configWriteCAS   KEYWORD2
 configWriteMUX   KEYWORD2
@@ -367,3 +385,25 @@ readCR1 KEYWORD2
 readCR2 KEYWORD2
 writeCassetteIn KEYWORD2
 readCassetteOut KEYWORD2
+
+#######################################
+# FileBrowser (FileBrowser.h)
+#######################################
+
+FileBrowser KEYWORD1
+addTextExtension    KEYWORD2
+clearTextExtensions KEYWORD2
+setTextExtensions   KEYWORD2
+navigateToDirectory KEYWORD2
+getCurrentDirectory KEYWORD2
+refresh KEYWORD2
+FileEntry   KEYWORD1
+
+# M1Shield SD Card Methods
+getSDCardSelectPin  KEYWORD2
+isSDCardInserted    KEYWORD2
+
+# M1Shield Buzzer Methods
+buzzerOn    KEYWORD2
+buzzerOff   KEYWORD2
+buzz    KEYWORD2

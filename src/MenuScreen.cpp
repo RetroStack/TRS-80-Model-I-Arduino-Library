@@ -112,36 +112,8 @@ Screen *MenuScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t offse
     }
 
     // Menu selection - activate the selected item (only if enabled)
-    if (action & (BUTTON_RIGHT | BUTTON_JOYSTICK | JOYSTICK_RIGHT) ||
-        ((action & (JOYSTICK_UP_RIGHT | JOYSTICK_DOWN_RIGHT)) && offsetX > offsetY))
-    {
-        uint8_t selectedIndex = _getSelectedMenuItemIndex();
-        if (_isMenuItemEnabled(selectedIndex))
-        {
-            if (getLogger())
-            {
-                if (selectedIndex < _menuItemCount && _menuItems[selectedIndex])
-                {
-                    getLogger()->infoF(F("MenuScreen: Selecting menu item %d: '%s'"), selectedIndex, _menuItems[selectedIndex]);
-                }
-                else
-                {
-                    getLogger()->infoF(F("MenuScreen: Selecting menu item %d"), selectedIndex);
-                }
-            }
-            return _getSelectedMenuItemScreen(selectedIndex);
-        }
-        // If current item is disabled, don't activate it
-        if (getLogger())
-        {
-            getLogger()->warnF(F("MenuScreen: Attempted to select disabled menu item %d"), selectedIndex);
-        }
-        return nullptr;
-    }
-
-    // Menu selection - activate the selected item (only if enabled)
-    if (action & (BUTTON_LEFT | JOYSTICK_LEFT) ||
-        ((action & (JOYSTICK_UP_LEFT | JOYSTICK_DOWN_LEFT)) && offsetX > offsetY))
+    if (action & (BUTTON_SELECT | BUTTON_LEFT | BUTTON_RIGHT | BUTTON_JOYSTICK | JOYSTICK_LEFT | JOYSTICK_RIGHT) ||
+        ((action & (JOYSTICK_UP_LEFT | JOYSTICK_UP_RIGHT | JOYSTICK_DOWN_LEFT | JOYSTICK_DOWN_RIGHT)) && offsetX > offsetY))
     {
         uint8_t selectedIndex = _getSelectedMenuItemIndex();
         if (_isMenuItemEnabled(selectedIndex))

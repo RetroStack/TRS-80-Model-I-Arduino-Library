@@ -87,6 +87,8 @@ public:
   void setAutoScroll(bool autoScroll);        // Enable or disable automatic scrolling
   void setLowerCaseMod(bool hasLowerCaseMod); // Set whether lowercase modification is available
 
+  bool captureToSD(const char *filename, bool useLocalCharacterSet = true); // Capture current viewport to SD card file
+
   char convertModel1CharacterToLocal(char character); // Convert TRS-80 character to local character
   char convertLocalCharacterToModel1(char character); // Convert local character to TRS-80 character
 

@@ -155,6 +155,66 @@ const __FlashStringHelper *ROM::identifyROM()
   return nullptr;
 }
 
+// Dump single ROM contents as binary to SD card file
+bool ROM::dumpROMToSD(uint8_t rom, const char *filename)
+{
+  if (!filename)
+  {
+    if (_logger)
+      _logger->errF(F("ROM: dumpROMToSD() called with null filename"));
+    return false;
+  }
+
+  if (!_checkROMNumber(rom))
+    return false;
+
+  uint16_t addr = getROMStartAddress(rom);
+  uint16_t size = getROMLength(rom);
+
+  if (_logger)
+    _logger->infoF(F("ROM: Dumping ROM %d to %s (address: 0x%04X, size: %d bytes)"), rom, filename, addr, size);
+
+  // Use Model1's memory dump method for efficient and consistent SD card handling
+  bool success = Model1.dumpMemoryToSD(addr, size, filename);
+
+  if (success && _logger)
+    _logger->infoF(F("ROM: Successfully dumped ROM %d to %s"), rom, filename);
+
+  return success;
+}
+
+// Dump all ROMs combined as binary to SD card file
+bool ROM::dumpAllROMsToSD(const char *filename)
+{
+  if (!filename)
+  {
+    if (_logger)
+      _logger->errF(F("ROM: dumpAllROMsToSD() called with null filename"));
+    return false;
+  }
+
+  // Calculate the start address (first ROM) and total length of all ROMs
+  uint16_t startAddr = getROMStartAddress(0); // Start of ROM 0
+  uint16_t totalLength = 0;
+
+  // Calculate total length by summing all ROM lengths
+  for (uint8_t rom = 0; rom < 4; rom++)
+  {
+    totalLength += getROMLength(rom);
+  }
+
+  if (_logger)
+    _logger->infoF(F("ROM: Dumping all ROMs to %s (address: 0x%04X, total length: %d bytes)"), filename, startAddr, totalLength);
+
+  // Use Model1's efficient memory dump method for the entire ROM region
+  bool success = Model1.dumpMemoryToSD(startAddr, totalLength, filename);
+
+  if (success && _logger)
+    _logger->infoF(F("ROM: Successfully dumped all ROMs to %s"), filename);
+
+  return success;
+}
+
 // Print ROM contents with specified formatting options
 void ROM::printROMContents(uint8_t rom, PRINT_STYLE style, bool relative, uint16_t bytesPerLine)
 {

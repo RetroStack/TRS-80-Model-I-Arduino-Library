@@ -170,7 +170,7 @@ Screen *ConsoleScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t of
     }
 
     // Handle back/menu button to exit console
-    if (action & (BUTTON_MENU | BUTTON_LEFT))
+    if (action & (BUTTON_MENU))
     {
         return nullptr; // Let base class handle navigation
     }

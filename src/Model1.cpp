@@ -6,6 +6,7 @@
 
 #include "Model1.h"
 #include "utils.h"
+#include <SD.h>
 #include "Model1LowLevel.h"
 
 // Refresh trigger
@@ -25,8 +26,8 @@
 
 // Version constants
 #define M1_VERSION_MAJOR 1
-#define M1_VERSION_MINOR 3
-#define M1_VERSION_REVISION 2
+#define M1_VERSION_MINOR 4
+#define M1_VERSION_REVISION 0
 
 // Define global instance
 Model1Class Model1;
@@ -1102,4 +1103,89 @@ void Model1Class::printMemoryContents(Print &output, uint16_t start, uint16_t le
 
     free(buffer);
     free(lineBuffer);
+}
+
+// Dump memory region to SD card file as binary
+bool Model1Class::dumpMemoryToSD(uint16_t address, uint16_t length, const char *filename)
+{
+    if (!filename)
+    {
+        if (_logger)
+            _logger->errF(F("Model1: dumpMemoryToSD() called with null filename"));
+        return false;
+    }
+
+    if (length == 0)
+    {
+        if (_logger)
+            _logger->errF(F("Model1: dumpMemoryToSD() called with zero length"));
+        return false;
+    }
+
+    // Initialize SD card if not already done
+    if (!SD.begin(M1Shield.getSDCardSelectPin()))
+    {
+        if (_logger)
+            _logger->errF(F("Model1: Failed to initialize SD card"));
+        return false;
+    }
+
+    // Open file for writing (binary mode)
+    File memoryFile = SD.open(filename, FILE_WRITE);
+    if (!memoryFile)
+    {
+        if (_logger)
+            _logger->errF(F("Model1: Failed to open file %s for writing"), filename);
+        return false;
+    }
+
+    if (_logger)
+        _logger->infoF(F("Model1: Dumping memory from address 0x%04X, length %u bytes to %s"), address, length, filename);
+
+    // Read and write memory in chunks to manage memory usage
+    const uint16_t CHUNK_SIZE = 64; // Read in 64-byte chunks
+    uint16_t bytesWritten = 0;
+
+    for (uint16_t offset = 0; offset < length; offset += CHUNK_SIZE)
+    {
+        uint16_t chunkSize = (offset + CHUNK_SIZE <= length) ? CHUNK_SIZE : (length - offset);
+        uint16_t currentAddress = address + offset;
+
+        // Read chunk from memory
+        uint8_t *chunk = readMemory(currentAddress, chunkSize);
+        if (!chunk)
+        {
+            if (_logger)
+                _logger->errF(F("Model1: Failed to read memory at address 0x%04X"), currentAddress);
+            memoryFile.close();
+            return false;
+        }
+
+        // Write chunk to file
+        size_t written = memoryFile.write(chunk, chunkSize);
+        if (written != chunkSize)
+        {
+            if (_logger)
+                _logger->errF(F("Model1: Failed to write chunk to file (wrote %u of %u bytes)"), written, chunkSize);
+            free(chunk);
+            memoryFile.close();
+            return false;
+        }
+
+        bytesWritten += written;
+        free(chunk); // Free the allocated buffer
+
+        // Optional progress logging for large dumps
+        if (_logger && length > 1024 && (offset % 256 == 0))
+        {
+            _logger->infoF(F("Model1: Progress: %u / %u bytes written"), bytesWritten, length);
+        }
+    }
+
+    memoryFile.close();
+
+    if (_logger)
+        _logger->infoF(F("Model1: Successfully dumped %u bytes to %s"), bytesWritten, filename);
+
+    return true;
 }

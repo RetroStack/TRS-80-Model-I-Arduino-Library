@@ -11,6 +11,7 @@
 #include "ILogger.h"
 #include "AddressBus.h"
 #include "DataBus.h"
+#include "M1Shield.h"
 
 // Print style enumeration for memory output formatting
 enum PRINT_STYLE
@@ -128,6 +129,9 @@ public:
 
     void printMemoryContents(uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32);                // Print memory contents to serial
     void printMemoryContents(Print &output, uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32); // Print memory contents to output
+
+    // ---------- SD Card Export
+    bool dumpMemoryToSD(uint16_t address, uint16_t length, const char *filename); // Dump memory region to SD card file as binary
 };
 
 extern Model1Class Model1;
