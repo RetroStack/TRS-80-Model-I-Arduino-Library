@@ -563,11 +563,7 @@ void MenuScreen::setMenuItems(const char **menuItems, uint8_t menuItemCount)
     }
 
     // Update display if active
-    if (isActive())
-    {
-        _drawContent();
-        M1Shield.display();
-    }
+    refreshMenu();
 }
 
 // Set the menu items from an array of String objects
@@ -632,11 +628,7 @@ void MenuScreen::setMenuItems(String *menuItems, uint8_t menuItemCount)
     }
 
     // Update display if active
-    if (isActive())
-    {
-        _drawContent();
-        M1Shield.display();
-    }
+    refreshMenu();
 }
 
 // Set the currently selected menu item by index
@@ -659,11 +651,7 @@ void MenuScreen::_setSelectedMenuItemIndex(uint8_t index)
     uint8_t itemsPerPage = _getItemsPerPage();
     _currentPage = index / itemsPerPage;
 
-    if (isActive())
-    {
-        _drawContent();
-        M1Shield.display();
-    }
+    refreshMenu();
 }
 
 // Get the currently selected menu item index
@@ -697,11 +685,7 @@ void MenuScreen::clearMenuItems()
     _currentPage = 0;
 
     // Update display if active
-    if (isActive())
-    {
-        _drawContent();
-        M1Shield.display();
-    }
+    refreshMenu();
 }
 
 // Main loop for menu screen updates
@@ -718,12 +702,15 @@ void MenuScreen::loop()
 void MenuScreen::refreshMenu()
 {
     // Refresh just the menu content area (efficient for when menu item values change)
-    if (isActive())
-    {
-        Adafruit_GFX &gfx = M1Shield.getGFX();
-        gfx.startWrite();
-        _drawContent();
-        gfx.endWrite();
-        M1Shield.display();
-    }
+    if (!isActive())
+        return;
+
+    // _drawContent() opens and closes its own SPI transaction, so it must not
+    // be bracketed here - doing so closed the transaction early and then ended
+    // it a second time.
+    M1Shield.renderAll([this]
+                       {
+                           _drawContent();
+                           M1Shield.display();
+                       });
 }

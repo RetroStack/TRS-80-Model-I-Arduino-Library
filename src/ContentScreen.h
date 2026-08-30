@@ -42,6 +42,7 @@ private:
 protected:
     void _drawHeader();         // Draw the header region with title
     virtual void _drawFooter(); // Draw the footer region with button labels (virtual for customization)
+    void _refreshFooter();      // Redraw just the footer on every enabled render target
     void _drawProgressBar();    // Draw the progress bar region
 
     void _drawScreen() override;         // Implement Screen's _drawScreen() to manage layout regions

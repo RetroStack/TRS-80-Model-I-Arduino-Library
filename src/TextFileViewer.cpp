@@ -207,6 +207,11 @@ bool TextFileViewer::open()
         return false;
     }
 
+    // ContentScreen::open() drew the screen before the file was counted and
+    // loaded, so the first frame showed an empty page. Redraw now that there
+    // is content. (BinaryFileViewer::open() already does the same.)
+    refresh();
+
     return true;
 }
 
@@ -286,7 +291,7 @@ void TextFileViewer::_drawContent()
         }
 
         // Clear footer area first
-        M1Shield.getGFX().fillRect(0, _getFooterTop(), M1Shield.getScreenWidth(), _getFooterHeight(), _backgroundColor);
+        M1Shield.getGFX().fillRect(0, _getFooterTop(), M1Shield.getScreenWidth(), _getFooterHeight(), M1Shield.convertColor(_backgroundColor));
 
         // Draw status text
         M1Shield.getGFX().setCursor(5, _getFooterTop() + 5);

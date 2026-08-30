@@ -137,6 +137,12 @@ This directory contains comprehensive examples demonstrating all UI components a
 
 **[View FileBrowser Examples and Documentation →](FileBrowser/README.md)**
 
+### RenderTargets (Multiple Output Destinations)
+
+Draw one UI to several destinations at once and toggle each at runtime. Includes a custom `RenderTarget` that mirrors the UI to the Serial Monitor, so it runs with no extra hardware.
+
+- **RenderTargets** - Register a second panel and a serial mirror; SELECT toggles each
+
 ### LoggerScreen (Specialized Display)
 
 **Location:** `LoggerScreen/`

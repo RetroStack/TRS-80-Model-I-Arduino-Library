@@ -54,6 +54,8 @@ This document provides a comprehensive reference of all classes and functions av
 - `void buzzerOff() const` // Deactivate buzzer sound
 - `void buzz(unsigned int durationMs) const` // Buzz for specified duration
 - `RenderManager& getRenderManager()` // Get the render target manager
+- `bool addDisplay(DisplayRenderTarget &target, int8_t cs, int8_t dc, int8_t rst = -1)` // Initialize and register an additional panel
+- `template <typename F> void renderAll(F draw)` // Run a drawing operation once per enabled render target
 - `void loop()` // Main update loop for all shield operations
 
 **Enums:**
@@ -86,6 +88,11 @@ Holds registered render targets and drives them as a group. Target 0 is the prim
 - `RenderTarget* getRenderTarget(uint8_t index) const` // Target by index, or nullptr
 - `RenderTarget* getPrimaryRenderTarget() const` // Target 0, or nullptr
 - `bool displayAll()` // Push every enabled target
+- `RenderTarget* getActiveTarget() const` // Target being drawn, or the primary outside a pass
+- `RenderTarget* getPassTarget() const` // Target being drawn, or nullptr outside a pass
+- `bool inRenderPass() const` // True while a render pass is running
+- `void beginRenderPass(RenderTarget *target)` // Nominate the target drawing resolves to
+- `void endRenderPass()` // Return drawing resolution to the primary
 
 **Constants:**
 
@@ -96,6 +103,7 @@ Holds registered render targets and drives them as a group. Target 0 is the prim
 RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::begin()`.
 
 - `explicit DisplayRenderTarget(DisplayProvider &provider)` // Provider is required, not owned
+- `bool begin(int8_t cs, int8_t dc, int8_t rst = -1)` // Reset and create the panel
 - `void setDisplayProvider(DisplayProvider &provider)` // Swap the backing provider
 - `DisplayProvider& getDisplayProvider() const` // Get the backing provider
 

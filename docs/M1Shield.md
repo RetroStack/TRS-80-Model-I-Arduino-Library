@@ -549,7 +549,14 @@ void loop() {
 RenderManager& getRenderManager();
 ```
 
-`begin(provider)` wraps the display provider in a `DisplayRenderTarget` and registers it as the primary render target. `getGFX()`, `getScreenWidth()`, `getScreenHeight()` and `convertColor()` read from that target, and `display()` pushes every enabled one - so additional output destinations receive the same `display()` without any screen code changing.
+```cpp
+bool addDisplay(DisplayRenderTarget &target, int8_t cs, int8_t dc, int8_t rst = -1);
+template <typename F> void renderAll(F draw);
+```
+
+`begin(provider)` wraps the display provider in a `DisplayRenderTarget` and registers it as the primary render target. `getGFX()`, `getScreenWidth()`, `getScreenHeight()` and `convertColor()` resolve to whichever target is currently being drawn, so `renderAll()` can run one drawing operation across every enabled target **without any screen code changing**.
+
+`addDisplay()` initializes an additional panel on its own pins and registers it. It refuses a panel that fails to initialize, and refuses one sharing the primary's reset pin - that would reset the primary panel and leave it blank.
 
 See [RenderTarget](RenderTarget.md) for the interface and for writing a custom target.
 

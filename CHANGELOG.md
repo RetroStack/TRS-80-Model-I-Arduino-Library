@@ -201,3 +201,18 @@ This is the initial version written by Ven Reddy
   - **Non-nullable Provider**: `DisplayRenderTarget` takes its `DisplayProvider` by reference, removing a `getGFX()` path that deliberately returned a dereferenced null pointer
   - **Single Rule**: `isSmallDisplay()` lives once, on `RenderTarget`
   - **Unchanged for Screens**: screens keep calling `M1Shield.getGFX()` and `M1Shield.display()`; no screen code changes
+- **NEW FEATURE**: The UI framework now draws to every registered render target, not just the primary
+  - **Active Target**: `RenderManager` tracks which target is being drawn; `M1Shield`'s `getGFX()`, `getScreenWidth()`, `getScreenHeight()` and `convertColor()` resolve to it. Because every draw call already went through those accessors, the whole framework and every existing sketch became multi-target aware with no call-site changes
+  - **`M1Shield::renderAll()`**: runs a drawing operation once per enabled target. Public, so sketches can mirror their own partial redraws. Nested calls draw once against the target already nominated
+  - **`M1Shield::addDisplay()`**: initializes an additional panel on its own pins and registers it, refusing a panel that fails to initialize or that shares the primary's reset pin
+  - **Per-target Layout**: `isSmallDisplay()` reads the active target, so a UI mirrored onto a smaller panel picks up the small header, footer and progress bar automatically
+  - **Runtime Switching**: `RenderTarget::setEnabled()` now does something - a disabled target is neither drawn nor pushed. Target 0 remains the layout authority whether or not it is enabled
+  - **Example**: `examples/UI/RenderTargets` demonstrates a second panel and a custom serial-mirror target
+  - **Cost**: 2 bytes of SRAM and roughly 1.5 KB of flash. Draw time scales with the number of enabled targets
+- **FIX**: `ConsoleScreen` stored colours already converted for one display and then used them raw, so console and logger text was invisible on monochrome panels; `_consoleBgColor` was converted twice, rendering a white background black. Colours are now stored raw and converted at draw time
+- **FIX**: `MenuScreen::refreshMenu()` bracketed `_drawContent()` in an SPI transaction that `_drawContent()` already opened, closing it early and then ending it twice
+- **FIX**: `ContentScreen::notify()` drew the notification without pushing it, so notifications never appeared on buffered (OLED) panels
+- **FIX**: `ConsoleScreen` could push the display from inside an open bulk-write transaction when paging triggered mid-write
+- **FIX**: `LoggerScreen` defaulted its timestamp setting from the display size in its constructor, before any display was known - a globally declared logger always disabled timestamps. The default now runs in `open()` and never overrides an explicit `setTimestampEnabled()`
+- **FIX**: `TextFileViewer::open()` drew the screen before loading the file, so the first frame showed an empty page
+- **FIX**: `TextFileViewer` drew its footer background without converting the colour

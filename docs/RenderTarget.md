@@ -17,10 +17,12 @@
 
 `M1Shield.begin(provider)` creates a `DisplayRenderTarget` around the display provider and registers it as target 0. From then on, `M1Shield`'s display accessors read through the render manager rather than the provider directly:
 
-- `getGFX()`, `getScreenWidth()`, `getScreenHeight()` and `convertColor()` use the **primary** target (index 0).
-- `display()` pushes **every enabled** target.
+- `getGFX()`, `getScreenWidth()`, `getScreenHeight()` and `convertColor()` resolve to the **active** target - the one currently being drawn during a render pass, or the primary outside one.
+- `display()` pushes the active target during a pass, and **every enabled** target outside one.
 
-Screens are unaffected - they keep calling `M1Shield.getGFX()` and `M1Shield.display()` as before. The indirection lets additional targets receive the same `display()` without touching any screen code.
+`M1Shield.renderAll()` runs a drawing operation once per enabled target, nominating each in turn. Because every draw call in the framework already goes through those accessors, **screens reach every target without a single call-site change** - a screen written before render targets existed mirrors correctly.
+
+Layout adapts per target for free: `Screen::isSmallDisplay()` reads the active target's height, so a 320x240 UI mirrored onto a 128x64 target picks up the small header, footer and progress bar on its own.
 
 ## RenderTarget Interface
 
@@ -81,7 +83,31 @@ The provider is taken by reference and is required - a target with no surface to
 RenderManager& getRenderManager();  // access the manager directly
 ```
 
-`begin(provider)` registers the display target; the destructor unregisters and deletes it. To temporarily stop pushing to the panel while keeping other targets live:
+`begin(provider)` registers the display target; the destructor unregisters and deletes it.
+
+```cpp
+// Add a second physical panel on its own pins
+bool addDisplay(DisplayRenderTarget &target, int8_t cs, int8_t dc, int8_t rst = -1);
+
+// Run a drawing operation once per enabled target
+template <typename F> void renderAll(F draw);
+```
+
+`addDisplay()` resets and creates the panel, then registers the target - and refuses to register one it could not initialize. It also refuses a panel sharing the primary's reset pin, which would reset the primary panel and leave it blank.
+
+`renderAll()` is public so a sketch can mirror its own partial redraws:
+
+```cpp
+M1Shield.renderAll([]{
+    Adafruit_GFX &gfx = M1Shield.getGFX();   // resolve INSIDE the callable
+    gfx.fillRect(0, 0, 40, 10, M1Shield.convertColor(0x0000));
+    M1Shield.display();                      // the callable pushes; the loop does not
+});
+```
+
+> **Never capture by reference, and never let an `Adafruit_GFX&` cross into the callable.** Resolve `getGFX()` inside it. A reference captured beforehand binds to the primary's canvas, so every target draws into panel 1 - and it compiles cleanly while doing so.
+
+To temporarily stop pushing to the panel while keeping other targets live:
 
 ```cpp
 RenderTarget* panel = M1Shield.getRenderManager().getPrimaryRenderTarget();
@@ -129,7 +155,10 @@ void setup() {
 ## Notes
 
 - **SRAM**: each registered target costs 2 bytes in the manager plus whatever the target itself holds. A `GFXcanvas1` costs `width * height / 8` bytes, so keep custom targets small on an 8 KB part.
-- **One draw, one surface**: `M1Shield.getGFX()` returns the *primary* target's context, so a single draw pass fills the primary target only. A secondary target that needs its own pixels must render in its `display()`, or the sketch must redraw per target.
+- **Target 0 is the layout authority**, enabled or not. Disabling the primary stops it being drawn and pushed, but it still defines the layout - otherwise switching the panel off would reflow the whole UI to whatever target 1 happens to be.
+- **Drawing outside a `Screen`** - directly in a sketch's `loop()` - reaches only the primary. Wrap it in `M1Shield.renderAll([]{ ... })` to mirror it.
+- **Pagination follows the primary.** `MenuScreen`'s current page and `TextFileViewer`'s page slice are decided outside the render pass, so a differently-sized secondary shows the primary's slice, possibly clipped or short. Layout adapts per target; pagination cannot.
+- **Draw time scales with target count** - two targets means two full draw passes.
 - **Lifetime**: a target must outlive its registration. Remove it with `removeRenderTarget()` before destroying it.
 
 ## See Also

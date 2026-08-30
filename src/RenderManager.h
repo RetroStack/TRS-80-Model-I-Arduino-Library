@@ -23,6 +23,7 @@ class RenderManager
 private:
     RenderTarget *_targets[MAX_RENDER_TARGETS];
     uint8_t _targetCount;
+    RenderTarget *_current; // Target being drawn during a render pass; nullptr otherwise
 
 public:
     RenderManager();
@@ -41,6 +42,21 @@ public:
     // Push every enabled target. Returns true only if all of them succeeded;
     // with no enabled targets there is nothing to push, which is not a failure.
     bool displayAll();
+
+    // Render pass state.
+    //
+    // During a pass the manager nominates one target as active, and M1Shield's
+    // display accessors resolve to it - which is how existing drawing code
+    // reaches every target without changing a single call site.
+    //
+    // Outside a pass the active target is the primary, whether or not it is
+    // enabled: target 0 is the layout authority, so disabling the panel must
+    // not silently reflow the UI to whatever target 1 happens to be.
+    RenderTarget *getActiveTarget() const; // Current target, or the primary outside a pass
+    RenderTarget *getPassTarget() const;   // Current target, or nullptr outside a pass
+    bool inRenderPass() const;             // True while a pass is running
+    void beginRenderPass(RenderTarget *target);
+    void endRenderPass();
 };
 
 #endif /* RENDER_MANAGER_H */

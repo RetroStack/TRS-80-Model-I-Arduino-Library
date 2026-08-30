@@ -75,7 +75,8 @@ private:
 
     bool _handlePaging();          // Check if console has reached the bottom and handle paging
     bool _shouldEndPagingWait();   // Check if paging timeout has expired
-    void _showPagingMessage();     // Display paging prompt message in footer area
+    void _showPagingMessage();     // Display paging prompt message on every enabled target
+    void _drawPagingMessage();     // Draw the paging prompt into the active target
     void _clearPagingMessage();    // Clear paging prompt from footer and restore normal footer
     void _waitForPagingIfNeeded(); // Block execution until paging wait is resolved
 

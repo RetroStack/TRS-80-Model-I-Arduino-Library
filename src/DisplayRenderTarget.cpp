@@ -17,6 +17,22 @@ DisplayRenderTarget::~DisplayRenderTarget()
 {
 }
 
+// Reset and create the panel this target draws to
+bool DisplayRenderTarget::begin(int8_t cs, int8_t dc, int8_t rst)
+{
+    // Same reset sequence M1Shield performs for the primary panel
+    if (rst >= 0)
+    {
+        pinMode(rst, OUTPUT);
+        digitalWrite(rst, LOW);
+        delay(50);
+        digitalWrite(rst, HIGH);
+        delay(50);
+    }
+
+    return _displayProvider->create(cs, dc, rst);
+}
+
 // Swap the backing provider
 void DisplayRenderTarget::setDisplayProvider(DisplayProvider &provider)
 {

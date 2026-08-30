@@ -55,6 +55,8 @@ private:
     ILogger *_logger; // Logger instance for debugging output
     char *_title;     // Dynamic title buffer (allocated as needed)
 
+    void _redrawAll(); // Draw the screen to every enabled render target and push each
+
 protected:
     virtual void _drawScreen() = 0; // Pure virtual method for initial screen rendering
 

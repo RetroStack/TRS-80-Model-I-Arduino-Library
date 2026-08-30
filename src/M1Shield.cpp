@@ -228,7 +228,7 @@ bool M1ShieldClass::isDisplayInitialized() const
 // before begin() has registered one.
 Adafruit_GFX &M1ShieldClass::getGFX()
 {
-    RenderTarget *target = _renderManager.getPrimaryRenderTarget();
+    RenderTarget *target = _renderManager.getActiveTarget();
     if (target)
     {
         return target->getGFX();
@@ -248,14 +248,14 @@ Adafruit_GFX &M1ShieldClass::getGFX()
 // Get display screen width in pixels
 uint16_t M1ShieldClass::getScreenWidth() const
 {
-    RenderTarget *target = _renderManager.getPrimaryRenderTarget();
+    RenderTarget *target = _renderManager.getActiveTarget();
     return target ? target->getScreenWidth() : _screenWidth;
 }
 
 // Get display screen height in pixels
 uint16_t M1ShieldClass::getScreenHeight() const
 {
-    RenderTarget *target = _renderManager.getPrimaryRenderTarget();
+    RenderTarget *target = _renderManager.getActiveTarget();
     return target ? target->getScreenHeight() : _screenHeight;
 }
 
@@ -286,9 +286,20 @@ ILogger *M1ShieldClass::getLogger() const
 }
 
 // Update display with current frame buffer contents.
-// Pushes every enabled render target, not just the panel.
+//
+// Inside a render pass this pushes only the target currently being drawn -
+// pushing the others would transfer targets that have not been drawn yet this
+// frame, and would touch a second device's bus while the current one holds an
+// open SPI transaction. Outside a pass it pushes every enabled target, which
+// is the documented behaviour and is byte-identical to the single-target case.
 bool M1ShieldClass::display()
 {
+    RenderTarget *pass = _renderManager.getPassTarget();
+    if (pass)
+    {
+        return pass->display();
+    }
+
     if (_renderManager.getRenderTargetCount() > 0)
     {
         bool result = _renderManager.displayAll();
@@ -309,7 +320,7 @@ bool M1ShieldClass::display()
 // Convert color from RGB to display format
 uint16_t M1ShieldClass::convertColor(uint16_t color)
 {
-    RenderTarget *target = _renderManager.getPrimaryRenderTarget();
+    RenderTarget *target = _renderManager.getActiveTarget();
     if (target)
     {
         return target->convertColor(color);
@@ -398,6 +409,47 @@ bool M1ShieldClass::setScreen(Screen *screen)
 }
 
 // Get reference to render manager
+// Initialize and register an additional display panel
+bool M1ShieldClass::addDisplay(DisplayRenderTarget &target, int8_t cs, int8_t dc, int8_t rst)
+{
+    // Sharing the primary's reset line would reset the primary panel: the
+    // Adafruit driver toggles reset unconditionally while initializing, and
+    // nothing re-initializes the primary afterwards, so it would go blank.
+    if (rst >= 0 && rst == PIN_TFT_RST)
+    {
+        if (_logger)
+        {
+            _logger->errF(F("M1Shield: Additional display cannot share the primary reset pin"));
+        }
+        return false;
+    }
+
+    if (!target.begin(cs, dc, rst))
+    {
+        if (_logger)
+        {
+            _logger->errF(F("M1Shield: Failed to initialize additional display"));
+        }
+        return false;
+    }
+
+    if (!_renderManager.addRenderTarget(&target))
+    {
+        if (_logger)
+        {
+            _logger->errF(F("M1Shield: No room to register additional render target"));
+        }
+        return false;
+    }
+
+    if (_logger)
+    {
+        _logger->infoF(F("M1Shield: Added render target '%s'"), target.getName());
+    }
+
+    return true;
+}
+
 RenderManager &M1ShieldClass::getRenderManager()
 {
     return _renderManager;
