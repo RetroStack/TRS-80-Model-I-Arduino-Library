@@ -25,17 +25,17 @@ public:
         return true;
     }
 
-    const char *name() const override
+    const char *getName() const override
     {
         return "ST7735 128x160";
     }
 
-    uint16_t width() const override
+    uint16_t getScreenWidth() const override
     {
         return 128;
     }
 
-    uint16_t height() const override
+    uint16_t getScreenHeight() const override
     {
         return 160;
     }

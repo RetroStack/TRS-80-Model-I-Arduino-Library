@@ -83,9 +83,9 @@ void setup() {
 
 ```cpp
 // Get display details from provider
-const char* name = displayProvider.name();      // "ST7789 240x320"
-uint16_t width = displayProvider.width();       // 320 (after rotation)
-uint16_t height = displayProvider.height();     // 240 (after rotation)
+const char* name = displayProvider.getName();      // "ST7789 240x320"
+uint16_t width = displayProvider.getScreenWidth();       // 320 (after rotation)
+uint16_t height = displayProvider.getScreenHeight();     // 240 (after rotation)
 
 // Or from M1Shield (same values)
 uint16_t w = M1Shield.getScreenWidth();
@@ -186,17 +186,17 @@ void displayStatus() {
     DisplayProvider& provider = M1Shield.getDisplayProvider();
 
     Serial.print("Display: ");
-    Serial.println(provider.name());
+    Serial.println(provider.getName());
     Serial.print("Size: ");
-    Serial.print(provider.width());
+    Serial.print(provider.getScreenWidth());
     Serial.print("x");
-    Serial.println(provider.height());
+    Serial.println(provider.getScreenHeight());
 
     // Direct graphics access
     Adafruit_GFX& gfx = provider.getGFX();
     gfx.setTextSize(1);
     gfx.setCursor(0, 0);
-    gfx.print(provider.name());
+    gfx.print(provider.getName());
 
     // Update display
     provider.display();
@@ -384,7 +384,7 @@ void setup() {
     M1Shield.begin(displayProvider);
 
     // Display name will show "SH1106 (SPI)"
-    Serial.println(displayProvider.name());
+    Serial.println(displayProvider.getName());
 }
 ```
 
@@ -412,7 +412,7 @@ void setup() {
     M1Shield.begin(displayProvider);
 
     // Display name will show "SH1106 (I2C)"
-    Serial.println(displayProvider.name());
+    Serial.println(displayProvider.getName());
 }
 ```
 
@@ -450,9 +450,9 @@ public:
     virtual Adafruit_GFX &getGFX() = 0;
     virtual bool display() = 0;
     virtual uint16_t convertColor(uint16_t color) = 0;
-    virtual const char *name() const = 0;
-    virtual uint16_t width() const = 0;
-    virtual uint16_t height() const = 0;
+    virtual const char * getName() const = 0;
+    virtual uint16_t getScreenWidth() const = 0;
+    virtual uint16_t getScreenHeight() const = 0;
     virtual ~DisplayProvider() = default;
 };
 ```
@@ -546,15 +546,15 @@ public:
         return false;
     }
 
-    const char *name() const override {
+    const char * getName() const override {
         return "NEWTYPE 240x320";
     }
 
-    uint16_t width() const override {
+    uint16_t getScreenWidth() const override {
         return 320;  // After rotation
     }
 
-    uint16_t height() const override {
+    uint16_t getScreenHeight() const override {
         return 240;  // After rotation
     }
 

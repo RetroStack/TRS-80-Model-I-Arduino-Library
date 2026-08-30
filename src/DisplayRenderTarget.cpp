@@ -54,7 +54,7 @@ DisplayProvider &DisplayRenderTarget::getDisplayProvider() const
 // Get render target name
 const char *DisplayRenderTarget::getName() const
 {
-    return _displayProvider->name();
+    return _displayProvider->getName();
 }
 
 // Check if render target is enabled
@@ -78,13 +78,13 @@ Adafruit_GFX &DisplayRenderTarget::getGFX()
 // Get display width in pixels
 uint16_t DisplayRenderTarget::getScreenWidth() const
 {
-    return _displayProvider->width();
+    return _displayProvider->getScreenWidth();
 }
 
 // Get display height in pixels
 uint16_t DisplayRenderTarget::getScreenHeight() const
 {
-    return _displayProvider->height();
+    return _displayProvider->getScreenHeight();
 }
 
 // Convert a color into the panel's format

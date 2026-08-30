@@ -613,9 +613,9 @@ RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::b
 - `virtual Adafruit_GFX& getGFX() = 0` // Get Adafruit_GFX interface for drawing
 - `virtual bool display() = 0` // Update display with buffered content (for buffered displays)
 - `virtual uint16_t convertColor(uint16_t color) = 0` // Convert RGB565 color to display-specific format
-- `virtual const char* name() const = 0` // Get display driver name
-- `virtual uint16_t width() const = 0` // Get display width in pixels
-- `virtual uint16_t height() const = 0` // Get display height in pixels
+- `virtual const char* getName() const = 0` // Get display driver name
+- `virtual uint16_t getScreenWidth() const = 0` // Get display width in pixels
+- `virtual uint16_t getScreenHeight() const = 0` // Get display height in pixels
 
 **Available Display Drivers:**
 

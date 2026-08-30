@@ -144,11 +144,11 @@ void setup()
     // Display provider information
     Serial.println("Display Provider Analysis:");
     Serial.print("  Controller: ");
-    Serial.println(displayProvider.name());
+    Serial.println(displayProvider.getName());
     Serial.print("  Resolution: ");
-    Serial.print(displayProvider.width());
+    Serial.print(displayProvider.getScreenWidth());
     Serial.print("x");
-    Serial.println(displayProvider.height());
+    Serial.println(displayProvider.getScreenHeight());
     Serial.print("  Color Depth: ");
     Serial.println("16-bit RGB565");
     Serial.println("");

@@ -26,17 +26,17 @@ public:
         return true;
     }
 
-    const char *name() const override
+    const char *getName() const override
     {
         return "HX8357D 320x480";
     }
 
-    uint16_t width() const override
+    uint16_t getScreenWidth() const override
     {
         return 320;
     }
 
-    uint16_t height() const override
+    uint16_t getScreenHeight() const override
     {
         return 480;
     }

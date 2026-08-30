@@ -96,11 +96,11 @@ void setup()
 
     // Show display information
     Serial.print("Display: ");
-    Serial.print(displayProvider.name());
+    Serial.print(displayProvider.getName());
     Serial.print(" (");
-    Serial.print(displayProvider.width());
+    Serial.print(displayProvider.getScreenWidth());
     Serial.print("x");
-    Serial.print(displayProvider.height());
+    Serial.print(displayProvider.getScreenHeight());
     Serial.println(")");
 
     // Initialize M1Shield hardware

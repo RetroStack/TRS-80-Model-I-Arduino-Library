@@ -177,8 +177,8 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
     provider.getGFX().setTextWrap(false);
 
     // Initialize display based on the selected type
-    _screenWidth = provider.width();
-    _screenHeight = provider.height();
+    _screenWidth = provider.getScreenWidth();
+    _screenHeight = provider.getScreenHeight();
 
     // Create and add display render target
     if (_displayTarget)

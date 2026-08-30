@@ -21,9 +21,9 @@ public:
     virtual bool display() = 0;                        // Update physical display with current buffer contents
     virtual uint16_t convertColor(uint16_t color) = 0; // Convert 16-bit color to display-specific format
 
-    virtual const char *name() const = 0; // Get display provider name
-    virtual uint16_t width() const = 0;   // Get display width in pixels
-    virtual uint16_t height() const = 0;  // Get display height in pixels
+    virtual const char *getName() const = 0; // Get display provider name
+    virtual uint16_t getScreenWidth() const = 0;   // Get display width in pixels
+    virtual uint16_t getScreenHeight() const = 0;  // Get display height in pixels
 };
 
 #endif /* DISPLAY_PROVIDER_H */
