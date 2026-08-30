@@ -88,8 +88,11 @@ public:
         // Calculate luminance using standard weights (ITU-R BT.709)
         uint16_t luminance = (uint16_t)(0.2126 * r + 0.7152 * g + 0.0722 * b);
 
-        // Use 50% threshold (127.5, rounded to 128)
-        return (luminance >= 128) ? SSD1306_WHITE : SSD1306_BLACK;
+        // A 50% threshold is right for dithering a photograph and wrong for a
+        // light-on-dark UI: pure red has a BT.709 luminance of 53, so an error
+        // message drawn in it disappeared into the black background. Anything
+        // meaningfully brighter than black is foreground on a 1-bit panel.
+        return (luminance >= 32) ? SSD1306_WHITE : SSD1306_BLACK;
     }
 
     void destroy() override

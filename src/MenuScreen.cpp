@@ -330,7 +330,9 @@ void MenuScreen::_drawContent()
             String menuText = String(_menuItems[itemIndex]);
             uint16_t menuTextWidth = menuText.length() * textSizeWidth;
 
-            if (configValue != nullptr && menuTextWidth > availableWidth)
+            // Applied whether or not a config value is present: a plain long
+            // item used to run past the row and wrap onto the one below it.
+            if (menuTextWidth > availableWidth)
             {
                 // Calculate how many characters fit with "..."
                 if (isSmall)

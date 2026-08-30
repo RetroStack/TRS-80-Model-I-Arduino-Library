@@ -171,6 +171,11 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
 
     _displayProvider = &provider;
 
+    // Adafruit_GFX wraps text at the screen edge by default, so anything wider
+    // than the panel spilled onto the row below instead of being clipped. Every
+    // region here manages its own truncation, so wrapping is never wanted.
+    provider.getGFX().setTextWrap(false);
+
     // Initialize display based on the selected type
     _screenWidth = provider.width();
     _screenHeight = provider.height();

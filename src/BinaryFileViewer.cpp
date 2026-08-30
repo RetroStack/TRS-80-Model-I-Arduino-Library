@@ -166,8 +166,8 @@ void BinaryFileViewer::_drawContent()
         // Try to open file first
         if (!_openFile())
         {
-            drawTextF(10, 10, F("Error: Could not open file"), M1Shield.convertColor(0xF800), 1);
-            drawText(10, 25, _filename, M1Shield.convertColor(0xF800), 1);
+            drawTextF(10, 10, F("Error: Could not open file"), 0xF800, 1);
+            drawText(10, 25, _filename, 0xF800, 1);
             return;
         }
     }
@@ -175,7 +175,7 @@ void BinaryFileViewer::_drawContent()
     // Load current page if needed
     if (!_loadCurrentPage())
     {
-        drawTextF(10, 10, F("Error loading file data"), M1Shield.convertColor(0xF800), 1);
+        drawTextF(10, 10, F("Error loading file data"), 0xF800, 1);
         return;
     }
 
@@ -186,7 +186,7 @@ void BinaryFileViewer::_displayBinaryContent()
 {
     if (!_fileOpen || !_pageBuffer)
     {
-        drawTextF(10, 10, F("File not available"), M1Shield.convertColor(0xFFFF), 1);
+        drawTextF(10, 10, F("File not available"), 0xFFFF, 1);
         return;
     }
 
@@ -229,7 +229,7 @@ void BinaryFileViewer::_displayBinaryContent()
         addressPart += ": ";
 
         // Draw address in yellow
-        drawText(currentX, currentY, addressPart, M1Shield.convertColor(0xFFE0), 1);
+        drawText(currentX, currentY, addressPart, 0xFFE0, 1);
         currentX += addressPart.length() * 6; // 6 pixels per character
 
         // Build and display hex bytes
@@ -252,7 +252,7 @@ void BinaryFileViewer::_displayBinaryContent()
         }
 
         // Draw hex bytes in cyan
-        drawText(currentX, currentY, hexPart, M1Shield.convertColor(0x07FF), 1);
+        drawText(currentX, currentY, hexPart, 0x07FF, 1);
         currentX += hexPart.length() * 6;
 
         // Build and display ASCII representation
@@ -283,7 +283,7 @@ void BinaryFileViewer::_displayBinaryContent()
         }
 
         // Draw ASCII in white
-        drawText(currentX, currentY, asciiPart, M1Shield.convertColor(0xFFFF), 1);
+        drawText(currentX, currentY, asciiPart, 0xFFFF, 1);
     }
 }
 
