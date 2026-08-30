@@ -8,75 +8,37 @@
 #define DISPLAY_ILI9341_H
 
 #include <Adafruit_ILI9341.h>
-#include "DisplayProvider.h"
+#include "DisplayProviderTFT.h"
 
-class Display_ILI9341 : public DisplayProvider
+class Display_ILI9341 : public DisplayProviderTFT<Adafruit_ILI9341>
 {
-private:
-    Adafruit_ILI9341 *_display; // Pointer to the ILI9341 display instance
-
 public:
-    // Constructor
-    Display_ILI9341() : _display(nullptr) {}
-
-    // Create ILI9341 display instance with specified pins
     bool create(int8_t cs, int8_t dc, int8_t rst) override
     {
-        if (_display)
+        if (!_reset(new Adafruit_ILI9341(cs, dc, rst)))
         {
-            delete _display;
+            return false;
         }
-        _display = new Adafruit_ILI9341(cs, dc, rst);
+
         _display->begin();
         _display->setRotation(3);
         return true;
     }
 
-    Adafruit_GFX &getGFX() override
-    {
-        return *_display;
-    }
-
-    bool display() override
-    {
-        // TFT displays update immediately, no explicit display() call needed
-        return (_display != nullptr);
-    }
-
-    uint16_t convertColor(uint16_t color) override
-    {
-        // ILI9341 uses 16-bit RGB565 format directly
-        return color;
-    }
-
-    void destroy() override
-    {
-        if (_display)
-        {
-            delete _display;
-            _display = nullptr;
-        }
-    }
-
     const char *name() const override
     {
-        return "ILI9341 240x320";
+        return "ILI9341 320x240";
     }
 
     uint16_t width() const override
     {
-        return 320; // After rotation 3
+        return 320;
     }
 
     uint16_t height() const override
     {
-        return 240; // After rotation 3
-    }
-
-    ~Display_ILI9341() override
-    {
-        destroy();
+        return 240;
     }
 };
 
-#endif // DISPLAY_ILI9341_H
+#endif /* DISPLAY_ILI9341_H */
