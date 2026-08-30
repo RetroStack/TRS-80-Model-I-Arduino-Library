@@ -61,6 +61,10 @@ private:
     unsigned long _rightPressed;    // Last right button press timestamp
     unsigned long _joystickPressed; // Last joystick button press timestamp
 
+    ActionTaken _joystickDirection;    // Direction currently held on the stick, NONE when centered
+    unsigned long _joystickRepeatTime; // When the held direction last fired
+    unsigned long _joystickRepeatDelay; // Interval until it may fire again
+
     // Display properties
     uint16_t _screenWidth;  // Display width in pixels
     uint16_t _screenHeight; // Display height in pixels

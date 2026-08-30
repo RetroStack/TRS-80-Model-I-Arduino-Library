@@ -14,6 +14,9 @@
 // Hardware timing constants
 constexpr unsigned long DEBOUNCE_TIME = 250; // Button debounce time in milliseconds
 
+constexpr unsigned long JOYSTICK_REPEAT_DELAY = 400; // Hold time before a direction repeats
+constexpr unsigned long JOYSTICK_REPEAT_RATE = 120;  // Interval between repeats after that
+
 // RGB LED pin assignments
 constexpr uint8_t PIN_ACTIVE_LED = 13; // Activity indicator LED pin
 constexpr uint8_t PIN_LED_BLUE = 10;   // Blue channel of RGB LED
@@ -68,6 +71,9 @@ M1ShieldClass::M1ShieldClass() : _screen(nullptr),
                                  _leftPressed(0),
                                  _rightPressed(0),
                                  _joystickPressed(0),
+                                 _joystickDirection(NONE),
+                                 _joystickRepeatTime(0),
+                                 _joystickRepeatDelay(0),
                                  _screenWidth(0),
                                  _screenHeight(0),
                                  _activeJoystick(false)
@@ -513,20 +519,21 @@ unsigned long M1ShieldClass::_getDebouncedState(int pin, unsigned long previousS
 {
     if (digitalRead(pin) == LOW)
     {
-        if (previousState == 0)
-        {
-            return millis(); // First detection
-        }
-        else if ((millis() - previousState) > DEBOUNCE_TIME)
-        {
-            return previousState; // Still pressed, stable
-        }
-        return previousState; // Still within debounce time
+        // First edge of a press is timestamped; later polls keep that stamp, so
+        // wasPressed() reports a held button exactly once.
+        return (previousState == 0) ? millis() : previousState;
     }
-    else
+
+    // Released. Contact bounce reads HIGH for a few milliseconds in the middle
+    // of a single physical press, and clearing the state on the first such read
+    // let the next LOW look like a fresh press -- so one press was reported
+    // several times. Hold it until the debounce window has actually elapsed.
+    if (previousState != 0 && (millis() - previousState) < DEBOUNCE_TIME)
     {
-        return 0; // Released
+        return previousState;
     }
+
+    return 0;
 }
 
 // --- Button Input ---
@@ -805,6 +812,7 @@ void M1ShieldClass::loop()
     int8_t offsetX = 0;
     int8_t offsetY = 0;
     bool joystickMoved = false;
+    ActionTaken direction = NONE;
 
     if (_activeJoystick)
     {
@@ -834,38 +842,63 @@ void M1ShieldClass::loop()
             // Diagonal directions for Joystick
             if (x < JOYSTICK_CENTER_MIN && y < JOYSTICK_CENTER_MIN)
             {
-                action = static_cast<ActionTaken>(action | JOYSTICK_UP_LEFT);
+                direction = JOYSTICK_UP_LEFT;
             }
             else if (x > JOYSTICK_CENTER_MAX && y < JOYSTICK_CENTER_MIN)
             {
-                action = static_cast<ActionTaken>(action | JOYSTICK_UP_RIGHT);
+                direction = JOYSTICK_UP_RIGHT;
             }
             else if (x < JOYSTICK_CENTER_MIN && y > JOYSTICK_CENTER_MAX)
             {
-                action = static_cast<ActionTaken>(action | JOYSTICK_DOWN_LEFT);
+                direction = JOYSTICK_DOWN_LEFT;
             }
             else if (x > JOYSTICK_CENTER_MAX && y > JOYSTICK_CENTER_MAX)
             {
-                action = static_cast<ActionTaken>(action | JOYSTICK_DOWN_RIGHT);
+                direction = JOYSTICK_DOWN_RIGHT;
             }
 
             // Cardinal directions for Joystick
             else if (x < JOYSTICK_CENTER_MIN)
             {
-                action = static_cast<ActionTaken>(action | JOYSTICK_LEFT);
+                direction = JOYSTICK_LEFT;
             }
             else if (x > JOYSTICK_CENTER_MAX)
             {
-                action = static_cast<ActionTaken>(action | JOYSTICK_RIGHT);
+                direction = JOYSTICK_RIGHT;
             }
             else if (y < JOYSTICK_CENTER_MIN)
             {
-                action = static_cast<ActionTaken>(action | JOYSTICK_UP);
+                direction = JOYSTICK_UP;
             }
             else if (y > JOYSTICK_CENTER_MAX)
             {
-                action = static_cast<ActionTaken>(action | JOYSTICK_DOWN);
+                direction = JOYSTICK_DOWN;
             }
+        }
+
+        // The buttons run through _getDebouncedState(), which reports a held
+        // button once. The stick had no such gate: its direction was rebuilt
+        // from the current reading on every loop(), so holding it off-centre
+        // re-sent the direction hundreds of times a second -- and since LEFT is
+        // folded into the select mask, that re-triggered the selected item
+        // continuously. Fire on entering a direction, then auto-repeat.
+        unsigned long now = millis();
+        if (direction != _joystickDirection)
+        {
+            _joystickDirection = direction;
+            _joystickRepeatTime = now;
+            _joystickRepeatDelay = JOYSTICK_REPEAT_DELAY;
+
+            if (direction != NONE)
+            {
+                action = static_cast<ActionTaken>(action | direction);
+            }
+        }
+        else if (direction != NONE && (now - _joystickRepeatTime) >= _joystickRepeatDelay)
+        {
+            _joystickRepeatTime = now;
+            _joystickRepeatDelay = JOYSTICK_REPEAT_RATE;
+            action = static_cast<ActionTaken>(action | direction);
         }
 
         if (wasJoystickPressed())
