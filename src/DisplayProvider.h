@@ -26,4 +26,4 @@ public:
     virtual uint16_t height() const = 0;  // Get display height in pixels
 };
 
-#endif // DISPLAY_PROVIDER_H
+#endif /* DISPLAY_PROVIDER_H */

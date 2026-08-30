@@ -90,7 +90,7 @@ uint16_t Video::getAddress(uint8_t x, uint8_t y)
 }
 
 // Get current cursor X position
-uint8_t Video::getX()
+uint8_t Video::getX() const
 {
   return _cursorPositionX;
 }
@@ -111,7 +111,7 @@ void Video::setX(uint8_t x)
 }
 
 // Get current cursor Y position
-uint8_t Video::getY()
+uint8_t Video::getY() const
 {
   return _cursorPositionY;
 }
@@ -139,43 +139,43 @@ void Video::setXY(uint8_t x, uint8_t y)
 }
 
 // Get viewport start X coordinate
-uint8_t Video::getStartX()
+uint8_t Video::getStartX() const
 {
   return _viewPort.x;
 }
 
 // Get viewport end X coordinate
-uint8_t Video::getEndX()
+uint8_t Video::getEndX() const
 {
   return _viewPort.x + _viewPort.width;
 }
 
 // Get viewport start Y coordinate
-uint8_t Video::getStartY()
+uint8_t Video::getStartY() const
 {
   return _viewPort.y;
 }
 
 // Get viewport end Y coordinate
-uint8_t Video::getEndY()
+uint8_t Video::getEndY() const
 {
   return _viewPort.y + _viewPort.height;
 }
 
 // Get viewport width
-uint8_t Video::getWidth()
+uint8_t Video::getWidth() const
 {
   return _viewPort.width;
 }
 
 // Get viewport height
-uint8_t Video::getHeight()
+uint8_t Video::getHeight() const
 {
   return _viewPort.height;
 }
 
 // Get total size of viewport (width * height)
-uint16_t Video::getSize()
+uint16_t Video::getSize() const
 {
   return _viewPort.width * _viewPort.height;
 }

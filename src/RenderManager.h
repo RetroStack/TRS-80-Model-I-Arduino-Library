@@ -11,7 +11,6 @@
 #include "RenderTarget.h"
 
 // Maximum number of render targets that can be registered
-constexpr uint8_t MAX_RENDER_TARGETS = 8;
 
 // Holds the registered render targets and drives them as a group.
 //
@@ -20,6 +19,12 @@ constexpr uint8_t MAX_RENDER_TARGETS = 8;
 // context from.
 class RenderManager
 {
+public:
+    // Class-scoped, like CompositeLogger::MAX_LOGGERS. As a namespace-scope
+    // constant this name leaked into every translation unit that included
+    // this header.
+    static const uint8_t MAX_RENDER_TARGETS = 8;
+
 private:
     RenderTarget *_targets[MAX_RENDER_TARGETS];
     uint8_t _targetCount;

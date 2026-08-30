@@ -88,4 +88,4 @@ private:
     void showPerformanceStats();
 };
 
-#endif // COMPREHENSIVE_CONSOLE_H
+#endif /* COMPREHENSIVE_CONSOLE_H */

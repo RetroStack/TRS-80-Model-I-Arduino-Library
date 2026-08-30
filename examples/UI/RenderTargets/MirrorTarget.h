@@ -94,4 +94,4 @@ public:
     }
 };
 
-#endif // MIRROR_TARGET_H
+#endif /* MIRROR_TARGET_H */

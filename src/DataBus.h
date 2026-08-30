@@ -28,8 +28,8 @@ public:
 
     void setLogger(ILogger &logger); // Set logger for debugging output
 
-    bool isReadable(); // Check if data bus is configured for reading
-    bool isWritable(); // Check if data bus is configured for writing
+    bool isReadable() const; // Check if data bus is configured for reading
+    bool isWritable() const; // Check if data bus is configured for writing
 
     void setAsReadable(); // Configure data bus pins as inputs for reading
     void setAsWritable(); // Configure data bus pins as outputs for writing

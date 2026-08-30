@@ -122,4 +122,4 @@ public:
     }
 };
 
-#endif // DISPLAY_SSD1306_H
+#endif /* DISPLAY_SSD1306_H */

@@ -81,13 +81,13 @@ void AddressBus::writeIOAddress(uint8_t address)
 }
 
 // Check if address bus is readable
-bool AddressBus::isReadable()
+bool AddressBus::isReadable() const
 {
     return !_writable;
 }
 
 // Check if address bus is writable
-bool AddressBus::isWritable()
+bool AddressBus::isWritable() const
 {
     return _writable;
 }

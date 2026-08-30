@@ -46,23 +46,23 @@ public:
   uint16_t getColumnAddress(uint16_t rowAddress, uint8_t x); // Get memory address for column within a row
   uint16_t getAddress(uint8_t x, uint8_t y);                 // Get memory address for coordinates
 
-  uint8_t getX();       // Get current cursor X position
+  uint8_t getX() const;       // Get current cursor X position
   void setX(uint8_t x); // Set cursor X position
 
-  uint8_t getY();       // Get current cursor Y position
+  uint8_t getY() const;       // Get current cursor Y position
   void setY(uint8_t y); // Set cursor Y position
 
   void setXY(uint8_t x, uint8_t y); // Set cursor position
 
-  uint8_t getStartX(); // Get viewport start X coordinate
-  uint8_t getEndX();   // Get viewport end X coordinate
+  uint8_t getStartX() const; // Get viewport start X coordinate
+  uint8_t getEndX() const;   // Get viewport end X coordinate
 
-  uint8_t getStartY(); // Get viewport start Y coordinate
-  uint8_t getEndY();   // Get viewport end Y coordinate
+  uint8_t getStartY() const; // Get viewport start Y coordinate
+  uint8_t getEndY() const;   // Get viewport end Y coordinate
 
-  uint8_t getWidth();  // Get viewport width
-  uint8_t getHeight(); // Get viewport height
-  uint16_t getSize();  // Get total viewport size in characters
+  uint8_t getWidth() const;  // Get viewport width
+  uint8_t getHeight() const; // Get viewport height
+  uint16_t getSize() const;  // Get total viewport size in characters
 
   uint8_t getAbsoluteX(uint8_t x); // Convert relative X to absolute screen coordinate
   uint8_t getAbsoluteY(uint8_t y); // Convert relative Y to absolute screen coordinate
@@ -96,4 +96,4 @@ public:
   using Print::println;
 };
 
-#endif // VIDEO_H
+#endif /* VIDEO_H */

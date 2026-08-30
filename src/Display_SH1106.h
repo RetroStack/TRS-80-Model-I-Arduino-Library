@@ -149,4 +149,4 @@ public:
     }
 };
 
-#endif // DISPLAY_SH1106_H
+#endif /* DISPLAY_SH1106_H */

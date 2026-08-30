@@ -4,8 +4,8 @@
  * Released under the MIT License.
  */
 
-#ifndef FILEBROWSER_H
-#define FILEBROWSER_H
+#ifndef FILE_BROWSER_H
+#define FILE_BROWSER_H
 
 #include <Arduino.h>
 #include <SD.h>
@@ -77,4 +77,4 @@ protected:
     const char *_getMenuItemConfigValue(uint8_t index) override; // Show file sizes
 };
 
-#endif /* FILEBROWSER_H */
+#endif /* FILE_BROWSER_H */

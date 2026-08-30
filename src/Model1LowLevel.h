@@ -52,8 +52,8 @@
  * hardware architecture and timing requirements.
  */
 
-#ifndef MODEL1_LOWLEVEL_H
-#define MODEL1_LOWLEVEL_H
+#ifndef MODEL1_LOW_LEVEL_H
+#define MODEL1_LOW_LEVEL_H
 
 #include <Arduino.h>
 #include "port_config.h"
@@ -281,4 +281,4 @@ public:
     }
 };
 
-#endif /* MODEL1_LOWLEVEL_H */
+#endif /* MODEL1_LOW_LEVEL_H */

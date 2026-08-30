@@ -4,8 +4,8 @@
  * Released under the MIT License.
  */
 
-#ifndef BINARYFILEVIEWER_H
-#define BINARYFILEVIEWER_H
+#ifndef BINARY_FILE_VIEWER_H
+#define BINARY_FILE_VIEWER_H
 
 #include <Arduino.h>
 #include <SD.h>
@@ -65,4 +65,4 @@ protected:
     Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override;
 };
 
-#endif /* BINARYFILEVIEWER_H */
+#endif /* BINARY_FILE_VIEWER_H */

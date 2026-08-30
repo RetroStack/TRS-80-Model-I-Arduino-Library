@@ -4,8 +4,8 @@
  * Released under the MIT License.
  */
 
-#ifndef TEXTFILEVIEWER_H
-#define TEXTFILEVIEWER_H
+#ifndef TEXT_FILE_VIEWER_H
+#define TEXT_FILE_VIEWER_H
 
 #include <Arduino.h>
 #include "ContentScreen.h"
@@ -82,4 +82,4 @@ protected:
     Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override; // Handle navigation input
 };
 
-#endif /* TEXTFILEVIEWER_H */
+#endif /* TEXT_FILE_VIEWER_H */

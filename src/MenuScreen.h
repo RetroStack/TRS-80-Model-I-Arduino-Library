@@ -27,7 +27,7 @@ private:
     bool _isItemEnabled(uint8_t index) const override { return _isMenuItemEnabled(index); } // Bridge to this class's own hook
 
 protected:
-    void _drawContent(); // Draw the menu content area with paginated item list
+    void _drawContent() override; // Draw the menu content area with paginated item list
 
     void _setSelectedMenuItemIndex(uint8_t index); // Set the currently selected menu item by index
 

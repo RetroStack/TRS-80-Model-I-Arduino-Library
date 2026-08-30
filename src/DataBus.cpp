@@ -58,13 +58,13 @@ void DataBus::writeData(uint8_t data)
 }
 
 // Check if data bus is readable
-bool DataBus::isReadable()
+bool DataBus::isReadable() const
 {
   return !_writable;
 }
 
 // Check if data bus is writable
-bool DataBus::isWritable()
+bool DataBus::isWritable() const
 {
   return _writable;
 }

@@ -107,7 +107,7 @@ public:
     void deactivateInterruptRequestSignal();                           // Deactivate interrupt request signal
 
     // ---------- Test Signal
-    bool hasActiveTestSignal();  // Check if test signal is active
+    bool hasActiveTestSignal() const;  // Check if test signal is active
     void activateTestSignal();   // Activate test signal
     void deactivateTestSignal(); // Deactivate test signal
 
@@ -117,13 +117,13 @@ public:
 
     // ---------- State
     char *getState();              // Get current state as string
-    uint64_t getStateData();       // Get state data as 64-bit value
-    uint64_t getStateConfigData(); // Get configuration state data
+    uint64_t getStateData() const;       // Get state data as 64-bit value
+    uint64_t getStateConfigData() const; // Get configuration state data
     void logState();               // Log current state to logger
 
-    uint8_t getVersionMajor();    // Get major version number
-    uint8_t getVersionMinor();    // Get minor version number
-    uint8_t getVersionRevision(); // Get revision number
+    uint8_t getVersionMajor() const;    // Get major version number
+    uint8_t getVersionMinor() const;    // Get minor version number
+    uint8_t getVersionRevision() const; // Get revision number
     char *getVersion();           // Get full version string
 
     void printMemoryContents(uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32);                // Print memory contents to serial

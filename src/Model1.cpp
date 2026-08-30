@@ -781,7 +781,7 @@ void Model1Class::_setTestSignal(bool value)
 }
 
 // Check if TEST signal is active
-bool Model1Class::hasActiveTestSignal()
+bool Model1Class::hasActiveTestSignal() const
 {
     return Model1LowLevel::readTEST() == LOW;
 }
@@ -953,13 +953,13 @@ char *Model1Class::getState()
 }
 
 // Get current state data
-uint64_t Model1Class::getStateData()
+uint64_t Model1Class::getStateData() const
 {
     return Model1LowLevel::getStateData();
 }
 
 // Get current state configuration data
-uint64_t Model1Class::getStateConfigData()
+uint64_t Model1Class::getStateConfigData() const
 {
     return Model1LowLevel::getStateConfigData();
 }
@@ -978,19 +978,19 @@ void Model1Class::logState()
 // ---------- Version
 
 // Get version major
-uint8_t Model1Class::getVersionMajor()
+uint8_t Model1Class::getVersionMajor() const
 {
     return M1_VERSION_MAJOR;
 }
 
 // Get version minor
-uint8_t Model1Class::getVersionMinor()
+uint8_t Model1Class::getVersionMinor() const
 {
     return M1_VERSION_MINOR;
 }
 
 // Get version revision
-uint8_t Model1Class::getVersionRevision()
+uint8_t Model1Class::getVersionRevision() const
 {
     return M1_VERSION_REVISION;
 }

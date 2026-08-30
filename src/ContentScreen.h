@@ -118,7 +118,7 @@ public:
 
     // Required Screen interface methods - must be implemented by derived classes
     virtual void loop() override;                                                        // Base implementation handles notification timeouts, derived classes can override
-    virtual Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) = 0; // Handle input events
+    Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override = 0; // Handle input events
 
     // Where the menu button goes back to. A factory rather than a screen
     // pointer: setScreen() closes and deletes the current screen before opening

@@ -84,4 +84,4 @@ const uint8_t PIN_WAIT_ON = 0b00000001 << 3;
 const uint8_t PIN_WAIT_OFF = ~(0b00000001 << 3);
 #define PIN_WAIT_PORT L
 
-#endif // PORT_CONFIG_H
+#endif /* PORT_CONFIG_H */

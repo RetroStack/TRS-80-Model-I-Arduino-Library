@@ -1,5 +1,5 @@
-#ifndef CASSETTESONGDATA_H
-#define CASSETTESONGDATA_H
+#ifndef CASSETTE_SONG_DATA_H
+#define CASSETTE_SONG_DATA_H
 
 #include <Arduino.h>
 
@@ -100,4 +100,4 @@ extern const int pacmanMelody[];
 extern const float pacmanDurations[];
 extern const size_t pacmanMelodyLength;
 
-#endif
+#endif /* CASSETTE_SONG_DATA_H */

@@ -57,4 +57,4 @@ public:
     bool valid() const { return _buffer != nullptr; }
 };
 
-#endif // UTILS_H
+#endif /* UTILS_H */

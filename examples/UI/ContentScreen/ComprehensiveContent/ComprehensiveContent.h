@@ -123,4 +123,4 @@ private:
     void drawSecondaryDataSummary();
 };
 
-#endif // COMPREHENSIVE_CONTENT_H
+#endif /* COMPREHENSIVE_CONTENT_H */
