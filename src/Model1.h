@@ -85,18 +85,18 @@ public:
 
     // ---------- Memory
     uint8_t readMemory(uint16_t address);             // Read byte from memory
-    void writeMemory(uint16_t address, uint8_t data); // Write byte to memory
+    bool writeMemory(uint16_t address, uint8_t data); // Write byte to memory; false if the bus is not mutable
     // Returns a newly allocated buffer; caller must free() the result
     uint8_t *readMemory(uint16_t address, uint16_t length);                                             // Read memory block
-    void writeMemory(uint16_t address, uint8_t *data, uint16_t length);                                 // Write memory block
-    void writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint16_t offset);                // Write memory block with offset
-    void copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length);                       // Copy memory between addresses
-    void fillMemory(uint8_t fill_data, uint16_t address, uint16_t length);                              // Fill memory with byte value
-    void fillMemory(uint8_t *fill_data, uint16_t length, uint16_t address, uint16_t length_in_bytes);   // Fill memory with repeating pattern
+    bool writeMemory(uint16_t address, uint8_t *data, uint16_t length);                                 // Write memory block; false if refused
+    bool writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint16_t offset);                // Write memory block with offset; false if refused
+    bool copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length);                       // Copy memory between addresses; false if refused
+    bool fillMemory(uint8_t fill_data, uint16_t address, uint16_t length);                              // Fill memory with byte value; false if refused
+    bool fillMemory(uint8_t *fill_data, uint16_t length, uint16_t address, uint16_t length_in_bytes);   // Fill memory with repeating pattern; false if refused
 
     // ---------- IO
     uint8_t readIO(uint8_t address);             // Read from I/O port
-    void writeIO(uint8_t address, uint8_t data); // Write to I/O port
+    bool writeIO(uint8_t address, uint8_t data); // Write to I/O port; false if the bus is not mutable
 
     // ---------- System Control Signals
     bool readSystemResetSignal();          // Read system reset signal state

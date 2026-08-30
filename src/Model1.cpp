@@ -87,13 +87,29 @@ void Model1Class::begin(int refreshTimer)
 // Shutdown the Model1 interface
 void Model1Class::end()
 {
+    // Order matters, and this used to be backwards. Releasing the buses first
+    // left the refresh ISR -- which fires roughly every 5.6us and writes the
+    // address bus -- driving pins that had already been reconfigured as inputs.
+    // And nothing set the bus immutable or released TEST*, so _checkMutability()
+    // still passed after end(): a read pulsed control lines on input pins and
+    // returned garbage rather than refusing, while the Z80 stayed halted.
+    //
+    // deactivateTestSignal() already performs that sequence in the right order,
+    // so reuse it when TEST* is asserted.
+    if (Model1LowLevel::readTEST() == LOW)
+    {
+        deactivateTestSignal();
+    }
+    else
+    {
+        deactivateMemoryRefresh();
+        _setImmutable();
+        _deactivateBusAccessSignals();
+        _deactivateBusControlSignals();
+    }
+
     _addressBus.end();
     _dataBus.end();
-
-    _deactivateBusControlSignals();
-    _deactivateBusAccessSignals();
-
-    deactivateMemoryRefresh();
 }
 
 // Set the logger for debugging output
@@ -337,11 +353,11 @@ uint8_t Model1Class::readMemory(uint16_t address)
 }
 
 // Write memory with single byte
-void Model1Class::writeMemory(uint16_t address, uint8_t data)
+bool Model1Class::writeMemory(uint16_t address, uint8_t data)
 {
     // Verification of access
     if (!_checkMutability())
-        return;
+        return false;
 
     uint8_t oldSREG = SREG;
     noInterrupts();
@@ -371,6 +387,7 @@ void Model1Class::writeMemory(uint16_t address, uint8_t data)
     _dataBus.setAsReadable();
 
     SREG = oldSREG;
+    return true;
 }
 
 // Read memory with length
@@ -398,52 +415,54 @@ uint8_t *Model1Class::readMemory(uint16_t address, uint16_t length)
 }
 
 // Write memory block
-void Model1Class::writeMemory(uint16_t address, uint8_t *data, uint16_t length)
+bool Model1Class::writeMemory(uint16_t address, uint8_t *data, uint16_t length)
 {
     if (!data)
     {
         if (_logger)
             _logger->errF(F("Model1: writeMemory called with null data pointer"));
-        return;
+        return false;
     }
-    writeMemory(address, data, length, 0);
+    return writeMemory(address, data, length, 0);
 }
 
 // Write memory with offset
-void Model1Class::writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint16_t offset)
+bool Model1Class::writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint16_t offset)
 {
     if (!data)
     {
         if (_logger)
             _logger->errF(F("Model1: writeMemory called with null data pointer"));
-        return;
+        return false;
     }
     if (length == 0)
     {
         if (_logger)
             _logger->warnF(F("Model1: writeMemory called with length 0"));
-        return;
+        return true; // Nothing to do; the requested state already holds
     }
     for (uint16_t i = 0; i < length; i++)
     {
-        writeMemory(address + i, data[offset + i]);
+        if (!writeMemory(address + i, data[offset + i]))
+            return false;
     }
+    return true;
 }
 
 // Copy memory from one location to another
-void Model1Class::copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length)
+bool Model1Class::copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length)
 {
     if (length == 0)
     {
         if (_logger)
             _logger->warnF(F("Model1: Copy memory called with length 0 - no action taken"));
-        return;
+        return true; // Nothing to do; the requested state already holds
     }
     if (dst_address == src_address)
     {
         if (_logger)
             _logger->warnF(F("Model1: Copy memory called with same src and dst address 0x%04X - no action taken"), src_address);
-        return;
+        return true; // Nothing to do; the requested state already holds
     }
 
     // Check for potential dangerous address overlap
@@ -456,51 +475,58 @@ void Model1Class::copyMemory(uint16_t src_address, uint16_t dst_address, uint16_
 
     for (uint16_t i = 0; i < length; i++)
     {
-        writeMemory(dst_address + i, readMemory(src_address + i));
+        if (!writeMemory(dst_address + i, readMemory(src_address + i)))
+            return false;
     }
+    return true;
 }
 
 // Fill memory with a single value
-void Model1Class::fillMemory(uint8_t fill_data, uint16_t address, uint16_t length)
+bool Model1Class::fillMemory(uint8_t fill_data, uint16_t address, uint16_t length)
 {
     for (uint16_t i = 0; i < length; i++)
     {
-        writeMemory(address + i, fill_data);
+        if (!writeMemory(address + i, fill_data))
+            return false;
     }
+    return true;
 }
 
 // Fill memory with data from a buffer
-void Model1Class::fillMemory(uint8_t *fill_data, uint16_t length, uint16_t address, uint16_t length_in_bytes)
+bool Model1Class::fillMemory(uint8_t *fill_data, uint16_t length, uint16_t address, uint16_t length_in_bytes)
 {
     if (!fill_data)
     {
         if (_logger)
             _logger->errF(F("Model1: fillMemory called with null fill_data pointer"));
-        return;
+        return false;
     }
     if (length == 0)
     {
         if (_logger)
             _logger->warnF(F("Model1: fillMemory called with length 0"));
-        return;
+        return true; // Nothing to do; the requested state already holds
     }
     if (length_in_bytes == 0)
     {
         if (_logger)
             _logger->warnF(F("Model1: fillMemory called with length_in_bytes 0"));
-        return;
+        return true; // Nothing to do; the requested state already holds
     }
     for (uint16_t i = 0; i < length_in_bytes; i += length)
     {
         for (uint16_t j = 0; j < length; j++)
         {
-            // Stop before writing past the end of the region, not after
+            // Stop before writing past the end of the region, not after.
+            // This is the normal end of the fill, not a refusal.
             if (i + j >= length_in_bytes)
-                return;
+                return true;
 
-            writeMemory(address + i + j, fill_data[j]);
+            if (!writeMemory(address + i + j, fill_data[j]))
+                return false;
         }
     }
+    return true;
 }
 
 // ----------------------------------------
@@ -539,11 +565,11 @@ uint8_t Model1Class::readIO(uint8_t address)
 }
 
 // Write to I/O port
-void Model1Class::writeIO(uint8_t address, uint8_t data)
+bool Model1Class::writeIO(uint8_t address, uint8_t data)
 {
     // Verification of access
     if (!_checkMutability())
-        return;
+        return false;
 
     uint8_t oldSREG = SREG;
     noInterrupts();
@@ -568,6 +594,7 @@ void Model1Class::writeIO(uint8_t address, uint8_t data)
     _dataBus.setAsReadable();
 
     SREG = oldSREG;
+    return true;
 }
 
 // ----------------------------------------

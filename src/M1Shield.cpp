@@ -492,32 +492,35 @@ void M1ShieldClass::setLEDColor(uint8_t r, uint8_t g, uint8_t b) const
 // Set RGB LED color using predefined color constants
 void M1ShieldClass::setLEDColor(LEDColor color, uint8_t intensity) const
 {
-    (void)intensity; // Parameter reserved for future use
+    // The header declares this with `intensity = 255` and says nothing about it
+    // being inert, so a caller passing 64 got full brightness and no
+    // diagnostic. Scale the channels instead of discarding it.
+    const uint8_t full = intensity;
     switch (color)
     {
     case LEDColor::COLOR_OFF:
         setLEDColor(0, 0, 0);
         break;
     case LEDColor::COLOR_RED:
-        setLEDColor(255, 0, 0);
+        setLEDColor(full, 0, 0);
         break;
     case LEDColor::COLOR_GREEN:
-        setLEDColor(0, 255, 0);
+        setLEDColor(0, full, 0);
         break;
     case LEDColor::COLOR_BLUE:
-        setLEDColor(0, 0, 255);
+        setLEDColor(0, 0, full);
         break;
     case LEDColor::COLOR_YELLOW:
-        setLEDColor(255, 255, 0);
+        setLEDColor(full, full, 0);
         break;
     case LEDColor::COLOR_MAGENTA:
-        setLEDColor(255, 0, 255);
+        setLEDColor(full, 0, full);
         break;
     case LEDColor::COLOR_CYAN:
-        setLEDColor(0, 255, 255);
+        setLEDColor(0, full, full);
         break;
     case LEDColor::COLOR_WHITE:
-        setLEDColor(255, 255, 255);
+        setLEDColor(full, full, full);
         break;
     }
 }

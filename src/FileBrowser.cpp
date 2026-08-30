@@ -595,7 +595,7 @@ String FileBrowser::getCurrentDirectory() const
 }
 
 // Refresh current directory contents
-void FileBrowser::refresh()
+void FileBrowser::reloadDirectory()
 {
     if (_loadDirectoryContents())
     {

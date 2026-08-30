@@ -70,7 +70,7 @@ public:
     // Directory navigation
     bool navigateToDirectory(const String &directory); // Public method to navigate to directory
     String getCurrentDirectory() const;                // Get current directory path
-    void refresh();                                    // Refresh current directory contents
+    void reloadDirectory();                            // Reload the current directory from the card
 
 protected:
     bool open() override;                                        // Initialize and load directory

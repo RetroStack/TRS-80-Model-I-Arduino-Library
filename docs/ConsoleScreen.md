@@ -275,14 +275,14 @@ console.print("Temp:\t25.6C\n");
 
 ```cpp
 void cls();           // Clear screen and reset cursor to top
-void refresh();       // Redraw screen (clears and resets)
+void clearScreen();       // Redraw screen (clears and resets)
 ```
 
 **Usage:**
 
 ```cpp
 console.cls();        // Clear all text and start fresh
-console.refresh();    // Same as cls() - redraw screen
+console.clearScreen();    // Same as cls() - redraw screen
 ```
 
 ### Screen State

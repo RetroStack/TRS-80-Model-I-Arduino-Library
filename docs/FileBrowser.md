@@ -104,7 +104,7 @@ Get the current directory path.
 
 **Returns:** Current directory path as String
 
-#### `void refresh()`
+#### `void reloadDirectory()`
 
 Refresh the current directory contents and update the display.
 

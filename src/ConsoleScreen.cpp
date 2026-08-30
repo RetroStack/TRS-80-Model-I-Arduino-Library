@@ -374,7 +374,7 @@ void ConsoleScreen::cls()
                        });
 }
 
-void ConsoleScreen::refresh()
+void ConsoleScreen::clearScreen()
 {
     cls();
 }

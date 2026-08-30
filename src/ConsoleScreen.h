@@ -100,7 +100,7 @@ public:
 
     // Console Control Methods
     void cls();     // Clear screen and reset cursor to top-left
-    void refresh(); // Refresh screen and reset cursor to top-left
+    void clearScreen(); // Clear the console and reset the cursor to top-left
 
     // Console Configuration Methods
     void setTextColor(uint16_t foreground, uint16_t background = 0x0000); // Set text color for subsequent output
