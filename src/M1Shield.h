@@ -106,6 +106,45 @@ public:
 
     RenderManager &getRenderManager(); // Get reference to render manager
 
+    // Run a drawing operation once per enabled render target.
+    //
+    // Inside the callable, M1Shield's display accessors resolve to the target
+    // being drawn, so existing drawing code reaches every target unchanged.
+    // The callable is responsible for pushing what it drew, so end it with
+    // M1Shield.display().
+    //
+    // Targets are visited in reverse registration order, primary last, so any
+    // state the drawing mutates ends the pass holding the primary's values.
+    // A nested call draws once against the target the outer pass nominated.
+    //
+    // IMPORTANT: never capture by reference, and never let an Adafruit_GFX
+    // reference cross into the callable. Resolve getGFX() *inside* it -
+    // otherwise every target draws into the primary's canvas, and it compiles
+    // cleanly while doing so.
+    template <typename DrawFn>
+    void renderAll(DrawFn draw)
+    {
+        if (_renderManager.inRenderPass())
+        {
+            draw(); // Nested: a target is already nominated
+            return;
+        }
+
+        for (uint8_t i = _renderManager.getRenderTargetCount(); i-- > 0;)
+        {
+            RenderTarget *target = _renderManager.getRenderTarget(i);
+            if (!target || !target->isEnabled())
+            {
+                continue;
+            }
+
+            _renderManager.beginRenderPass(target);
+            draw();
+        }
+
+        _renderManager.endRenderPass();
+    }
+
     void setLEDColor(uint8_t r, uint8_t g, uint8_t b) const;         // Set RGB LED color using individual channel control
     void setLEDColor(LEDColor color, uint8_t intensity = 255) const; // Set RGB LED color using predefined color enumeration
 

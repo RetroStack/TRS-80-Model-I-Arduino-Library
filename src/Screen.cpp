@@ -49,10 +49,19 @@ bool Screen::open()
     }
 
     _active = true;
-    _drawScreen();      // Trigger initial rendering
-    M1Shield.display(); // Push changes to display
+    _redrawAll(); // Trigger initial rendering on every enabled target
 
     return true;
+}
+
+// Draw the screen to every enabled render target and push each one
+void Screen::_redrawAll()
+{
+    M1Shield.renderAll([this]
+                       {
+                           _drawScreen();
+                           M1Shield.display();
+                       });
 }
 
 // Deactivate screen and perform cleanup
@@ -71,8 +80,7 @@ void Screen::refresh()
 {
     if (_active)
     {
-        _drawScreen();      // Redraw the screen content
-        M1Shield.display(); // Push changes to display
+        _redrawAll();
     }
 }
 
