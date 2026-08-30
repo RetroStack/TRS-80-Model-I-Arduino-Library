@@ -7,7 +7,7 @@
 #include "RenderManager.h"
 
 // Constructor - initialize empty target list
-RenderManager::RenderManager() : _targetCount(0)
+RenderManager::RenderManager() : _targetCount(0), _current(nullptr)
 {
     // Initialize target array to nullptrs
     for (uint8_t i = 0; i < MAX_RENDER_TARGETS; i++)
@@ -65,6 +65,12 @@ bool RenderManager::removeRenderTarget(RenderTarget *target)
             }
             _targets[_targetCount - 1] = nullptr;
             _targetCount--;
+
+            // Never leave a pass pointing at a target that is gone
+            if (_current == target)
+            {
+                _current = nullptr;
+            }
             return true;
         }
     }
@@ -80,6 +86,7 @@ void RenderManager::clearRenderTargets()
         _targets[i] = nullptr;
     }
     _targetCount = 0;
+    _current = nullptr;
 }
 
 // Get number of registered render targets
@@ -122,4 +129,34 @@ bool RenderManager::displayAll()
     }
 
     return allSucceeded;
+}
+
+// Get the target that drawing should currently resolve to
+RenderTarget *RenderManager::getActiveTarget() const
+{
+    return _current ? _current : getPrimaryRenderTarget();
+}
+
+// Get the target being drawn, or nullptr when no pass is running
+RenderTarget *RenderManager::getPassTarget() const
+{
+    return _current;
+}
+
+// Check whether a render pass is currently running
+bool RenderManager::inRenderPass() const
+{
+    return _current != nullptr;
+}
+
+// Nominate the target that drawing resolves to
+void RenderManager::beginRenderPass(RenderTarget *target)
+{
+    _current = target;
+}
+
+// Return drawing resolution to the primary target
+void RenderManager::endRenderPass()
+{
+    _current = nullptr;
 }
