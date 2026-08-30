@@ -34,3 +34,6 @@ fp-info-cache
 *.ses
 
 ci-sketches/
+
+# Native test binaries
+extras/test/test_RenderManager
