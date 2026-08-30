@@ -193,8 +193,10 @@ void BinaryFileViewer::_displayBinaryContent()
     uint16_t linesPerPage = _getLinesPerPage();
     uint16_t bytesPerLine = _getBytesPerLine();
     uint16_t lineHeight = 8; // Text size 1 line height
-    uint16_t startX = _getContentLeft() + 5;
-    uint16_t startY = _getContentTop() + 5;
+    // drawText() adds the content origin itself; these were absolute, so the
+    // dump started a second header height down the panel.
+    uint16_t startX = 5;
+    uint16_t startY = 5;
 
     // Display hex dump
     for (uint16_t line = 0; line < linesPerPage; line++)
@@ -204,7 +206,7 @@ void BinaryFileViewer::_displayBinaryContent()
         uint16_t currentY = startY + (line * lineHeight);
 
         // Stop if we've reached end of buffer or content area
-        if (lineStartInBuffer >= _bytesInBuffer || currentY >= (_getContentTop() + _getContentHeight() - lineHeight))
+        if (lineStartInBuffer >= _bytesInBuffer || currentY >= (_getContentHeight() - lineHeight))
             break;
 
         uint16_t currentX = startX;
