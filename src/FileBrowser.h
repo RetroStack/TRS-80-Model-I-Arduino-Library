@@ -13,16 +13,19 @@
 #include "TextFileViewer.h"
 #include "BinaryFileViewer.h"
 
-struct FileEntry
-{
-    String name;
-    bool isDirectory;
-    uint32_t size;
-};
-
 class FileBrowser : public MenuScreen
 {
 private:
+    // Private: this is FileBrowser's own record of a directory entry, not a
+    // type callers construct. It was at namespace scope and exported
+    // library-wide while being used only by the array below.
+    struct FileEntry
+    {
+        String name;
+        bool isDirectory;
+        uint32_t size;
+    };
+
     String _currentDirectory;       // Current directory path
     String _rootDirectory;          // Root directory (can't go above this)
     String _targetFilename;         // File to pre-select and scroll to

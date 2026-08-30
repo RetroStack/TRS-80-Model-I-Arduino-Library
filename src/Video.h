@@ -15,6 +15,11 @@
 /**
  * Structure for the viewport information
  */
+// A four-byte aggregate describing a rectangle of the Model 1 screen. Kept in
+// this header rather than a file of its own: it has no behaviour, it is only
+// ever passed to and from Video, and splitting it would mean a header and a
+// docs page for four bytes. It is public API -- examples/Model1/ViewPort uses
+// it directly -- and is documented in docs/Video.md.
 struct ViewPort
 {
   uint8_t x;

@@ -50,8 +50,7 @@ constexpr uint8_t PIN_CR2 = 42;       // Cassette Remote 2 (configurable input/o
 constexpr uint8_t PIN_CASS_IN = A14;  // Cassette input from the perspective of the Model 1
 constexpr uint8_t PIN_CASS_OUT = A15; // Cassette output from the perspective of the Model 1
 
-// Buzzer pin
-constexpr uint8_t PIN_BUZZER = 4; // Buzzer pin
+constexpr uint8_t PIN_BUZZER = 4; // Buzzer
 
 // SD Card pin
 constexpr uint8_t PIN_SD_SELECT = 49; // SD card chip select pin
