@@ -61,6 +61,12 @@ protected:
 
     Screen *_handleBackAction(ActionTaken action); // Back screen when the menu button was pressed, else nullptr
 
+    // Wrap-around scan for the next selectable item. MenuScreen and
+    // ButtonScreen had line-for-line identical copies of this, differing only
+    // in where the count came from and which predicate they asked.
+    virtual bool _isItemEnabled(uint8_t index) const { (void)index; return true; }
+    uint8_t _findNextEnabledItem(uint8_t startIndex, bool forward, uint8_t itemCount) const;
+
     // A screen that cannot show its content -- no card, unreadable file --
     // stays open and says so, rather than refusing to open and leaving the
     // device with no screen at all.

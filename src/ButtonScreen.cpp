@@ -69,39 +69,7 @@ uint8_t ButtonScreen::_getMaxVisibleItems() const
 // Find the next enabled button item
 uint8_t ButtonScreen::_findNextEnabledItem(uint8_t startIndex, bool forward) const
 {
-    uint8_t buttonItemCount = _getButtonItemCount();
-    if (buttonItemCount == 0)
-        return 0;
-
-    // Ensure start index is valid
-    if (startIndex >= buttonItemCount)
-    {
-        startIndex = buttonItemCount - 1;
-    }
-
-    uint8_t currentIndex = startIndex;
-    uint8_t attempts = 0;
-
-    do
-    {
-        if (_isButtonItemEnabled(currentIndex))
-        {
-            return currentIndex;
-        }
-
-        if (forward)
-        {
-            currentIndex = (currentIndex + 1) % buttonItemCount;
-        }
-        else
-        {
-            currentIndex = (currentIndex == 0) ? buttonItemCount - 1 : currentIndex - 1;
-        }
-        attempts++;
-    } while (attempts < buttonItemCount);
-
-    // If no enabled items found, return the original index
-    return startIndex;
+    return ContentScreen::_findNextEnabledItem(startIndex, forward, _getButtonItemCount());
 }
 
 // Adjust view window to ensure selected item is visible

@@ -23,7 +23,8 @@ private:
 
     uint8_t _getItemsPerPage() const; // Calculate maximum items that can fit on one page
 
-    uint8_t _findNextEnabledItem(uint8_t startIndex, bool forward) const; // Find the next enabled menu item
+    uint8_t _findNextEnabledItem(uint8_t startIndex, bool forward) const; // Next enabled item, via ContentScreen
+    bool _isItemEnabled(uint8_t index) const override { return _isMenuItemEnabled(index); } // Bridge to this class's own hook
 
 protected:
     void _drawContent(); // Draw the menu content area with paginated item list

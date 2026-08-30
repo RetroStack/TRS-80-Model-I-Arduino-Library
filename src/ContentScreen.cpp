@@ -101,6 +101,41 @@ bool ContentScreen::_hasErrorState() const
     return _errorMessage != nullptr;
 }
 
+// Next selectable item, wrapping at either end
+uint8_t ContentScreen::_findNextEnabledItem(uint8_t startIndex, bool forward, uint8_t itemCount) const
+{
+    if (itemCount == 0)
+        return 0;
+
+    if (startIndex >= itemCount)
+    {
+        startIndex = itemCount - 1;
+    }
+
+    uint8_t currentIndex = startIndex;
+    uint8_t attempts = 0;
+
+    do
+    {
+        if (_isItemEnabled(currentIndex))
+        {
+            return currentIndex;
+        }
+
+        if (forward)
+        {
+            currentIndex = (currentIndex + 1) % itemCount;
+        }
+        else
+        {
+            currentIndex = (currentIndex == 0) ? itemCount - 1 : currentIndex - 1;
+        }
+        attempts++;
+    } while (attempts < itemCount);
+
+    return startIndex; // Nothing enabled; leave the selection where it was
+}
+
 // Set where the menu button leads
 void ContentScreen::setBackScreen(BackScreenFactory factory, const String &context)
 {

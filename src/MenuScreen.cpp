@@ -68,38 +68,7 @@ uint8_t MenuScreen::_getItemsPerPage() const
 
 uint8_t MenuScreen::_findNextEnabledItem(uint8_t startIndex, bool forward) const
 {
-    if (_menuItemCount == 0)
-        return 0;
-
-    // Ensure start index is valid
-    if (startIndex >= _menuItemCount)
-    {
-        startIndex = _menuItemCount - 1;
-    }
-
-    uint8_t currentIndex = startIndex;
-    uint8_t attempts = 0;
-
-    do
-    {
-        if (_isMenuItemEnabled(currentIndex))
-        {
-            return currentIndex;
-        }
-
-        if (forward)
-        {
-            currentIndex = (currentIndex + 1) % _menuItemCount;
-        }
-        else
-        {
-            currentIndex = (currentIndex == 0) ? _menuItemCount - 1 : currentIndex - 1;
-        }
-        attempts++;
-    } while (attempts < _menuItemCount);
-
-    // If no enabled items found, return the original index
-    return startIndex;
+    return ContentScreen::_findNextEnabledItem(startIndex, forward, _menuItemCount);
 }
 
 // Input Handling and Navigation
@@ -343,38 +312,15 @@ void MenuScreen::_drawContent()
 
             // Applied whether or not a config value is present: a plain long
             // item used to run past the row and wrap onto the one below it.
+            // _truncateText() is ContentScreen's; this class used to carry its
+            // own copy, which had even invented a two-dot ellipsis.
             if (menuTextWidth > availableWidth)
             {
-                // Calculate how many characters fit with "..."
-                if (isSmall)
+                char *truncated = _truncateText(menuText.c_str(), availableWidth, textSizeWidth);
+                menuText = (truncated != nullptr) ? String(truncated) : String();
+                if (truncated != nullptr)
                 {
-                    uint16_t ellipsisWidth = 2 * textSizeWidth;
-                    uint16_t maxCharsWidth = (ellipsisWidth < availableWidth) ? (availableWidth - ellipsisWidth) : 0;
-                    uint8_t maxChars = maxCharsWidth / textSizeWidth;
-
-                    if (maxChars > 0)
-                    {
-                        menuText = menuText.substring(0, maxChars) + "..";
-                    }
-                    else
-                    {
-                        menuText = ".."; // Fallback if space is extremely limited
-                    }
-                }
-                else
-                {
-                    uint16_t ellipsisWidth = 3 * textSizeWidth;
-                    uint16_t maxCharsWidth = (ellipsisWidth < availableWidth) ? (availableWidth - ellipsisWidth) : 0;
-                    uint8_t maxChars = maxCharsWidth / textSizeWidth;
-
-                    if (maxChars > 0)
-                    {
-                        menuText = menuText.substring(0, maxChars) + "...";
-                    }
-                    else
-                    {
-                        menuText = "..."; // Fallback if space is extremely limited
-                    }
+                    free(truncated);
                 }
             }
 

@@ -18,7 +18,8 @@ private:
     uint8_t _viewStartIndex;          // Index of the leftmost visible button item
 
     uint8_t _getMaxVisibleItems() const;                                  // Calculate maximum items that can fit horizontally
-    uint8_t _findNextEnabledItem(uint8_t startIndex, bool forward) const; // Find the next enabled button item
+    uint8_t _findNextEnabledItem(uint8_t startIndex, bool forward) const; // Next enabled item, via ContentScreen
+    bool _isItemEnabled(uint8_t index) const override { return _isButtonItemEnabled(index); } // Bridge to this class's own hook
     void _adjustViewWindow();                                             // Adjust the view window to ensure selected item is visible
 
 protected:
