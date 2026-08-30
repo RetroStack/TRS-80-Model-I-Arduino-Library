@@ -88,9 +88,15 @@ void Screen::refresh()
 // Check if current display is small (either dimension <= 128 pixels)
 bool Screen::isSmallDisplay() const
 {
-    // Testing height alone classified the 128x160 ST7735 as large, so it took
-    // the full 320x240 template: a size-3 title on a 128 pixel width leaves
-    // room for six characters, three of which the ellipsis then consumes.
+    // The rule lives on RenderTarget, which documents itself as its single
+    // home; this used to re-derive it, so there were two definitions and the
+    // documented one had no callers at all.
+    RenderTarget *target = M1Shield.getRenderManager().getActiveTarget();
+    if (target != nullptr)
+    {
+        return target->isSmallDisplay();
+    }
+
     return M1Shield.getScreenHeight() <= 128 || M1Shield.getScreenWidth() <= 128;
 }
 

@@ -109,6 +109,10 @@ public:
 
     bool setScreen(Screen *screen); // Set the active screen and perform transition
 
+    // The render-target registry. addRenderTarget() on it does not validate a
+    // reset pin or call begin() on the target -- addDisplay() above is the door
+    // for a display panel; use this one for targets that manage themselves,
+    // such as a serial mirror.
     RenderManager &getRenderManager(); // Get reference to render manager
 
     // Initialize an additional display panel and register it as a render

@@ -11,7 +11,6 @@
 #include "ILogger.h"
 #include "AddressBus.h"
 #include "DataBus.h"
-#include "M1Shield.h"
 
 // Print style enumeration for memory output formatting
 enum PRINT_STYLE

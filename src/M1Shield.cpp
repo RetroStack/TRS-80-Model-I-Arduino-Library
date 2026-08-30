@@ -234,6 +234,15 @@ void M1ShieldClass::deactivateJoystick()
 // Check if display has been properly initialized
 bool M1ShieldClass::isDisplayInitialized() const
 {
+    // Answered from _displayProvider while getGFX() answered from the render
+    // manager, so the two could disagree once a target was registered or its
+    // provider swapped. Both now ask the manager.
+    RenderTarget *active = _renderManager.getActiveTarget();
+    if (active != nullptr)
+    {
+        return active->getScreenWidth() > 0 && active->getScreenHeight() > 0;
+    }
+
     return (_displayProvider != nullptr && _screenWidth > 0 && _screenHeight > 0);
 }
 
@@ -276,6 +285,20 @@ uint16_t M1ShieldClass::getScreenHeight() const
 // Get reference to the display provider
 DisplayProvider &M1ShieldClass::getDisplayProvider() const
 {
+    // Every sibling accessor resolves through the active render target; this
+    // one answered from _displayProvider unconditionally, so under a render
+    // pass on a second panel it returned the primary's provider while
+    // getScreenWidth() beside it returned the secondary's width.
+    RenderTarget *active = _renderManager.getActiveTarget();
+    if (active != nullptr)
+    {
+        DisplayProvider *provider = active->getProvider();
+        if (provider != nullptr)
+        {
+            return *provider;
+        }
+    }
+
     if (!_displayProvider)
     {
         if (_logger)

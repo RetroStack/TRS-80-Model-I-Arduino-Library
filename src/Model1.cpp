@@ -7,6 +7,10 @@
 #include "Model1.h"
 #include "utils.h"
 #include <SD.h>
+// Only dumpMemoryToSD() needs the shield, and only for the card select pin.
+// Including this from Model1.h instead pulled Adafruit_GFX and the whole UI
+// header chain into every hardware-only sketch.
+#include "M1Shield.h"
 #include "Model1LowLevel.h"
 
 // Refresh trigger

@@ -40,6 +40,12 @@ void DisplayRenderTarget::setDisplayProvider(DisplayProvider &provider)
 }
 
 // Get the backing provider
+// The provider, as RenderTarget's optional accessor
+DisplayProvider *DisplayRenderTarget::getProvider() const
+{
+    return _displayProvider;
+}
+
 DisplayProvider &DisplayRenderTarget::getDisplayProvider() const
 {
     return *_displayProvider;
