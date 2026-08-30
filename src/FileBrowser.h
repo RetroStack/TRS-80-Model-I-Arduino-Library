@@ -36,8 +36,8 @@ private:
     bool _hasRootRestriction;       // Whether root directory restriction is active
 
     // Dynamic array management
-    void _ensureFileCapacity(uint8_t minCapacity);          // Ensure _files array has minimum capacity
-    void _ensureTextExtensionCapacity(uint8_t minCapacity); // Ensure _textExtensions array has minimum capacity
+    bool _ensureFileCapacity(uint8_t minCapacity);          // Ensure _files array has minimum capacity; false if it could not grow
+    bool _ensureTextExtensionCapacity(uint8_t minCapacity); // Ensure _textExtensions array has minimum capacity; false if it could not grow
     void _cleanupArrays();                                  // Free allocated arrays
 
     // Directory operations

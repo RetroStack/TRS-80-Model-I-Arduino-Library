@@ -83,10 +83,10 @@ void FileBrowser::_cleanupArrays()
 }
 
 // Ensure _files array has minimum capacity
-void FileBrowser::_ensureFileCapacity(uint8_t minCapacity)
+bool FileBrowser::_ensureFileCapacity(uint8_t minCapacity)
 {
     if (_fileCapacity >= minCapacity)
-        return;
+        return true;
 
     // Calculate new capacity (grow by 50% or minimum needed)
     uint8_t newCapacity = _fileCapacity + (_fileCapacity >> 1);
@@ -97,7 +97,7 @@ void FileBrowser::_ensureFileCapacity(uint8_t minCapacity)
     if (!newFiles)
     {
         // Out of memory - keep the existing array rather than losing it
-        return;
+        return false;
     }
 
     // Copy existing data
@@ -114,13 +114,14 @@ void FileBrowser::_ensureFileCapacity(uint8_t minCapacity)
 
     _files = newFiles;
     _fileCapacity = newCapacity;
+    return true;
 }
 
 // Ensure _textExtensions array has minimum capacity
-void FileBrowser::_ensureTextExtensionCapacity(uint8_t minCapacity)
+bool FileBrowser::_ensureTextExtensionCapacity(uint8_t minCapacity)
 {
     if (_textExtensionCapacity >= minCapacity)
-        return;
+        return true;
 
     // Calculate new capacity (grow by 50% or minimum needed)
     uint8_t newCapacity = _textExtensionCapacity + (_textExtensionCapacity >> 1);
@@ -131,7 +132,7 @@ void FileBrowser::_ensureTextExtensionCapacity(uint8_t minCapacity)
     if (!newExtensions)
     {
         // Out of memory - keep the existing array rather than losing it
-        return;
+        return false;
     }
 
     // Copy existing data
@@ -148,6 +149,7 @@ void FileBrowser::_ensureTextExtensionCapacity(uint8_t minCapacity)
 
     _textExtensions = newExtensions;
     _textExtensionCapacity = newCapacity;
+    return true;
 }
 
 // Initialize and load directory
@@ -514,8 +516,13 @@ void FileBrowser::addTextExtension(const String &extension)
             return;
     }
 
-    // Ensure we have capacity for one more extension
-    _ensureTextExtensionCapacity(_textExtensionCount + 1);
+    // A uint8_t count saturates at 255, where +1 truncates to 0 and skips the
+    // grow entirely, leaving the write below past the end of the array.
+    if (_textExtensionCount == 255)
+        return;
+
+    if (!_ensureTextExtensionCapacity((uint8_t)(_textExtensionCount + 1)))
+        return;
 
     _textExtensions[_textExtensionCount] = ext;
     _textExtensionCount++;
@@ -530,8 +537,14 @@ void FileBrowser::clearTextExtensions()
 // Set text extensions array
 void FileBrowser::setTextExtensions(const String *extensions, uint8_t count)
 {
-    // Ensure we have enough capacity
+    if (!extensions)
+        return;
+
+    // A failed grow leaves the old, smaller array in place. Store what fits
+    // rather than assigning the requested count and writing past the end.
     _ensureTextExtensionCapacity(count);
+    if (count > _textExtensionCapacity)
+        count = _textExtensionCapacity;
 
     _textExtensionCount = count;
 
