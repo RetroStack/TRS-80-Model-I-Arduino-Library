@@ -55,21 +55,7 @@ public:
     {
         va_list args;
         va_start(args, fmt);
-
-        size_t len = strlen_P((const char *)fmt);
-        if (len > 0)
-        {
-            char buffer[len + 1]; // +1 for null terminator
-            strcpy_P(buffer, (const char *)fmt);
-            buffer[len] = '\0'; // Ensure null termination
-
-            // Use a temporary buffer for formatted output
-            char formatted[256]; // Fixed size buffer to avoid VLA
-            vsnprintf(formatted, sizeof(formatted), buffer, args);
-            formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
-            info("%s", formatted);
-        }
-
+        _formatFlash(INFO, fmt, args);
         va_end(args);
     }
 
@@ -78,21 +64,7 @@ public:
     {
         va_list args;
         va_start(args, fmt);
-
-        size_t len = strlen_P((const char *)fmt);
-        if (len > 0)
-        {
-            char buffer[len + 1]; // +1 for null terminator
-            strcpy_P(buffer, (const char *)fmt);
-            buffer[len] = '\0'; // Ensure null termination
-
-            // Use a temporary buffer for formatted output
-            char formatted[256]; // Fixed size buffer to avoid VLA
-            vsnprintf(formatted, sizeof(formatted), buffer, args);
-            formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
-            warn("%s", formatted);
-        }
-
+        _formatFlash(WARN, fmt, args);
         va_end(args);
     }
 
@@ -101,21 +73,7 @@ public:
     {
         va_list args;
         va_start(args, fmt);
-
-        size_t len = strlen_P((const char *)fmt);
-        if (len > 0)
-        {
-            char buffer[len + 1]; // +1 for null terminator
-            strcpy_P(buffer, (const char *)fmt);
-            buffer[len] = '\0'; // Ensure null termination
-
-            // Use a temporary buffer for formatted output
-            char formatted[256]; // Fixed size buffer to avoid VLA
-            vsnprintf(formatted, sizeof(formatted), buffer, args);
-            formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
-            err("%s", formatted);
-        }
-
+        _formatFlash(ERR, fmt, args);
         va_end(args);
     }
 
@@ -124,24 +82,57 @@ public:
     {
         va_list args;
         va_start(args, fmt);
-
-        size_t len = strlen_P((const char *)fmt);
-        if (len > 0)
-        {
-            char buffer[len + 1]; // +1 for null terminator
-            strcpy_P(buffer, (const char *)fmt);
-            buffer[len] = '\0'; // Ensure null termination
-
-            // Use a temporary buffer for formatted output
-            char formatted[256]; // Fixed size buffer to avoid VLA
-            vsnprintf(formatted, sizeof(formatted), buffer, args);
-            formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
-            debug("%s", formatted);
-        }
-
+        _formatFlash(DEBUG, fmt, args);
         va_end(args);
     }
 
+protected:
+    enum Level
+    {
+        INFO,
+        WARN,
+        ERR,
+        DEBUG
+    };
+
+    void _dispatch(Level level, const char *message)
+    {
+        switch (level)
+        {
+        case INFO:
+            info("%s", message);
+            break;
+        case WARN:
+            warn("%s", message);
+            break;
+        case ERR:
+            err("%s", message);
+            break;
+        case DEBUG:
+            debug("%s", message);
+            break;
+        }
+    }
+
+    // Formats a flash-held format string. The four F() methods used to carry a
+    // copy of this each: a runtime-sized stack array for the format -- directly
+    // under a comment claiming it avoided one -- plus a 256-byte buffer for the
+    // result, on a part with 8KB of SRAM. vsnprintf_P reads the format straight
+    // out of flash, so the copy is gone and only one buffer remains.
+    void _formatFlash(Level level, const __FlashStringHelper *fmt, va_list args)
+    {
+        if (fmt == nullptr)
+        {
+            return;
+        }
+
+        char formatted[128];
+        vsnprintf_P(formatted, sizeof(formatted), (const char *)fmt, args);
+        formatted[sizeof(formatted) - 1] = '\0';
+        _dispatch(level, formatted);
+    }
+
+public:
     virtual size_t write(uint8_t ch) = 0;                         // Write single character (Print interface)
     virtual size_t write(const uint8_t *buffer, size_t size) = 0; // Write buffer of characters (Print interface)
 };

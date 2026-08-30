@@ -251,6 +251,106 @@ uint16_t LoggerScreen::getLogBufferCount() const
 }
 
 // Log informational messages
+// Log a String as a info message
+void LoggerScreen::info(const String &message)
+{
+    info("%s", message.c_str());
+}
+
+// Log a flash-held format string as a info message
+void LoggerScreen::infoF(const __FlashStringHelper *fmt, ...)
+{
+    if (fmt == nullptr)
+        return;
+
+    va_list args;
+    va_start(args, fmt);
+
+    // vsnprintf_P reads the format straight out of flash, so nothing is copied
+    // into RAM but the result.
+    char formatted[128];
+    vsnprintf_P(formatted, sizeof(formatted), (const char *)fmt, args);
+    formatted[sizeof(formatted) - 1] = '\0';
+    va_end(args);
+
+    info("%s", formatted);
+}
+
+// Log a String as a warn message
+void LoggerScreen::warn(const String &message)
+{
+    warn("%s", message.c_str());
+}
+
+// Log a flash-held format string as a warn message
+void LoggerScreen::warnF(const __FlashStringHelper *fmt, ...)
+{
+    if (fmt == nullptr)
+        return;
+
+    va_list args;
+    va_start(args, fmt);
+
+    // vsnprintf_P reads the format straight out of flash, so nothing is copied
+    // into RAM but the result.
+    char formatted[128];
+    vsnprintf_P(formatted, sizeof(formatted), (const char *)fmt, args);
+    formatted[sizeof(formatted) - 1] = '\0';
+    va_end(args);
+
+    warn("%s", formatted);
+}
+
+// Log a String as a err message
+void LoggerScreen::err(const String &message)
+{
+    err("%s", message.c_str());
+}
+
+// Log a flash-held format string as a err message
+void LoggerScreen::errF(const __FlashStringHelper *fmt, ...)
+{
+    if (fmt == nullptr)
+        return;
+
+    va_list args;
+    va_start(args, fmt);
+
+    // vsnprintf_P reads the format straight out of flash, so nothing is copied
+    // into RAM but the result.
+    char formatted[128];
+    vsnprintf_P(formatted, sizeof(formatted), (const char *)fmt, args);
+    formatted[sizeof(formatted) - 1] = '\0';
+    va_end(args);
+
+    err("%s", formatted);
+}
+
+// Log a String as a debug message
+void LoggerScreen::debug(const String &message)
+{
+    debug("%s", message.c_str());
+}
+
+// Log a flash-held format string as a debug message
+void LoggerScreen::debugF(const __FlashStringHelper *fmt, ...)
+{
+    if (fmt == nullptr)
+        return;
+
+    va_list args;
+    va_start(args, fmt);
+
+    // vsnprintf_P reads the format straight out of flash, so nothing is copied
+    // into RAM but the result.
+    char formatted[128];
+    vsnprintf_P(formatted, sizeof(formatted), (const char *)fmt, args);
+    formatted[sizeof(formatted) - 1] = '\0';
+    va_end(args);
+
+    debug("%s", formatted);
+}
+
 // Level label for the current panel width
 const char *LoggerScreen::_levelLabel(LogLevel level) const
 {

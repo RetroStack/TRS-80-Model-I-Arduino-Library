@@ -134,6 +134,7 @@ public:
 
     // Button management
     void setButtonItems(const char **buttonItems, uint8_t buttonItemCount);                 // Set button labels for footer display
+    void setButtonItems(String *buttonItems, uint8_t buttonItemCount); // Arduino String array form
     void setButtonItemsF(const __FlashStringHelper **buttonItems, uint8_t buttonItemCount); // Set button labels from FlashString array
     void clearButtonItems();                                                                // Clear all button labels and free allocated memory
 

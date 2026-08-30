@@ -536,6 +536,33 @@ void ContentScreen::_drawProgressBar()
 }
 
 // Sets the button items (FlashString version)
+// Set button items from an array of String objects
+void ContentScreen::setButtonItems(String *buttonItems, uint8_t buttonItemCount)
+{
+    if (buttonItems == nullptr || buttonItemCount == 0)
+    {
+        clearButtonItems();
+        return;
+    }
+
+    // Delegate to the const char* form, as the project's string-API rule
+    // requires, so the copying and failure handling live in one place.
+    const char **items = (const char **)malloc(buttonItemCount * sizeof(const char *));
+    if (items == nullptr)
+    {
+        clearButtonItems();
+        return;
+    }
+
+    for (uint8_t i = 0; i < buttonItemCount; i++)
+    {
+        items[i] = buttonItems[i].c_str();
+    }
+
+    setButtonItems(items, buttonItemCount);
+    free(items);
+}
+
 void ContentScreen::setButtonItemsF(const __FlashStringHelper **buttonItems, uint8_t buttonItemCount)
 {
     if (buttonItems == nullptr || buttonItemCount <= 0)

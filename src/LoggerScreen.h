@@ -85,6 +85,19 @@ public:
     void err(const char *fmt, ...) __attribute__((format(printf, 2, 3)));
     void debug(const char *fmt, ...) __attribute__((format(printf, 2, 3)));
 
+    // The String and F() forms its three sibling loggers expose. LoggerScreen
+    // does not inherit ILogger, so it could not pick them up the way they do;
+    // without them the example kept every literal in SRAM.
+    void info(const String &message);
+    void warn(const String &message);
+    void err(const String &message);
+    void debug(const String &message);
+
+    void infoF(const __FlashStringHelper *fmt, ...);
+    void warnF(const __FlashStringHelper *fmt, ...);
+    void errF(const __FlashStringHelper *fmt, ...);
+    void debugF(const __FlashStringHelper *fmt, ...);
+
     ILogger *asLogger(); // Get an ILogger adapter for this LoggerScreen
 
 private:
