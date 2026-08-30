@@ -167,6 +167,4 @@ void loop()
         }
     }
 
-    // Small delay for smooth operation
-    delay(100);
 }

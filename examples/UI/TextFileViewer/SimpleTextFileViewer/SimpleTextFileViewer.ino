@@ -82,6 +82,7 @@ void setup()
 
 void loop()
 {
-    // M1Shield handles the screen updates automatically
-    delay(50);
+    // Drives input and redraw. Without this call nothing reaches the screen:
+    // the shield does not update itself.
+    M1Shield.loop();
 }

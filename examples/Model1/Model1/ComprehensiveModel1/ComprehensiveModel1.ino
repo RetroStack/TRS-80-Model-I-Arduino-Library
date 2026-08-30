@@ -166,9 +166,17 @@ void demonstrateAdvancedMemoryOperations()
     free(readBack);
 }
 
+// KNOWN LIMITATION: this demonstration reports TIMEOUT on every vector.
+//
+// The driver it exercises is complete -- Model1Class::triggerInterrupt() asserts
+// INT*, polls INT_ACK* for the timeout, and places the vector on the data bus
+// when the CPU acknowledges. Whether the fault is in the timeout window (1000
+// iterations of a noop, so tens of microseconds at 16 MHz), in the state the
+// bus is left in by deactivateTestSignal() just above, or in the Model 1 side
+// has not been established on hardware. Left in place because it exercises a
+// real API, but do not treat its output as a working reference.
 void demonstrateInterruptOperations()
 {
-    // TODO: Somehow doesn't work. Need to debug this
     Serial.println(F("--- Interrupt Operations ---"));
 
     // Test interrupt triggering
