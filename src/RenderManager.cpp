@@ -5,7 +5,6 @@
  */
 
 #include "RenderManager.h"
-#include "Screen.h"
 
 // Constructor - initialize empty target list
 RenderManager::RenderManager() : _targetCount(0)
@@ -97,4 +96,30 @@ RenderTarget *RenderManager::getRenderTarget(uint8_t index) const
         return _targets[index];
     }
     return nullptr;
+}
+
+// Get the primary render target (index 0)
+RenderTarget *RenderManager::getPrimaryRenderTarget() const
+{
+    return getRenderTarget(0);
+}
+
+// Push every enabled target
+bool RenderManager::displayAll()
+{
+    bool allSucceeded = true;
+
+    for (uint8_t i = 0; i < _targetCount; i++)
+    {
+        RenderTarget *target = _targets[i];
+        if (target && target->isEnabled())
+        {
+            if (!target->display())
+            {
+                allSucceeded = false;
+            }
+        }
+    }
+
+    return allSucceeded;
 }

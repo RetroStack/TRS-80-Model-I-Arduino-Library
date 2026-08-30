@@ -16,6 +16,7 @@ The `M1Shield` class provides a comprehensive hardware abstraction layer for the
   - [Button Input](#button-input)
   - [Joystick Input](#joystick-input)
 - [LED Control](#led-control)
+- [Render Targets](#render-targets)
 - [Buzzer](#buzzer)
 - [Screen Management](#screen-management)
 - [SD Card Detection](#sd-card-detection)
@@ -541,6 +542,16 @@ void loop() {
     M1Shield.loop();    // Handle input, screen updates, and transitions
 }
 ```
+
+## Render Targets
+
+```cpp
+RenderManager& getRenderManager();
+```
+
+`begin(provider)` wraps the display provider in a `DisplayRenderTarget` and registers it as the primary render target. `getGFX()`, `getScreenWidth()`, `getScreenHeight()` and `convertColor()` read from that target, and `display()` pushes every enabled one - so additional output destinations receive the same `display()` without any screen code changing.
+
+See [RenderTarget](RenderTarget.md) for the interface and for writing a custom target.
 
 ## Buzzer
 

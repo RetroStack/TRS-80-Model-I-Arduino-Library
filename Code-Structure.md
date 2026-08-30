@@ -53,12 +53,51 @@ This document provides a comprehensive reference of all classes and functions av
 - `void buzzerOn() const` // Activate buzzer sound
 - `void buzzerOff() const` // Deactivate buzzer sound
 - `void buzz(unsigned int durationMs) const` // Buzz for specified duration
+- `RenderManager& getRenderManager()` // Get the render target manager
 - `void loop()` // Main update loop for all shield operations
 
 **Enums:**
 
 - `enum LEDColor` // RGB LED color definitions: COLOR_OFF, COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_YELLOW, COLOR_MAGENTA, COLOR_CYAN, COLOR_WHITE
 - `enum JoystickDirection` // 8-directional joystick states: CENTER, UP, DOWN, LEFT, RIGHT, UP_LEFT, UP_RIGHT, DOWN_LEFT, DOWN_RIGHT
+
+## RenderTarget (RenderTarget.h)
+
+Abstract destination that screens are drawn to.
+
+- `const char* getName() const` // Human-readable target name
+- `bool isEnabled() const` // Whether the target is drawn to and presented
+- `void setEnabled(bool enabled)` // Enable or disable the target
+- `Adafruit_GFX& getGFX()` // Graphics context to draw into
+- `uint16_t getScreenWidth() const` // Target width in pixels
+- `uint16_t getScreenHeight() const` // Target height in pixels
+- `uint16_t convertColor(uint16_t color)` // Convert a color to the target's format
+- `bool display()` // Push what was drawn to the physical device
+- `bool isSmallDisplay() const` // Non-virtual; height <= 128
+
+## RenderManager (RenderManager.h)
+
+Holds registered render targets and drives them as a group. Target 0 is the primary.
+
+- `bool addRenderTarget(RenderTarget *target)` // Register a target
+- `bool removeRenderTarget(RenderTarget *target)` // Unregister a target
+- `void clearRenderTargets()` // Unregister all targets
+- `uint8_t getRenderTargetCount() const` // Number of registered targets
+- `RenderTarget* getRenderTarget(uint8_t index) const` // Target by index, or nullptr
+- `RenderTarget* getPrimaryRenderTarget() const` // Target 0, or nullptr
+- `bool displayAll()` // Push every enabled target
+
+**Constants:**
+
+- `constexpr uint8_t MAX_RENDER_TARGETS = 8` // Registration capacity
+
+## DisplayRenderTarget (DisplayRenderTarget.h)
+
+RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::begin()`.
+
+- `explicit DisplayRenderTarget(DisplayProvider &provider)` // Provider is required, not owned
+- `void setDisplayProvider(DisplayProvider &provider)` // Swap the backing provider
+- `DisplayProvider& getDisplayProvider() const` // Get the backing provider
 
 ## Model1Class (Model1.h)
 

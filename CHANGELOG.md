@@ -194,3 +194,10 @@ This is the initial version written by Ven Reddy
 - **PACKAGING**: `architectures` narrowed from `*` to `avr`, with an `#error` in `port_config.h` naming the ATmega2560 requirement instead of failing deep inside the port macros
 - **DOCUMENTATION**: Corrected API names that never existed, including `Model1.readByte()`/`writeByte()` in the README quickstart, `M1Shield.processInput()`/`updateScreen()`/`renderScreen()`, and `beginWithDisplay()`/`updateDisplay()`
 - **DOCUMENTATION**: `docs/MenuScreen.md` examples no longer cache child screens as members and delete them in the menu destructor; `setScreen()` takes ownership and deletes the outgoing menu, so that pattern freed the screen being activated
+- **NEW FEATURE**: Completed the render target abstraction introduced alongside `RenderManager`
+  - **Real Interface**: `RenderTarget` now declares the drawing surface itself - `getGFX()`, `getScreenWidth()`, `getScreenHeight()`, `convertColor()` and `display()` - so targets are genuinely interchangeable rather than only nameable
+  - **Fan-out**: `RenderManager::displayAll()` pushes every enabled target, and `M1Shield.display()` now goes through it; `getPrimaryRenderTarget()` names target 0
+  - **Delegation**: `M1Shield`'s display accessors read through the primary render target instead of the display provider, so the seam is load-bearing rather than decorative
+  - **Non-nullable Provider**: `DisplayRenderTarget` takes its `DisplayProvider` by reference, removing a `getGFX()` path that deliberately returned a dereferenced null pointer
+  - **Single Rule**: `isSmallDisplay()` lives once, on `RenderTarget`
+  - **Unchanged for Screens**: screens keep calling `M1Shield.getGFX()` and `M1Shield.display()`; no screen code changes

@@ -1,5 +1,5 @@
 /*
- * DisplayRenderTarget.h - Render target that wraps a DisplayProvider for graphics output
+ * DisplayRenderTarget.h - Render target backed by a DisplayProvider
  * Authors: Marcel Erz (RetroStack)
  * Released under the MIT License.
  */
@@ -11,41 +11,37 @@
 #include "DisplayProvider.h"
 #include <Adafruit_GFX.h>
 
-// Render target that provides display functionality using a DisplayProvider
-// This moves display-related functionality from M1Shield into a render target
+// Render target that draws through a DisplayProvider - the panel attached to
+// the shield. M1Shield creates and registers one of these in begin(), and its
+// own display accessors delegate here.
+//
+// The provider is held by reference: a target without a surface to draw on has
+// no valid meaning, so it cannot be constructed in that state.
 class DisplayRenderTarget : public RenderTarget
 {
 private:
-    DisplayProvider *_displayProvider;
+    DisplayProvider *_displayProvider; // Never null; pointer only so it can be reseated
     bool _enabled;
 
 public:
-    DisplayRenderTarget(DisplayProvider *provider = nullptr);
+    explicit DisplayRenderTarget(DisplayProvider &provider);
     virtual ~DisplayRenderTarget();
 
-    // Set/get the display provider
-    void setDisplayProvider(DisplayProvider *provider);
-    DisplayProvider *getDisplayProvider() const;
+    // Swap the backing provider (does not take ownership of either)
+    void setDisplayProvider(DisplayProvider &provider);
+    DisplayProvider &getDisplayProvider() const;
 
     // RenderTarget interface
     const char *getName() const override;
     bool isEnabled() const override;
     void setEnabled(bool enabled) override;
 
-    // Display properties (similar to M1Shield interface)
-    uint16_t getScreenWidth() const;
-    uint16_t getScreenHeight() const;
-    bool isSmallDisplay() const; // Check if display height <= 128 pixels
-    
-    // Graphics access (similar to M1Shield interface)
-    Adafruit_GFX &getGFX() const;
-    uint16_t convertColor(uint16_t color) const;
-    
-    // Display update (similar to M1Shield interface)
-    bool display() const; // Update the display (push framebuffer for OLED, validate for TFT)
-    
-    // Display initialization status
-    bool isDisplayInitialized() const;
+    Adafruit_GFX &getGFX() override;
+    uint16_t getScreenWidth() const override;
+    uint16_t getScreenHeight() const override;
+    uint16_t convertColor(uint16_t color) override;
+
+    bool display() override;
 };
 
 #endif /* DISPLAY_RENDER_TARGET_H */

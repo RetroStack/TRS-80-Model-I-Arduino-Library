@@ -176,7 +176,7 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
         delete _displayTarget;
     }
     
-    _displayTarget = new DisplayRenderTarget(&provider);
+    _displayTarget = new DisplayRenderTarget(provider);
     if (_displayTarget && _renderManager.addRenderTarget(_displayTarget))
     {
         if (_logger)
@@ -223,9 +223,17 @@ bool M1ShieldClass::isDisplayInitialized() const
     return (_displayProvider != nullptr && _screenWidth > 0 && _screenHeight > 0);
 }
 
-// Get reference to the Adafruit_GFX display object
+// Get reference to the Adafruit_GFX display object.
+// Drawing goes through the primary render target; the provider is only used
+// before begin() has registered one.
 Adafruit_GFX &M1ShieldClass::getGFX()
 {
+    RenderTarget *target = _renderManager.getPrimaryRenderTarget();
+    if (target)
+    {
+        return target->getGFX();
+    }
+
     if (!_displayProvider)
     {
         if (_logger)
@@ -240,13 +248,15 @@ Adafruit_GFX &M1ShieldClass::getGFX()
 // Get display screen width in pixels
 uint16_t M1ShieldClass::getScreenWidth() const
 {
-    return _screenWidth;
+    RenderTarget *target = _renderManager.getPrimaryRenderTarget();
+    return target ? target->getScreenWidth() : _screenWidth;
 }
 
 // Get display screen height in pixels
 uint16_t M1ShieldClass::getScreenHeight() const
 {
-    return _screenHeight;
+    RenderTarget *target = _renderManager.getPrimaryRenderTarget();
+    return target ? target->getScreenHeight() : _screenHeight;
 }
 
 // Get reference to the display provider
@@ -275,12 +285,13 @@ ILogger *M1ShieldClass::getLogger() const
     return _logger;
 }
 
-// Update display with current frame buffer contents
+// Update display with current frame buffer contents.
+// Pushes every enabled render target, not just the panel.
 bool M1ShieldClass::display()
 {
-    if (_displayProvider)
+    if (_renderManager.getRenderTargetCount() > 0)
     {
-        bool result = _displayProvider->display();
+        bool result = _renderManager.displayAll();
         if (!result && _logger)
         {
             _logger->warnF(F("M1Shield: Display update failed"));
@@ -298,6 +309,11 @@ bool M1ShieldClass::display()
 // Convert color from RGB to display format
 uint16_t M1ShieldClass::convertColor(uint16_t color)
 {
+    RenderTarget *target = _renderManager.getPrimaryRenderTarget();
+    if (target)
+    {
+        return target->convertColor(color);
+    }
     if (_displayProvider)
     {
         return _displayProvider->convertColor(color);
