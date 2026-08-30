@@ -525,6 +525,15 @@ void M1ShieldClass::setLEDColor(LEDColor color, uint8_t intensity) const
     }
 }
 
+// Edge-detect one button, advancing its stored state
+bool M1ShieldClass::_wasPressed(int pin, unsigned long &state)
+{
+    unsigned long newState = _getDebouncedState(pin, state);
+    bool pressed = (state == 0 && newState != 0);
+    state = newState;
+    return pressed;
+}
+
 // Get debounced button state with timing control
 unsigned long M1ShieldClass::_getDebouncedState(int pin, unsigned long previousState) const
 {
@@ -558,10 +567,7 @@ bool M1ShieldClass::isMenuPressed() const
 // Check if menu button was just pressed (debounced)
 bool M1ShieldClass::wasMenuPressed()
 {
-    unsigned long newState = _getDebouncedState(PIN_MENU, _menuPressed);
-    bool wasPressed = (_menuPressed == 0 && newState != 0);
-    _menuPressed = newState;
-    return wasPressed;
+    return _wasPressed(PIN_MENU, _menuPressed);
 }
 
 // Check if select button is currently pressed
@@ -573,10 +579,7 @@ bool M1ShieldClass::isSelectPressed() const
 // Check if select button was just pressed (debounced)
 bool M1ShieldClass::wasSelectPressed()
 {
-    unsigned long newState = _getDebouncedState(PIN_SELECT, _selectPressed);
-    bool wasPressed = (_selectPressed == 0 && newState != 0);
-    _selectPressed = newState;
-    return wasPressed;
+    return _wasPressed(PIN_SELECT, _selectPressed);
 }
 
 // Check if left button is currently pressed
@@ -588,10 +591,7 @@ bool M1ShieldClass::isLeftPressed() const
 // Check if left button was just pressed (debounced)
 bool M1ShieldClass::wasLeftPressed()
 {
-    unsigned long newState = _getDebouncedState(PIN_LEFT, _leftPressed);
-    bool wasPressed = (_leftPressed == 0 && newState != 0);
-    _leftPressed = newState;
-    return wasPressed;
+    return _wasPressed(PIN_LEFT, _leftPressed);
 }
 
 // Check if right button is currently pressed
@@ -603,10 +603,7 @@ bool M1ShieldClass::isRightPressed() const
 // Check if right button was just pressed (debounced)
 bool M1ShieldClass::wasRightPressed()
 {
-    unsigned long newState = _getDebouncedState(PIN_RIGHT, _rightPressed);
-    bool wasPressed = (_rightPressed == 0 && newState != 0);
-    _rightPressed = newState;
-    return wasPressed;
+    return _wasPressed(PIN_RIGHT, _rightPressed);
 }
 
 // Check if up button is currently pressed
@@ -618,10 +615,7 @@ bool M1ShieldClass::isUpPressed() const
 // Check if up button was just pressed (debounced)
 bool M1ShieldClass::wasUpPressed()
 {
-    unsigned long newState = _getDebouncedState(PIN_UP, _upPressed);
-    bool wasPressed = (_upPressed == 0 && newState != 0);
-    _upPressed = newState;
-    return wasPressed;
+    return _wasPressed(PIN_UP, _upPressed);
 }
 
 // Check if down button is currently pressed
@@ -633,10 +627,7 @@ bool M1ShieldClass::isDownPressed() const
 // Check if down button was just pressed (debounced)
 bool M1ShieldClass::wasDownPressed()
 {
-    unsigned long newState = _getDebouncedState(PIN_DOWN, _downPressed);
-    bool wasPressed = (_downPressed == 0 && newState != 0);
-    _downPressed = newState;
-    return wasPressed;
+    return _wasPressed(PIN_DOWN, _downPressed);
 }
 
 // --- Joystick Input ---
@@ -650,10 +641,7 @@ bool M1ShieldClass::isJoystickPressed() const
 // Check if joystick button was just pressed (debounced)
 bool M1ShieldClass::wasJoystickPressed()
 {
-    unsigned long newState = _getDebouncedState(PIN_JOYSTICK_BUTTON, _joystickPressed);
-    bool wasPressed = (_joystickPressed == 0 && newState != 0);
-    _joystickPressed = newState;
-    return wasPressed;
+    return _wasPressed(PIN_JOYSTICK_BUTTON, _joystickPressed);
 }
 
 // Get joystick direction based on analog position

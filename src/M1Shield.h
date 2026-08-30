@@ -73,6 +73,7 @@ private:
 
     // Internal debouncing helper for button state detection
     unsigned long _getDebouncedState(int pin, unsigned long pressedState) const;
+    bool _wasPressed(int pin, unsigned long &state); // Edge detection shared by every was*Pressed()
 
     void _active() const;   // Set shield to active state (internal)
     void _inactive() const; // Set shield to inactive state (internal)
