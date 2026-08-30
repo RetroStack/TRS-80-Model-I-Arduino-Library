@@ -470,7 +470,7 @@ void Model1Class::fillMemory(uint8_t fill_data, uint16_t address, uint16_t lengt
 }
 
 // Fill memory with data from a buffer
-void Model1Class::fillMemory(uint8_t *fill_data, uint16_t length, uint16_t address, uint16_t address_length)
+void Model1Class::fillMemory(uint8_t *fill_data, uint16_t length, uint16_t address, uint16_t length_in_bytes)
 {
     if (!fill_data)
     {
@@ -484,21 +484,21 @@ void Model1Class::fillMemory(uint8_t *fill_data, uint16_t length, uint16_t addre
             _logger->warnF(F("Model1: fillMemory called with length 0"));
         return;
     }
-    if (address_length == 0)
+    if (length_in_bytes == 0)
     {
         if (_logger)
-            _logger->warnF(F("Model1: fillMemory called with address_length 0"));
+            _logger->warnF(F("Model1: fillMemory called with length_in_bytes 0"));
         return;
     }
-    for (uint16_t i = 0; i < address_length; i += length)
+    for (uint16_t i = 0; i < length_in_bytes; i += length)
     {
         for (uint16_t j = 0; j < length; j++)
         {
-            writeMemory(address + i + j, fill_data[j]);
-
-            // Check if we reached the end address
-            if (i + j >= address_length)
+            // Stop before writing past the end of the region, not after
+            if (i + j >= length_in_bytes)
                 return;
+
+            writeMemory(address + i + j, fill_data[j]);
         }
     }
 }

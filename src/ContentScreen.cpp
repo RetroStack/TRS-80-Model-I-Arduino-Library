@@ -1190,8 +1190,11 @@ void ContentScreen::_drawConfirm(const char *text, const char *leftText, const c
         rightButtonWidth = TEXT_SIZE_2_WIDTH * (strlen(rightText) + 1) + 4; // +1 for ">", +4 for margins
     }
 
-    // Calculate available width for main message
-    uint16_t availableWidth = screenWidth - leftButtonWidth - rightButtonWidth - 8; // 8 additional margin
+    // Calculate available width for main message. Clamp: on a 128px-wide
+    // panel two long button labels underflow this and _truncateText then
+    // never truncates, overprinting both buttons.
+    uint16_t usedWidth = leftButtonWidth + rightButtonWidth + 8; // 8 additional margin
+    uint16_t availableWidth = (usedWidth < screenWidth) ? (screenWidth - usedWidth) : 0;
 
     // Left button text (left-aligned) - when provided, show as indicator
     if (leftText != nullptr && leftText[0] != '\0')
