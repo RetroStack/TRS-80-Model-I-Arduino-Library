@@ -432,3 +432,7 @@ getName	KEYWORD2
 isEnabled	KEYWORD2
 setEnabled	KEYWORD2
 isSmallDisplay	KEYWORD2
+addDisplay	KEYWORD2
+renderAll	KEYWORD2
+getActiveTarget	KEYWORD2
+inRenderPass	KEYWORD2

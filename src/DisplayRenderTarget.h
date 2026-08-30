@@ -27,6 +27,11 @@ public:
     explicit DisplayRenderTarget(DisplayProvider &provider);
     virtual ~DisplayRenderTarget();
 
+    // Reset and create the panel on the given pins. Pass rst = -1 when the
+    // panel has no reset line of its own - sharing another panel's reset pin
+    // would reset that panel too.
+    bool begin(int8_t cs, int8_t dc, int8_t rst = -1);
+
     // Swap the backing provider (does not take ownership of either)
     void setDisplayProvider(DisplayProvider &provider);
     DisplayProvider &getDisplayProvider() const;

@@ -409,6 +409,47 @@ bool M1ShieldClass::setScreen(Screen *screen)
 }
 
 // Get reference to render manager
+// Initialize and register an additional display panel
+bool M1ShieldClass::addDisplay(DisplayRenderTarget &target, int8_t cs, int8_t dc, int8_t rst)
+{
+    // Sharing the primary's reset line would reset the primary panel: the
+    // Adafruit driver toggles reset unconditionally while initializing, and
+    // nothing re-initializes the primary afterwards, so it would go blank.
+    if (rst >= 0 && rst == PIN_TFT_RST)
+    {
+        if (_logger)
+        {
+            _logger->errF(F("M1Shield: Additional display cannot share the primary reset pin"));
+        }
+        return false;
+    }
+
+    if (!target.begin(cs, dc, rst))
+    {
+        if (_logger)
+        {
+            _logger->errF(F("M1Shield: Failed to initialize additional display"));
+        }
+        return false;
+    }
+
+    if (!_renderManager.addRenderTarget(&target))
+    {
+        if (_logger)
+        {
+            _logger->errF(F("M1Shield: No room to register additional render target"));
+        }
+        return false;
+    }
+
+    if (_logger)
+    {
+        _logger->infoF(F("M1Shield: Added render target '%s'"), target.getName());
+    }
+
+    return true;
+}
+
 RenderManager &M1ShieldClass::getRenderManager()
 {
     return _renderManager;

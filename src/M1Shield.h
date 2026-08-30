@@ -106,6 +106,14 @@ public:
 
     RenderManager &getRenderManager(); // Get reference to render manager
 
+    // Initialize an additional display panel and register it as a render
+    // target, so the UI is drawn to it as well as to the primary panel.
+    //
+    // The caller owns the target and its provider; neither is deleted here.
+    // Returns false without registering anything if the panel fails to
+    // initialize, so a half-set-up target can never end up in the manager.
+    bool addDisplay(DisplayRenderTarget &target, int8_t cs, int8_t dc, int8_t rst = -1);
+
     // Run a drawing operation once per enabled render target.
     //
     // Inside the callable, M1Shield's display accessors resolve to the target
