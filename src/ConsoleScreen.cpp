@@ -628,12 +628,12 @@ void ConsoleScreen::_drawPagingMessage()
     case PAGING_WAIT_TIMEOUT:
         if (_pagingPaused)
         {
-            message = "PAUSED - RT to continue";
+            message = "Paused - [>] go";
         }
         else
         {
             unsigned long remaining = (_pagingTimeoutMs - (millis() - _pagingWaitStartTime)) / 1000 + 1;
-            message = "Auto in " + String(remaining) + "s - LT:pause RT:next";
+            message = "Next in " + String(remaining) + "s - [<] hold [>] go";
         }
         break;
 
@@ -644,12 +644,12 @@ void ConsoleScreen::_drawPagingMessage()
     case PAGING_WAIT_BOTH:
         if (_pagingPaused)
         {
-            message = "PAUSED - RT to continue";
+            message = "Paused - [>] go";
         }
         else
         {
             unsigned long remaining = (_pagingTimeoutMs - (millis() - _pagingWaitStartTime)) / 1000 + 1;
-            message = "Auto " + String(remaining) + "s - LT:pause RT:next";
+            message = "Next in " + String(remaining) + "s - [<] hold [>] go";
         }
         break;
 

@@ -24,7 +24,7 @@ BinaryFileViewer::BinaryFileViewer(const char *filename)
     setTitleF(F("Binary File Viewer"));
 
     // Set default button items
-    const char *buttons[] = {"Up:Prev", "Dn:Next"};
+    const char *buttons[] = {"[M] Back", "[^v] Page"};
     setButtonItems(buttons, 2);
 }
 

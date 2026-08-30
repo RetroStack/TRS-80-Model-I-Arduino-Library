@@ -101,7 +101,7 @@ LoggerScreen::LoggerScreen(const char *title) : ConsoleScreen(), _loggerAdapter(
     setTextSize(1);               // Small text for more lines
 
     // Update button labels for logger screen
-    const char *buttonItems[1] = {"[M] Close Log"};
+    const char *buttonItems[1] = {"[M] Close"};
     setButtonItems(buttonItems, 1);
 
     // Create the logger adapter

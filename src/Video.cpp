@@ -46,25 +46,25 @@ void Video::setViewPort(ViewPort viewPort)
   {
     viewPort.x = VIDEO_COLS - 1;
     if (_logger)
-      _logger->warnF(F("X coordinate of viewport is larger than there is space. Reset to %d."), viewPort.x);
+      _logger->warnF(F("Video: X coordinate of viewport is larger than there is space. Reset to %d."), viewPort.x);
   }
   if (viewPort.y >= VIDEO_ROWS)
   {
     viewPort.y = VIDEO_ROWS - 1;
     if (_logger)
-      _logger->warnF(F("Y coordinate of viewport is larger than there is space. Reset to %d."), viewPort.y);
+      _logger->warnF(F("Video: Y coordinate of viewport is larger than there is space. Reset to %d."), viewPort.y);
   }
   if (viewPort.x + viewPort.width > VIDEO_COLS)
   {
     viewPort.width = VIDEO_COLS - viewPort.x;
     if (_logger)
-      _logger->warnF(F("Width of viewport is larger than there is space. Reset to %d."), viewPort.width);
+      _logger->warnF(F("Video: Width of viewport is larger than there is space. Reset to %d."), viewPort.width);
   }
   if (viewPort.y + viewPort.height > VIDEO_ROWS)
   {
     viewPort.height = VIDEO_ROWS - viewPort.y;
     if (_logger)
-      _logger->warnF(F("Height of viewport is larger than there is space. Reset to %d."), viewPort.height);
+      _logger->warnF(F("Video: Height of viewport is larger than there is space. Reset to %d."), viewPort.height);
   }
 
   _viewPort = viewPort;

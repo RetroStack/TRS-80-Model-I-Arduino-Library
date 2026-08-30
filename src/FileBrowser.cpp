@@ -67,7 +67,7 @@ FileBrowser::FileBrowser(const String &directoryOrPath, const String &targetFile
 
     // Set title and button items
     setTitleF(F("File Browser"));
-    const char *buttons[] = {"[M] Back", "[</>] Open"};
+    const char *buttons[] = {"[M] Back", "[<>] Open"};
     setButtonItems(buttons, 2);
 }
 
@@ -386,7 +386,7 @@ bool FileBrowser::_navigateToDirectory(const String &dir)
     // accepts "/logsecret" for a root of "/logs".
     if (_hasRootRestriction && !pathIsWithin(newPath.c_str(), _rootDirectory.c_str()))
     {
-        notifyF(F("Access restricted to root directory"));
+        notifyF(F("Outside root folder"));
         return false;
     }
 
@@ -396,7 +396,7 @@ bool FileBrowser::_navigateToDirectory(const String &dir)
     {
         if (testDir)
             testDir.close();
-        notifyF(F("Directory not found"));
+        notifyF(F("Folder not found"));
         return false;
     }
     testDir.close();
@@ -626,7 +626,7 @@ Screen *FileBrowser::_getSelectedMenuItemScreen(int index)
 
     if (_fileCount == 0)
     {
-        notifyF(F("Directory is empty"));
+        notifyF(F("Folder is empty"));
         return nullptr;
     }
 
@@ -641,11 +641,11 @@ Screen *FileBrowser::_getSelectedMenuItemScreen(int index)
             {
                 _updateMenuItems();
                 refreshMenu();
-                notifyF(F("Directory changed"));
+                notifyF(F("Folder opened"));
             }
             else
             {
-                notifyF(F("Error reading directory"));
+                notifyF(F("Cannot read folder"));
             }
         }
         return nullptr; // Stay on this screen

@@ -50,7 +50,7 @@ void AddressBus::writeMemoryAddress(uint16_t address)
     if (!_writable)
     {
         if (_logger)
-            _logger->errF(F("Address bus is not writable."));
+            _logger->errF(F("AddressBus: Address bus is not writable."));
         return;
     }
     Model1LowLevel::writeAddressBus(address);
@@ -74,7 +74,7 @@ void AddressBus::writeIOAddress(uint8_t address)
     if (!_writable)
     {
         if (_logger)
-            _logger->errF(F("IO address bus is not writable."));
+            _logger->errF(F("AddressBus: IO address bus is not writable."));
         return;
     }
     Model1LowLevel::writeAddressBus(address);

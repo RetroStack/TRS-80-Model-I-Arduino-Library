@@ -51,7 +51,7 @@ void DataBus::writeData(uint8_t data)
   if (!_writable)
   {
     if (_logger)
-      _logger->errF(F("Data bus is not writable."));
+      _logger->errF(F("DataBus: Data bus is not writable."));
     return;
   }
   Model1LowLevel::writeDataBus(data);

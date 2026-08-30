@@ -66,8 +66,8 @@ TextFileViewer::TextFileViewer(const char *filename) : ContentScreen()
     setTitleF(F("Text File Viewer"));
 
     // Set default button items
-    const char *buttonLabels[] = {"Up/Dn:Page", "Lf/Rt:Scroll", "Sel:AutoPage"};
-    setButtonItems(buttonLabels, 3);
+    const char *buttonLabels[] = {"[M] Back", "[^v] Page", "[<>] Scroll", "[S] Auto"};
+    setButtonItems(buttonLabels, 4);
 }
 
 // Destructor

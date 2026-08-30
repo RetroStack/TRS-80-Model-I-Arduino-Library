@@ -211,7 +211,7 @@ bool Model1Class::_checkMutability()
     if (!_isMutable())
     {
         if (_logger)
-            _logger->errF(F("System is not mutable, but a request to access the system was made."));
+            _logger->errF(F("Model1: System is not mutable, but a request to access the system was made."));
     }
     return mutability;
 }
@@ -752,7 +752,7 @@ void Model1Class::activateInterruptRequestSignal()
     if (Model1LowLevel::readINT() == LOW)
     {
         if (_logger)
-            _logger->warnF(F("INT* signal already active."));
+            _logger->warnF(F("Model1: INT* signal already active."));
         return;
     }
 
@@ -765,7 +765,7 @@ void Model1Class::deactivateInterruptRequestSignal()
     if (Model1LowLevel::readINT() == HIGH)
     {
         if (_logger)
-            _logger->warnF(F("INT* signal already deactivated."));
+            _logger->warnF(F("Model1: INT* signal already deactivated."));
         return;
     }
 
@@ -792,7 +792,7 @@ void Model1Class::activateTestSignal()
     if (Model1LowLevel::readTEST() == LOW)
     {
         if (_logger)
-            _logger->warnF(F("TEST* signal already active."));
+            _logger->warnF(F("Model1: TEST* signal already active."));
         return;
     }
 
@@ -824,7 +824,7 @@ void Model1Class::deactivateTestSignal()
     if (Model1LowLevel::readTEST() == HIGH)
     {
         if (_logger)
-            _logger->warnF(F("TEST* signal already deactivated."));
+            _logger->warnF(F("Model1: TEST* signal already deactivated."));
         return;
     }
 
@@ -864,7 +864,7 @@ void Model1Class::activateWaitSignal()
     if (Model1LowLevel::readWAIT() == LOW)
     {
         if (_logger)
-            _logger->warnF(F("WAIT* signal already active."));
+            _logger->warnF(F("Model1: WAIT* signal already active."));
         return;
     }
 
@@ -877,7 +877,7 @@ void Model1Class::deactivateWaitSignal()
     if (Model1LowLevel::readWAIT() == HIGH)
     {
         if (_logger)
-            _logger->warnF(F("WAIT* signal already deactivated."));
+            _logger->warnF(F("Model1: WAIT* signal already deactivated."));
         return;
     }
 
@@ -970,7 +970,7 @@ void Model1Class::logState()
     if (_logger)
     {
         char *state = getState();
-        _logger->infoF(F("State: %s"), state);
+        _logger->infoF(F("Model1: State: %s"), state);
         free(state);
     }
 }
@@ -1034,7 +1034,7 @@ void Model1Class::printMemoryContents(Print &output, uint16_t start, uint16_t le
     if (bytesPerLine == 0 || bytesPerLine > 60)
     {
         if (_logger)
-            _logger->errF(F("Unsupported value for bytesPerLine with %d."), bytesPerLine);
+            _logger->errF(F("Model1: Unsupported value for bytesPerLine with %d."), bytesPerLine);
         return;
     }
 
@@ -1042,7 +1042,7 @@ void Model1Class::printMemoryContents(Print &output, uint16_t start, uint16_t le
     if (!buffer)
     {
         if (_logger)
-            _logger->errF(F("Cannot allocate byte buffer."));
+            _logger->errF(F("Model1: Cannot allocate byte buffer."));
         return;
     }
 
@@ -1059,7 +1059,7 @@ void Model1Class::printMemoryContents(Print &output, uint16_t start, uint16_t le
     if (!lineBuffer)
     {
         if (_logger)
-            _logger->errF(F("Cannot allocate line buffer."));
+            _logger->errF(F("Model1: Cannot allocate line buffer."));
         free(buffer);
         return;
     }
