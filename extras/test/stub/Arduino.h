@@ -29,4 +29,4 @@ using std::malloc;
 inline size_t strlen_P(const char *s) { return std::strlen(s); }
 inline char *strcpy_P(char *dest, const char *src) { return std::strcpy(dest, src); }
 
-#endif // TEST_STUB_ARDUINO_H
+#endif /* TEST_STUB_ARDUINO_H */

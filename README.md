@@ -1,6 +1,6 @@
 # TRS-80 Model I Arduino Library
 
-**NOTE**: There are still a lot of changes that are happening within this library. Use this only for testing. We will make breaking changes. A stable version will be released shortly before TA 2025.
+**NOTE**: This library is under active development and breaking changes still happen between major versions. See the [changelog](CHANGELOG.md) for what changed in the current release, including the migration notes for 2.0.0.
 
 Arduino library for interfacing with TRS-80 Model I hardware via the 40-pin edge connector. Control memory, video, keyboard, and bus signals to create ROM dumpers, RAM testers, and custom peripherals.
 

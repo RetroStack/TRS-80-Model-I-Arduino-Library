@@ -137,6 +137,92 @@ This is the initial version written by Ven Reddy
 - **BEHAVIOR**: Buffered entries automatically replay when screen opens
 - **MEMORY**: Dynamic allocation, zero overhead when disabled
 
+## 30th August 2026 - Correctness Sweep and Multi-Target Rendering (2.0.0)
+
+A whole-codebase review, and the first release to carry the render-target work
+-- which had been sitting unreleased inside the 1.4.0 entry below since
+September 2025.
+
+### Breaking
+
+- `DisplayProvider::name()`, `width()` and `height()` are now `getName()`,
+  `getScreenWidth()` and `getScreenHeight()`, matching `RenderTarget` and
+  `M1Shield`. A `DisplayProvider` implemented outside this library needs the
+  same rename.
+- `ILogger`'s `String` overloads take the message, not a format string, and no
+  longer accept variadic arguments. `logger->info(String("x %d"), n)` becomes
+  `logger->info("x %d", n)` or `logger->infoF(F("x %d"), n)`.
+- `ConsoleScreen::refresh()` is now `clearScreen()` and
+  `FileBrowser::refresh()` is now `reloadDirectory()`. Both shadowed the
+  non-virtual `Screen::refresh()` with different meanings.
+- `Model1`'s memory and I/O mutators return `bool` instead of `void`. Existing
+  calls still compile; the return value is now available.
+- `FileEntry` is no longer a namespace-scope type; it is private to
+  `FileBrowser`.
+
+### Fixed
+
+- Arduino `String`s are no longer used as printf format strings, so an SD
+  filename containing `%` cannot make the logger read the stack.
+- The chunked memory walks terminate instead of wrapping at 65536:
+  `printMemoryContents()` no longer hangs, and `dumpMemoryToSD()` no longer
+  runs until the card fills.
+- `ConsoleScreen`'s auto-forward no longer uses the screen after `setScreen()`
+  has deleted it.
+- `FileBrowser::setTextExtensions()` and `addTextExtension()` no longer write
+  past their array when a capacity grow fails.
+- `Video::read()` no longer allocates zero bytes and writes a kilobyte into it.
+- `MenuScreen::setMenuItems()` keeps its slots consecutive, so trailing items
+  are neither lost nor leaked.
+- `restrictToRoot` compares whole path components and collapses `..`, so
+  `/logs` no longer contains `/logsecret`.
+- A missing SD card leaves a screen with an error on it rather than a frozen
+  panel no button reaches.
+- Button debounce actually debounces, and the joystick fires once per direction
+  with auto-repeat instead of once per `loop()`.
+- Notifications, alerts and confirmations appear on the monochrome OLEDs
+  instead of being suppressed -- `confirm()` no longer answers itself.
+- The hex viewer's colours are converted once, not twice, so it is no longer
+  black on black on a monochrome panel.
+- Both file viewers draw at the right offset, and `setTextSize()` recomputes
+  the page count.
+- Per-target render state no longer leaks between panels.
+- `Model1::end()` stops the refresh ISR and locks the bus before releasing it,
+  and releases TEST*.
+
+### Changed
+
+- The eight SPI TFT providers share a template base; `AddressBus` and `DataBus`
+  share a CRTP base; the flash-string copy idiom, the item scan and the text
+  truncation each live in one place.
+- CI pins every action to a commit SHA and every library to a version, and runs
+  with a read-only token.
+- Native tests cover the chunk and path arithmetic as well as `RenderManager`.
+
+- **NEW FEATURE**: Completed the render target abstraction introduced alongside `RenderManager`
+  - **Real Interface**: `RenderTarget` now declares the drawing surface itself - `getGFX()`, `getScreenWidth()`, `getScreenHeight()`, `convertColor()` and `display()` - so targets are genuinely interchangeable rather than only nameable
+  - **Fan-out**: `RenderManager::displayAll()` pushes every enabled target, and `M1Shield.display()` now goes through it; `getPrimaryRenderTarget()` names target 0
+  - **Delegation**: `M1Shield`'s display accessors read through the primary render target instead of the display provider, so the seam is load-bearing rather than decorative
+  - **Non-nullable Provider**: `DisplayRenderTarget` takes its `DisplayProvider` by reference, removing a `getGFX()` path that deliberately returned a dereferenced null pointer
+  - **Single Rule**: `isSmallDisplay()` lives once, on `RenderTarget`
+  - **Unchanged for Screens**: screens keep calling `M1Shield.getGFX()` and `M1Shield.display()`; no screen code changes
+- **NEW FEATURE**: The UI framework now draws to every registered render target, not just the primary
+  - **Active Target**: `RenderManager` tracks which target is being drawn; `M1Shield`'s `getGFX()`, `getScreenWidth()`, `getScreenHeight()` and `convertColor()` resolve to it. Because every draw call already went through those accessors, the whole framework and every existing sketch became multi-target aware with no call-site changes
+  - **`M1Shield::renderAll()`**: runs a drawing operation once per enabled target. Public, so sketches can mirror their own partial redraws. Nested calls draw once against the target already nominated
+  - **`M1Shield::addDisplay()`**: initializes an additional panel on its own pins and registers it, refusing a panel that fails to initialize or that shares the primary's reset pin
+  - **Per-target Layout**: `isSmallDisplay()` reads the active target, so a UI mirrored onto a smaller panel picks up the small header, footer and progress bar automatically
+  - **Runtime Switching**: `RenderTarget::setEnabled()` now does something - a disabled target is neither drawn nor pushed. Target 0 remains the layout authority whether or not it is enabled
+  - **Example**: `examples/UI/RenderTargets` demonstrates a second panel and a custom serial-mirror target
+  - **Cost**: 2 bytes of SRAM and roughly 1.5 KB of flash. Draw time scales with the number of enabled targets
+- **FIX**: `ConsoleScreen` stored colours already converted for one display and then used them raw, so console and logger text was invisible on monochrome panels; `_consoleBgColor` was converted twice, rendering a white background black. Colours are now stored raw and converted at draw time
+- **FIX**: `MenuScreen::refreshMenu()` bracketed `_drawContent()` in an SPI transaction that `_drawContent()` already opened, closing it early and then ending it twice
+- **FIX**: `ContentScreen::notify()` drew the notification without pushing it, so notifications never appeared on buffered (OLED) panels
+- **FIX**: `ConsoleScreen` could push the display from inside an open bulk-write transaction when paging triggered mid-write
+- **FIX**: `LoggerScreen` defaulted its timestamp setting from the display size in its constructor, before any display was known - a globally declared logger always disabled timestamps. The default now runs in `open()` and never overrides an explicit `setTimestampEnabled()`
+- **FIX**: `TextFileViewer::open()` drew the screen before loading the file, so the first frame showed an empty page
+- **FIX**: `TextFileViewer` drew its footer background without converting the colour
+
+
 ## 19th September 2025 - FileBrowser and File Viewer Updates (1.4.0)
 
 - **NEW FEATURE**: Added FileBrowser class for comprehensive SD card file and directory browsing
@@ -194,25 +280,3 @@ This is the initial version written by Ven Reddy
 - **PACKAGING**: `architectures` narrowed from `*` to `avr`, with an `#error` in `port_config.h` naming the ATmega2560 requirement instead of failing deep inside the port macros
 - **DOCUMENTATION**: Corrected API names that never existed, including `Model1.readByte()`/`writeByte()` in the README quickstart, `M1Shield.processInput()`/`updateScreen()`/`renderScreen()`, and `beginWithDisplay()`/`updateDisplay()`
 - **DOCUMENTATION**: `docs/MenuScreen.md` examples no longer cache child screens as members and delete them in the menu destructor; `setScreen()` takes ownership and deletes the outgoing menu, so that pattern freed the screen being activated
-- **NEW FEATURE**: Completed the render target abstraction introduced alongside `RenderManager`
-  - **Real Interface**: `RenderTarget` now declares the drawing surface itself - `getGFX()`, `getScreenWidth()`, `getScreenHeight()`, `convertColor()` and `display()` - so targets are genuinely interchangeable rather than only nameable
-  - **Fan-out**: `RenderManager::displayAll()` pushes every enabled target, and `M1Shield.display()` now goes through it; `getPrimaryRenderTarget()` names target 0
-  - **Delegation**: `M1Shield`'s display accessors read through the primary render target instead of the display provider, so the seam is load-bearing rather than decorative
-  - **Non-nullable Provider**: `DisplayRenderTarget` takes its `DisplayProvider` by reference, removing a `getGFX()` path that deliberately returned a dereferenced null pointer
-  - **Single Rule**: `isSmallDisplay()` lives once, on `RenderTarget`
-  - **Unchanged for Screens**: screens keep calling `M1Shield.getGFX()` and `M1Shield.display()`; no screen code changes
-- **NEW FEATURE**: The UI framework now draws to every registered render target, not just the primary
-  - **Active Target**: `RenderManager` tracks which target is being drawn; `M1Shield`'s `getGFX()`, `getScreenWidth()`, `getScreenHeight()` and `convertColor()` resolve to it. Because every draw call already went through those accessors, the whole framework and every existing sketch became multi-target aware with no call-site changes
-  - **`M1Shield::renderAll()`**: runs a drawing operation once per enabled target. Public, so sketches can mirror their own partial redraws. Nested calls draw once against the target already nominated
-  - **`M1Shield::addDisplay()`**: initializes an additional panel on its own pins and registers it, refusing a panel that fails to initialize or that shares the primary's reset pin
-  - **Per-target Layout**: `isSmallDisplay()` reads the active target, so a UI mirrored onto a smaller panel picks up the small header, footer and progress bar automatically
-  - **Runtime Switching**: `RenderTarget::setEnabled()` now does something - a disabled target is neither drawn nor pushed. Target 0 remains the layout authority whether or not it is enabled
-  - **Example**: `examples/UI/RenderTargets` demonstrates a second panel and a custom serial-mirror target
-  - **Cost**: 2 bytes of SRAM and roughly 1.5 KB of flash. Draw time scales with the number of enabled targets
-- **FIX**: `ConsoleScreen` stored colours already converted for one display and then used them raw, so console and logger text was invisible on monochrome panels; `_consoleBgColor` was converted twice, rendering a white background black. Colours are now stored raw and converted at draw time
-- **FIX**: `MenuScreen::refreshMenu()` bracketed `_drawContent()` in an SPI transaction that `_drawContent()` already opened, closing it early and then ending it twice
-- **FIX**: `ContentScreen::notify()` drew the notification without pushing it, so notifications never appeared on buffered (OLED) panels
-- **FIX**: `ConsoleScreen` could push the display from inside an open bulk-write transaction when paging triggered mid-write
-- **FIX**: `LoggerScreen` defaulted its timestamp setting from the display size in its constructor, before any display was known - a globally declared logger always disabled timestamps. The default now runs in `open()` and never overrides an explicit `setTimestampEnabled()`
-- **FIX**: `TextFileViewer::open()` drew the screen before loading the file, so the first frame showed an empty page
-- **FIX**: `TextFileViewer` drew its footer background without converting the colour

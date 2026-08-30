@@ -19,4 +19,4 @@ public:
     virtual ~Adafruit_GFX() {}
 };
 
-#endif // TEST_STUB_ADAFRUIT_GFX_H
+#endif /* TEST_STUB_ADAFRUIT_GFX_H */
