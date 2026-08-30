@@ -187,8 +187,11 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
         delete _displayTarget;
     }
     
+    // Index 0, not the tail: removing and re-appending demoted the panel below
+    // any target registered in between, and target 0 is the layout authority --
+    // the whole UI would reflow to the secondary panel's geometry.
     _displayTarget = new DisplayRenderTarget(provider);
-    if (_displayTarget && _renderManager.addRenderTarget(_displayTarget))
+    if (_displayTarget && _renderManager.insertRenderTarget(_displayTarget, 0))
     {
         if (_logger)
         {

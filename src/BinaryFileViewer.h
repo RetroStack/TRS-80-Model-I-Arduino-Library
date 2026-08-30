@@ -23,6 +23,8 @@ private:
     // Display buffer for current page
     uint8_t *_pageBuffer;    // Buffer for current page data
     uint16_t _bufferSize;    // Size of page buffer
+    uint16_t _pageLines;     // Rows per page, captured with the buffer
+    uint16_t _pageBytesPerLine; // Bytes per row, captured with the buffer
     uint16_t _bytesInBuffer; // Actual bytes loaded in buffer
 
     // File operations

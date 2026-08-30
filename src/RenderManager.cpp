@@ -46,6 +46,36 @@ bool RenderManager::addRenderTarget(RenderTarget *target)
 }
 
 // Remove a render target from the manager
+bool RenderManager::insertRenderTarget(RenderTarget *target, uint8_t index)
+{
+    if (target == nullptr || _targetCount >= MAX_RENDER_TARGETS)
+    {
+        return false;
+    }
+
+    for (uint8_t i = 0; i < _targetCount; i++)
+    {
+        if (_targets[i] == target)
+        {
+            return false; // Already registered
+        }
+    }
+
+    if (index > _targetCount)
+    {
+        index = _targetCount;
+    }
+
+    for (uint8_t i = _targetCount; i > index; i--)
+    {
+        _targets[i] = _targets[i - 1];
+    }
+
+    _targets[index] = target;
+    _targetCount++;
+    return true;
+}
+
 bool RenderManager::removeRenderTarget(RenderTarget *target)
 {
     if (target == nullptr || _targetCount == 0)

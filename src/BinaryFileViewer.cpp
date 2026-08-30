@@ -16,6 +16,8 @@ BinaryFileViewer::BinaryFileViewer(const char *filename)
     _fileOpen = false;
     _pageBuffer = nullptr;
     _bufferSize = 0;
+    _pageLines = 0;
+    _pageBytesPerLine = 0;
     _bytesInBuffer = 0;
 
     // Set default title
@@ -68,16 +70,25 @@ bool BinaryFileViewer::_loadCurrentPage()
         return false;
     }
 
-    // Calculate page size if not done yet
+    // Capture the page geometry once, from whatever target is authoritative at
+    // the time -- outside a render pass that is the primary. _drawContent()
+    // runs inside a pass and used to re-derive rows and bytes-per-row from the
+    // target being drawn, so a narrower secondary panel drew a different number
+    // of bytes than nextPage() advanced by: pages skipped bytes and the address
+    // column disagreed with the data beside it.
     if (_bufferSize == 0)
     {
-        _bufferSize = _getPageSize();
+        _pageLines = _getLinesPerPage();
+        _pageBytesPerLine = _getBytesPerLine();
+        _bufferSize = _pageLines * _pageBytesPerLine;
         _pageBuffer = (uint8_t *)malloc(_bufferSize);
         if (!_pageBuffer)
         {
             // Reset the size too - otherwise the guard above is skipped on the
             // next call and _file.read() is handed a null destination.
             _bufferSize = 0;
+            _pageLines = 0;
+            _pageBytesPerLine = 0;
             return false;
         }
     }
@@ -101,6 +112,8 @@ void BinaryFileViewer::_freePageBuffer()
         free(_pageBuffer);
         _pageBuffer = nullptr;
         _bufferSize = 0;
+        _pageLines = 0;
+        _pageBytesPerLine = 0;
         _bytesInBuffer = 0;
     }
 }
@@ -152,7 +165,14 @@ uint16_t BinaryFileViewer::_getBytesPerLine() const
 
 uint32_t BinaryFileViewer::_getPageSize() const
 {
-    return _getLinesPerPage() * _getBytesPerLine();
+    // The captured unit once a page has been loaded, so paging and drawing
+    // always agree; the derived one before that, to size the first buffer.
+    if (_bufferSize != 0)
+    {
+        return _bufferSize;
+    }
+
+    return (uint32_t)_getLinesPerPage() * _getBytesPerLine();
 }
 
 // Display methods
@@ -190,8 +210,10 @@ void BinaryFileViewer::_displayBinaryContent()
         return;
     }
 
-    uint16_t linesPerPage = _getLinesPerPage();
-    uint16_t bytesPerLine = _getBytesPerLine();
+    // Captured geometry, so every target draws the page that was actually
+    // loaded and simply clips if it is narrower.
+    uint16_t linesPerPage = (_pageLines > 0) ? _pageLines : _getLinesPerPage();
+    uint16_t bytesPerLine = (_pageBytesPerLine > 0) ? _pageBytesPerLine : _getBytesPerLine();
     uint16_t lineHeight = 8; // Text size 1 line height
     // drawText() adds the content origin itself; these were absolute, so the
     // dump started a second header height down the panel.

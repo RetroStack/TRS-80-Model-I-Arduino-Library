@@ -101,6 +101,34 @@ int main() {
     CHECK(!full.addRenderTarget(&many[MAX_RENDER_TARGETS]), "rejects past capacity");
     CHECK(!full.addRenderTarget(nullptr), "rejects null");
 
+    printf("Ordered insert keeps the layout authority at index 0\n");
+    {
+        RenderManager im;
+        FakeTarget panel("panel");
+        FakeTarget mirror("mirror");
+        FakeTarget replacement("replacement");
+
+        im.addRenderTarget(&panel);
+        im.addRenderTarget(&mirror);
+        CHECK(im.getPrimaryRenderTarget() == &panel, "panel starts as primary");
+
+        // What M1Shield::begin() does when it is called a second time.
+        im.removeRenderTarget(&panel);
+        CHECK(im.getPrimaryRenderTarget() == &mirror, "removing the panel promotes the mirror");
+
+        CHECK(im.insertRenderTarget(&replacement, 0), "replacement inserts at the front");
+        CHECK(im.getPrimaryRenderTarget() == &replacement, "replacement is primary, not appended past the mirror");
+        CHECK(im.getRenderTarget(1) == &mirror, "the mirror shifted along rather than being displaced");
+        CHECK(im.getRenderTargetCount() == 2, "count is right after the insert");
+
+        CHECK(!im.insertRenderTarget(&replacement, 0), "inserting a duplicate is rejected");
+        CHECK(!im.insertRenderTarget(nullptr, 0), "inserting null is rejected");
+
+        FakeTarget tail("tail");
+        CHECK(im.insertRenderTarget(&tail, 99), "an index past the end clamps to the end");
+        CHECK(im.getRenderTarget(2) == &tail, "clamped insert landed last");
+    }
+
     printf(failures ? "\n%d FAILURE(S)\n" : "\nall checks passed\n", failures);
     return failures ? 1 : 0;
 }

@@ -271,11 +271,20 @@ size_t ConsoleScreen::write(uint8_t c)
     // renderAll visits the primary last, so its post-write cursor survives.
     const uint16_t startX = _currentX;
     const uint16_t startY = _currentY;
+    const bool startWaiting = _isWaitingForPaging;
+    const unsigned long startWaitTime = _pagingWaitStartTime;
 
-    M1Shield.renderAll([this, c, startX, startY]
+    M1Shield.renderAll([this, c, startX, startY, startWaiting, startWaitTime]
                        {
                            _currentX = startX;
                            _currentY = startY;
+                           // Paging is per-target state too: a shorter panel
+                           // reaches the bottom first, and its paging wait used
+                           // to survive into the primary's pass and clear it
+                           // early. renderAll visits the primary last, so its
+                           // result is the one that stands.
+                           _isWaitingForPaging = startWaiting;
+                           _pagingWaitStartTime = startWaitTime;
                            _processChar((char)c);
                            if (isActive())
                            {
@@ -299,11 +308,16 @@ size_t ConsoleScreen::write(const uint8_t *buffer, size_t size)
     // renderAll visits the primary last, so its post-write cursor survives.
     const uint16_t startX = _currentX;
     const uint16_t startY = _currentY;
+    const bool startWaiting = _isWaitingForPaging;
+    const unsigned long startWaitTime = _pagingWaitStartTime;
 
-    M1Shield.renderAll([this, buffer, size, startX, startY]
+    M1Shield.renderAll([this, buffer, size, startX, startY, startWaiting, startWaitTime]
                        {
                            _currentX = startX;
                            _currentY = startY;
+                           // See write(uint8_t): paging state is per-target.
+                           _isWaitingForPaging = startWaiting;
+                           _pagingWaitStartTime = startWaitTime;
 
                            // Resolved per target - never hoist this out
                            Adafruit_GFX &gfx = M1Shield.getGFX();

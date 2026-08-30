@@ -31,6 +31,11 @@ public:
 
     // Render target management
     bool addRenderTarget(RenderTarget *target);
+
+    // Insert at a specific index, shifting the rest along. M1Shield uses this
+    // to keep the display panel at index 0 -- the layout authority -- when it
+    // is replaced after other targets have already been registered.
+    bool insertRenderTarget(RenderTarget *target, uint8_t index);
     bool removeRenderTarget(RenderTarget *target);
     void clearRenderTargets();
     uint8_t getRenderTargetCount() const;
