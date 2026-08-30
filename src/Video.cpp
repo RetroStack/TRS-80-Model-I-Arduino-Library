@@ -317,6 +317,20 @@ void Video::scroll(uint8_t rows)
 // Read a block of characters from the screen
 char *Video::read(uint8_t x, uint8_t y, uint16_t length, bool raw)
 {
+  // The read below stops at the end of the viewport regardless, so a longer
+  // length only inflates the allocation -- and length + 1 wraps to 0 at 65535,
+  // which avr-libc answers with a minimum-size block rather than a null
+  // pointer, leaving the guard below useless and the writes out of bounds.
+  uint16_t available = 0;
+  if (x < _viewPort.width && y < _viewPort.height)
+  {
+    available = (uint16_t)(_viewPort.height - y) * _viewPort.width - x;
+  }
+  if (length > available)
+  {
+    length = available;
+  }
+
   uint8_t *buffer = (uint8_t *)malloc((length + 1) * sizeof(uint8_t));
   if (!buffer)
   {

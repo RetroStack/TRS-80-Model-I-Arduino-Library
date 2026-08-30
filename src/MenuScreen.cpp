@@ -537,8 +537,11 @@ void MenuScreen::setMenuItems(const char **menuItems, uint8_t menuItemCount)
             if (itemCopy != nullptr)
             {
                 strcpy(itemCopy, menuItems[i]);
-                _menuItems[i] = itemCopy;
-                successCount++;
+                // Store consecutively: _menuItemCount below is the number of
+                // successes, so an item left at its original index after a
+                // skipped entry would sit past the count -- invisible to the
+                // menu and missed by clearMenuItems().
+                _menuItems[successCount++] = itemCopy;
             }
             else if (getLogger())
             {
@@ -569,66 +572,34 @@ void MenuScreen::setMenuItems(const char **menuItems, uint8_t menuItemCount)
 // Set the menu items from an array of String objects
 void MenuScreen::setMenuItems(String *menuItems, uint8_t menuItemCount)
 {
-    // Clear any existing menu items first
-    clearMenuItems();
-
     if (menuItems == nullptr || menuItemCount == 0)
     {
-        return; // Just clear and exit
+        clearMenuItems();
+        return;
     }
 
-    // Allocate array of string pointers
-    _menuItems = (char **)malloc(menuItemCount * sizeof(char *));
-    if (_menuItems == nullptr)
+    // Delegate to the const char* form so the copying, the failure handling and
+    // the consecutive-slot rule all live in one place.
+    const char **items = (const char **)malloc(menuItemCount * sizeof(const char *));
+    if (items == nullptr)
     {
-        return; // Allocation failed
-    }
-
-    // Initialize all pointers to nullptr first
-    for (uint8_t i = 0; i < menuItemCount; i++)
-    {
-        _menuItems[i] = nullptr;
-    }
-
-    // Allocate and copy each menu item string
-    uint8_t successCount = 0;
-    for (uint8_t i = 0; i < menuItemCount; i++)
-    {
-        const char *cstr = menuItems[i].c_str();
-        if (cstr != nullptr)
+        clearMenuItems();
+        if (getLogger())
         {
-            size_t len = strlen(cstr);
-            char *itemCopy = (char *)malloc(len + 1);
-            if (itemCopy != nullptr)
-            {
-                strcpy(itemCopy, cstr);
-                _menuItems[i] = itemCopy;
-                successCount++;
-            }
-            else if (getLogger())
-            {
-                const char *currentTitle = getTitle();
-                getLogger()->errF(F("MenuScreen[%s]: Failed to allocate memory for menu item %d"),
-                                  currentTitle ? currentTitle : "Unknown", i);
-            }
+            const char *currentTitle = getTitle();
+            getLogger()->errF(F("MenuScreen[%s]: Failed to allocate memory for menu items array"),
+                              currentTitle ? currentTitle : "Unknown");
         }
+        return;
     }
 
-    // Update state
-    _menuItemCount = successCount;
-
-    // Set selection to first enabled item
-    if (successCount > 0)
+    for (uint8_t i = 0; i < menuItemCount; i++)
     {
-        _selectedMenuItemIndex = _findNextEnabledItem(0, true);
-    }
-    else
-    {
-        _selectedMenuItemIndex = 0;
+        items[i] = menuItems[i].c_str();
     }
 
-    // Update display if active
-    refreshMenu();
+    setMenuItems(items, menuItemCount);
+    free(items);
 }
 
 // Set the currently selected menu item by index
