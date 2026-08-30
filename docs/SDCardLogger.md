@@ -129,7 +129,7 @@ void setup() {
     if (!logger.begin()) {
         // No card, or the card could not be initialized. Fall back to
         // serial so the failure is visible.
-        Serial.begin(9600);
+        Serial.begin(115200);
         Serial.println(F("SD logging unavailable"));
     }
 }

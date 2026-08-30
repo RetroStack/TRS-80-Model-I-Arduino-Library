@@ -45,6 +45,7 @@ The library is organized into several key areas:
 - [**Model1**](Model1.md) - High-level interface for memory access, bus control, and system management. Start here for most applications.
 - [**Model1LowLevel**](Model1LowLevel.md) - Direct hardware control for advanced users requiring precise signal timing (WARNING: Expert level).
 - [**Cassette**](Cassette.md) - Cassette tape interface emulation and video mode control for authentic TRS-80 operation.
+- [**KeyboardChangeIterator**](KeyboardChangeIterator.md) - Walks the differences between two keyboard snapshots, one changed key at a time.
 - [**Keyboard**](Keyboard.md) - Matrix keyboard reading with change detection and key mapping.
 - [**Video**](Video.md) - Video memory manipulation, text display, and character encoding with viewport support.
 - [**ROM**](ROM.md) - ROM analysis tools including reading, checksumming, and automatic identification of known ROM versions.
@@ -68,7 +69,9 @@ The library is organized into several key areas:
 The M1Shield provides a safe, reliable connection method with integrated display and user interface:
 
 - [**M1Shield**](M1Shield.md) - Main shield interface for display, input controls, LED indicators, screen management, and cassette interface (WARNING: Advanced).
-- [**RenderTarget**](RenderTarget.md) - Render target abstraction and RenderManager for driving one or more output destinations.
+- [**RenderTarget**](RenderTarget.md) - The interface for a destination that screens can be drawn to.
+- [**RenderManager**](RenderManager.md) - The registry of render targets and the render pass that drives them.
+- [**DisplayRenderTarget**](DisplayRenderTarget.md) - The built-in render target backed by a display panel.
 - [**DisplayProvider**](DisplayProvider.md) - Adaptive display system supporting multiple controller types (TFT: ST7789, ST7735, ILI9341, ST7796, HX8357, ILI9325; OLED: SSD1306, SH1106).
 
 ### User Interface Framework

@@ -1,14 +1,16 @@
-# RenderTarget and RenderManager
+# RenderTarget
 
-`RenderTarget` is the interface for a destination that screens can be drawn to. `RenderManager` holds the registered targets and drives them as a group. `DisplayRenderTarget` is the built-in implementation that draws through a `DisplayProvider` - the panel attached to the shield.
+`RenderTarget` is the interface for a destination that screens can be drawn to.
+A panel is one; so is anything else that can accept the same drawing calls.
+
+See [RenderManager](RenderManager.md) for the registry that holds them, and
+[DisplayRenderTarget](DisplayRenderTarget.md) for the built-in implementation
+that draws through a `DisplayProvider`.
 
 ## Table of Contents
 
 - [Overview](#overview)
-- [RenderTarget Interface](#rendertarget-interface)
-- [RenderManager](#rendermanager)
-- [DisplayRenderTarget](#displayrendertarget)
-- [How M1Shield Uses It](#how-m1shield-uses-it)
+- [Interface](#interface)
 - [Writing a Custom Target](#writing-a-custom-target)
 - [Notes](#notes)
 - [See Also](#see-also)
@@ -24,7 +26,7 @@
 
 Layout adapts per target for free: `Screen::isSmallDisplay()` reads the active target's height, so a 320x240 UI mirrored onto a 128x64 target picks up the small header, footer and progress bar on its own.
 
-## RenderTarget Interface
+## Interface
 
 ```cpp
 class RenderTarget {
@@ -47,74 +49,6 @@ public:
 ```
 
 `isSmallDisplay()` is non-virtual and is the single definition of the small-display rule.
-
-## RenderManager
-
-```cpp
-bool addRenderTarget(RenderTarget* target);     // false if full or already registered
-bool removeRenderTarget(RenderTarget* target);  // false if not found
-void clearRenderTargets();
-
-uint8_t getRenderTargetCount() const;
-RenderTarget* getRenderTarget(uint8_t index) const;   // nullptr when out of range
-RenderTarget* getPrimaryRenderTarget() const;         // target 0, or nullptr
-
-bool displayAll();  // push every enabled target
-```
-
-Up to `MAX_RENDER_TARGETS` (8) targets may be registered. **Registration order matters**: target 0 is the primary, and is what dimensions, colors and the graphics context are read from.
-
-The manager does **not** own the targets - it never deletes them. `M1Shield` owns the `DisplayRenderTarget` it registers; you own anything you add.
-
-## DisplayRenderTarget
-
-```cpp
-explicit DisplayRenderTarget(DisplayProvider& provider);
-
-void setDisplayProvider(DisplayProvider& provider);
-DisplayProvider& getDisplayProvider() const;
-```
-
-The provider is taken by reference and is required - a target with no surface to draw on has no valid meaning, so it cannot be constructed in that state. The provider is not owned by the target.
-
-## How M1Shield Uses It
-
-```cpp
-RenderManager& getRenderManager();  // access the manager directly
-```
-
-`begin(provider)` registers the display target; the destructor unregisters and deletes it.
-
-```cpp
-// Add a second physical panel on its own pins
-bool addDisplay(DisplayRenderTarget &target, int8_t cs, int8_t dc, int8_t rst = -1);
-
-// Run a drawing operation once per enabled target
-template <typename F> void renderAll(F draw);
-```
-
-`addDisplay()` resets and creates the panel, then registers the target - and refuses to register one it could not initialize. It also refuses a panel sharing the primary's reset pin, which would reset the primary panel and leave it blank.
-
-`renderAll()` is public so a sketch can mirror its own partial redraws:
-
-```cpp
-M1Shield.renderAll([]{
-    Adafruit_GFX &gfx = M1Shield.getGFX();   // resolve INSIDE the callable
-    gfx.fillRect(0, 0, 40, 10, M1Shield.convertColor(0x0000));
-    M1Shield.display();                      // the callable pushes; the loop does not
-});
-```
-
-> **Never capture by reference, and never let an `Adafruit_GFX&` cross into the callable.** Resolve `getGFX()` inside it. A reference captured beforehand binds to the primary's canvas, so every target draws into panel 1 - and it compiles cleanly while doing so.
-
-To temporarily stop pushing to the panel while keeping other targets live:
-
-```cpp
-RenderTarget* panel = M1Shield.getRenderManager().getPrimaryRenderTarget();
-if (panel) {
-    panel->setEnabled(false);   // drawing still works; display() skips it
-}
-```
 
 ## Writing a Custom Target
 
@@ -163,6 +97,8 @@ void setup() {
 
 ## See Also
 
+- [RenderManager](RenderManager.md) - the registry and the render pass
+- [DisplayRenderTarget](DisplayRenderTarget.md) - the built-in panel target
 - [DisplayProvider](DisplayProvider.md) - the panel abstraction a `DisplayRenderTarget` wraps
 - [M1Shield](M1Shield.md) - `getRenderManager()`, `getGFX()`, `display()`
 - [Screen](Screen.md) - what draws through these targets

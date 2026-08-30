@@ -92,7 +92,7 @@ size_t write(const uint8_t *buffer, size_t size) override;
 SerialLogger logger;
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(115200);
 
     logger.info("System initialized");
     logger.warn("Low memory detected");
@@ -187,7 +187,7 @@ Messages are formatted with prefixes for easy identification:
 SerialLogger globalLogger;
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(115200);
     globalLogger.info("Application started");
 }
 
@@ -223,7 +223,7 @@ SensorManager sensors(&logger);
 SerialLogger logger;
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(115200);
 
     #ifdef DEBUG
         logger.unmute();
