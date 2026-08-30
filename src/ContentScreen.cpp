@@ -6,6 +6,7 @@
 
 #include "ContentScreen.h"
 #include "M1Shield.h"
+#include "utils.h"
 #include <Adafruit_GFX.h>
 
 // Text sizing constants for layout calculations
@@ -199,14 +200,11 @@ void ContentScreen::_drawMainContent()
         gfx.setTextSize(textSize);
 
         // _errorMessage is a flash pointer; copy it out before measuring.
-        size_t length = strlen_P((const char *)_errorMessage);
-        char *buffer = (char *)malloc(length + 1);
-        if (buffer != nullptr)
+        FlashBuffer message(_errorMessage);
+        if (message.valid())
         {
-            strcpy_P(buffer, (const char *)_errorMessage);
-            _drawCenteredText(buffer, primaryLeft, primaryTop + (primaryHeight / 2) - halfHeight,
+            _drawCenteredText(message.c_str(), primaryLeft, primaryTop + (primaryHeight / 2) - halfHeight,
                               primaryWidth, charWidth);
-            free(buffer);
         }
     }
     else
@@ -768,20 +766,13 @@ void ContentScreen::drawTextF(uint16_t x, uint16_t y, const __FlashStringHelper 
     }
 
     // Convert FlashString to regular string and delegate to existing method
-    size_t len = strlen_P((const char *)text);
-    char *buffer = (char *)malloc(len + 1);
-    if (buffer == nullptr)
+    FlashBuffer copy(text);
+    if (!copy.valid())
     {
         return; // Failed allocation
     }
 
-    strcpy_P(buffer, (const char *)text);
-
-    // Delegate to regular drawText method
-    drawText(x, y, buffer, color, size);
-
-    // Free temporary buffer
-    free(buffer);
+    drawText(x, y, copy.c_str(), color, size);
 }
 
 // =====================================================================================
@@ -849,19 +840,11 @@ void ContentScreen::notifyF(const __FlashStringHelper *text, unsigned long durat
     if (text == nullptr)
         return;
 
-    // Convert FlashString to regular string
-    size_t len = strlen_P((const char *)text);
-    char *buffer = (char *)malloc(len + 1);
-    if (buffer == nullptr)
-        return; // Failed allocation
+    FlashBuffer copy(text);
+    if (!copy.valid())
+        return;
 
-    strcpy_P(buffer, (const char *)text);
-
-    // Delegate to regular notify method
-    notify(buffer, durationMs, backgroundColor);
-
-    // Free temporary buffer
-    free(buffer);
+    notify(copy.c_str(), durationMs, backgroundColor);
 }
 
 // Check if notification is currently active
@@ -1079,9 +1062,8 @@ void ContentScreen::alertF(const __FlashStringHelper *text)
         return;
 
     // Convert FlashString to regular string
-    size_t len = strlen_P((const char *)text);
-    char *buffer = (char *)malloc(len + 1);
-    if (buffer == nullptr)
+    FlashBuffer copy(text);
+    if (!copy.valid())
     {
         if (getLogger())
         {
@@ -1092,13 +1074,7 @@ void ContentScreen::alertF(const __FlashStringHelper *text)
         return; // Failed allocation
     }
 
-    strcpy_P(buffer, (const char *)text);
-
-    // Delegate to regular alert method
-    alert(buffer);
-
-    // Free temporary buffer
-    free(buffer);
+    alert(copy.c_str());
 }
 
 // Show a confirmation dialog
@@ -1167,16 +1143,14 @@ ConfirmResult ContentScreen::confirmF(const __FlashStringHelper *text, const __F
     if (text == nullptr || leftText == nullptr || rightText == nullptr)
         return CONFIRM_LEFT; // Default to left/cancel for safety
 
-    // Convert all FlashStrings to regular strings
-    size_t textLen = strlen_P((const char *)text);
-    size_t leftLen = strlen_P((const char *)leftText);
-    size_t rightLen = strlen_P((const char *)rightText);
+    // Three copies, each released when its scope ends. The hand-written form
+    // needed a partial-failure cleanup block to avoid leaking whichever of the
+    // three had succeeded.
+    FlashBuffer textCopy(text);
+    FlashBuffer leftCopy(leftText);
+    FlashBuffer rightCopy(rightText);
 
-    char *textBuffer = (char *)malloc(textLen + 1);
-    char *leftBuffer = (char *)malloc(leftLen + 1);
-    char *rightBuffer = (char *)malloc(rightLen + 1);
-
-    if (textBuffer == nullptr || leftBuffer == nullptr || rightBuffer == nullptr)
+    if (!textCopy.valid() || !leftCopy.valid() || !rightCopy.valid())
     {
         if (getLogger())
         {
@@ -1185,27 +1159,10 @@ ConfirmResult ContentScreen::confirmF(const __FlashStringHelper *text, const __F
                               currentTitle ? currentTitle : "Unknown");
         }
 
-        // Free any successfully allocated buffers before returning
-        if (textBuffer)
-            free(textBuffer);
-        if (leftBuffer)
-            free(leftBuffer);
-        if (rightBuffer)
-            free(rightBuffer);
-        return CONFIRM_LEFT; // Failed allocation, default to left/cancel
+        return CONFIRM_LEFT; // Default to left/cancel for safety
     }
 
-    strcpy_P(textBuffer, (const char *)text);
-    strcpy_P(leftBuffer, (const char *)leftText);
-    strcpy_P(rightBuffer, (const char *)rightText);
-
-    // Delegate to regular confirm method
-    ConfirmResult result = confirm(textBuffer, leftBuffer, rightBuffer);
-
-    // Free temporary buffers
-    free(textBuffer);
-    free(leftBuffer);
-    free(rightBuffer);
+    ConfirmResult result = confirm(textCopy.c_str(), leftCopy.c_str(), rightCopy.c_str());
 
     return result;
 }

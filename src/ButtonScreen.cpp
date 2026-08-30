@@ -6,6 +6,7 @@
 
 #include "ButtonScreen.h"
 #include "M1Shield.h"
+#include "utils.h"
 #include <Adafruit_GFX.h>
 
 // Display Configuration Constants
@@ -355,27 +356,21 @@ void ButtonScreen::_drawFooter()
         // Draw config value (second row)
         const __FlashStringHelper *configValueF = _getButtonItemConfigValueF(itemIndex);
         const char *configValue = nullptr;
-        char *tempConfigBuffer = nullptr;
+        // Released when this block ends; the explicit free lived about a
+        // hundred lines further down.
+        FlashBuffer configCopy(configValueF);
 
         if (configValueF != nullptr)
         {
-            // Convert FlashString to regular string for display
-            size_t len = strlen_P((const char *)configValueF);
-            tempConfigBuffer = (char *)malloc(len + 1);
-            if (tempConfigBuffer != nullptr)
+            if (configCopy.valid())
             {
-                strcpy_P(tempConfigBuffer, (const char *)configValueF);
-                configValue = tempConfigBuffer;
+                configValue = configCopy.c_str();
             }
-            else
+            else if (getLogger())
             {
-                // Log malloc failure with screen title context
-                if (getLogger())
-                {
-                    const char *title = getTitle();
-                    getLogger()->errF(F("ButtonScreen[%s]: Failed to allocate %d bytes for config value display"),
-                                      title ? title : "Unknown", len + 1);
-                }
+                const char *title = getTitle();
+                getLogger()->errF(F("ButtonScreen[%s]: Failed to allocate memory for config value display"),
+                                  title ? title : "Unknown");
             }
         }
         else
@@ -415,11 +410,6 @@ void ButtonScreen::_drawFooter()
             gfx.setTextSize(textSize);
         }
 
-        // Free temporary config buffer
-        if (tempConfigBuffer != nullptr)
-        {
-            free(tempConfigBuffer);
-        }
 
         // Draw border between items (except last one)
         if (i < itemsToShow - 1 && !isSmall)

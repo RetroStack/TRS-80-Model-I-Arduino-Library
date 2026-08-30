@@ -37,4 +37,25 @@ uint16_t chunkLength(uint32_t offset, uint16_t total, uint16_t chunkSize); // Le
 bool normalizePath(const char *path, char *out, size_t outSize); // Collapse "." and ".." segments; returns false if the result does not fit
 bool pathIsWithin(const char *path, const char *root);           // Component-wise containment test for two normalized paths
 
+// Copies a flash string into RAM for the duration of a scope, then frees it.
+// The copy-out-of-flash-and-delegate idiom was hand-written at a dozen sites,
+// which had already drifted three ways: some used a heap buffer, one used a
+// runtime-sized stack array, and only some logged an allocation failure.
+class FlashBuffer
+{
+private:
+    char *_buffer;
+
+    // Copying would double-free; the buffer is owned by exactly one scope.
+    FlashBuffer(const FlashBuffer &);
+    FlashBuffer &operator=(const FlashBuffer &);
+
+public:
+    explicit FlashBuffer(const __FlashStringHelper *text);
+    ~FlashBuffer();
+
+    const char *c_str() const { return _buffer; } // nullptr if the copy failed
+    bool valid() const { return _buffer != nullptr; }
+};
+
 #endif // UTILS_H

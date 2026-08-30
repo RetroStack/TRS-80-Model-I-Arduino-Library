@@ -302,3 +302,27 @@ bool pathIsWithin(const char *path, const char *root)
   // The match must land on a component boundary, not mid-name.
   return path[rootLength] == '\0' || path[rootLength] == '/';
 }
+
+// Copy a flash string into RAM
+FlashBuffer::FlashBuffer(const __FlashStringHelper *text) : _buffer(nullptr)
+{
+  if (text == nullptr)
+  {
+    return;
+  }
+
+  size_t length = strlen_P((const char *)text);
+  _buffer = (char *)malloc(length + 1);
+  if (_buffer != nullptr)
+  {
+    strcpy_P(_buffer, (const char *)text);
+  }
+}
+
+FlashBuffer::~FlashBuffer()
+{
+  if (_buffer != nullptr)
+  {
+    free(_buffer);
+  }
+}

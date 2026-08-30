@@ -6,6 +6,7 @@
 
 #include "Screen.h"
 #include "M1Shield.h"
+#include "utils.h"
 #include <Adafruit_GFX.h>
 
 // Constructor - initialize screen as inactive
@@ -131,10 +132,8 @@ void Screen::setTitleF(const __FlashStringHelper *title)
         return;
     }
 
-    // Get length and allocate buffer
-    size_t len = strlen_P((const char *)title);
-    char *buffer = (char *)malloc(len + 1);
-    if (buffer == nullptr)
+    FlashBuffer copy(title);
+    if (!copy.valid())
     {
         if (getLogger())
         {
@@ -146,14 +145,7 @@ void Screen::setTitleF(const __FlashStringHelper *title)
         return;
     }
 
-    // Copy from flash to RAM buffer
-    strcpy_P(buffer, (const char *)title);
-
-    // Delegate to regular setTitle method
-    setTitle(buffer);
-
-    // Free temporary buffer
-    free(buffer);
+    setTitle(copy.c_str());
 }
 
 // Clear the current title

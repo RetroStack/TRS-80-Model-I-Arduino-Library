@@ -5,6 +5,7 @@
  */
 
 #include "MenuScreen.h"
+#include "utils.h"
 #include "M1Shield.h"
 #include <Adafruit_GFX.h>
 
@@ -291,17 +292,15 @@ void MenuScreen::_drawContent()
             // Check FlashString version first, then fall back to regular string
             const __FlashStringHelper *configValueF = _getMenuItemConfigValueF(itemIndex);
             const char *configValue = nullptr;
-            char *tempConfigBuffer = nullptr;
+            // Released when this block ends; the explicit free lived about a
+            // hundred lines further down.
+            FlashBuffer configCopy(configValueF);
 
             if (configValueF != nullptr)
             {
-                // Convert FlashString to regular string for display
-                size_t len = strlen_P((const char *)configValueF);
-                tempConfigBuffer = (char *)malloc(len + 1);
-                if (tempConfigBuffer != nullptr)
+                if (configCopy.valid())
                 {
-                    strcpy_P(tempConfigBuffer, (const char *)configValueF);
-                    configValue = tempConfigBuffer;
+                    configValue = configCopy.c_str();
                 }
                 else if (getLogger())
                 {
@@ -398,11 +397,6 @@ void MenuScreen::_drawContent()
                 gfx.print(configValue);
             }
 
-            // Clean up temporary buffer if it was allocated for FlashString
-            if (tempConfigBuffer != nullptr)
-            {
-                free(tempConfigBuffer);
-            }
         }
 
         itemsDrawn++;
