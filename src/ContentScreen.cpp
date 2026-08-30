@@ -175,14 +175,7 @@ void ContentScreen::loop()
                 _clearNotification();
 
                 // Immediately redraw the footer to show the change
-                if (isActive())
-                {
-                    Adafruit_GFX &gfx = M1Shield.getGFX();
-                    gfx.startWrite();
-                    _drawFooter();
-                    gfx.endWrite();
-                    M1Shield.display();
-                }
+                _refreshFooter();
             }
         }
     }
@@ -568,14 +561,7 @@ void ContentScreen::setButtonItems(const char **buttonItems, uint8_t buttonItemC
     }
 
     // Update footer immediately if screen is active
-    if (isActive())
-    {
-        Adafruit_GFX &gfx = M1Shield.getGFX();
-        gfx.startWrite();
-        _drawFooter();
-        gfx.endWrite();
-        M1Shield.display(); // Push changes to display
-    }
+    _refreshFooter();
 }
 
 // Clear button items
@@ -596,14 +582,7 @@ void ContentScreen::clearButtonItems()
     _buttonItemCount = 0;
 
     // Update footer immediately if screen is active
-    if (isActive())
-    {
-        Adafruit_GFX &gfx = M1Shield.getGFX();
-        gfx.startWrite();
-        _drawFooter();
-        gfx.endWrite();
-        M1Shield.display(); // Push changes to display
-    }
+    _refreshFooter();
 }
 
 // Set progress value (0-100)
@@ -620,11 +599,14 @@ void ContentScreen::setProgressValue(int value)
     // Update progress bar immediately if screen is active
     if (isActive())
     {
-        Adafruit_GFX &gfx = M1Shield.getGFX();
-        gfx.startWrite();
-        _drawProgressBar();
-        gfx.endWrite();
-        M1Shield.display(); // Push changes to display
+        M1Shield.renderAll([this]
+                           {
+                               Adafruit_GFX &gfx = M1Shield.getGFX();
+                               gfx.startWrite();
+                               _drawProgressBar();
+                               gfx.endWrite();
+                               M1Shield.display();
+                           });
     }
 }
 
@@ -640,17 +622,21 @@ void ContentScreen::clearContentArea()
     if (!isActive())
         return;
 
-    uint16_t x = _getContentLeft();
-    uint16_t y = _getContentTop();
-    uint16_t width = _getContentWidth();
-    uint16_t height = _getContentHeight();
+    M1Shield.renderAll([this]
+                       {
+                           // Geometry differs per target, so resolve it inside the pass
+                           uint16_t x = _getContentLeft();
+                           uint16_t y = _getContentTop();
+                           uint16_t width = _getContentWidth();
+                           uint16_t height = _getContentHeight();
 
-    Adafruit_GFX &gfx = M1Shield.getGFX();
-    gfx.startWrite();
-    gfx.fillRect(x, y, width, height, M1Shield.convertColor(SCREEN_COLOR_BG));
-    gfx.endWrite();
+                           Adafruit_GFX &gfx = M1Shield.getGFX();
+                           gfx.startWrite();
+                           gfx.fillRect(x, y, width, height, M1Shield.convertColor(SCREEN_COLOR_BG));
+                           gfx.endWrite();
 
-    M1Shield.display(); // Push changes to display
+                           M1Shield.display();
+                       });
 }
 
 // Efficient function to clear secondary content area
@@ -659,21 +645,25 @@ void ContentScreen::clearSecondaryContentArea()
     if (!isActive())
         return;
 
-    uint16_t x = _getSecondaryContentLeft();
-    uint16_t y = _getSecondaryContentTop();
-    uint16_t width = _getSecondaryContentWidth();
-    uint16_t height = _getSecondaryContentHeight();
+    M1Shield.renderAll([this]
+                       {
+                           // Geometry differs per target, so resolve it inside the pass
+                           uint16_t x = _getSecondaryContentLeft();
+                           uint16_t y = _getSecondaryContentTop();
+                           uint16_t width = _getSecondaryContentWidth();
+                           uint16_t height = _getSecondaryContentHeight();
 
-    // Only clear if secondary content area has non-zero size
-    if (width > 0 && height > 0)
-    {
-        Adafruit_GFX &gfx = M1Shield.getGFX();
-        gfx.startWrite();
-        gfx.fillRect(x, y, width, height, M1Shield.convertColor(SCREEN_COLOR_BG));
-        gfx.endWrite();
+                           // Only clear if secondary content area has non-zero size
+                           if (width > 0 && height > 0)
+                           {
+                               Adafruit_GFX &gfx = M1Shield.getGFX();
+                               gfx.startWrite();
+                               gfx.fillRect(x, y, width, height, M1Shield.convertColor(SCREEN_COLOR_BG));
+                               gfx.endWrite();
 
-        M1Shield.display(); // Push changes to display
-    }
+                               M1Shield.display();
+                           }
+                       });
 }
 
 // Draw text
@@ -789,7 +779,11 @@ void ContentScreen::notify(const char *text, unsigned long durationMs, uint16_t 
     // Trigger immediate redraw to show notification
     if (isActive())
     {
-        _drawNotification();
+        M1Shield.renderAll([this]
+                           {
+                               _drawNotification();
+                               M1Shield.display();
+                           });
     }
 }
 
@@ -834,15 +828,28 @@ void ContentScreen::dismissNotification()
         _clearNotification();
 
         // Restore footer efficiently (no need for full screen refresh)
-        if (isActive())
-        {
-            Adafruit_GFX &gfx = M1Shield.getGFX();
-            gfx.startWrite();
-            _drawFooter();
-            gfx.endWrite();
-            M1Shield.display();
-        }
+        _refreshFooter();
     }
+}
+
+// Redraw just the footer on every enabled render target
+//
+// Note the getGFX() call is inside the lambda: it must re-resolve for each
+// target. Hoisting it out would draw every target into the primary's canvas,
+// and would still compile.
+void ContentScreen::_refreshFooter()
+{
+    if (!isActive())
+        return;
+
+    M1Shield.renderAll([this]
+                       {
+                           Adafruit_GFX &gfx = M1Shield.getGFX();
+                           gfx.startWrite();
+                           _drawFooter();
+                           gfx.endWrite();
+                           M1Shield.display();
+                       });
 }
 
 // Draw the notification
@@ -923,9 +930,12 @@ void ContentScreen::alert(const char *text)
         getLogger()->infoF(F("ContentScreen: Showing alert '%s'"), text);
     }
 
-    // Draw the alert dialog
-    _drawAlert(text);
-    M1Shield.display();
+    // Draw the alert dialog on every enabled target
+    M1Shield.renderAll([this, text]
+                       {
+                           _drawAlert(text);
+                           M1Shield.display();
+                       });
 
     // Block execution until LEFT or RIGHT button is pressed
     while (true)
@@ -944,11 +954,7 @@ void ContentScreen::alert(const char *text)
     }
 
     // Restore the footer efficiently (no need for full screen refresh)
-    Adafruit_GFX &gfx = M1Shield.getGFX();
-    gfx.startWrite();
-    _drawFooter();
-    gfx.endWrite();
-    M1Shield.display();
+    _refreshFooter();
 }
 
 // Show an alert dialog with Strings
@@ -1000,9 +1006,12 @@ ConfirmResult ContentScreen::confirm(const char *text, const char *leftText, con
         getLogger()->infoF(F("ContentScreen: Showing confirmation dialog '%s' with buttons '%s' and '%s'"), text, leftText, rightText);
     }
 
-    // Draw the confirmation dialog
-    _drawConfirm(text, leftText, rightText);
-    M1Shield.display();
+    // Draw the confirmation dialog on every enabled target
+    M1Shield.renderAll([this, text, leftText, rightText]
+                       {
+                           _drawConfirm(text, leftText, rightText);
+                           M1Shield.display();
+                       });
 
     // Block execution until LEFT or RIGHT button is pressed
     while (true)
@@ -1015,11 +1024,7 @@ ConfirmResult ContentScreen::confirm(const char *text, const char *leftText, con
             }
 
             // Restore the footer efficiently and return left choice
-            Adafruit_GFX &gfx = M1Shield.getGFX();
-            gfx.startWrite();
-            _drawFooter();
-            gfx.endWrite();
-            M1Shield.display();
+            _refreshFooter();
             return CONFIRM_LEFT;
         }
         else if (M1Shield.wasRightPressed())
@@ -1030,11 +1035,7 @@ ConfirmResult ContentScreen::confirm(const char *text, const char *leftText, con
             }
 
             // Restore the footer efficiently and return right choice
-            Adafruit_GFX &gfx = M1Shield.getGFX();
-            gfx.startWrite();
-            _drawFooter();
-            gfx.endWrite();
-            M1Shield.display();
+            _refreshFooter();
             return CONFIRM_RIGHT;
         }
 

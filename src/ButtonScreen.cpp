@@ -433,13 +433,6 @@ void ButtonScreen::_drawFooter()
 // Refresh the horizontal button display
 void ButtonScreen::refreshButtons()
 {
-    if (isActive())
-    {
-        // Redraw just the horizontal button area
-        Adafruit_GFX &gfx = M1Shield.getGFX();
-        gfx.startWrite();
-        _drawFooter();
-        gfx.endWrite();
-        M1Shield.display();
-    }
+    // _drawFooter() is virtual, so this redraws the horizontal button area
+    _refreshFooter();
 }
