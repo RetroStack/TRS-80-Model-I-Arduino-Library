@@ -6,6 +6,11 @@
 
 #include "FileBrowser.h"
 #include "M1Shield.h"
+#include "utils.h"
+
+// Longest path this browser will build. SD short names are 12 characters, so
+// this allows deep nesting while keeping the working buffer off the heap.
+constexpr size_t MAX_PATH_LENGTH = 128;
 
 // Constructor - handles all usage patterns intelligently
 FileBrowser::FileBrowser(const String &directoryOrPath, const String &targetFile, bool restrictToRoot) : MenuScreen()
@@ -45,10 +50,12 @@ FileBrowser::FileBrowser(const String &directoryOrPath, const String &targetFile
     }
 
     // Set default text file extensions
-    _ensureTextExtensionCapacity(2);
-    _textExtensions[0] = "log";
-    _textExtensions[1] = "txt";
-    _textExtensionCount = 2;
+    if (_ensureTextExtensionCapacity(2))
+    {
+        _textExtensions[0] = "log";
+        _textExtensions[1] = "txt";
+        _textExtensionCount = 2;
+    }
 
     // Set title and button items
     setTitleF(F("File Browser"));
@@ -359,8 +366,9 @@ bool FileBrowser::_navigateToDirectory(const String &dir)
         newPath = _normalizePath(newPath);
     }
 
-    // Check root restriction
-    if (_hasRootRestriction && !newPath.startsWith(_rootDirectory))
+    // Check root restriction. Compared component-wise: a plain prefix test
+    // accepts "/logsecret" for a root of "/logs".
+    if (_hasRootRestriction && !pathIsWithin(newPath.c_str(), _rootDirectory.c_str()))
     {
         notifyF(F("Access restricted to root directory"));
         return false;
@@ -390,21 +398,16 @@ bool FileBrowser::_navigateUp()
 // Normalize directory path
 String FileBrowser::_normalizePath(const String &path)
 {
-    String normalized = path;
+    char buffer[MAX_PATH_LENGTH];
 
-    // Ensure starts with /
-    if (!normalized.startsWith("/"))
+    if (!normalizePath(path.c_str(), buffer, sizeof(buffer)))
     {
-        normalized = "/" + normalized;
+        // Too long to represent. Fall back to root rather than returning a
+        // half-collapsed path that the containment check would then accept.
+        return String("/");
     }
 
-    // Remove trailing slash unless it's the root
-    if (normalized.length() > 1 && normalized.endsWith("/"))
-    {
-        normalized = normalized.substring(0, normalized.length() - 1);
-    }
-
-    return normalized;
+    return String(buffer);
 }
 
 // Get parent directory path
