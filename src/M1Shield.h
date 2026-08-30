@@ -1,5 +1,5 @@
 /*
- * M1Shield.h - Hardware abstraction layer for TRS-80 Model    unsigne    bool begin();                                       // Initialize shield hardware and displaynceButton(uint8_t pin, unsigned long &pressedState); // Internal debouncing helper for button state detectionino Shield
+ * M1Shield.h - Hardware abstraction layer for TRS-80 Model I Arduino Shield
  * Authors: Marcel Erz (RetroStack)
  * Released under the MIT License.
  */

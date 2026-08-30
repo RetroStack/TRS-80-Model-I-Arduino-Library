@@ -692,8 +692,6 @@ void setup() {
 }
 
 void loop() {
-    M1Shield.processInput();
-    M1Shield.updateScreen();
-    M1Shield.renderScreen();
+    M1Shield.loop();
 }
 ```

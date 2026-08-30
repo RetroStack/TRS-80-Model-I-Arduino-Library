@@ -172,3 +172,25 @@ This is the initial version written by Ven Reddy
   - **Signal Mapping**: Updated MUX (Port H/Pin 16), WR (Port J/Pin 15), OUT (Port J/Pin 14) pin assignments
   - **Configuration Cleanup**: Removed deprecated CR1/CR2 port configuration entries
   - **Compatibility**: Maintains backward compatibility through software abstraction layer
+- **HARDWARE FIX**: Corrected `PIN_WR_ON` / `PIN_WR_OFF` definitions in `port_config.h`
+  - **Signal Deassertion**: `PIN_WR_OFF` was defined identically to `PIN_WR_ON`, so the WR strobe could not be deasserted through the mask; it is now the complement
+- **HARDWARE**: Added shield PCB (KiCad) and enclosure (STL) design files under `Shield/` and `Case/`
+- **STABILITY**: Fixed two crashes reachable through ordinary use
+  - **Screen Dispatch**: `M1Shield::loop()` dispatched to `_screen` after `setScreen()` may have cleared it, so opening a file the viewer could not read jumped through a null vtable pointer
+  - **Binary Viewer**: `BinaryFileViewer` kept a non-zero buffer size after a failed allocation, so the next page turn passed a null destination to `File::read()`
+  - **Allocation Checks**: `FileBrowser` and `TextFileViewer` now check `new[]` results before writing through them, and `FileBrowser` no longer overruns its array on directories with more than 255 visible entries
+- **FIX**: Corrected several functions that produced wrong results
+  - **`Model1::fillMemory()`**: No longer writes one byte past the region; its fourth parameter is now named `length_in_bytes` in the header to match the implementation, which has always treated it as a byte count rather than an end address
+  - **`Video::setX()` / `setY()`**: A cursor at exactly the viewport width or height was accepted, placing subsequent output outside video RAM
+  - **`Video` tab expansion**: Tabs advanced by the distance past the previous tab stop instead of the distance to the next one
+  - **Diagonal Joystick Input**: `MenuScreen` and `ButtonScreen` compared signed joystick offsets rather than magnitudes, so three of the four diagonal directions resolved to the wrong axis
+  - **`TextFileViewer::nextPage()`**: Underflowed on a file with no pages
+  - **Layout Math**: Clamped unsigned subtractions in `MenuScreen` rows and the `ContentScreen` confirm dialog that underflowed on narrow displays and defeated text truncation
+  - **`ButtonScreen::refreshButtons()`**: Now pushes the framebuffer, so navigation is visible on SSD1306 and SH1106 panels
+- **FIX**: `M1ShieldClass::begin()` was declared but never defined, so sketches calling the no-argument overload failed to link
+  - **Standard Entry Point**: `begin()` is the library's no-argument initialization entry point and performs the display-independent setup; `begin(DisplayProvider&)` now calls it first
+  - **Failure Handling**: `begin(DisplayProvider&)` no longer adopts a display provider whose `create()` failed
+- **PACKAGING**: `library.properties` now declares its dependencies via `depends=`; previously an Arduino IDE install pulled in nothing, not even Adafruit GFX
+- **PACKAGING**: `architectures` narrowed from `*` to `avr`, with an `#error` in `port_config.h` naming the ATmega2560 requirement instead of failing deep inside the port macros
+- **DOCUMENTATION**: Corrected API names that never existed, including `Model1.readByte()`/`writeByte()` in the README quickstart, `M1Shield.processInput()`/`updateScreen()`/`renderScreen()`, and `beginWithDisplay()`/`updateDisplay()`
+- **DOCUMENTATION**: `docs/MenuScreen.md` examples no longer cache child screens as members and delete them in the menu destructor; `setScreen()` takes ownership and deletes the outgoing menu, so that pattern freed the screen being activated

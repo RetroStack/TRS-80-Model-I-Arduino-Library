@@ -530,11 +530,8 @@ void loop() {
 
 Advanced screen management system for complex applications:
 
-- **`void setScreen(Screen* screen)`** - Set active screen
-- **`Screen* getCurrentScreen()`** - Get current screen pointer
-- **`void processInput()`** - Process input and handle screen transitions
-- **`void updateScreen()`** - Update current screen (calls loop())
-- **`void renderScreen()`** - Render current screen if needed
+- **`bool setScreen(Screen* screen)`** - Set active screen; takes ownership of the pointer and deletes the outgoing screen
+- **`void loop()`** - Process input, dispatch to the active screen and handle screen transitions. Call this once per sketch `loop()`.
 
 **Screen Lifecycle:**
 

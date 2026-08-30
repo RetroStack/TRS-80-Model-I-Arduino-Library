@@ -67,7 +67,7 @@ This document provides a comprehensive reference of all classes and functions av
 - `void writeMemory(uint16_t address, uint8_t data)` // Write byte to memory address
 - `void readMemory(uint16_t address, uint8_t *buffer, uint16_t length)` // Read buffer from memory
 - `void writeMemory(uint16_t address, const uint8_t *buffer, uint16_t length)` // Write buffer to memory
-- `void fillMemory(uint16_t address, uint8_t data, uint16_t length)` // Fill memory range with value
+- `void fillMemory(uint8_t fill_data, uint16_t address, uint16_t length)` // Fill memory range with value
 - `void copyMemory(uint16_t sourceAddress, uint16_t destinationAddress, uint16_t length)` // Copy memory range
 - `bool verifyMemory(uint16_t address, const uint8_t *buffer, uint16_t length, uint16_t *errorAddress = nullptr)` // Verify memory contents
 - `void clearMemory(uint16_t address, uint16_t length)` // Clear memory range to zero

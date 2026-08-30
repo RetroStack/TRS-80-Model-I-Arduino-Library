@@ -226,7 +226,7 @@ Display_SSD1306 displayProvider;
 
 void setup() {
     // SPI mode - requires CS, DC, and optionally RST pins
-    if (M1Shield.begin(displayProvider, 9, 8, -1)) {  // CS=9, DC=8, RST=unused
+    if (M1Shield.begin(displayProvider)) {  // CS/DC/RST come from the shield pin map
         Serial.println("SSD1306 SPI display ready!");
     }
 }
@@ -253,7 +253,7 @@ Display_SSD1306 displayProvider;
 void setup() {
     // I2C mode - only needs address and optional reset pin
     if (displayProvider.createI2C(0x3C, -1)) {  // Address=0x3C, RST=unused
-        M1Shield.beginWithDisplay(&displayProvider);
+        M1Shield.begin(displayProvider);
         Serial.println("SSD1306 I2C display ready!");
     }
 }
@@ -327,13 +327,13 @@ void setup() {
     // Choose either SPI or I2C
     #ifdef USE_SPI
         // SPI setup
-        if (M1Shield.begin(displayProvider, 9, 8, -1)) {
+        if (M1Shield.begin(displayProvider)) {
             Serial.println("SSD1306 SPI initialized");
         }
     #else
         // I2C setup
         if (displayProvider.createI2C(0x3C)) {
-            M1Shield.beginWithDisplay(&displayProvider);
+            M1Shield.begin(displayProvider);
             Serial.println("SSD1306 I2C initialized");
         }
     #endif
@@ -351,7 +351,7 @@ void setup() {
     gfx.fillCircle(64, 32, 10, SSD1306_WHITE);
 
     // Update display (required for OLED)
-    M1Shield.updateDisplay();
+    M1Shield.display();
 }
 
 void loop() {

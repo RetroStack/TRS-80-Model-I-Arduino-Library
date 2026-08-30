@@ -254,6 +254,13 @@ Page 1 of 3        Page 2 of 3        Page 3 of 3
 
 **Must be implemented** by derived classes to define what happens when a menu item is selected. Return nullptr to stay on current screen.
 
+> **Ownership**: the returned pointer is handed to `M1Shield.setScreen()`, which
+> takes ownership of it and `delete`s the outgoing screen - including the menu
+> that returned it. Return a freshly constructed screen (`return new
+> SettingsScreen();`). Never return a screen cached as a member and deleted in
+> the menu's destructor: activating it destroys the menu, whose destructor then
+> deletes the screen that is now active.
+
 ### Optional Override Methods
 
 - **`virtual const char* _getMenuItemConfigValue(uint8_t index)`** - Get configuration value string for a menu item
@@ -558,6 +565,22 @@ protected:
 - **Safe References**: Original string arrays can be freed after `_setMenuItems()`
 - **Dynamic Sizing**: Memory allocated based on actual menu size
 
+### Screen Ownership
+
+`M1Shield.setScreen()` takes ownership of the screen it is given and deletes the
+previous one. Because a menu is itself the previous screen when one of its items
+is activated, a menu must not own the screens it returns:
+
+```cpp
+// Correct - the shield owns it from here on
+Screen* _getSelectedMenuItemScreen(int index) override {
+    return new SettingsScreen();
+}
+```
+
+Keep any state that must outlive a child screen in the menu itself, not in a
+cached child-screen instance.
+
 ### Memory Considerations
 
 - **Per-Item Overhead**: Each menu item requires strlen + 1 bytes
@@ -583,15 +606,12 @@ protected:
 
 class MainMenu : public MenuScreen {
 private:
-    GameScreen* _gameScreen;
-    SettingsScreen* _settingsScreen;
+    // State that must outlive a child screen lives here, not in a cached
+    // child-screen instance - setScreen() deletes this menu when one is opened.
+    bool _hasSavedGame;
 
 public:
-    MainMenu() {
-        // Create child screens
-        _gameScreen = new GameScreen();
-        _settingsScreen = new SettingsScreen();
-
+    MainMenu() : _hasSavedGame(false) {
         // Configure menu
         const char* items[] = {
             "New Game",
@@ -609,29 +629,22 @@ public:
         _setFooterButtons(buttons, 2);
     }
 
-    ~MainMenu() {
-        delete _gameScreen;
-        delete _settingsScreen;
-    }
-
 protected:
     Screen* _getSelectedMenuItemScreen(int index) override {
         switch(index) {
             case 0:  // New Game
-                _gameScreen->startNewGame();
-                return _gameScreen;
+                return new GameScreen(GameScreen::NEW_GAME);
 
             case 1:  // Continue Game
-                if (_gameScreen->hasSavedGame()) {
-                    _gameScreen->loadSavedGame();
-                    return _gameScreen;
+                if (_hasSavedGame) {
+                    return new GameScreen(GameScreen::CONTINUE);
                 } else {
                     // Show message: "No saved game"
                     return nullptr;  // Stay on menu
                 }
 
             case 2:  // Settings
-                return _settingsScreen;
+                return new SettingsScreen();
 
             case 3:  // High Scores
                 return new HighScoreScreen();
@@ -686,15 +699,12 @@ This example demonstrates memory-efficient menu creation using FlashString (F() 
 
 class FlashStringMenu : public MenuScreen {
 private:
-    GameScreen* _gameScreen;
-    SettingsScreen* _settingsScreen;
+    // Menu-owned state; child screens are constructed on demand because
+    // setScreen() deletes this menu when one is opened.
+    bool _hasSavedGame;
 
 public:
-    FlashStringMenu() {
-        // Create child screens
-        _gameScreen = new GameScreen();
-        _settingsScreen = new SettingsScreen();
-
+    FlashStringMenu() : _hasSavedGame(false) {
         // Configure menu using FlashString - saves significant RAM
         static const __FlashStringHelper* flashMenuItems[] = {
             F("New Game"),         // Stored in flash memory
@@ -717,29 +727,22 @@ public:
         setButtonItemsF(flashButtons, 2);
     }
 
-    ~FlashStringMenu() {
-        delete _gameScreen;
-        delete _settingsScreen;
-    }
-
 protected:
     Screen* _getSelectedMenuItemScreen(int index) override {
         switch(index) {
             case 0:  // New Game
-                _gameScreen->startNewGame();
-                return _gameScreen;
+                return new GameScreen(GameScreen::NEW_GAME);
 
             case 1:  // Continue Game
-                if (_gameScreen->hasSavedGame()) {
-                    _gameScreen->loadSavedGame();
-                    return _gameScreen;
+                if (_hasSavedGame) {
+                    return new GameScreen(GameScreen::CONTINUE);
                 } else {
                     // Could show "No saved game" message
                     return nullptr;
                 }
 
             case 2:  // Settings
-                return _settingsScreen;
+                return new SettingsScreen();
 
             case 3:  // High Scores
                 return new HighScoreScreen();
@@ -756,7 +759,7 @@ protected:
 
     // Dynamic menu updates using FlashString
     void updateMenuForGameState() {
-        if (_gameScreen->hasSavedGame()) {
+        if (_hasSavedGame) {
             // Show continue option
             static const __FlashStringHelper* gameMenuItems[] = {
                 F("New Game"),
