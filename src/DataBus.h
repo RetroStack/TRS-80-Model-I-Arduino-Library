@@ -9,31 +9,16 @@
 
 #include <Arduino.h>
 #include "ILogger.h"
+#include "BusBase.h"
 
-class DataBus
+class DataBus : public BusBase<DataBus, uint8_t>
 {
+    friend class BusBase<DataBus, uint8_t>; // Calls _configurePort()
+
 private:
-    ILogger *_logger; // Logger instance for debugging output
-
-    volatile bool _writable; // Flag indicating if bus is configured for writing
-
-    void _setBus(bool writableOption);   // Configure bus direction (true for write, false for read)
     void _configurePort(uint8_t config); // Set port configuration for direction control
 
 public:
-    DataBus(); // Constructor
-
-    void begin(); // Initialize data bus pins and configuration
-    void end();   // Reset data bus to default state
-
-    void setLogger(ILogger &logger); // Set logger for debugging output
-
-    bool isReadable() const; // Check if data bus is configured for reading
-    bool isWritable() const; // Check if data bus is configured for writing
-
-    void setAsReadable(); // Configure data bus pins as inputs for reading
-    void setAsWritable(); // Configure data bus pins as outputs for writing
-
     uint8_t readData();           // Read 8-bit data value from bus
     void writeData(uint8_t data); // Write 8-bit data value to bus
 
