@@ -478,12 +478,6 @@ Screen *BinaryFileViewer::actionTaken(ActionTaken action, int8_t offsetX, int8_t
         return nullptr;
     }
 
-    if (action & BUTTON_SELECT)
-    {
-        // Future: Could implement search or goto offset functionality
-        notifyF(F("SELECT: Feature not implemented"));
-        return nullptr;
-    }
 
     return nullptr;
 }

@@ -74,6 +74,7 @@ public:
 
 protected:
     bool open() override;                                        // Initialize and load directory
+    bool _isMenuItemEnabled(uint8_t index) const override; // The empty-folder placeholder is not selectable
     Screen *_getSelectedMenuItemScreen(int index) override;      // Handle file/directory selection
     const char *_getMenuItemConfigValue(uint8_t index) override; // Show file sizes
 };

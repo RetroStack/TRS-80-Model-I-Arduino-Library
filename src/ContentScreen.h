@@ -41,7 +41,7 @@ private:
     void _clearNotification();                                                         // Clear notification text and free memory
     void _drawAlert(const char *text);                                                 // Draw alert dialog overlay in place of footer
     void _drawConfirm(const char *text, const char *leftText, const char *rightText);  // Draw confirm dialog overlay in place of footer
-    char *_truncateText(const char *text, uint16_t availableWidth, uint8_t charWidth); // Create truncated copy of text with "..." if needed
+
 
     // The band the notification and dialog overlays draw into. Normally the
     // footer; on a small panel the footer has no height, so they borrow the
@@ -50,10 +50,15 @@ private:
     uint16_t _getOverlayHeight() const; // Height of the overlay band
     uint8_t _getOverlayTextSize() const; // Text size the overlay band can carry
 
+
+
+protected:
+    // Text fitting. Protected because MenuScreen, ButtonScreen and
+    // ConsoleScreen each grew their own truncation when these were private.
+    char *_truncateText(const char *text, uint16_t availableWidth, uint8_t charWidth); // Truncated copy with "..." if needed
     void _drawCenteredText(const char *text, uint16_t x0, uint16_t y,
                            uint16_t availableWidth, uint8_t charWidth); // Centered, truncated and clipped to the region
 
-protected:
     Screen *_handleBackAction(ActionTaken action); // Back screen when the menu button was pressed, else nullptr
 
     // A screen that cannot show its content -- no card, unreadable file --

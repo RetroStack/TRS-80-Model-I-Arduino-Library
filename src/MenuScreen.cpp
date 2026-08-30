@@ -243,6 +243,18 @@ void MenuScreen::_drawContent()
     }
 
     // Render up to itemsPerPage items for current page
+    // With nothing to show, the loop below painted blank alternating rows and
+    // left the user with no idea whether the menu had failed or was simply
+    // empty. Say which.
+    if (_menuItemCount == 0)
+    {
+        gfx.setTextSize(isSmall ? 1 : 2);
+        gfx.setTextColor(M1Shield.convertColor(ROW_COLOR_FG1));
+        _drawCenteredText("No items", left, top + (rowHeight / 2),
+                          width, isSmall ? TEXT_SIZE_1_WIDTH : TEXT_SIZE_2_WIDTH);
+        return;
+    }
+
     for (uint8_t i = 0; i < itemsPerPage; i++, itemIndex++)
     {
         int y = top + (i * rowHeight);

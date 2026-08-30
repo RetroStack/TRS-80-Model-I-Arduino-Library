@@ -503,15 +503,33 @@ bool TextFileViewer::_countFileLines()
         return false;
     }
 
-    // Count lines without loading content
+    // Count lines without loading content. This reads the whole file, which is
+    // seconds on a large one, and used to show nothing at all -- the progress
+    // bar existed but no library operation ever drove it.
     _totalFileLines = 0;
     _lastFileSize = file.size();
+    const uint32_t totalBytes = _lastFileSize;
+    uint8_t lastShown = 0;
+
+    setProgressValue(0);
 
     while (file.available())
     {
         readLineCapped(file);
         _totalFileLines++;
+
+        if (totalBytes > 0)
+        {
+            uint8_t percent = (uint8_t)(((uint32_t)file.position() * 100) / totalBytes);
+            if (percent != lastShown)
+            {
+                lastShown = percent;
+                setProgressValue(percent);
+            }
+        }
     }
+
+    setProgressValue(100);
 
     file.close();
     return true;

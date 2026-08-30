@@ -260,6 +260,8 @@ bool FileBrowser::_loadDirectoryContents()
         entry = dir.openNextFile();
     }
 
+    setProgressValue(50); // Counting pass done; the reading pass follows
+
     // Ensure we have enough capacity (capped at what uint8_t indices allow)
     if (entryCount > 255)
     {
@@ -309,6 +311,8 @@ bool FileBrowser::_loadDirectoryContents()
         entry.close();
         entry = dir.openNextFile();
     }
+
+    setProgressValue(100);
 
     dir.close();
 
@@ -438,9 +442,10 @@ String FileBrowser::_getParentDirectory(const String &path)
 // Check if file should be shown
 bool FileBrowser::_isValidFile(const String &filename)
 {
-    // For now, show all files
-    // Could be extended to filter by extension or size
-    return true;
+    // Everything except the FAT volume label, which is not a file the user can
+    // open. This used to be `return true` with the argument unread, which read
+    // at both call sites as though a filter were being applied.
+    return filename.length() > 0;
 }
 
 // Check if file should open with TextFileViewer
@@ -480,8 +485,11 @@ void FileBrowser::_updateMenuItems()
 {
     if (_fileCount == 0)
     {
-        // Show empty directory message
-        const char *emptyItems[] = {"<Empty Directory>"};
+        // A placeholder row, not a file. _isMenuItemEnabled() below reports it
+        // disabled so it draws greyed and without the selection marker --
+        // before, it carried the highlight and the "> " selector and read as
+        // something you could open.
+        const char *emptyItems[] = {"Folder is empty"};
         setMenuItems(emptyItems, 1);
         return;
     }
@@ -608,6 +616,13 @@ void FileBrowser::reloadDirectory()
 }
 
 // Handle file/directory selection
+// The empty-folder placeholder is a message, not a file
+bool FileBrowser::_isMenuItemEnabled(uint8_t index) const
+{
+    (void)index;
+    return _fileCount > 0;
+}
+
 Screen *FileBrowser::_getSelectedMenuItemScreen(int index)
 {
     if (index < 0 || index >= (int)_fileCount)
