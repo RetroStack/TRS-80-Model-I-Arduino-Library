@@ -407,3 +407,28 @@ isSDCardInserted    KEYWORD2
 buzzerOn    KEYWORD2
 buzzerOff   KEYWORD2
 buzz    KEYWORD2
+
+#######################################
+# Render Targets (RenderTarget.h)
+#######################################
+
+RenderTarget	KEYWORD1
+RenderManager	KEYWORD1
+DisplayRenderTarget	KEYWORD1
+MAX_RENDER_TARGETS	LITERAL1
+
+# RenderManager Methods
+getRenderManager	KEYWORD2
+addRenderTarget	KEYWORD2
+removeRenderTarget	KEYWORD2
+clearRenderTargets	KEYWORD2
+getRenderTargetCount	KEYWORD2
+getRenderTarget	KEYWORD2
+getPrimaryRenderTarget	KEYWORD2
+displayAll	KEYWORD2
+
+# RenderTarget Methods
+getName	KEYWORD2
+isEnabled	KEYWORD2
+setEnabled	KEYWORD2
+isSmallDisplay	KEYWORD2

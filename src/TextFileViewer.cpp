@@ -81,7 +81,9 @@ void TextFileViewer::setTextSize(uint8_t size)
 // Navigation methods
 bool TextFileViewer::nextPage()
 {
-    if (_currentPage >= _totalPages - 1)
+    // _totalPages is unsigned - "_totalPages - 1" wraps when it is zero,
+    // which let _currentPage advance past the end of an empty file.
+    if (_totalPages == 0 || _currentPage + 1 >= _totalPages)
         return false;
 
     _currentPage++;
@@ -371,6 +373,11 @@ bool TextFileViewer::_loadCurrentPage()
 
     // Allocate memory for current page only
     _currentPageLines = new String[linesToRead];
+    if (!_currentPageLines)
+    {
+        file.close();
+        return false;
+    }
     _linesOnCurrentPage = 0;
     _maxLineLength = 0;
 

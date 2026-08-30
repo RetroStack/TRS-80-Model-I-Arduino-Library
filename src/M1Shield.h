@@ -1,5 +1,5 @@
 /*
- * M1Shield.h - Hardware abstraction layer for TRS-80 Model    unsigne    bool begin();                                       // Initialize shield hardware and displaynceButton(uint8_t pin, unsigned long &pressedState); // Internal debouncing helper for button state detectionino Shield
+ * M1Shield.h - Hardware abstraction layer for TRS-80 Model I Arduino Shield
  * Authors: Marcel Erz (RetroStack)
  * Released under the MIT License.
  */
@@ -78,7 +78,11 @@ public:
 
     ~M1ShieldClass(); // Destructor performs cleanup of display and screen resources
 
-    bool begin();                          // Initialize shield hardware and display
+    // Standard initialization entry point. Always safe to call; shared setup
+    // added here in future releases reaches existing sketches unchanged.
+    // Does not initialize the display - begin(DisplayProvider &) does that,
+    // and calls this first.
+    bool begin();                          // Initialize shield hardware (no display)
     bool begin(DisplayProvider &provider); // Initialize shield with custom display provider
 
     void setLogger(ILogger &logger); // Set logger for debugging output

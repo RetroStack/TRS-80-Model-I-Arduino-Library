@@ -1,6 +1,6 @@
 /*
- * SerialLogger.h - Class for logging to the serial interface
- * Authors: Marcel Erz (RetroStack)
+ * SDCardLogger.h - Class for logging to a file on the SD card
+ * Authors: Ven Reddy, Marcel Erz (RetroStack)
  * Released under the MIT License.
  */
 

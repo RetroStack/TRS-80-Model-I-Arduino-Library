@@ -98,7 +98,7 @@ uint8_t Video::getX()
 // Set cursor X position with bounds checking
 void Video::setX(uint8_t x)
 {
-  if (x > _viewPort.width)
+  if (x >= _viewPort.width)
   {
     if (_logger)
       _logger->warnF(F("Video: X cursor position %d out of bounds (max %d). Reset to %d."), x, _viewPort.width, _viewPort.width - 1);
@@ -119,7 +119,7 @@ uint8_t Video::getY()
 // Set cursor Y position with bounds checking
 void Video::setY(uint8_t y)
 {
-  if (y > _viewPort.height)
+  if (y >= _viewPort.height)
   {
     if (_logger)
       _logger->warnF(F("Video: Y cursor position %d out of bounds (max %d). Reset to %d."), y, _viewPort.height, _viewPort.height - 1);
@@ -417,9 +417,8 @@ void Video::_print(const char character, bool raw)
   }
   else if (character == '\t')
   {
-    uint8_t len = _cursorPositionX % 4;
-    if (len == 0)
-      len = 4;
+    // Distance to the next tab stop, not the distance past the last one
+    uint8_t len = 4 - (_cursorPositionX % 4);
     for (int i = 0; i < len; i++)
     {
       print(' ');

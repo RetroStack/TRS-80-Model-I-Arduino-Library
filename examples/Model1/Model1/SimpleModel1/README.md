@@ -62,13 +62,13 @@ void setup() {
 
 - **Read Memory**: `Model1.readMemory(address)`
 - **Write Memory**: `Model1.writeMemory(address, value)`
-- **Block Read**: `Model1.readMemoryBlock(address, buffer, length)`
-- **Block Write**: `Model1.writeMemoryBlock(address, buffer, length)`
+- **Block Read**: `Model1.readMemory(address, length)` (returns a newly allocated buffer; caller must `free()` it)
+- **Block Write**: `Model1.writeMemory(address, buffer, length)`
 
 ### I/O Operations
 
-- **Read Port**: `Model1.readPort(port)`
-- **Write Port**: `Model1.writePort(port, value)`
+- **Read Port**: `Model1.readIO(port)`
+- **Write Port**: `Model1.writeIO(port, value)`
 - **Status Check**: Basic hardware status verification
 
 ## Sample Output

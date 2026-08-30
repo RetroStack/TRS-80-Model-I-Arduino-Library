@@ -1,12 +1,6 @@
 /*
- * KeyboardChangeIterator.cpp - Iterator for keyboard state c// Check if there are more changes to iterate
-bool KeyboardChangeIterator::hasNext() const
-{
-    return _found;
-}
-
-// Get the key information for the current change
-KeyChange KeyboardChangeIterator::next() * Authors: Ven Reddy, Marcel Erz (RetroStack)
+ * KeyboardChangeIterator.cpp - Iterator for keyboard state changes
+ * Authors: Ven Reddy, Marcel Erz (RetroStack)
  * Released under the MIT License.
  */
 

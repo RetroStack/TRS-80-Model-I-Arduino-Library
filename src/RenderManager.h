@@ -13,7 +13,11 @@
 // Maximum number of render targets that can be registered
 constexpr uint8_t MAX_RENDER_TARGETS = 8;
 
-// Manages multiple render targets
+// Holds the registered render targets and drives them as a group.
+//
+// Registration order is significant: target 0 is the primary target, and is
+// what M1Shield's display accessors read dimensions, colors and the graphics
+// context from.
 class RenderManager
 {
 private:
@@ -30,6 +34,13 @@ public:
     void clearRenderTargets();
     uint8_t getRenderTargetCount() const;
     RenderTarget *getRenderTarget(uint8_t index) const;
+
+    // The primary target - target 0, or nullptr when none is registered
+    RenderTarget *getPrimaryRenderTarget() const;
+
+    // Push every enabled target. Returns true only if all of them succeeded;
+    // with no enabled targets there is nothing to push, which is not a failure.
+    bool displayAll();
 };
 
 #endif /* RENDER_MANAGER_H */

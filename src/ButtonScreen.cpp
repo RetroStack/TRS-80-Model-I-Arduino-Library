@@ -182,7 +182,7 @@ Screen *ButtonScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t off
 
     // Menu selection - activate the selected item (only if enabled)
     if (action & (BUTTON_SELECT | BUTTON_UP | BUTTON_DOWN | BUTTON_JOYSTICK | JOYSTICK_UP | JOYSTICK_DOWN) ||
-        ((action & (JOYSTICK_UP_LEFT | JOYSTICK_UP_RIGHT | JOYSTICK_DOWN_LEFT | JOYSTICK_DOWN_RIGHT)) && offsetY > offsetX))
+        ((action & (JOYSTICK_UP_LEFT | JOYSTICK_UP_RIGHT | JOYSTICK_DOWN_LEFT | JOYSTICK_DOWN_RIGHT)) && abs(offsetY) > abs(offsetX)))
     {
         uint8_t selectedIndex = _getSelectedButtonItemIndex();
         if (_isButtonItemEnabled(selectedIndex))
@@ -226,7 +226,7 @@ Screen *ButtonScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t off
 
         // Move left - find previous enabled item
         if (action & (BUTTON_LEFT | JOYSTICK_LEFT) ||
-            ((action & (JOYSTICK_UP_LEFT | JOYSTICK_DOWN_LEFT)) && offsetX > offsetY))
+            ((action & (JOYSTICK_UP_LEFT | JOYSTICK_DOWN_LEFT)) && abs(offsetX) > abs(offsetY)))
         {
             uint8_t nextSelection;
             if (currentSelection > 0)
@@ -242,7 +242,7 @@ Screen *ButtonScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t off
         }
         // Move right - find next enabled item
         else if (action & (BUTTON_RIGHT | JOYSTICK_RIGHT) ||
-                 ((action & (JOYSTICK_UP_RIGHT | JOYSTICK_DOWN_RIGHT)) && offsetX > offsetY))
+                 ((action & (JOYSTICK_UP_RIGHT | JOYSTICK_DOWN_RIGHT)) && abs(offsetX) > abs(offsetY)))
         {
             uint8_t nextSelection;
             if (currentSelection < buttonItemCount - 1)
@@ -440,5 +440,6 @@ void ButtonScreen::refreshButtons()
         gfx.startWrite();
         _drawFooter();
         gfx.endWrite();
+        M1Shield.display();
     }
 }

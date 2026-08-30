@@ -115,7 +115,7 @@ _(Remember to `free()` the buffer returned by block read.)_
 - **`void writeMemory(uint16_t address, uint8_t* data, uint16_t length, uint16_t offset)`** - Write block with offset
 - **`void copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length)`** - Copy memory between addresses
 - **`void fillMemory(uint8_t fill_data, uint16_t address, uint16_t length)`** - Fill memory with a byte
-- **`void fillMemory(uint8_t* fill_data, uint16_t length, uint16_t start_address, uint16_t end_address)`** - Fill memory repeating a byte array
+- **`void fillMemory(uint8_t* fill_data, uint16_t length, uint16_t address, uint16_t length_in_bytes)`** - Fill `length_in_bytes` bytes from `address` by repeating a `length`-byte pattern
 
 ## I/O Access
 

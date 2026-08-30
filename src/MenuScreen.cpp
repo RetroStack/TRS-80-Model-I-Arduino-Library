@@ -113,7 +113,7 @@ Screen *MenuScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t offse
 
     // Menu selection - activate the selected item (only if enabled)
     if (action & (BUTTON_SELECT | BUTTON_LEFT | BUTTON_RIGHT | BUTTON_JOYSTICK | JOYSTICK_LEFT | JOYSTICK_RIGHT) ||
-        ((action & (JOYSTICK_UP_LEFT | JOYSTICK_UP_RIGHT | JOYSTICK_DOWN_LEFT | JOYSTICK_DOWN_RIGHT)) && offsetX > offsetY))
+        ((action & (JOYSTICK_UP_LEFT | JOYSTICK_UP_RIGHT | JOYSTICK_DOWN_LEFT | JOYSTICK_DOWN_RIGHT)) && abs(offsetX) > abs(offsetY)))
     {
         uint8_t selectedIndex = _getSelectedMenuItemIndex();
         if (_isMenuItemEnabled(selectedIndex))
@@ -156,7 +156,7 @@ Screen *MenuScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t offse
 
         // Move up - find previous enabled item
         if (action & (BUTTON_UP | JOYSTICK_UP) ||
-            ((action & (JOYSTICK_UP_LEFT | JOYSTICK_UP_RIGHT)) && offsetY > offsetX))
+            ((action & (JOYSTICK_UP_LEFT | JOYSTICK_UP_RIGHT)) && abs(offsetY) > abs(offsetX)))
         {
             uint8_t nextSelection;
             if (currentSelection > 0)
@@ -171,7 +171,7 @@ Screen *MenuScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t offse
         }
         // Move down - find next enabled item
         else if (action & (BUTTON_DOWN | JOYSTICK_DOWN) ||
-                 ((action & (JOYSTICK_DOWN_LEFT | JOYSTICK_DOWN_RIGHT)) && offsetY > offsetX))
+                 ((action & (JOYSTICK_DOWN_LEFT | JOYSTICK_DOWN_RIGHT)) && abs(offsetY) > abs(offsetX)))
         {
             uint8_t nextSelection;
             if (currentSelection < _menuItemCount - 1)
@@ -311,14 +311,20 @@ void MenuScreen::_drawContent()
             {
                 uint16_t configLen = strlen(configValue);
                 configWidth = configLen * textSizeWidth;
-                configX = left + width - configWidth - rightPadding;
+                // Clamp: a long config value would underflow this to ~65530
+                // and push the value off-screen.
+                uint16_t configInset = configWidth + rightPadding;
+                configX = (configInset < width) ? (left + width - configInset) : left;
             }
 
             // Calculate available space for menu text
             uint16_t menuTextStartX = left + leftPadding;
             uint16_t selectorWidth = (isSmall ? 1 : 2) * textSizeWidth; // "> " or "  "
             uint16_t menuTextX = menuTextStartX + selectorWidth;
-            uint16_t availableWidth = width - (menuTextX - left) - configWidth - configGap; // gap between text and config
+            // Clamp: without this the subtraction underflows on narrow panels
+            // and the truncation below never fires.
+            uint16_t usedWidth = (menuTextX - left) + configWidth + configGap;
+            uint16_t availableWidth = (usedWidth < width) ? (width - usedWidth) : 0; // gap between text and config
 
             // Truncate menu text if it would collide with config value
             String menuText = String(_menuItems[itemIndex]);
@@ -330,7 +336,7 @@ void MenuScreen::_drawContent()
                 if (isSmall)
                 {
                     uint16_t ellipsisWidth = 2 * textSizeWidth;
-                    uint16_t maxCharsWidth = availableWidth - ellipsisWidth;
+                    uint16_t maxCharsWidth = (ellipsisWidth < availableWidth) ? (availableWidth - ellipsisWidth) : 0;
                     uint8_t maxChars = maxCharsWidth / textSizeWidth;
 
                     if (maxChars > 0)
@@ -345,7 +351,7 @@ void MenuScreen::_drawContent()
                 else
                 {
                     uint16_t ellipsisWidth = 3 * textSizeWidth;
-                    uint16_t maxCharsWidth = availableWidth - ellipsisWidth;
+                    uint16_t maxCharsWidth = (ellipsisWidth < availableWidth) ? (availableWidth - ellipsisWidth) : 0;
                     uint8_t maxChars = maxCharsWidth / textSizeWidth;
 
                     if (maxChars > 0)

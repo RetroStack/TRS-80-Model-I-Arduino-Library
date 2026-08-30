@@ -62,6 +62,7 @@ The library is organized into several key areas:
 
 - [**ILogger**](ILogger.md) - Unified logging interface supporting multiple output formats and destinations.
 - [**SerialLogger**](SerialLogger.md) - Serial port logging with formatted output and mute/unmute control.
+- [**SDCardLogger**](SDCardLogger.md) - Persistent logging to a file on the SD card, surviving resets and power cycles.
 - [**CompositeLogger**](CompositeLogger.md) - Multi-destination logging for simultaneous output to serial, display, and file systems.
 
 ### M1Shield Support
@@ -71,6 +72,7 @@ The library is organized into several key areas:
 The M1Shield provides a safe, reliable connection method with integrated display and user interface:
 
 - [**M1Shield**](M1Shield.md) - Main shield interface for display, input controls, LED indicators, screen management, and cassette interface (WARNING: Advanced).
+- [**RenderTarget**](RenderTarget.md) - Render target abstraction and RenderManager for driving one or more output destinations.
 - [**DisplayProvider**](DisplayProvider.md) - Adaptive display system supporting multiple controller types (TFT: ST7789, ST7735, ILI9341, ST7796, HX8357, ILI9325; OLED: SSD1306, SH1106).
 
 ### User Interface Framework
@@ -103,8 +105,8 @@ void setup() {
   Model1.begin();
   Model1.activateTestSignal();
 
-  uint8_t data = Model1.readByte(0x0000);  // Read ROM
-  Model1.writeByte(0x3C00, 0x41);          // Write 'A' to video memory
+  uint8_t data = Model1.readMemory(0x0000);  // Read ROM
+  Model1.writeMemory(0x3C00, 0x41);          // Write 'A' to video memory
 
   Model1.deactivateTestSignal();
 }

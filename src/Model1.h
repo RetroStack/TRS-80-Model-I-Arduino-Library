@@ -92,7 +92,7 @@ public:
     void writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint16_t offset);                // Write memory block with offset
     void copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length);                       // Copy memory between addresses
     void fillMemory(uint8_t fill_data, uint16_t address, uint16_t length);                              // Fill memory with byte value
-    void fillMemory(uint8_t *fill_data, uint16_t length, uint16_t start_address, uint16_t end_address); // Fill memory with pattern
+    void fillMemory(uint8_t *fill_data, uint16_t length, uint16_t address, uint16_t length_in_bytes);   // Fill memory with repeating pattern
 
     // ---------- IO
     uint8_t readIO(uint8_t address);             // Read from I/O port

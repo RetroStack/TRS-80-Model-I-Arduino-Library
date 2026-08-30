@@ -6,6 +6,7 @@ This document provides a comprehensive reference of all classes and functions av
 
 - `M1ShieldClass()` // Default constructor
 - `~M1ShieldClass()` // Destructor with cleanup
+- `bool begin()` // Initialize hardware without a display (standard no-argument entry point)
 - `bool begin(DisplayProvider &provider)` // Initialize hardware and display
 - `void activateJoystick()` // Enable joystick input
 - `void deactivateJoystick()` // Disable joystick input
@@ -22,12 +23,14 @@ This document provides a comprehensive reference of all classes and functions av
 - `void setLEDColor(uint8_t r, uint8_t g, uint8_t b) const` // Set RGB LED with individual channels
 - `void setLEDColor(LEDColor color, uint8_t intensity = 255) const` // Set LED with predefined color
 - `bool isMenuPressed() const` // Check menu button current state
+- `bool isSelectPressed() const` // Check select button current state
 - `bool isLeftPressed() const` // Check left button current state
 - `bool isRightPressed() const` // Check right button current state
 - `bool isUpPressed() const` // Check up button current state
 - `bool isDownPressed() const` // Check down button current state
 - `bool isJoystickPressed() const` // Check joystick button current state
 - `bool wasMenuPressed()` // Check and consume menu button press event
+- `bool wasSelectPressed()` // Check and consume select button press event
 - `bool wasLeftPressed()` // Check and consume left button press event
 - `bool wasRightPressed()` // Check and consume right button press event
 - `bool wasUpPressed()` // Check and consume up button press event
@@ -50,12 +53,51 @@ This document provides a comprehensive reference of all classes and functions av
 - `void buzzerOn() const` // Activate buzzer sound
 - `void buzzerOff() const` // Deactivate buzzer sound
 - `void buzz(unsigned int durationMs) const` // Buzz for specified duration
+- `RenderManager& getRenderManager()` // Get the render target manager
 - `void loop()` // Main update loop for all shield operations
 
 **Enums:**
 
-- `enum LEDColor` // RGB LED color definitions: BLACK, WHITE, RED, GREEN, BLUE, YELLOW, CYAN, MAGENTA
+- `enum LEDColor` // RGB LED color definitions: COLOR_OFF, COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_YELLOW, COLOR_MAGENTA, COLOR_CYAN, COLOR_WHITE
 - `enum JoystickDirection` // 8-directional joystick states: CENTER, UP, DOWN, LEFT, RIGHT, UP_LEFT, UP_RIGHT, DOWN_LEFT, DOWN_RIGHT
+
+## RenderTarget (RenderTarget.h)
+
+Abstract destination that screens are drawn to.
+
+- `const char* getName() const` // Human-readable target name
+- `bool isEnabled() const` // Whether the target is drawn to and presented
+- `void setEnabled(bool enabled)` // Enable or disable the target
+- `Adafruit_GFX& getGFX()` // Graphics context to draw into
+- `uint16_t getScreenWidth() const` // Target width in pixels
+- `uint16_t getScreenHeight() const` // Target height in pixels
+- `uint16_t convertColor(uint16_t color)` // Convert a color to the target's format
+- `bool display()` // Push what was drawn to the physical device
+- `bool isSmallDisplay() const` // Non-virtual; height <= 128
+
+## RenderManager (RenderManager.h)
+
+Holds registered render targets and drives them as a group. Target 0 is the primary.
+
+- `bool addRenderTarget(RenderTarget *target)` // Register a target
+- `bool removeRenderTarget(RenderTarget *target)` // Unregister a target
+- `void clearRenderTargets()` // Unregister all targets
+- `uint8_t getRenderTargetCount() const` // Number of registered targets
+- `RenderTarget* getRenderTarget(uint8_t index) const` // Target by index, or nullptr
+- `RenderTarget* getPrimaryRenderTarget() const` // Target 0, or nullptr
+- `bool displayAll()` // Push every enabled target
+
+**Constants:**
+
+- `constexpr uint8_t MAX_RENDER_TARGETS = 8` // Registration capacity
+
+## DisplayRenderTarget (DisplayRenderTarget.h)
+
+RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::begin()`.
+
+- `explicit DisplayRenderTarget(DisplayProvider &provider)` // Provider is required, not owned
+- `void setDisplayProvider(DisplayProvider &provider)` // Swap the backing provider
+- `DisplayProvider& getDisplayProvider() const` // Get the backing provider
 
 ## Model1Class (Model1.h)
 
@@ -67,7 +109,7 @@ This document provides a comprehensive reference of all classes and functions av
 - `void writeMemory(uint16_t address, uint8_t data)` // Write byte to memory address
 - `void readMemory(uint16_t address, uint8_t *buffer, uint16_t length)` // Read buffer from memory
 - `void writeMemory(uint16_t address, const uint8_t *buffer, uint16_t length)` // Write buffer to memory
-- `void fillMemory(uint16_t address, uint8_t data, uint16_t length)` // Fill memory range with value
+- `void fillMemory(uint8_t fill_data, uint16_t address, uint16_t length)` // Fill memory range with value
 - `void copyMemory(uint16_t sourceAddress, uint16_t destinationAddress, uint16_t length)` // Copy memory range
 - `bool verifyMemory(uint16_t address, const uint8_t *buffer, uint16_t length, uint16_t *errorAddress = nullptr)` // Verify memory contents
 - `void clearMemory(uint16_t address, uint16_t length)` // Clear memory range to zero

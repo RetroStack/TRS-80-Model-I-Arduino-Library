@@ -1,49 +1,44 @@
 /*
- * DisplayRenderTarget.cpp - Render target that wraps a DisplayProvider for graphics output
+ * DisplayRenderTarget.cpp - Render target backed by a DisplayProvider
  * Authors: Marcel Erz (RetroStack)
  * Released under the MIT License.
  */
 
 #include "DisplayRenderTarget.h"
 
-// Constructor
-DisplayRenderTarget::DisplayRenderTarget(DisplayProvider *provider) 
-    : _displayProvider(provider), _enabled(true)
+// Constructor - the provider is required and is not owned by this target
+DisplayRenderTarget::DisplayRenderTarget(DisplayProvider &provider)
+    : _displayProvider(&provider), _enabled(true)
 {
 }
 
-// Destructor
+// Destructor - the DisplayProvider is owned by the caller, not by this target
 DisplayRenderTarget::~DisplayRenderTarget()
 {
-    // We don't own the DisplayProvider, so we don't clean it up
 }
 
-// Set the display provider
-void DisplayRenderTarget::setDisplayProvider(DisplayProvider *provider)
+// Swap the backing provider
+void DisplayRenderTarget::setDisplayProvider(DisplayProvider &provider)
 {
-    _displayProvider = provider;
+    _displayProvider = &provider;
 }
 
-// Get the display provider
-DisplayProvider *DisplayRenderTarget::getDisplayProvider() const
+// Get the backing provider
+DisplayProvider &DisplayRenderTarget::getDisplayProvider() const
 {
-    return _displayProvider;
+    return *_displayProvider;
 }
 
 // Get render target name
 const char *DisplayRenderTarget::getName() const
 {
-    if (_displayProvider)
-    {
-        return _displayProvider->name();
-    }
-    return "Display (No Provider)";
+    return _displayProvider->name();
 }
 
 // Check if render target is enabled
 bool DisplayRenderTarget::isEnabled() const
 {
-    return _enabled && _displayProvider != nullptr;
+    return _enabled;
 }
 
 // Enable or disable the render target
@@ -52,68 +47,32 @@ void DisplayRenderTarget::setEnabled(bool enabled)
     _enabled = enabled;
 }
 
-// Get display width (similar to M1Shield::getScreenWidth())
+// Get the graphics context to draw into
+Adafruit_GFX &DisplayRenderTarget::getGFX()
+{
+    return _displayProvider->getGFX();
+}
+
+// Get display width in pixels
 uint16_t DisplayRenderTarget::getScreenWidth() const
 {
-    if (_displayProvider)
-    {
-        return _displayProvider->width();
-    }
-    return 0;
+    return _displayProvider->width();
 }
 
-// Get display height (similar to M1Shield::getScreenHeight())
+// Get display height in pixels
 uint16_t DisplayRenderTarget::getScreenHeight() const
 {
-    if (_displayProvider)
-    {
-        return _displayProvider->height();
-    }
-    return 0;
+    return _displayProvider->height();
 }
 
-// Check if display is small (similar to Screen::isSmallDisplay())
-bool DisplayRenderTarget::isSmallDisplay() const
+// Convert a color into the panel's format
+uint16_t DisplayRenderTarget::convertColor(uint16_t color)
 {
-    return getScreenHeight() <= 128;
+    return _displayProvider->convertColor(color);
 }
 
-// Get GFX reference (similar to M1Shield::getGFX())
-Adafruit_GFX &DisplayRenderTarget::getGFX() const
+// Push the framebuffer to the panel
+bool DisplayRenderTarget::display()
 {
-    if (_displayProvider)
-    {
-        return _displayProvider->getGFX();
-    }
-    
-    // This should not happen if used correctly, but we need to return something
-    // In a real implementation, you might want to throw an exception or return a null object
-    static Adafruit_GFX *nullGfx = nullptr; // This will cause a crash if accessed - intentional for debugging
-    return *nullGfx;
-}
-
-// Convert color (similar to M1Shield::convertColor())
-uint16_t DisplayRenderTarget::convertColor(uint16_t color) const
-{
-    if (_displayProvider)
-    {
-        return _displayProvider->convertColor(color);
-    }
-    return color; // Return unchanged if no provider
-}
-
-// Update display (similar to M1Shield::display())
-bool DisplayRenderTarget::display() const
-{
-    if (_displayProvider)
-    {
-        return _displayProvider->display();
-    }
-    return false;
-}
-
-// Check if display is initialized (similar to M1Shield::isDisplayInitialized())
-bool DisplayRenderTarget::isDisplayInitialized() const
-{
-    return _displayProvider != nullptr;
+    return _displayProvider->display();
 }

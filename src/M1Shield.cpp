@@ -100,11 +100,17 @@ M1ShieldClass::~M1ShieldClass()
     }
 }
 
-// Initialize M1Shield with display provider and configure pins
-bool M1ShieldClass::begin(DisplayProvider &provider)
+// Initialize the shield hardware that does not depend on a display.
+//
+// This no-argument overload is the library's standard initialization entry
+// point. It is always safe to call, and shared setup added here in future
+// releases reaches existing sketches without changing their call sites -
+// which is why it exists even when its body is trivial.
+//
+// It deliberately does not touch the display; use begin(DisplayProvider &)
+// for that. begin(DisplayProvider &) calls this first.
+bool M1ShieldClass::begin()
 {
-    _displayProvider = &provider;
-
     pinMode(PIN_ACTIVE_LED, OUTPUT);
     _inactive();
 
@@ -125,6 +131,15 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
     pinMode(PIN_JOYSTICK_Y, INPUT);
 
     pinMode(PIN_BUZZER, OUTPUT);
+
+    return true;
+}
+
+// Initialize M1Shield with display provider and configure pins
+bool M1ShieldClass::begin(DisplayProvider &provider)
+{
+    // Shared, display-independent initialization
+    begin();
 
     // Initialize display with error handling
     // Manual Reset Sequence
@@ -148,6 +163,8 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
         return false;
     }
 
+    _displayProvider = &provider;
+
     // Initialize display based on the selected type
     _screenWidth = provider.width();
     _screenHeight = provider.height();
@@ -159,7 +176,7 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
         delete _displayTarget;
     }
     
-    _displayTarget = new DisplayRenderTarget(&provider);
+    _displayTarget = new DisplayRenderTarget(provider);
     if (_displayTarget && _renderManager.addRenderTarget(_displayTarget))
     {
         if (_logger)
@@ -206,9 +223,17 @@ bool M1ShieldClass::isDisplayInitialized() const
     return (_displayProvider != nullptr && _screenWidth > 0 && _screenHeight > 0);
 }
 
-// Get reference to the Adafruit_GFX display object
+// Get reference to the Adafruit_GFX display object.
+// Drawing goes through the primary render target; the provider is only used
+// before begin() has registered one.
 Adafruit_GFX &M1ShieldClass::getGFX()
 {
+    RenderTarget *target = _renderManager.getPrimaryRenderTarget();
+    if (target)
+    {
+        return target->getGFX();
+    }
+
     if (!_displayProvider)
     {
         if (_logger)
@@ -223,13 +248,15 @@ Adafruit_GFX &M1ShieldClass::getGFX()
 // Get display screen width in pixels
 uint16_t M1ShieldClass::getScreenWidth() const
 {
-    return _screenWidth;
+    RenderTarget *target = _renderManager.getPrimaryRenderTarget();
+    return target ? target->getScreenWidth() : _screenWidth;
 }
 
 // Get display screen height in pixels
 uint16_t M1ShieldClass::getScreenHeight() const
 {
-    return _screenHeight;
+    RenderTarget *target = _renderManager.getPrimaryRenderTarget();
+    return target ? target->getScreenHeight() : _screenHeight;
 }
 
 // Get reference to the display provider
@@ -258,12 +285,13 @@ ILogger *M1ShieldClass::getLogger() const
     return _logger;
 }
 
-// Update display with current frame buffer contents
+// Update display with current frame buffer contents.
+// Pushes every enabled render target, not just the panel.
 bool M1ShieldClass::display()
 {
-    if (_displayProvider)
+    if (_renderManager.getRenderTargetCount() > 0)
     {
-        bool result = _displayProvider->display();
+        bool result = _renderManager.displayAll();
         if (!result && _logger)
         {
             _logger->warnF(F("M1Shield: Display update failed"));
@@ -281,6 +309,11 @@ bool M1ShieldClass::display()
 // Convert color from RGB to display format
 uint16_t M1ShieldClass::convertColor(uint16_t color)
 {
+    RenderTarget *target = _renderManager.getPrimaryRenderTarget();
+    if (target)
+    {
+        return target->convertColor(color);
+    }
     if (_displayProvider)
     {
         return _displayProvider->convertColor(color);
@@ -827,6 +860,11 @@ void M1ShieldClass::loop()
         }
     }
 
-    // Execute a loop within the screen in case it needs it
-    _screen->loop();
+    // Execute a loop within the screen in case it needs it.
+    // setScreen() above may have failed to open the new screen and left
+    // _screen as nullptr, so re-check before dispatching.
+    if (_screen)
+    {
+        _screen->loop();
+    }
 }

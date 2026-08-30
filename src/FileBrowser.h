@@ -1,8 +1,5 @@
 /*
- * FileBrowser.h - MenuScreen for b    String _getParentDirectory(const String& path); // Get parent directory path
-    void _parseFilePath(const String& filePath, String& directory, String& filename); // Parse file path into directory and filename components
-    bool _isFilePath(const String& path);           // Check if path contains a filename (has extension)
-    bool _isValidFile(const String& filename);     // Check if file should be shownsing SD card directories and files
+ * FileBrowser.h - MenuScreen for browsing SD card directories and files
  * Authors: Marcel Erz (RetroStack)
  * Released under the MIT License.
  */

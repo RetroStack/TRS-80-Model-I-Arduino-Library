@@ -243,7 +243,7 @@ void setup() {
   Model1.activateTestSignal();
 
   // Read from address 0x0000 (ROM)
-  uint8_t data = Model1.readByte(0x0000);
+  uint8_t data = Model1.readMemory(0x0000);
   Serial.print("ROM byte 0: 0x");
   Serial.println(data, HEX);
 

@@ -36,8 +36,8 @@ void setup() {
     Model1.begin();
     Model1.activateTestSignal();
 
-    uint8_t data = Model1.readByte(0x0000);  // Read ROM
-    Model1.writeByte(0x3C00, 0x41);          // Write to video RAM
+    uint8_t data = Model1.readMemory(0x0000);  // Read ROM
+    Model1.writeMemory(0x3C00, 0x41);          // Write to video RAM
 
     Model1.deactivateTestSignal();
 }

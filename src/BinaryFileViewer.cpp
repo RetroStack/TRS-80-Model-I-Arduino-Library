@@ -75,6 +75,9 @@ bool BinaryFileViewer::_loadCurrentPage()
         _pageBuffer = (uint8_t *)malloc(_bufferSize);
         if (!_pageBuffer)
         {
+            // Reset the size too - otherwise the guard above is skipped on the
+            // next call and _file.read() is handed a null destination.
+            _bufferSize = 0;
             return false;
         }
     }
