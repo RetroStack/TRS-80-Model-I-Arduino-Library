@@ -6,13 +6,16 @@
 CXX      ?= g++
 CXXFLAGS ?= -std=c++11 -Wall -Wextra -I ../../src -I stub
 
-TESTS := test_RenderManager
+TESTS := test_RenderManager test_utils
 
 .PHONY: all clean
 all: $(TESTS)
 	@for t in $(TESTS); do echo "--- $$t"; ./$$t || exit 1; done
 
 test_RenderManager: test_RenderManager.cpp ../../src/RenderManager.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+test_utils: test_utils.cpp ../../src/utils.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 clean:

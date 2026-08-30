@@ -79,6 +79,7 @@ void asmWait(uint16_t wait)
 {
   if (wait == 0)
     return;
+#ifdef __AVR__
   __asm__ volatile(
       " mov r16,%0\n" // set wait countdown
       "1: nop\n"      // noop
@@ -88,6 +89,9 @@ void asmWait(uint16_t wait)
       : "r"(wait) // input operands if any, here
       : "r16"     // clobbered regs here
   );
+#else
+  (void)wait; // Host builds have no cycle-accurate delay to emulate
+#endif
 }
 
 /**
@@ -155,6 +159,7 @@ void asmWait(uint16_t wait)
  */
 void asmWait(uint16_t outerLoopCount, uint16_t innerLoopCount)
 {
+#ifdef __AVR__
   asm volatile(
       "outer_loop_start: \n\t"                   // Outer loop start label
       "movw r24, %A0 \n\t"                       // Copy outer loop count to r24:r25
@@ -169,4 +174,131 @@ void asmWait(uint16_t outerLoopCount, uint16_t innerLoopCount)
       : "r"(outerLoopCount), "r"(innerLoopCount) // Inputs
       : "r24", "r25", "r26", "r27"               // Clobbers
   );
+#else
+  (void)outerLoopCount;
+  (void)innerLoopCount;
+#endif
+}
+
+// Length of the chunk starting at `offset` within a `total`-byte range.
+// Returns 0 once the range is exhausted. `offset` is 32-bit so that a caller
+// stepping it by `chunkSize` cannot wrap at 65536 and restart the range.
+uint16_t chunkLength(uint32_t offset, uint16_t total, uint16_t chunkSize)
+{
+  if (chunkSize == 0 || offset >= total)
+  {
+    return 0;
+  }
+
+  uint32_t remaining = (uint32_t)total - offset;
+  return (remaining < chunkSize) ? (uint16_t)remaining : chunkSize;
+}
+
+// Collapse "." and ".." segments and squeeze repeated separators. The result
+// always starts with "/" and never ends with one (except for root itself). A
+// ".." that would climb above root is clamped there rather than escaping.
+bool normalizePath(const char *path, char *out, size_t outSize)
+{
+  if (!path || !out || outSize < 2)
+  {
+    return false;
+  }
+
+  size_t len = 0;
+  out[0] = '\0';
+
+  const char *p = path;
+  while (*p)
+  {
+    while (*p == '/')
+    {
+      p++;
+    }
+    if (!*p)
+    {
+      break;
+    }
+
+    const char *segment = p;
+    while (*p && *p != '/')
+    {
+      p++;
+    }
+    size_t segmentLength = (size_t)(p - segment);
+
+    if (segmentLength == 1 && segment[0] == '.')
+    {
+      continue;
+    }
+
+    if (segmentLength == 2 && segment[0] == '.' && segment[1] == '.')
+    {
+      while (len > 0 && out[len - 1] != '/')
+      {
+        len--;
+      }
+      if (len > 0)
+      {
+        len--; // Drop the separator that preceded the removed segment
+      }
+      out[len] = '\0';
+      continue;
+    }
+
+    if (len + segmentLength + 2 > outSize)
+    {
+      return false;
+    }
+
+    out[len++] = '/';
+    for (size_t i = 0; i < segmentLength; i++)
+    {
+      out[len++] = segment[i];
+    }
+    out[len] = '\0';
+  }
+
+  if (len == 0)
+  {
+    out[0] = '/';
+    out[1] = '\0';
+  }
+
+  return true;
+}
+
+// Containment test comparing whole path components, so "/logs" does not
+// contain "/logsecret". Both arguments must already be normalized.
+bool pathIsWithin(const char *path, const char *root)
+{
+  if (!path || !root)
+  {
+    return false;
+  }
+
+  if (root[0] == '/' && root[1] == '\0')
+  {
+    return path[0] == '/'; // Root contains every absolute path
+  }
+
+  size_t rootLength = 0;
+  while (root[rootLength])
+  {
+    rootLength++;
+  }
+  while (rootLength > 1 && root[rootLength - 1] == '/')
+  {
+    rootLength--;
+  }
+
+  for (size_t i = 0; i < rootLength; i++)
+  {
+    if (path[i] != root[i])
+    {
+      return false;
+    }
+  }
+
+  // The match must land on a component boundary, not mid-name.
+  return path[rootLength] == '\0' || path[rootLength] == '/';
 }
