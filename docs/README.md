@@ -40,10 +40,6 @@ This library is ideal for:
 
 The library is organized into several key areas:
 
-## Library Architecture
-
-The library is organized into several key areas:
-
 ### Core TRS-80 Interface
 
 - [**Model1**](Model1.md) - High-level interface for memory access, bus control, and system management. Start here for most applications.
@@ -91,7 +87,7 @@ A complete screen management system for building interactive applications:
 Comprehensive SD card file operations with integrated browsing and viewing capabilities:
 
 - [**FileBrowser**](FileBrowser.md) - SD card file and directory browser with automatic file type detection and viewer selection.
-- [**TextFileViewer**](TextFileViewer.md) - Scrollable text file viewer with syntax highlighting and search capabilities for displaying SD card text files.
+- [**TextFileViewer**](TextFileViewer.md) - Paged text file viewer with horizontal scrolling and optional auto-paging for displaying SD card text files.
 - [**BinaryFileViewer**](BinaryFileViewer.md) - Hexadecimal binary file viewer with ASCII representation for examining SD card binary files.
 
 ## Quick Start Guide

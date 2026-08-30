@@ -88,7 +88,7 @@ protected:
 
 **[Complete Examples Guide](examples/)** - Comprehensive examples with progressive learning paths
 
-The examples folder contains over 40 examples organized by functionality:
+The examples folder contains 35 examples organized by functionality:
 
 - **[M1Shield Examples](examples/M1Shield/)** - Hardware platform and display examples
 - **[Model1 Examples](examples/Model1/)** - TRS-80 hardware interface (ROM, RAM, Video, Keyboard, etc.)

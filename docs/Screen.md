@@ -695,3 +695,24 @@ void loop() {
     M1Shield.loop();
 }
 ```
+
+## Logging
+
+```cpp
+void setLogger(ILogger &logger);  // Attach a logger
+ILogger *getLogger() const;       // The attached logger, or nullptr
+```
+
+With no logger attached, diagnostics are discarded silently -- this is the
+first thing to set up when something is not behaving. Any `ILogger` works:
+`SerialLogger`, `SDCardLogger`, `LoggerScreen`, or a `CompositeLogger` fanning
+out to several at once.
+
+```cpp
+SerialLogger logger;
+
+void setup() {
+    Serial.begin(115200);
+    M1Shield.setLogger(logger);
+}
+```

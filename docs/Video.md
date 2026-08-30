@@ -420,3 +420,21 @@ void loop() {
     delay(2000);
 }
 ```
+
+## Capturing the Screen to SD Card
+
+```cpp
+bool captureToSD(const char *filename, bool useLocalCharacterSet = true);
+```
+
+Writes the current viewport to a file, one row per line. With
+`useLocalCharacterSet` true the Model 1 character codes are translated to
+ASCII; pass `false` to write the raw bytes instead. Returns `false` if the card
+cannot be initialised or the file cannot be written.
+
+```cpp
+Model1.activateTestSignal();
+Video.captureToSD("screen.txt");        // Readable text
+Video.captureToSD("screen.bin", false); // Raw Model 1 bytes
+Model1.deactivateTestSignal();
+```

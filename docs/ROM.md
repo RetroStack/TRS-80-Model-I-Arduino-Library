@@ -171,3 +171,26 @@ void setup() {
 void loop() {
 }
 ```
+
+## Dumping ROMs to SD Card
+
+```cpp
+bool dumpROMToSD(uint8_t rom, const char *filename);  // One ROM, as raw binary
+bool dumpAllROMsToSD(const char *filename);           // All ROMs, concatenated
+```
+
+Both require the TEST* signal to be active, and both return `false` if the card
+cannot be initialised, the file cannot be opened, or a write is short. The card
+select pin comes from `M1Shield.getSDCardSelectPin()`.
+
+```cpp
+Model1.activateTestSignal();
+
+if (!ROM.dumpROMToSD(0, "rom0.bin")) {
+    logger.errF(F("ROM 0 dump failed"));
+}
+
+ROM.dumpAllROMsToSD("roms.bin");
+
+Model1.deactivateTestSignal();
+```
