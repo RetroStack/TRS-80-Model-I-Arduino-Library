@@ -12,67 +12,40 @@
 class ILogger : public Print
 {
 public:
-    virtual void info(const char *fmt, ...) = 0;  // Log informational message with format string
-    virtual void warn(const char *fmt, ...) = 0;  // Log warning message with format string
-    virtual void err(const char *fmt, ...) = 0;   // Log error message with format string
-    virtual void debug(const char *fmt, ...) = 0; // Log debug message with format string
+    // The format attribute makes the compiler check these call sites. Index 2 is
+    // the format and 3 the first variadic argument, because `this` is index 1.
+    virtual void info(const char *fmt, ...) __attribute__((format(printf, 2, 3))) = 0;  // Log informational message with format string
+    virtual void warn(const char *fmt, ...) __attribute__((format(printf, 2, 3))) = 0;  // Log warning message with format string
+    virtual void err(const char *fmt, ...) __attribute__((format(printf, 2, 3))) = 0;   // Log error message with format string
+    virtual void debug(const char *fmt, ...) __attribute__((format(printf, 2, 3))) = 0; // Log debug message with format string
 
-    // String versions with optional format arguments
+    // String versions. These take the message itself, never a format string: a
+    // String is usually built at runtime, and a runtime format string turns any
+    // stray '%' in it -- an SD filename, a line read from a file -- into a
+    // directive that consumes arguments that were never passed.
 
     // Log informational message from Arduino String object
-    void info(const String &fmt, ...)
+    void info(const String &message)
     {
-        va_list args;
-        va_start(args, fmt);
-
-        char formatted[256]; // Fixed size buffer to avoid VLA
-        vsnprintf(formatted, sizeof(formatted), fmt.c_str(), args);
-        formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
-        info("%s", formatted);
-
-        va_end(args);
+        info("%s", message.c_str());
     }
 
     // Log warning message from Arduino String object
-    void warn(const String &fmt, ...)
+    void warn(const String &message)
     {
-        va_list args;
-        va_start(args, fmt);
-
-        char formatted[256]; // Fixed size buffer to avoid VLA
-        vsnprintf(formatted, sizeof(formatted), fmt.c_str(), args);
-        formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
-        warn("%s", formatted);
-
-        va_end(args);
+        warn("%s", message.c_str());
     }
 
     // Log error message from Arduino String object
-    void err(const String &fmt, ...)
+    void err(const String &message)
     {
-        va_list args;
-        va_start(args, fmt);
-
-        char formatted[256]; // Fixed size buffer to avoid VLA
-        vsnprintf(formatted, sizeof(formatted), fmt.c_str(), args);
-        formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
-        err("%s", formatted);
-
-        va_end(args);
+        err("%s", message.c_str());
     }
 
     // Log debug message from Arduino String object
-    void debug(const String &fmt, ...)
+    void debug(const String &message)
     {
-        va_list args;
-        va_start(args, fmt);
-
-        char formatted[256]; // Fixed size buffer to avoid VLA
-        vsnprintf(formatted, sizeof(formatted), fmt.c_str(), args);
-        formatted[sizeof(formatted) - 1] = '\0'; // Ensure null termination
-        debug("%s", formatted);
-
-        va_end(args);
+        debug("%s", message.c_str());
     }
 
     // F() macro versions with format string support (more memory efficient)

@@ -25,10 +25,10 @@ public:
 
     bool begin(); // Initialize SD card and log file
 
-    void info(const char *fmt, ...);  // Log informational message to SD card
-    void warn(const char *fmt, ...);  // Log warning message to SD card
-    void err(const char *fmt, ...);   // Log error message to SD card
-    void debug(const char *fmt, ...); // Log debug message to SD card
+    void info(const char *fmt, ...) __attribute__((format(printf, 2, 3)));  // Log informational message to SD card
+    void warn(const char *fmt, ...) __attribute__((format(printf, 2, 3)));  // Log warning message to SD card
+    void err(const char *fmt, ...) __attribute__((format(printf, 2, 3)));   // Log error message to SD card
+    void debug(const char *fmt, ...) __attribute__((format(printf, 2, 3))); // Log debug message to SD card
 
     using ILogger::debug;
     using ILogger::err;

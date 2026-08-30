@@ -67,10 +67,10 @@ public:
     uint16_t getLogBufferCount() const;   // Get number of entries currently in buffer
 
     // Logging interface (compatible with ILogger but not inheriting)
-    void info(const char *fmt, ...);
-    void warn(const char *fmt, ...);
-    void err(const char *fmt, ...);
-    void debug(const char *fmt, ...);
+    void info(const char *fmt, ...) __attribute__((format(printf, 2, 3)));
+    void warn(const char *fmt, ...) __attribute__((format(printf, 2, 3)));
+    void err(const char *fmt, ...) __attribute__((format(printf, 2, 3)));
+    void debug(const char *fmt, ...) __attribute__((format(printf, 2, 3)));
 
     ILogger *asLogger(); // Get an ILogger adapter for this LoggerScreen
 

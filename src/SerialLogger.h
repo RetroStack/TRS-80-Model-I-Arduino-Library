@@ -18,10 +18,10 @@ private:
     void _log(const char *fmt, va_list arguments); // Internal logging implementation with variable arguments
 
 public:
-    void info(const char *fmt, ...);  // Log informational message to serial output
-    void warn(const char *fmt, ...);  // Log warning message to serial output
-    void err(const char *fmt, ...);   // Log error message to serial output
-    void debug(const char *fmt, ...); // Log debug message to serial output
+    void info(const char *fmt, ...) __attribute__((format(printf, 2, 3)));  // Log informational message to serial output
+    void warn(const char *fmt, ...) __attribute__((format(printf, 2, 3)));  // Log warning message to serial output
+    void err(const char *fmt, ...) __attribute__((format(printf, 2, 3)));   // Log error message to serial output
+    void debug(const char *fmt, ...) __attribute__((format(printf, 2, 3))); // Log debug message to serial output
 
     using ILogger::debug;
     using ILogger::err;
