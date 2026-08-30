@@ -203,10 +203,28 @@ void ConsoleScreen::_newLine()
     // Check if we've reached the bottom of the screen
     if (_currentY + _lineHeight >= _contentHeight)
     {
-        if (!_handlePaging())
+        // _handlePaging() can clear the console or draw the paging prompt, and
+        // both push the display. Close the bulk transaction around it so a push
+        // never happens while one is open - Adafruit_SPITFT does not nest them.
+        Adafruit_GFX &gfx = M1Shield.getGFX();
+        const bool bulk = _inBulkWrite;
+        if (bulk)
         {
-            // If _handlePaging() returns false, we're waiting for user action
-            // Don't advance cursor further - stay at current position
+            gfx.endWrite();
+        }
+
+        const bool advanced = _handlePaging();
+
+        if (bulk)
+        {
+            gfx.startWrite();
+            gfx.setTextColor(M1Shield.convertColor(_textColor), M1Shield.convertColor(_textBgColor));
+            gfx.setTextSize(_textSize);
+        }
+
+        if (!advanced)
+        {
+            // Waiting for user action - don't advance cursor further
             _currentY -= _lineHeight; // Revert the Y advance
         }
     }
@@ -243,11 +261,22 @@ size_t ConsoleScreen::write(uint8_t c)
     // Block execution if we're waiting for paging action
     _waitForPagingIfNeeded();
 
-    _processChar((char)c);
-    if (isActive())
-    {
-        M1Shield.display(); // Push changes to display
-    }
+    // Each target replays the character from the same starting cursor.
+    // renderAll visits the primary last, so its post-write cursor survives.
+    const uint16_t startX = _currentX;
+    const uint16_t startY = _currentY;
+
+    M1Shield.renderAll([this, c, startX, startY]
+                       {
+                           _currentX = startX;
+                           _currentY = startY;
+                           _processChar((char)c);
+                           if (isActive())
+                           {
+                               M1Shield.display();
+                           }
+                       });
+
     return 1; // Always successful since _processChar handles all characters
 }
 
@@ -260,39 +289,44 @@ size_t ConsoleScreen::write(const uint8_t *buffer, size_t size)
     // Block execution if we're waiting for paging action
     _waitForPagingIfNeeded();
 
-    Adafruit_GFX &gfx = M1Shield.getGFX();
+    // Each target replays the whole buffer from the same starting cursor.
+    // renderAll visits the primary last, so its post-write cursor survives.
+    const uint16_t startX = _currentX;
+    const uint16_t startY = _currentY;
 
-    // Start bulk write transaction for better SPI performance
-    gfx.startWrite();
+    M1Shield.renderAll([this, buffer, size, startX, startY]
+                       {
+                           _currentX = startX;
+                           _currentY = startY;
 
-    // Set text properties once for the entire bulk operation
-    gfx.setTextColor(M1Shield.convertColor(_textColor), M1Shield.convertColor(_textBgColor));
-    gfx.setTextSize(_textSize);
+                           // Resolved per target - never hoist this out
+                           Adafruit_GFX &gfx = M1Shield.getGFX();
 
-    // Flag that we're in a bulk write operation
-    _inBulkWrite = true;
+                           // Start bulk write transaction for better SPI performance
+                           gfx.startWrite();
 
-    size_t n = 0;
-    while (size--)
-    {
-        // Process character without individual display updates
-        _processChar((char)*buffer++);
-        n++;
-    }
+                           // Set text properties once for the entire bulk operation
+                           gfx.setTextColor(M1Shield.convertColor(_textColor), M1Shield.convertColor(_textBgColor));
+                           gfx.setTextSize(_textSize);
 
-    // Clear bulk write flag
-    _inBulkWrite = false;
+                           _inBulkWrite = true;
 
-    // End bulk write transaction
-    gfx.endWrite();
+                           const uint8_t *cursor = buffer;
+                           for (size_t i = 0; i < size; i++)
+                           {
+                               // Process character without individual display updates
+                               _processChar((char)*cursor++);
+                           }
 
-    // Single display update after processing entire buffer
-    if (n > 0)
-    {
-        M1Shield.display();
-    }
+                           _inBulkWrite = false;
 
-    return n;
+                           gfx.endWrite();
+
+                           // Single display update after processing entire buffer
+                           M1Shield.display();
+                       });
+
+    return size;
 }
 
 // Console Control Methods
@@ -300,21 +334,24 @@ size_t ConsoleScreen::write(const uint8_t *buffer, size_t size)
 // Clear screen and reset cursor to top-left
 void ConsoleScreen::cls()
 {
-    _updateDimensions();
-
     if (!isActive())
         return;
 
-    Adafruit_GFX &gfx = M1Shield.getGFX();
+    M1Shield.renderAll([this]
+                       {
+                           // Dimensions and colour are per-target
+                           _updateDimensions();
 
-    // Clear console area
-    gfx.fillRect(_contentLeft, _contentTop, _contentWidth, _contentHeight, M1Shield.convertColor(_consoleBgColor));
+                           Adafruit_GFX &gfx = M1Shield.getGFX();
+                           gfx.fillRect(_contentLeft, _contentTop, _contentWidth, _contentHeight,
+                                        M1Shield.convertColor(_consoleBgColor));
 
-    // Reset cursor to top-left
-    _currentX = 0;
-    _currentY = 0;
+                           // Reset cursor to top-left
+                           _currentX = 0;
+                           _currentY = 0;
 
-    M1Shield.display(); // Push changes to display
+                           M1Shield.display();
+                       });
 }
 
 void ConsoleScreen::refresh()
@@ -444,7 +481,6 @@ void ConsoleScreen::_waitForPagingIfNeeded()
     if (_showPagingPrompt)
     {
         _showPagingMessage();
-        M1Shield.display();
     }
 
     // Block execution until paging wait is resolved
@@ -458,7 +494,6 @@ void ConsoleScreen::_waitForPagingIfNeeded()
                 // LEFT button pauses the timeout
                 _pagingPaused = true;
                 _showPagingMessage(); // Update the message to show paused state
-                M1Shield.display();
             }
             else if (M1Shield.wasRightPressed())
             {
@@ -539,7 +574,7 @@ bool ConsoleScreen::_shouldEndPagingWait()
 }
 
 // Show paging message in footer area (similar to ContentScreen alerts)
-void ConsoleScreen::_showPagingMessage()
+void ConsoleScreen::_drawPagingMessage()
 {
     if (!isActive())
         return;
@@ -625,9 +660,16 @@ void ConsoleScreen::_showPagingMessage()
 
     gfx.setCursor(xPos, textY);
     gfx.print(message);
+}
 
-    // Display the update
-    M1Shield.display();
+// Show the paging prompt on every enabled render target
+void ConsoleScreen::_showPagingMessage()
+{
+    M1Shield.renderAll([this]
+                       {
+                           _drawPagingMessage();
+                           M1Shield.display();
+                       });
 }
 
 // Clear paging message and restore normal footer
