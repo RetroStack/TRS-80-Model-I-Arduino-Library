@@ -37,7 +37,7 @@ public:
     virtual bool display() = 0;
 
     // Single home for the small-display rule, shared by every target.
-    bool isSmallDisplay() const { return getScreenHeight() <= 128; }
+    bool isSmallDisplay() const { return getScreenHeight() <= 128 || getScreenWidth() <= 128; }
 };
 
 #endif /* RENDER_TARGET_H */

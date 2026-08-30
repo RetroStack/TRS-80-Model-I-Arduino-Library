@@ -63,7 +63,7 @@ protected:
 public:
     Screen();                    // Default constructor initializes screen in inactive state
     virtual ~Screen();           // Virtual destructor ensures proper cleanup of derived classes
-    bool isSmallDisplay() const; // Check if the current display is considered small (height <= 128 pixels)
+    bool isSmallDisplay() const; // Check if the current display is considered small (either dimension <= 128 pixels)
 
     void setLogger(ILogger &logger); // Set logger for debugging output
     ILogger *getLogger() const;      // Get logger instance

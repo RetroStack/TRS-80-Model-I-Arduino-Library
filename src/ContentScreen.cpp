@@ -238,53 +238,18 @@ void ContentScreen::_drawHeader()
     if (title != nullptr && title[0] != '\0')
     {
         gfx.setTextColor(M1Shield.convertColor(HEADER_COLOR_FG));
-        char *truncatedTitle = nullptr;
 
         if (isSmallDisplay())
         {
-            // Truncate title for small display if needed
-            truncatedTitle = _truncateText(title, screenWidth - 4, TEXT_SIZE_1_WIDTH); // 4 pixel margin
-
             gfx.setTextSize(1);
-            if (truncatedTitle != nullptr)
-            {
-                // Calculate centered position for truncated title text
-                uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(truncatedTitle);
-                // Center vertically in the 10-pixel header (10 - 8) / 2 = 1 pixel from top
-                gfx.setCursor((screenWidth - textWidth) / 2, top + 1);
-                gfx.print(truncatedTitle);
-                free(truncatedTitle);
-            }
-            else
-            {
-                // Fallback: display original title if truncation failed
-                uint16_t textWidth = TEXT_SIZE_1_WIDTH * strlen(title);
-                gfx.setCursor((screenWidth - textWidth) / 2, top + 1);
-                gfx.print(title);
-            }
+            // Center vertically in the 10-pixel header (10 - 8) / 2 = 1 pixel from top
+            _drawCenteredText(title, 2, top + 1, screenWidth - 4, TEXT_SIZE_1_WIDTH);
         }
         else
         {
-            // Truncate title for regular display if needed
-            truncatedTitle = _truncateText(title, screenWidth - 4, TEXT_SIZE_3_WIDTH); // 4 pixel margin
-
             gfx.setTextSize(3);
-            if (truncatedTitle != nullptr)
-            {
-                // Calculate centered position for truncated title text
-                uint16_t textWidth = TEXT_SIZE_3_WIDTH * strlen(truncatedTitle);
-                // Center vertically in the 34-pixel header (34 - 24) / 2 = 5 pixels from top
-                gfx.setCursor((screenWidth - textWidth) / 2, top + 5);
-                gfx.print(truncatedTitle);
-                free(truncatedTitle);
-            }
-            else
-            {
-                // Fallback: display original title if truncation failed
-                uint16_t textWidth = TEXT_SIZE_3_WIDTH * strlen(title);
-                gfx.setCursor((screenWidth - textWidth) / 2, top + 5);
-                gfx.print(title);
-            }
+            // Center vertically in the 34-pixel header (34 - 24) / 2 = 5 pixels from top
+            _drawCenteredText(title, 2, top + 5, screenWidth - 4, TEXT_SIZE_3_WIDTH);
         }
     }
 }
@@ -877,50 +842,109 @@ void ContentScreen::_refreshFooter()
                        });
 }
 
+// Height of the band the overlays draw into
+uint16_t ContentScreen::_getOverlayHeight() const
+{
+    uint16_t footerHeight = _getFooterHeight();
+    if (footerHeight > 0)
+    {
+        return footerHeight;
+    }
+
+    // Small panels give the footer no height at all, which is why the overlays
+    // used to bail out entirely. Borrow one line from the bottom of the content
+    // area instead, so a message still reaches the user.
+    uint16_t band = (TEXT_SIZE_1_HALF_HEIGHT * 2) + 4;
+    uint16_t contentHeight = _getContentHeight();
+    return (band > contentHeight) ? contentHeight : band;
+}
+
+// Top of the band the overlays draw into
+uint16_t ContentScreen::_getOverlayTop() const
+{
+    if (_getFooterHeight() > 0)
+    {
+        return _getFooterTop();
+    }
+
+    return _getContentTop() + _getContentHeight() - _getOverlayHeight();
+}
+
+// Text size the overlay band can carry
+uint8_t ContentScreen::_getOverlayTextSize() const
+{
+    return isSmallDisplay() ? 1 : 2;
+}
+
+// Draw text centered in a region, truncated and then clipped to it
+void ContentScreen::_drawCenteredText(const char *text, uint16_t x0, uint16_t y,
+                                      uint16_t availableWidth, uint8_t charWidth)
+{
+    if (text == nullptr || charWidth == 0)
+    {
+        return;
+    }
+
+    uint16_t maxChars = availableWidth / charWidth;
+    if (maxChars == 0)
+    {
+        return;
+    }
+
+    char *truncated = _truncateText(text, availableWidth, charWidth);
+    const char *toDraw = (truncated != nullptr) ? truncated : text;
+
+    // _truncateText returns null when it cannot allocate, and also when nothing
+    // meaningful fits. Callers used to fall back to printing the original
+    // string in full, which overran the region and painted over its neighbours.
+    uint16_t length = strlen(toDraw);
+    if (length > maxChars)
+    {
+        length = maxChars;
+    }
+
+    uint16_t textWidth = length * charWidth;
+    uint16_t xPos = x0 + ((availableWidth > textWidth) ? (availableWidth - textWidth) / 2 : 0);
+
+    Adafruit_GFX &gfx = M1Shield.getGFX();
+    gfx.setCursor(xPos, y);
+    for (uint16_t i = 0; i < length; i++)
+    {
+        gfx.write(toDraw[i]);
+    }
+
+    if (truncated != nullptr)
+    {
+        free(truncated);
+    }
+}
+
 // Draw the notification
 void ContentScreen::_drawNotification()
 {
-    if (!isActive() || !_notificationActive || _notificationText == nullptr || isSmallDisplay())
+    if (!isActive() || !_notificationActive || _notificationText == nullptr)
         return;
 
     uint16_t screenWidth = M1Shield.getScreenWidth();
-    uint16_t top = _getFooterTop();
-    uint16_t height = _getFooterHeight();
+    uint16_t top = _getOverlayTop();
+    uint16_t height = _getOverlayHeight();
+    if (height == 0)
+        return;
+
+    uint8_t textSize = _getOverlayTextSize();
+    uint8_t charWidth = (textSize == 1) ? TEXT_SIZE_1_WIDTH : TEXT_SIZE_2_WIDTH;
+    uint8_t halfHeight = (textSize == 1) ? TEXT_SIZE_1_HALF_HEIGHT : TEXT_SIZE_2_HALF_HEIGHT;
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
     // Draw notification background using custom color
     gfx.fillRect(0, top, screenWidth, height, M1Shield.convertColor(_notificationBgColor));
 
-    // Draw notification text (black on yellow) - using text size 2 for better visibility
     gfx.setTextColor(M1Shield.convertColor(NOTIFICATION_COLOR_FG));
-    gfx.setTextSize(2);
+    gfx.setTextSize(textSize);
 
-    // Truncate notification text if needed (leave 4 pixel margin)
-    char *truncatedText = _truncateText(_notificationText, screenWidth - 4, TEXT_SIZE_2_WIDTH);
-    if (truncatedText != nullptr)
-    {
-        // Center text horizontally
-        uint16_t textWidth = TEXT_SIZE_2_WIDTH * strlen(truncatedText);
-        uint16_t xPos = (screenWidth - textWidth) / 2;
-
-        // Center text vertically in footer area
-        uint16_t yPos = top + (height - 16) / 2; // 16 is approximate height of size-2 text
-
-        gfx.setCursor(xPos, yPos);
-        gfx.print(truncatedText);
-        free(truncatedText);
-    }
-    else
-    {
-        // Fallback: display original notification text if truncation failed
-        uint16_t textWidth = TEXT_SIZE_2_WIDTH * strlen(_notificationText);
-        uint16_t xPos = (screenWidth - textWidth) / 2;
-        uint16_t yPos = top + (height - 16) / 2;
-
-        gfx.setCursor(xPos, yPos);
-        gfx.print(_notificationText);
-    }
+    uint16_t yPos = top + (height / 2) - halfHeight;
+    _drawCenteredText(_notificationText, 2, yPos, screenWidth - 4, charWidth);
 }
 
 // Clear the notification
@@ -944,7 +968,7 @@ void ContentScreen::_clearNotification()
 // Show an alert dialog
 void ContentScreen::alert(const char *text)
 {
-    if (!isActive() || text == nullptr || isSmallDisplay())
+    if (!isActive() || text == nullptr)
         return;
 
     // Clear any existing notification to prevent conflicts
@@ -1020,7 +1044,9 @@ void ContentScreen::alertF(const __FlashStringHelper *text)
 // Show a confirmation dialog
 ConfirmResult ContentScreen::confirm(const char *text, const char *leftText, const char *rightText)
 {
-    if (!isActive() || text == nullptr || isSmallDisplay())
+    // This used to return CONFIRM_LEFT on small panels without ever asking, so
+    // any flow gated on a confirmation silently took the cancel branch.
+    if (!isActive() || text == nullptr)
         return CONFIRM_LEFT; // Default to left/cancel for safety
 
     // Clear any existing notification to prevent conflicts
@@ -1127,12 +1153,14 @@ ConfirmResult ContentScreen::confirmF(const __FlashStringHelper *text, const __F
 // Draw alert dialog
 void ContentScreen::_drawAlert(const char *text)
 {
-    if (!isActive() || text == nullptr || isSmallDisplay())
+    if (!isActive() || text == nullptr)
         return;
 
     uint16_t screenWidth = M1Shield.getScreenWidth();
-    uint16_t top = _getFooterTop();
-    uint16_t height = _getFooterHeight();
+    uint16_t top = _getOverlayTop();
+    uint16_t height = _getOverlayHeight();
+    if (height == 0)
+        return;
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
@@ -1154,25 +1182,8 @@ void ContentScreen::_drawAlert(const char *text)
     uint16_t indicatorWidth = TEXT_SIZE_2_WIDTH;                      // Width of "<" or ">"
     uint16_t availableWidth = screenWidth - (2 * indicatorWidth) - 8; // 8 pixels total margin
 
-    // Truncate main text if needed
-    char *truncatedText = _truncateText(text, availableWidth, TEXT_SIZE_2_WIDTH);
-    if (truncatedText != nullptr)
-    {
-        // Center main text horizontally
-        uint16_t textWidth = TEXT_SIZE_2_WIDTH * strlen(truncatedText);
-        uint16_t xPos = (screenWidth - textWidth) / 2;
-        gfx.setCursor(xPos, textY);
-        gfx.print(truncatedText);
-        free(truncatedText);
-    }
-    else
-    {
-        // Fallback: display original text if truncation failed
-        uint16_t textWidth = TEXT_SIZE_2_WIDTH * strlen(text);
-        uint16_t xPos = (screenWidth - textWidth) / 2;
-        gfx.setCursor(xPos, textY);
-        gfx.print(text);
-    }
+    // Centered between the two indicators, clipped to the space between them
+    _drawCenteredText(text, indicatorWidth + 4, textY, availableWidth, TEXT_SIZE_2_WIDTH);
 
     // Draw right indicator ">" (right-aligned)
     uint16_t rightIndicatorX = screenWidth - TEXT_SIZE_2_WIDTH - 2; // TEXT_SIZE_2_WIDTH for ">" character
@@ -1183,12 +1194,14 @@ void ContentScreen::_drawAlert(const char *text)
 // Draw confirmation dialog
 void ContentScreen::_drawConfirm(const char *text, const char *leftText, const char *rightText)
 {
-    if (!isActive() || text == nullptr || isSmallDisplay())
+    if (!isActive() || text == nullptr)
         return;
 
     uint16_t screenWidth = M1Shield.getScreenWidth();
-    uint16_t top = _getFooterTop();
-    uint16_t height = _getFooterHeight();
+    uint16_t top = _getOverlayTop();
+    uint16_t height = _getOverlayHeight();
+    if (height == 0)
+        return;
 
     Adafruit_GFX &gfx = M1Shield.getGFX();
 
@@ -1230,24 +1243,10 @@ void ContentScreen::_drawConfirm(const char *text, const char *leftText, const c
         gfx.print(leftText);
     }
 
-    // Main message (center-aligned) - truncated if needed
-    char *truncatedText = _truncateText(text, availableWidth, TEXT_SIZE_2_WIDTH);
-    if (truncatedText != nullptr)
-    {
-        uint16_t mainTextWidth = TEXT_SIZE_2_WIDTH * strlen(truncatedText);
-        uint16_t mainTextX = (screenWidth - mainTextWidth) / 2;
-        gfx.setCursor(mainTextX, textY);
-        gfx.print(truncatedText);
-        free(truncatedText);
-    }
-    else
-    {
-        // Fallback: display original text if truncation failed
-        uint16_t mainTextWidth = TEXT_SIZE_2_WIDTH * strlen(text);
-        uint16_t mainTextX = (screenWidth - mainTextWidth) / 2;
-        gfx.setCursor(mainTextX, textY);
-        gfx.print(text);
-    }
+    // Main message, centered in whatever the button labels left over. When that
+    // is nothing, availableWidth is 0 and nothing is drawn -- printing the full
+    // message here used to paint straight over both button labels.
+    _drawCenteredText(text, (screenWidth - availableWidth) / 2, textY, availableWidth, TEXT_SIZE_2_WIDTH);
 
     // Right button text (right-aligned) - when provided, show as indicator
     if (rightText != nullptr && rightText[0] != '\0')

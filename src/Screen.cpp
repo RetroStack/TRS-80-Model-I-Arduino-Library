@@ -84,10 +84,13 @@ void Screen::refresh()
     }
 }
 
-// Check if current display is small (height <= 128 pixels)
+// Check if current display is small (either dimension <= 128 pixels)
 bool Screen::isSmallDisplay() const
 {
-    return M1Shield.getScreenHeight() <= 128;
+    // Testing height alone classified the 128x160 ST7735 as large, so it took
+    // the full 320x240 template: a size-3 title on a 128 pixel width leaves
+    // room for six characters, three of which the ellipsis then consumes.
+    return M1Shield.getScreenHeight() <= 128 || M1Shield.getScreenWidth() <= 128;
 }
 
 // Set screen title/name
