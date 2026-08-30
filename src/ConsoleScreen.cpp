@@ -175,10 +175,12 @@ Screen *ConsoleScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t of
         }
     }
 
-    // Handle back/menu button to exit console
-    if (action & (BUTTON_MENU))
+    // Handle back/menu button to exit console. LoggerScreen inherits this, so
+    // both of the screens that advertise a back control are covered here.
+    Screen *backScreen = _handleBackAction(action);
+    if (backScreen != nullptr)
     {
-        return nullptr; // Let base class handle navigation
+        return backScreen;
     }
 
     // No navigation for other actions - stay on console

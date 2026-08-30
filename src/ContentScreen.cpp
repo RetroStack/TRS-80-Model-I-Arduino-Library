@@ -53,7 +53,8 @@ constexpr uint16_t CONFIRM_COLOR_FG = 0x0000; // Confirm text color (black)
 // Constructor
 ContentScreen::ContentScreen() : Screen()
 {
-    _buttonItems = nullptr; // No button storage allocated initially
+    _backScreenFactory = nullptr; // No back destination until one is set
+    _buttonItems = nullptr;       // No button storage allocated initially
     _buttonItemCount = 0;
     _progressValue = 0;
 
@@ -63,6 +64,30 @@ ContentScreen::ContentScreen() : Screen()
     _notificationDuration = 0;
     _notificationBgColor = 0xFFE0; // Default to yellow background
     _notificationActive = false;
+}
+
+// Set where the menu button leads
+void ContentScreen::setBackScreen(BackScreenFactory factory, const String &context)
+{
+    _backScreenFactory = factory;
+    _backScreenContext = context;
+}
+
+// Whether a back destination has been set
+bool ContentScreen::hasBackScreen() const
+{
+    return _backScreenFactory != nullptr;
+}
+
+// Build the back screen if the menu button was pressed
+Screen *ContentScreen::_handleBackAction(ActionTaken action)
+{
+    if ((action & BUTTON_MENU) && _backScreenFactory != nullptr)
+    {
+        return _backScreenFactory(_backScreenContext);
+    }
+
+    return nullptr;
 }
 
 // Destructor

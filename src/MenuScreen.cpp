@@ -45,7 +45,7 @@ MenuScreen::MenuScreen() : ContentScreen()
 
     // Set default button labels - can be overridden by derived classes
     const char *buttonItems[2] = {
-        "[M/<] Exit ", "[>] Select"};
+        "[M] Exit", "[</>] Select"};
     setButtonItems(buttonItems, 2);
 }
 

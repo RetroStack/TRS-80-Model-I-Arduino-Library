@@ -12,6 +12,14 @@
 // this allows deep nesting while keeping the working buffer off the heap.
 constexpr size_t MAX_PATH_LENGTH = 128;
 
+// Rebuilds a browser at a given directory. Handed to the file viewers as their
+// back destination -- a factory rather than a pointer, because setScreen()
+// destroys this browser before the viewer opens.
+static Screen *createFileBrowserAt(const String &directory)
+{
+    return new FileBrowser(directory);
+}
+
 // Constructor - handles all usage patterns intelligently
 FileBrowser::FileBrowser(const String &directoryOrPath, const String &targetFile, bool restrictToRoot) : MenuScreen()
 {
@@ -59,7 +67,7 @@ FileBrowser::FileBrowser(const String &directoryOrPath, const String &targetFile
 
     // Set title and button items
     setTitleF(F("File Browser"));
-    const char *buttons[] = {"[M/<] Back", "[>] Select"};
+    const char *buttons[] = {"[M] Back", "[</>] Open"};
     setButtonItems(buttons, 2);
 }
 
@@ -637,16 +645,24 @@ Screen *FileBrowser::_getSelectedMenuItemScreen(int index)
             fullPath += "/";
         fullPath += selected.name;
 
+        // Give the viewer a way back here; without one, opening a file from
+        // the browser was a one-way trip that only a reset escaped.
+        ContentScreen *viewer;
         if (_isTextFile(selected.name))
         {
-            // Open with TextFileViewer
-            return new TextFileViewer(fullPath.c_str());
+            viewer = new TextFileViewer(fullPath.c_str());
         }
         else
         {
-            // Open with BinaryFileViewer
-            return new BinaryFileViewer(fullPath.c_str());
+            viewer = new BinaryFileViewer(fullPath.c_str());
         }
+
+        if (viewer != nullptr)
+        {
+            viewer->setBackScreen(createFileBrowserAt, _currentDirectory);
+        }
+
+        return viewer;
     }
 }
 

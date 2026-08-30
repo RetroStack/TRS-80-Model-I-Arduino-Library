@@ -311,6 +311,14 @@ Screen *TextFileViewer::actionTaken(ActionTaken action, int8_t offsetX, int8_t o
         return nullptr;
     }
 
+    // The menu button is advertised as back on every one of these screens; it
+    // used to fall through and return nullptr, leaving the screen with no exit.
+    Screen *backScreen = _handleBackAction(action);
+    if (backScreen != nullptr)
+    {
+        return backScreen;
+    }
+
     // Handle navigation actions
     if (action & UP_ANY)
     {

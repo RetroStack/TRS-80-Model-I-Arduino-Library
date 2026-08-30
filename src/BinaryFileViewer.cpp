@@ -413,10 +413,12 @@ Screen *BinaryFileViewer::actionTaken(ActionTaken action, int8_t offsetX, int8_t
         return nullptr;
     }
 
-    if (action & BUTTON_MENU)
+    // The menu button is advertised as back on every one of these screens; it
+    // used to fall through and return nullptr, leaving the screen with no exit.
+    Screen *backScreen = _handleBackAction(action);
+    if (backScreen != nullptr)
     {
-        // Return to previous screen or close
-        return nullptr;
+        return backScreen;
     }
 
     if (action & UP_ANY)

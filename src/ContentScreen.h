@@ -32,6 +32,9 @@ private:
     bool _notificationActive;             // Whether notification is currently active
     uint16_t _notificationBgColor;        // Custom notification background color
 
+    Screen *(*_backScreenFactory)(const String &context); // Builds the screen the menu button returns to
+    String _backScreenContext;                            // Passed to that factory when it runs
+
     uint8_t _getPadding() const;                                                       // Gets the padding between areas
     void _drawNotification();                                                          // Draw notification overlay in place of footer
     void _clearNotification();                                                         // Clear notification text and free memory
@@ -40,6 +43,8 @@ private:
     char *_truncateText(const char *text, uint16_t availableWidth, uint8_t charWidth); // Create truncated copy of text with "..." if needed
 
 protected:
+    Screen *_handleBackAction(ActionTaken action); // Back screen when the menu button was pressed, else nullptr
+
     void _drawHeader();         // Draw the header region with title
     virtual void _drawFooter(); // Draw the footer region with button labels (virtual for customization)
     void _refreshFooter();      // Redraw just the footer on every enabled render target
@@ -85,6 +90,14 @@ public:
     // Required Screen interface methods - must be implemented by derived classes
     virtual void loop() override;                                                        // Base implementation handles notification timeouts, derived classes can override
     virtual Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) = 0; // Handle input events
+
+    // Where the menu button goes back to. A factory rather than a screen
+    // pointer: setScreen() closes and deletes the current screen before opening
+    // the next, so a stored pointer to the previous screen would already be
+    // dangling by the time the user pressed back.
+    typedef Screen *(*BackScreenFactory)(const String &context);
+    void setBackScreen(BackScreenFactory factory, const String &context = String()); // Set where back leads
+    bool hasBackScreen() const;                                                      // Whether a back destination is set
 
     // Progress control
     void setProgressValue(int value); // Set progress bar value (0-100)
