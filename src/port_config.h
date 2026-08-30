@@ -9,6 +9,14 @@
 
 #include <Arduino.h>
 
+// The port and pin assignments below are specific to the ATmega2560.
+// Ports E, H, J and L do not exist on smaller AVRs, and no PORT registers
+// exist on ARM or Xtensa targets, so anything else fails deep inside the
+// port macros with errors that do not name the real cause.
+#if !defined(__AVR_ATmega2560__)
+#error "The TRS-80 Model I library requires an Arduino Mega 2560 (ATmega2560)."
+#endif
+
 // Low- and high-byte port for Address Bus
 #define BUS_ADDR_LOW_PORT A
 #define BUS_ADDR_HIGH_PORT C

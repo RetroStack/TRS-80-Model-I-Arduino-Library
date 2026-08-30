@@ -100,11 +100,17 @@ M1ShieldClass::~M1ShieldClass()
     }
 }
 
-// Initialize M1Shield with display provider and configure pins
-bool M1ShieldClass::begin(DisplayProvider &provider)
+// Initialize the shield hardware that does not depend on a display.
+//
+// This no-argument overload is the library's standard initialization entry
+// point. It is always safe to call, and shared setup added here in future
+// releases reaches existing sketches without changing their call sites -
+// which is why it exists even when its body is trivial.
+//
+// It deliberately does not touch the display; use begin(DisplayProvider &)
+// for that. begin(DisplayProvider &) calls this first.
+bool M1ShieldClass::begin()
 {
-    _displayProvider = &provider;
-
     pinMode(PIN_ACTIVE_LED, OUTPUT);
     _inactive();
 
@@ -125,6 +131,15 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
     pinMode(PIN_JOYSTICK_Y, INPUT);
 
     pinMode(PIN_BUZZER, OUTPUT);
+
+    return true;
+}
+
+// Initialize M1Shield with display provider and configure pins
+bool M1ShieldClass::begin(DisplayProvider &provider)
+{
+    // Shared, display-independent initialization
+    begin();
 
     // Initialize display with error handling
     // Manual Reset Sequence
@@ -147,6 +162,8 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
         }
         return false;
     }
+
+    _displayProvider = &provider;
 
     // Initialize display based on the selected type
     _screenWidth = provider.width();
