@@ -15,12 +15,11 @@ class Display_SSD1306 : public DisplayProvider
 {
 private:
     Adafruit_SSD1306 *_display; // Pointer to the SSD1306 display instance
-    bool _isI2C;                // True for I2C mode, false for SPI mode
     uint8_t _i2cAddress;        // I2C address for the display (typically 0x3C)
 
 public:
     // Constructor
-    Display_SSD1306() : _display(nullptr), _isI2C(false), _i2cAddress(0x3C) {}
+    Display_SSD1306() : _display(nullptr), _i2cAddress(0x3C) {}
 
     // Create SSD1306 display instance with SPI interface
     bool create(int8_t cs, int8_t dc, int8_t rst) override
@@ -30,7 +29,6 @@ public:
             delete _display;
         }
         _display = new Adafruit_SSD1306(128, 64, &SPI, dc, rst, cs);
-        _isI2C = false;
         if (_display->begin(SSD1306_SWITCHCAPVCC))
         {
             _display->clearDisplay();
@@ -47,7 +45,6 @@ public:
             delete _display;
         }
         _display = new Adafruit_SSD1306(128, 64, &Wire, rst);
-        _isI2C = true;
         _i2cAddress = i2cAddress;
         if (_display->begin(SSD1306_SWITCHCAPVCC, _i2cAddress))
         {

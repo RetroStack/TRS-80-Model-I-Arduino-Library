@@ -10,16 +10,10 @@
 #include <Adafruit_GFX.h>
 
 // Display Configuration Constants
-constexpr uint8_t TEXT_SIZE_2_WIDTH = 12;      // Width of size-2 text characters
-constexpr uint8_t TEXT_SIZE_2_HEIGHT = 16;     // Height of size-2 text characters
-constexpr uint8_t TEXT_SIZE_2_HALF_HEIGHT = 8; // Half-height of size-2 text for centering
 
 // Horizontal Button Layout Constants
 constexpr uint16_t BUTTON_FOOTER_HEIGHT = 26;       // Height of expanded footer for horizontal buttons (2 rows of size-2 text)
 constexpr uint16_t BUTTON_SMALL_FOOTER_HEIGHT = 20; // Height of expanded footer for small displays
-constexpr uint16_t BUTTON_ITEM_HEIGHT = 16;         // Height of each button item row
-constexpr uint16_t BUTTON_CONFIG_HEIGHT = 16;       // Height of config value row
-constexpr uint16_t BUTTON_PADDING = 2;              // Padding between button items horizontally
 constexpr uint16_t BUTTON_MIN_WIDTH = 100;          // Minimum width of button items to calculate number of buttons
 
 // Color Constants

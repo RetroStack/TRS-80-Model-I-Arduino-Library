@@ -6,7 +6,6 @@
 
 #include "Keyboard.h"
 #include "Model1.h"
-#include "utils.h"
 
 #define KEYBOARD_ALL_ADDRESS 0x38FF
 #define KEYBOARD_MEM_ADDRESS 0x3800

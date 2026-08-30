@@ -44,7 +44,6 @@ private:
     uint32_t _calculateTotalPages(); // Calculate total pages based on lines per page
     void _calculateLayout();         // Calculate lines per page and layout
     bool _checkFileUpdate();         // Check if file has been updated (for auto-paging)
-    void _updateMaxLineLength();     // Update maximum line length for current page
 
 public:
     TextFileViewer(const char *filename); // Constructor with filename, sets default button items

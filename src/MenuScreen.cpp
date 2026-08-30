@@ -11,13 +11,10 @@
 
 // Display Configuration Constants
 constexpr uint8_t TEXT_SIZE_1_WIDTH = 6;       // Width of size-1 text characters
-constexpr uint8_t TEXT_SIZE_1_HALF_HEIGHT = 3; // Half-height of size-1 text for centering
 
 constexpr uint8_t TEXT_SIZE_2_WIDTH = 12;      // Width of size-2 text characters
 constexpr uint8_t TEXT_SIZE_2_HALF_HEIGHT = 6; // Half-height of size-2 text for centering
 
-constexpr uint8_t TEXT_SIZE_3_WIDTH = 18;      // Width of size-3 text characters
-constexpr uint8_t TEXT_SIZE_3_HALF_HEIGHT = 8; // Half-height of size-3 text for centering
 
 // Menu Layout Constants
 constexpr uint16_t ROW_HEIGHT = 26;                       // Height of each menu row in pixels

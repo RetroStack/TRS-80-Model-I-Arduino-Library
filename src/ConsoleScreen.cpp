@@ -728,12 +728,6 @@ uint16_t ConsoleScreen::getPagingTimeout() const
 }
 
 // Check if console is currently waiting for paging action
-bool ConsoleScreen::isPagingWaiting() const
-{
-    return _isWaitingForPaging;
-}
-
-// Check if console is currently waiting for paging action
 bool ConsoleScreen::isWaitingForPaging() const
 {
     return _isWaitingForPaging;

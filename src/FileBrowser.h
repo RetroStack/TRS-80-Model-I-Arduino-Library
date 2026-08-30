@@ -42,7 +42,6 @@ private:
     // Directory operations
     bool _loadDirectoryContents();                                                    // Load files and directories into _files array
     bool _navigateToDirectory(const String &dir);                                     // Navigate to specified directory
-    bool _navigateUp();                                                               // Navigate to parent directory
     String _normalizePath(const String &path);                                        // Normalize directory path
     String _getParentDirectory(const String &path);                                   // Get parent directory path
     void _parseFilePath(const String &filePath, String &directory, String &filename); // Parse file path into directory and filename components

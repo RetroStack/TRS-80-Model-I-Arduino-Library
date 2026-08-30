@@ -49,14 +49,12 @@ public:
 
 private:
     // New organized layout methods
-    void drawCompactLayout();    // For small displays
     void drawControllerLayout(); // Button layout like a real controller
     void drawJoystickArea();     // Prominent joystick visualization
     void drawStatusArea();       // Status and information area
 
     // Selective update methods for performance optimization
     void updateAfterInput(ActionTaken action, int8_t offsetX, int8_t offsetY);
-    void updateCompactStatus();  // Update only compact status area
     void updateButtonVisuals();  // Update only button area
     void updateJoystickVisual(); // Update only joystick area
     void updateStatusVisual();   // Update only status area

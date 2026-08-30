@@ -586,8 +586,3 @@ bool TextFileViewer::_checkFileUpdate()
     return fileChanged;
 }
 
-void TextFileViewer::_updateMaxLineLength()
-{
-    // This is handled in _loadCurrentPage() for efficiency
-    // No need for separate implementation since we only load current page
-}

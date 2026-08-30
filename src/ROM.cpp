@@ -6,7 +6,6 @@
 
 #include "ROM.h"
 #include "Model1.h"
-#include "utils.h"
 
 #define ROM_START 0x00
 #define ROM_1K_LENGTH 1024

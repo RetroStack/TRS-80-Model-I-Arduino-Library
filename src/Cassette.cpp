@@ -6,7 +6,6 @@
 
 #include "Cassette.h"
 #include "Model1.h"
-#include "utils.h"
 
 // Local port
 #define CASSETTE_PORT 0xff

@@ -405,12 +405,6 @@ bool FileBrowser::_navigateToDirectory(const String &dir)
     return true;
 }
 
-// Navigate to parent directory
-bool FileBrowser::_navigateUp()
-{
-    return _navigateToDirectory("..");
-}
-
 // Normalize directory path
 String FileBrowser::_normalizePath(const String &path)
 {

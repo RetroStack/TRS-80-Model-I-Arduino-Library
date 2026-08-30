@@ -17,7 +17,6 @@ constexpr uint8_t TEXT_SIZE_2_WIDTH = 12;      // Width of size-2 text character
 constexpr uint8_t TEXT_SIZE_2_HALF_HEIGHT = 6; // Half-height of size-2 text for centering
 
 constexpr uint8_t TEXT_SIZE_3_WIDTH = 18;      // Width of size-3 text characters
-constexpr uint8_t TEXT_SIZE_3_HALF_HEIGHT = 8; // Half-height of size-3 text for centering
 
 // Color scheme constants for consistent theming
 constexpr uint16_t SCREEN_COLOR_BG = 0x0000; // Background color for content area

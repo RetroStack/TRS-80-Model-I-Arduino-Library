@@ -233,13 +233,6 @@ Screen *ComprehensiveScreen::launchSelectedDemo()
     return newScreen;
 }
 
-void ComprehensiveScreen::drawNavigationInfo()
-{
-    // This is called from draw() after each demo to show consistent navigation
-    // Currently each demo shows its own navigation, so this can be minimal
-    // or used for common status information
-}
-
 const char *ComprehensiveScreen::getDemoName()
 {
     switch (currentDemo)

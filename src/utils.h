@@ -30,7 +30,6 @@ char pinStatus(bool value);    // Get pin status character ('o' for output, 'i' 
 char busStatus(uint8_t value); // Get bus status character ('o' for output, 'i' for input, '?' for unknown)
 
 void asmWait(uint16_t wait);                                    // Precise nanosecond delay using inline assembly (16MHz ATMega)
-void asmWait(uint16_t outerLoopCount, uint16_t innerLoopCount); // Nested loop delay for longer durations using inline assembly
 
 uint16_t chunkLength(uint32_t offset, uint16_t total, uint16_t chunkSize); // Length of the chunk at an offset, 0 when the range is exhausted
 

@@ -633,21 +633,6 @@ const char *ComprehensiveContent::getModeTitle(ContentMode mode)
     }
 }
 
-const char *ComprehensiveContent::getModeFooter(ContentMode mode)
-{
-    switch (mode)
-    {
-    case MODE_MAIN_MENU:
-        return "Up/Down: Navigate | Menu: Select";
-    case MODE_INTERACTIVE_DEMO:
-        return "Arrows: Move | Menu: Exit";
-    case MODE_SETTINGS:
-        return "Up/Down: Navigate | Menu: Toggle";
-    default:
-        return "Left: Back | Menu: Select";
-    }
-}
-
 void ComprehensiveContent::updateData()
 {
     // Simulate sensor data updates
