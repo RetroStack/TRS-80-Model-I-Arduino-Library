@@ -16,6 +16,7 @@ The `M1Shield` class provides a comprehensive hardware abstraction layer for the
   - [Button Input](#button-input)
   - [Joystick Input](#joystick-input)
 - [LED Control](#led-control)
+- [Buzzer](#buzzer)
 - [Screen Management](#screen-management)
 - [SD Card Detection](#sd-card-detection)
 - [Cassette Interface](#cassette-interface)
@@ -34,7 +35,18 @@ Creates a new `M1Shield` instance. The shield is not initialized until `begin()`
 
 ## Initialization
 
-### `void begin(DisplayProvider &provider)`
+### `bool begin()`
+
+Initializes the shield hardware that does not depend on a display: button pins
+with internal pull-ups, the analog joystick pins, the RGB LED pins and the
+buzzer pin. Returns `true`.
+
+This is the library's standard no-argument initialization entry point. It is
+always safe to call, and shared setup added here in future releases reaches
+existing sketches without changing their call sites. It does not initialize the
+display - use `begin(DisplayProvider &)` for that, which calls this first.
+
+### `bool begin(DisplayProvider &provider)`
 
 Initializes all M1Shield hardware components using the specified display provider:
 
@@ -42,6 +54,7 @@ Initializes all M1Shield hardware components using the specified display provide
 - Button input pins with internal pull-ups
 - Analog joystick pins
 - RGB LED control pins
+- Buzzer pin
 - Hardware abstraction layer setup
 
 ```cpp
@@ -208,11 +221,13 @@ gfx.fillCircle(50, 100, 20, M1Shield.convertColor(0x07FF));   // Cyan circle
 
 ### Button Input
 
-Six buttons are supported: Menu, Up, Down, Left, Right, and Joystick button.
+Seven buttons are supported: Menu, Select, Up, Down, Left, Right, and the
+joystick push button.
 
 **Current State Methods (continuous reading):**
 
 - **`bool isMenuPressed()`** - Menu/center button
+- **`bool isSelectPressed()`** - Select button (activates the current item)
 - **`bool isUpPressed()`** - Up directional button
 - **`bool isDownPressed()`** - Down directional button
 - **`bool isLeftPressed()`** - Left directional button
@@ -222,6 +237,7 @@ Six buttons are supported: Menu, Up, Down, Left, Right, and Joystick button.
 **Event Detection Methods (one-shot, consuming):**
 
 - **`bool wasMenuPressed()`** - Menu button was pressed since last call
+- **`bool wasSelectPressed()`** - Select button was pressed since last call
 - **`bool wasUpPressed()`** - Up button was pressed since last call
 - **`bool wasDownPressed()`** - Down button was pressed since last call
 - **`bool wasLeftPressed()`** - Left button was pressed since last call
@@ -524,6 +540,26 @@ This method handles all shield operations including:
 void loop() {
     M1Shield.loop();    // Handle input, screen updates, and transitions
 }
+```
+
+## Buzzer
+
+A piezo buzzer is driven directly from the shield. `buzz()` blocks for the
+requested duration; use `buzzerOn()`/`buzzerOff()` when the sketch needs to keep
+running.
+
+- **`void buzzerOn()`** - Start the buzzer and return immediately
+- **`void buzzerOff()`** - Stop the buzzer
+- **`void buzz(unsigned int durationMs)`** - Buzz for `durationMs` milliseconds, then stop
+
+```cpp
+// Short confirmation beep
+M1Shield.buzz(50);
+
+// Non-blocking: start here, stop from your own timing logic
+M1Shield.buzzerOn();
+// ... later ...
+M1Shield.buzzerOff();
 ```
 
 ## Screen Management

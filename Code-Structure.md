@@ -6,6 +6,7 @@ This document provides a comprehensive reference of all classes and functions av
 
 - `M1ShieldClass()` // Default constructor
 - `~M1ShieldClass()` // Destructor with cleanup
+- `bool begin()` // Initialize hardware without a display (standard no-argument entry point)
 - `bool begin(DisplayProvider &provider)` // Initialize hardware and display
 - `void activateJoystick()` // Enable joystick input
 - `void deactivateJoystick()` // Disable joystick input
@@ -22,12 +23,14 @@ This document provides a comprehensive reference of all classes and functions av
 - `void setLEDColor(uint8_t r, uint8_t g, uint8_t b) const` // Set RGB LED with individual channels
 - `void setLEDColor(LEDColor color, uint8_t intensity = 255) const` // Set LED with predefined color
 - `bool isMenuPressed() const` // Check menu button current state
+- `bool isSelectPressed() const` // Check select button current state
 - `bool isLeftPressed() const` // Check left button current state
 - `bool isRightPressed() const` // Check right button current state
 - `bool isUpPressed() const` // Check up button current state
 - `bool isDownPressed() const` // Check down button current state
 - `bool isJoystickPressed() const` // Check joystick button current state
 - `bool wasMenuPressed()` // Check and consume menu button press event
+- `bool wasSelectPressed()` // Check and consume select button press event
 - `bool wasLeftPressed()` // Check and consume left button press event
 - `bool wasRightPressed()` // Check and consume right button press event
 - `bool wasUpPressed()` // Check and consume up button press event
@@ -54,7 +57,7 @@ This document provides a comprehensive reference of all classes and functions av
 
 **Enums:**
 
-- `enum LEDColor` // RGB LED color definitions: BLACK, WHITE, RED, GREEN, BLUE, YELLOW, CYAN, MAGENTA
+- `enum LEDColor` // RGB LED color definitions: COLOR_OFF, COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_YELLOW, COLOR_MAGENTA, COLOR_CYAN, COLOR_WHITE
 - `enum JoystickDirection` // 8-directional joystick states: CENTER, UP, DOWN, LEFT, RIGHT, UP_LEFT, UP_RIGHT, DOWN_LEFT, DOWN_RIGHT
 
 ## Model1Class (Model1.h)

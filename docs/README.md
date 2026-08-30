@@ -62,6 +62,7 @@ The library is organized into several key areas:
 
 - [**ILogger**](ILogger.md) - Unified logging interface supporting multiple output formats and destinations.
 - [**SerialLogger**](SerialLogger.md) - Serial port logging with formatted output and mute/unmute control.
+- [**SDCardLogger**](SDCardLogger.md) - Persistent logging to a file on the SD card, surviving resets and power cycles.
 - [**CompositeLogger**](CompositeLogger.md) - Multi-destination logging for simultaneous output to serial, display, and file systems.
 
 ### M1Shield Support
