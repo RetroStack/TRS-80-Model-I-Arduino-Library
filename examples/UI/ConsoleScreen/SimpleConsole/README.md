@@ -44,11 +44,12 @@ This simple example provides a foundation for console-style applications:
 #include <M1Shield.h>
 #include "SimpleConsole.h"
 
-SimpleConsole consoleScreen;
-
 void setup() {
     M1Shield.begin(displayProvider);
-    M1Shield.setScreen(&consoleScreen);
+
+    // Matches SimpleConsole.ino, which already does this. A global screen's
+    // constructor runs before begin().
+    M1Shield.setScreen(new SimpleConsole());
 }
 ```
 

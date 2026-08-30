@@ -965,7 +965,7 @@ protected:
 
 public:
     DebugConsole() {
-        _setTitle("Debug Output");
+        setTitle("Debug Output");
         setConsoleBackground(M1Shield.convertColor(0x0000));
     }
 
@@ -1018,7 +1018,7 @@ protected:
 
 public:
     SerialConsole() {
-        _setTitle("Serial Monitor");
+        setTitle("Serial Monitor");
         setTabSize(4);
     }
 
@@ -1116,7 +1116,7 @@ protected:
 
 public:
     PagingConsole() {
-        _setTitle("Paging Demo");
+        setTitle("Paging Demo");
 
         // Configure paging for demo
         setPagingMode(PAGING_WAIT_BOTH);    // Button OR timeout

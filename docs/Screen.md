@@ -133,7 +133,7 @@ if (title) {
 ### Input Processing
 
 ```cpp
-virtual Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) = 0
+virtual Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) = 0
 ```
 
 **Pure virtual method** that handles all user input and determines navigation:
@@ -148,7 +148,7 @@ virtual Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY
 Use bitwise operations to check for input combinations:
 
 ```cpp
-Screen* MyScreen::actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) {
+Screen* MyScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) {
     // Check for specific button
     if (action & BUTTON_MENU) {
         return &mainMenu;  // Navigate to main menu
@@ -280,7 +280,7 @@ Derived classes must implement these pure virtual methods:
 ```cpp
 virtual void _drawScreen() = 0      // Initial screen rendering
 virtual void loop() = 0             // Main update loop
-virtual Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) = 0  // Input handling
+virtual Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) = 0  // Input handling
 ```
 
 ### Method Responsibilities
@@ -390,7 +390,7 @@ public:
         }
     }
 
-    Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override {
+    Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override {
         if (action & BUTTON_RIGHT) {
             // Update display in response to input
             Adafruit_GFX& gfx = M1Shield.getGFX();
@@ -467,7 +467,7 @@ public:
         updateLives();
     }
 
-    Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override {
+    Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override {
         if (_gameOver) {
             // Game over - any input returns to menu
             if (action != NONE) {
@@ -532,7 +532,7 @@ public:
         updateCursor();
     }
 
-    Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override {
+    Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override {
         if (action & BUTTON_MENU) {
             return previousScreen;  // Back to previous
         }
@@ -641,7 +641,7 @@ public:
         }
     }
 
-    Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override {
+    Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override {
         // Handle user input
         if (action & BUTTON_UP) {
             _counter++;

@@ -168,7 +168,7 @@ RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::b
 - `virtual void close()` // Deactivate screen and cleanup
 - `virtual void _drawScreen() = 0` // Pure virtual: initial screen rendering
 - `virtual void loop() = 0` // Pure virtual: main update loop
-- `virtual Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) = 0` // Pure virtual: input handling
+- `virtual Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) = 0` // Pure virtual: input handling
 
 **Enums:**
 
@@ -179,7 +179,7 @@ RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::b
 - `ContentScreen()` // Constructor with structured layout initialization
 - `virtual ~ContentScreen()` // Destructor with memory cleanup
 - `virtual void loop() = 0` // Pure virtual: main update loop for content logic
-- `virtual Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) = 0` // Pure virtual: input handler within structured layout
+- `virtual Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) = 0` // Pure virtual: input handler within structured layout
 - `void setProgressValue(int value)` // Set progress bar value (0-100)
 - `uint8_t getProgressValue() const` // Get current progress bar value
 - `void setButtonItems(const char** buttonItems, uint8_t buttonItemCount)` // Set button labels for footer with dynamic allocation
@@ -236,7 +236,7 @@ RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::b
 - `MenuScreen()` // Constructor with default menu state and button labels
 - `virtual ~MenuScreen()` // Destructor with dynamic memory cleanup
 - `virtual void loop()` // Main loop processing for menu screen updates
-- `Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)` // Handle user input for menu navigation (up/down/select/back)
+- `Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY)` // Handle user input for menu navigation (up/down/select/back)
 - `void setMenuItems(const char** menuItems, uint8_t menuItemCount)` // Set menu items from C-string array with deep copy
 - `void setMenuItems(String* menuItems, uint8_t menuItemCount)` // Set menu items from String array with deep copy
 - `void setMenuItemsF(const __FlashStringHelper** menuItems, uint8_t menuItemCount)` // Set menu items from FlashString array with deep copy
@@ -252,7 +252,7 @@ RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::b
 - `virtual ~ButtonScreen()` // Destructor - ContentScreen handles button items cleanup
 - `bool open()` // Initialize view when screen opens, finding first enabled item
 - `virtual void loop()` // Main loop processing for horizontal button screen updates
-- `Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)` // Handle user input for horizontal navigation (left/right/select/back)
+- `Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY)` // Handle user input for horizontal navigation (left/right/select/back)
 - `void refreshButtons()` // Refresh the horizontal button display
 - `uint16_t _getFooterHeight() const override` // Override to provide expanded footer height for horizontal buttons
 - `virtual Screen* _getSelectedButtonItemScreen(int index) = 0` // Pure virtual: get screen for selected button item
@@ -268,7 +268,7 @@ RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::b
 - `virtual ~ConsoleScreen()` // Destructor
 - `bool open()` // Override to initialize timing for one-time execution
 - `void loop()` // Main loop processing for console screen updates
-- `Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)` // Handle user input actions with standard navigation
+- `Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY)` // Handle user input actions with standard navigation
 - `size_t write(uint8_t c)` // Write single character to console (Print interface requirement)
 - `size_t write(const uint8_t* buffer, size_t size)` // Write buffer of characters for bulk operations
 - `void cls()` // Clear screen and reset cursor to top-left

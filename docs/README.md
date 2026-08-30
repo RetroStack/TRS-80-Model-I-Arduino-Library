@@ -116,15 +116,19 @@ void setup() {
 
 ```cpp
 #include <M1Shield.h>
-#include <MenuScreen.h>
 #include <Display_ST7789_320x240.h>  // Or your preferred display
+#include "MyMenu.h"                  // Your MenuScreen subclass
 
 Display_ST7789_320x240 displayProvider;
-MenuScreen menuScreen;
 
 void setup() {
   M1Shield.begin(displayProvider);
-  M1Shield.setScreen(&menuScreen);
+
+  // Screens are created with new, never as globals: a global constructor runs
+  // before begin(), so the screen would be built before there is a display to
+  // measure. MenuScreen is abstract -- subclass it and implement
+  // _getSelectedMenuItemScreen().
+  M1Shield.setScreen(new MyMenu());
 }
 
 void loop() {

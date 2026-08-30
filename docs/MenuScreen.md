@@ -196,7 +196,7 @@ Navigation is handled automatically by the base class:
 ## Input Handling
 
 - **`virtual void loop()`** - Main loop processing for menu screen updates (override for custom processing)
-- **`Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override`** - Handle user input actions and navigate accordingly
+- **`Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override`** - Handle user input actions and navigate accordingly
 
 The `actionTaken()` method processes user input for menu navigation including:
 
@@ -276,9 +276,9 @@ Page 1 of 3        Page 2 of 3        Page 3 of 3
 ### Menu Configuration
 
 ```cpp
-void _setMenuItems(const char** items, uint8_t count)  // Set menu items
-void _setTitle(const char* title)                      // Set menu title
-void _setFooterButtons(const char** buttons, uint8_t count)  // Set footer buttons
+void setMenuItems(const char** items, uint8_t count)  // Set menu items
+void setTitle(const char* title)                      // Set menu title
+void setButtonItems(const char** buttons, uint8_t count)  // Set footer buttons
 ```
 
 ### Configuration Values (Optional)
@@ -389,10 +389,10 @@ public:
         setMenuItems(items, 6);
 
         // Configure layout
-        _setTitle("Settings");
+        setTitle("Settings");
 
         const char* buttons[] = {"[M] Exit", "Select >"};`
-        _setFooterButtons(buttons, 2);
+        setButtonItems(buttons, 2);
 
         // Initialize state
         _soundEnabled = true;
@@ -468,8 +468,8 @@ public:
             "Settings",
             "Exit"
         };
-        _setMenuItems(items, 5);
-        _setTitle("Main Menu");
+        setMenuItems(items, 5);
+        setTitle("Main Menu");
 
         // Check game state
         _gameInProgress = checkGameState();
@@ -523,7 +523,7 @@ public:
     FileMenu() {
         loadFileList();
         updateMenuItems();
-        _setTitle("Select File");
+        setTitle("Select File");
     }
 
 private:
@@ -542,7 +542,7 @@ private:
             items[i] = _fileList[i].c_str();
         }
 
-        _setMenuItems(items, _fileList.size());
+        setMenuItems(items, _fileList.size());
         delete[] items;  // MenuScreen made copies
     }
 
@@ -562,7 +562,7 @@ protected:
 
 - **String Duplication**: All menu item strings are duplicated internally
 - **Automatic Cleanup**: Memory freed when menu is destroyed or items change
-- **Safe References**: Original string arrays can be freed after `_setMenuItems()`
+- **Safe References**: Original string arrays can be freed after `setMenuItems()`
 - **Dynamic Sizing**: Memory allocated based on actual menu size
 
 ### Screen Ownership
@@ -621,12 +621,12 @@ public:
             "About",
             "Exit"
         };
-        _setMenuItems(items, 6);
+        setMenuItems(items, 6);
 
-        _setTitle("Main Menu");
+        setTitle("Main Menu");
 
         const char* buttons[] = {"Select", "Exit"};
-        _setFooterButtons(buttons, 2);
+        setButtonItems(buttons, 2);
     }
 
 protected:
@@ -661,7 +661,7 @@ protected:
 
 public:
     // Override actionTaken to handle exit
-    Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override {
+    Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override {
         // Let parent handle navigation first
         Screen* result = MenuScreen::actionTaken(action, offsetX, offsetY);
 

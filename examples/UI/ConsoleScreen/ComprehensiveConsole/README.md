@@ -53,12 +53,13 @@ This comprehensive example provides a complete console application toolkit:
 #include <M1Shield.h>
 #include "ComprehensiveConsole.h"
 
-ComprehensiveConsole consoleScreen;
-
 void setup() {
     M1Shield.begin(displayProvider);
     M1Shield.activateJoystick();  // Enhanced control
-    M1Shield.setScreen(&consoleScreen);
+
+    // Matches ComprehensiveConsole.ino, which already does this. A global
+    // screen's constructor runs before begin().
+    M1Shield.setScreen(new ComprehensiveConsole());
 }
 ```
 
