@@ -1,0 +1,95 @@
+name: Build
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Arduino Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/arduino-lint-action@v1
+        with:
+          library-manager: update
+
+  compile-examples:
+    name: Compile examples
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/compile-sketches@v1
+        with:
+          fqbn: arduino:avr:mega
+          sketch-paths: |
+            - examples
+          libraries: |
+            - source-path: ./
+            - name: Adafruit GFX Library
+            - name: Adafruit ST7735 and ST7789 Library
+            - name: Adafruit BusIO
+            - name: SD
+          enable-warnings-report: true
+
+  compile-providers:
+    name: Compile ${{ matrix.provider }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # One sketch per DisplayProvider, so a provider header that cannot
+        # compile is caught even though every example defaults to ST7789.
+        # Display_ILI9325 is intentionally absent: the library supplying its
+        # header is not published, so it cannot be resolved here.
+        provider:
+          - Display_ST7789_320x240
+          - Display_ST7789_240x240
+          - Display_ST7789_320x170
+          - Display_ST7735
+          - Display_ST7796
+          - Display_ILI9341
+          - Display_HX8357
+          - Display_SSD1306
+          - Display_SH1106
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate a sketch for ${{ matrix.provider }}
+        run: |
+          dir="ci-sketches/${{ matrix.provider }}"
+          mkdir -p "$dir"
+          cat > "$dir/${{ matrix.provider }}.ino" <<'SKETCH'
+          #include <PROVIDER.h>
+          #include <M1Shield.h>
+
+          PROVIDER displayProvider;
+
+          void setup() {
+              M1Shield.begin(displayProvider);
+          }
+
+          void loop() {
+              M1Shield.loop();
+          }
+          SKETCH
+          sed -i "s/PROVIDER/${{ matrix.provider }}/g" "$dir/${{ matrix.provider }}.ino"
+          cat "$dir/${{ matrix.provider }}.ino"
+
+      - uses: arduino/compile-sketches@v1
+        with:
+          fqbn: arduino:avr:mega
+          sketch-paths: |
+            - ci-sketches/${{ matrix.provider }}
+          libraries: |
+            - source-path: ./
+            - name: Adafruit GFX Library
+            - name: Adafruit ST7735 and ST7789 Library
+            - name: Adafruit BusIO
+            - name: Adafruit ILI9341
+            - name: Adafruit HX8357 Library
+            - name: Adafruit SSD1306
+            - name: Adafruit SH110X
+            - name: SD

@@ -33,3 +33,4 @@ fp-info-cache
 *.dsn
 *.ses
 
+ci-sketches/
