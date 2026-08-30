@@ -371,6 +371,11 @@ bool TextFileViewer::_loadCurrentPage()
 
     // Allocate memory for current page only
     _currentPageLines = new String[linesToRead];
+    if (!_currentPageLines)
+    {
+        file.close();
+        return false;
+    }
     _linesOnCurrentPage = 0;
     _maxLineLength = 0;
 

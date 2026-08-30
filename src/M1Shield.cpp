@@ -827,6 +827,11 @@ void M1ShieldClass::loop()
         }
     }
 
-    // Execute a loop within the screen in case it needs it
-    _screen->loop();
+    // Execute a loop within the screen in case it needs it.
+    // setScreen() above may have failed to open the new screen and left
+    // _screen as nullptr, so re-check before dispatching.
+    if (_screen)
+    {
+        _screen->loop();
+    }
 }

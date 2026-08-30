@@ -94,6 +94,11 @@ void FileBrowser::_ensureFileCapacity(uint8_t minCapacity)
         newCapacity = minCapacity;
 
     FileEntry *newFiles = new FileEntry[newCapacity];
+    if (!newFiles)
+    {
+        // Out of memory - keep the existing array rather than losing it
+        return;
+    }
 
     // Copy existing data
     for (uint8_t i = 0; i < _fileCount; i++)
@@ -123,6 +128,11 @@ void FileBrowser::_ensureTextExtensionCapacity(uint8_t minCapacity)
         newCapacity = minCapacity;
 
     String *newExtensions = new String[newCapacity];
+    if (!newExtensions)
+    {
+        // Out of memory - keep the existing array rather than losing it
+        return;
+    }
 
     // Copy existing data
     for (uint8_t i = 0; i < _textExtensionCount; i++)
@@ -193,8 +203,10 @@ bool FileBrowser::_loadDirectoryContents()
         return false;
     }
 
-    // First pass: count entries to determine required capacity
-    uint8_t entryCount = 0;
+    // First pass: count entries to determine required capacity.
+    // Counted in 16 bits so a directory with more than 255 visible entries
+    // cannot wrap; the count is clamped to the uint8_t capacity below.
+    uint16_t entryCount = 0;
 
     // Count ".." entry if applicable
     if (_currentDirectory != "/" && (!_hasRootRestriction || _currentDirectory != _rootDirectory))
@@ -227,8 +239,12 @@ bool FileBrowser::_loadDirectoryContents()
         entry = dir.openNextFile();
     }
 
-    // Ensure we have enough capacity
-    _ensureFileCapacity(entryCount);
+    // Ensure we have enough capacity (capped at what uint8_t indices allow)
+    if (entryCount > 255)
+    {
+        entryCount = 255;
+    }
+    _ensureFileCapacity((uint8_t)entryCount);
 
     // Reset directory position for second pass
     dir.close();
@@ -236,7 +252,8 @@ bool FileBrowser::_loadDirectoryContents()
 
     // Second pass: add entries to array
     // Add ".." entry if not at root or if root restriction allows it
-    if (_currentDirectory != "/" && (!_hasRootRestriction || _currentDirectory != _rootDirectory))
+    if (_currentDirectory != "/" && (!_hasRootRestriction || _currentDirectory != _rootDirectory) &&
+        _fileCount < _fileCapacity)
     {
         _files[_fileCount].name = "..";
         _files[_fileCount].isDirectory = true;
@@ -260,7 +277,7 @@ bool FileBrowser::_loadDirectoryContents()
 
         // Only add files that pass our filter
         bool isDirectory = entry.isDirectory();
-        if (isDirectory || _isValidFile(entryName))
+        if ((isDirectory || _isValidFile(entryName)) && _fileCount < _fileCapacity)
         {
             _files[_fileCount].name = entryName;
             _files[_fileCount].isDirectory = isDirectory;
@@ -454,6 +471,10 @@ void FileBrowser::_updateMenuItems()
 
     // Create menu item array
     const char **menuItems = new const char *[_fileCount];
+    if (!menuItems)
+    {
+        return;
+    }
     for (uint8_t i = 0; i < _fileCount; i++)
     {
         menuItems[i] = _files[i].name.c_str();
