@@ -34,6 +34,7 @@ private:
 
     Screen *(*_backScreenFactory)(const String &context); // Builds the screen the menu button returns to
     String _backScreenContext;                            // Passed to that factory when it runs
+    const __FlashStringHelper *_errorMessage;             // Drawn in place of the content when set
 
     uint8_t _getPadding() const;                                                       // Gets the padding between areas
     void _drawNotification();                                                          // Draw notification overlay in place of footer
@@ -54,6 +55,13 @@ private:
 
 protected:
     Screen *_handleBackAction(ActionTaken action); // Back screen when the menu button was pressed, else nullptr
+
+    // A screen that cannot show its content -- no card, unreadable file --
+    // stays open and says so, rather than refusing to open and leaving the
+    // device with no screen at all.
+    void _setErrorState(const __FlashStringHelper *message); // Show this instead of the content
+    void _clearErrorState();                                 // Resume drawing content
+    bool _hasErrorState() const;                             // Whether an error is being shown
 
     void _drawHeader();         // Draw the header region with title
     virtual void _drawFooter(); // Draw the footer region with button labels (virtual for customization)

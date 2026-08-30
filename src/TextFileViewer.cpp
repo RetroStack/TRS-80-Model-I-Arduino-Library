@@ -192,10 +192,12 @@ bool TextFileViewer::open()
 
     _calculateLayout();
 
+    // Returning false here deletes the screen and leaves the device with none,
+    // so a file the browser could not read froze it. Stay open and say so.
     if (!_countFileLines())
     {
-        notifyF(F("Failed to read file"));
-        return false;
+        _setErrorState(F("Cannot read file"));
+        return true;
     }
 
     _totalPages = _calculateTotalPages();
@@ -203,9 +205,11 @@ bool TextFileViewer::open()
 
     if (!_loadCurrentPage())
     {
-        notifyF(F("Failed to load file content"));
-        return false;
+        _setErrorState(F("Cannot load file"));
+        return true;
     }
+
+    _clearErrorState();
 
     // ContentScreen::open() drew the screen before the file was counted and
     // loaded, so the first frame showed an empty page. Redraw now that there

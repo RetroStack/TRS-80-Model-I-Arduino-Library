@@ -176,19 +176,23 @@ bool FileBrowser::open()
         return false;
     }
 
-    // Initialize SD card if not already done
+    // A failure here used to return false, which makes setScreen() delete this
+    // screen and leave _screen null -- a frozen panel that no button reaches.
+    // Stay open and say what is wrong instead; the menu button still leads out
+    // if a back destination was set.
     if (!SD.begin(M1Shield.getSDCardSelectPin()))
     {
-        notifyF(F("Error: Failed to initialize SD card"));
-        return false;
+        _setErrorState(F("No SD card"));
+        return true;
     }
 
-    // Load directory contents
     if (!_loadDirectoryContents())
     {
-        notifyF(F("Error: Could not read directory"));
-        return false;
+        _setErrorState(F("Cannot read folder"));
+        return true;
     }
+
+    _clearErrorState();
 
     // Update menu items from loaded files
     _updateMenuItems();

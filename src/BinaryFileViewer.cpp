@@ -393,11 +393,14 @@ bool BinaryFileViewer::open()
 
     if (_openFile())
     {
+        _clearErrorState();
         refresh();
     }
     else
     {
-        notifyF(F("Error: Could not open file"));
+        // A notification expires; this screen would then show an empty grid
+        // with no explanation. Keep the reason on screen instead.
+        _setErrorState(F("Cannot open file"));
     }
 
     return true;

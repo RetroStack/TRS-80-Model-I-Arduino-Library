@@ -54,6 +54,7 @@ constexpr uint16_t CONFIRM_COLOR_FG = 0x0000; // Confirm text color (black)
 ContentScreen::ContentScreen() : Screen()
 {
     _backScreenFactory = nullptr; // No back destination until one is set
+    _errorMessage = nullptr;      // Not in an error state
     _buttonItems = nullptr;       // No button storage allocated initially
     _buttonItemCount = 0;
     _progressValue = 0;
@@ -64,6 +65,39 @@ ContentScreen::ContentScreen() : Screen()
     _notificationDuration = 0;
     _notificationBgColor = 0xFFE0; // Default to yellow background
     _notificationActive = false;
+}
+
+// Show a message in place of the content
+void ContentScreen::_setErrorState(const __FlashStringHelper *message)
+{
+    _errorMessage = message;
+
+    if (isActive())
+    {
+        refresh();
+    }
+}
+
+// Resume drawing content
+void ContentScreen::_clearErrorState()
+{
+    if (_errorMessage == nullptr)
+    {
+        return;
+    }
+
+    _errorMessage = nullptr;
+
+    if (isActive())
+    {
+        refresh();
+    }
+}
+
+// Whether an error is being shown instead of the content
+bool ContentScreen::_hasErrorState() const
+{
+    return _errorMessage != nullptr;
 }
 
 // Set where the menu button leads
@@ -151,8 +185,34 @@ void ContentScreen::_drawMainContent()
     uint16_t secondaryWidth = _getSecondaryContentWidth();
     uint16_t secondaryHeight = _getSecondaryContentHeight();
 
-    // Draw primary content
-    _drawContent();
+    // Draw primary content, or the error that replaces it
+    if (_errorMessage != nullptr)
+    {
+        Adafruit_GFX &gfx = M1Shield.getGFX();
+        uint8_t textSize = isSmallDisplay() ? 1 : 2;
+        uint8_t charWidth = (textSize == 1) ? TEXT_SIZE_1_WIDTH : TEXT_SIZE_2_WIDTH;
+        uint8_t halfHeight = (textSize == 1) ? TEXT_SIZE_1_HALF_HEIGHT : TEXT_SIZE_2_HALF_HEIGHT;
+
+        gfx.fillRect(primaryLeft, primaryTop, primaryWidth, primaryHeight,
+                     M1Shield.convertColor(SCREEN_COLOR_BG));
+        gfx.setTextColor(M1Shield.convertColor(SCREEN_COLOR_FG));
+        gfx.setTextSize(textSize);
+
+        // _errorMessage is a flash pointer; copy it out before measuring.
+        size_t length = strlen_P((const char *)_errorMessage);
+        char *buffer = (char *)malloc(length + 1);
+        if (buffer != nullptr)
+        {
+            strcpy_P(buffer, (const char *)_errorMessage);
+            _drawCenteredText(buffer, primaryLeft, primaryTop + (primaryHeight / 2) - halfHeight,
+                              primaryWidth, charWidth);
+            free(buffer);
+        }
+    }
+    else
+    {
+        _drawContent();
+    }
 
     // Draw secondary content if it has non-zero size
     if (secondaryWidth > 0 && secondaryHeight > 0)
