@@ -286,7 +286,7 @@ void TextFileViewer::_drawContent()
         }
 
         // Clear footer area first
-        M1Shield.getGFX().fillRect(0, _getFooterTop(), M1Shield.getScreenWidth(), _getFooterHeight(), _backgroundColor);
+        M1Shield.getGFX().fillRect(0, _getFooterTop(), M1Shield.getScreenWidth(), _getFooterHeight(), M1Shield.convertColor(_backgroundColor));
 
         // Draw status text
         M1Shield.getGFX().setCursor(5, _getFooterTop() + 5);

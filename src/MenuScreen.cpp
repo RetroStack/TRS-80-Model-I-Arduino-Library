@@ -720,10 +720,9 @@ void MenuScreen::refreshMenu()
     // Refresh just the menu content area (efficient for when menu item values change)
     if (isActive())
     {
-        Adafruit_GFX &gfx = M1Shield.getGFX();
-        gfx.startWrite();
+        // _drawContent() opens and closes its own SPI transaction; bracketing it
+        // here closed the transaction early and then ended it a second time.
         _drawContent();
-        gfx.endWrite();
         M1Shield.display();
     }
 }

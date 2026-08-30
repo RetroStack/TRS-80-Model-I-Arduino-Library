@@ -34,9 +34,11 @@ ConsoleScreen::ConsoleScreen() : ContentScreen()
     _charWidth = CHAR_WIDTH_SIZE_1;
     _lineHeight = CHAR_HEIGHT_SIZE_1;
 
-    _textColor = M1Shield.convertColor(DEFAULT_TEXT_COLOR);
-    _textBgColor = M1Shield.convertColor(DEFAULT_TEXT_BG_COLOR);
-    _consoleBgColor = M1Shield.convertColor(DEFAULT_CONSOLE_BG_COLOR);
+    // Colours are stored raw (RGB565) and converted at draw time, so the same
+    // console renders correctly on panels with different colour formats.
+    _textColor = DEFAULT_TEXT_COLOR;
+    _textBgColor = DEFAULT_TEXT_BG_COLOR;
+    _consoleBgColor = DEFAULT_CONSOLE_BG_COLOR;
     _tabSize = DEFAULT_TAB_SIZE;
 
     // Initialize cursor position
@@ -264,7 +266,7 @@ size_t ConsoleScreen::write(const uint8_t *buffer, size_t size)
     gfx.startWrite();
 
     // Set text properties once for the entire bulk operation
-    gfx.setTextColor(_textColor, _textBgColor);
+    gfx.setTextColor(M1Shield.convertColor(_textColor), M1Shield.convertColor(_textBgColor));
     gfx.setTextSize(_textSize);
 
     // Flag that we're in a bulk write operation
@@ -325,15 +327,17 @@ void ConsoleScreen::refresh()
 // Set text color and background color
 void ConsoleScreen::setTextColor(uint16_t foreground, uint16_t background)
 {
-    _textColor = M1Shield.convertColor(foreground);
-    _textBgColor = M1Shield.convertColor(background);
+    // Stored raw; converted at draw time
+    _textColor = foreground;
+    _textBgColor = background;
 }
 
 // Set console background color
 // This color is used to clear the console area
 void ConsoleScreen::setConsoleBackground(uint16_t color)
 {
-    _consoleBgColor = M1Shield.convertColor(color);
+    // Stored raw; converted at draw time
+    _consoleBgColor = color;
 }
 
 // Set text size
@@ -419,7 +423,7 @@ void ConsoleScreen::_renderChar(char c)
     // Only set text properties if not in bulk write mode (already set)
     if (!_inBulkWrite)
     {
-        gfx.setTextColor(_textColor, _textBgColor);
+        gfx.setTextColor(M1Shield.convertColor(_textColor), M1Shield.convertColor(_textBgColor));
         gfx.setTextSize(_textSize);
     }
 
