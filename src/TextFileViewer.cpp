@@ -207,6 +207,11 @@ bool TextFileViewer::open()
         return false;
     }
 
+    // ContentScreen::open() drew the screen before the file was counted and
+    // loaded, so the first frame showed an empty page. Redraw now that there
+    // is content. (BinaryFileViewer::open() already does the same.)
+    refresh();
+
     return true;
 }
 

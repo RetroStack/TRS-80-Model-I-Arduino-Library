@@ -15,6 +15,7 @@ class LoggerScreen : public ConsoleScreen
 {
 private:
     bool _showTimestamps;     // Whether to include timestamps in log messages
+    bool _timestampsExplicit; // True once setTimestampEnabled() has been called
     bool _useColorCoding;     // Whether to use color coding for different log levels
     unsigned long _startTime; // Start time for relative timestamps
 

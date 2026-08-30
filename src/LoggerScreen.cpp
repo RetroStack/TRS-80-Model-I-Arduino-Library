@@ -80,7 +80,12 @@ LoggerScreen::LoggerScreen(const char *title) : ConsoleScreen(), _loggerAdapter(
     setTitle(title);
 
     // Initialize logger settings
-    _showTimestamps = isSmallDisplay() ? false : true; // Default to no timestamps on small displays
+    // The display size is not known at construction time - for a global
+    // LoggerScreen no target is registered yet and getScreenHeight() reads 0,
+    // which made isSmallDisplay() true and disabled timestamps permanently.
+    // The size-based default is applied in open() instead.
+    _showTimestamps = true;
+    _timestampsExplicit = false;
     _useColorCoding = true;
     _startTime = millis();
 
@@ -130,6 +135,13 @@ ILogger *LoggerScreen::asLogger()
 // Override open to replay buffered entries
 bool LoggerScreen::open()
 {
+    // Apply the size-based default now that a display is actually known,
+    // unless the caller has already made an explicit choice.
+    if (!_timestampsExplicit)
+    {
+        _showTimestamps = !isSmallDisplay();
+    }
+
     // Call parent implementation first
     bool result = ConsoleScreen::open();
 
@@ -146,6 +158,7 @@ bool LoggerScreen::open()
 void LoggerScreen::setTimestampEnabled(bool enabled)
 {
     _showTimestamps = enabled;
+    _timestampsExplicit = true; // An explicit choice outranks the size default
 }
 
 // Check whether timestamps are enabled
