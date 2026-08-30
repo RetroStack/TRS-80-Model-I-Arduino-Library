@@ -1033,23 +1033,26 @@ void Model1Class::printMemoryContents(Print &output, uint16_t start, uint16_t le
         return;
     }
 
-    for (uint16_t offset = 0; offset < length; offset += bytesPerLine)
+    // offset is 32-bit so that stepping it by bytesPerLine cannot wrap at 65536
+    // and restart the range; the addresses derived from it stay 16-bit and are
+    // still allowed to wrap, which is how the Model 1 address space behaves.
+    for (uint32_t offset = 0;; offset += bytesPerLine)
     {
-        uint16_t lineLengthActual = (offset + bytesPerLine <= length)
-                                        ? bytesPerLine
-                                        : (length - offset);
+        uint16_t lineLengthActual = chunkLength(offset, length, bytesPerLine);
+        if (lineLengthActual == 0)
+            break;
 
         // Load from ROM
         for (uint16_t i = 0; i < lineLengthActual; ++i)
         {
-            buffer[i] = readMemory(start + offset + i);
+            buffer[i] = readMemory((uint16_t)(start + offset + i));
         }
 
         // Build the line string
         char *p = lineBuffer;
 
         // Address
-        uint16_t addr = relative ? offset : (start + offset);
+        uint16_t addr = relative ? (uint16_t)offset : (uint16_t)(start + offset);
         p += sprintf(p, "%04X: ", addr);
 
         // Hex bytes
@@ -1146,10 +1149,13 @@ bool Model1Class::dumpMemoryToSD(uint16_t address, uint16_t length, const char *
     const uint16_t CHUNK_SIZE = 64; // Read in 64-byte chunks
     uint16_t bytesWritten = 0;
 
-    for (uint16_t offset = 0; offset < length; offset += CHUNK_SIZE)
+    for (uint32_t offset = 0;; offset += CHUNK_SIZE)
     {
-        uint16_t chunkSize = (offset + CHUNK_SIZE <= length) ? CHUNK_SIZE : (length - offset);
-        uint16_t currentAddress = address + offset;
+        uint16_t chunkSize = chunkLength(offset, length, CHUNK_SIZE);
+        if (chunkSize == 0)
+            break;
+
+        uint16_t currentAddress = (uint16_t)(address + offset);
 
         // Read chunk from memory
         uint8_t *chunk = readMemory(currentAddress, chunkSize);

@@ -136,7 +136,11 @@ void ConsoleScreen::loop()
             Screen *newScreen = actionTaken(BUTTON_MENU, 0, 0);
             if (newScreen != nullptr)
             {
+                // setScreen() closes and deletes the current screen before it
+                // opens the new one, and the current screen is this one. Nothing
+                // below this call may touch a member again.
                 M1Shield.setScreen(newScreen);
+                return;
             }
         }
     }
