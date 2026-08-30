@@ -22,7 +22,7 @@ public:
     {
         va_list args;
         va_start(args, fmt);
-        _parent->_logMessage("INFO", _parent->COLOR_INFO, fmt, args);
+        _parent->_logMessage(_parent->_levelLabel(LoggerScreen::LEVEL_INFO), _parent->COLOR_INFO, fmt, args);
         va_end(args);
     }
 
@@ -31,7 +31,7 @@ public:
     {
         va_list args;
         va_start(args, fmt);
-        _parent->_logMessage("WARN", _parent->COLOR_WARN, fmt, args);
+        _parent->_logMessage(_parent->_levelLabel(LoggerScreen::LEVEL_WARN), _parent->COLOR_WARN, fmt, args);
         va_end(args);
     }
 
@@ -40,7 +40,7 @@ public:
     {
         va_list args;
         va_start(args, fmt);
-        _parent->_logMessage("ERR ", _parent->COLOR_ERROR, fmt, args);
+        _parent->_logMessage(_parent->_levelLabel(LoggerScreen::LEVEL_ERROR), _parent->COLOR_ERROR, fmt, args);
         va_end(args);
     }
 
@@ -49,7 +49,7 @@ public:
     {
         va_list args;
         va_start(args, fmt);
-        _parent->_logMessage("DEBUG", _parent->COLOR_DEBUG, fmt, args);
+        _parent->_logMessage(_parent->_levelLabel(LoggerScreen::LEVEL_DEBUG), _parent->COLOR_DEBUG, fmt, args);
         va_end(args);
     }
 
@@ -251,11 +251,33 @@ uint16_t LoggerScreen::getLogBufferCount() const
 }
 
 // Log informational messages
+// Level label for the current panel width
+const char *LoggerScreen::_levelLabel(LogLevel level) const
+{
+    // Padded to four characters so the columns line up. The adapter used to
+    // carry its own copy of these, spelling debug "DEBUG" -- five characters,
+    // breaking the alignment -- and never abbreviating on a small panel.
+    const bool small = isSmallDisplay();
+    switch (level)
+    {
+    case LEVEL_INFO:
+        return small ? "I" : "INFO";
+    case LEVEL_WARN:
+        return small ? "W" : "WARN";
+    case LEVEL_ERROR:
+        return small ? "E" : "ERR ";
+    case LEVEL_DEBUG:
+        return small ? "D" : "DBUG";
+    }
+
+    return "";
+}
+
 void LoggerScreen::info(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    _logMessage(isSmallDisplay() ? "I" : "INFO", COLOR_INFO, fmt, args);
+    _logMessage(_levelLabel(LEVEL_INFO), COLOR_INFO, fmt, args);
     va_end(args);
 }
 
@@ -264,7 +286,7 @@ void LoggerScreen::warn(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    _logMessage(isSmallDisplay() ? "W" : "WARN", COLOR_WARN, fmt, args);
+    _logMessage(_levelLabel(LEVEL_WARN), COLOR_WARN, fmt, args);
     va_end(args);
 }
 
@@ -273,7 +295,7 @@ void LoggerScreen::err(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    _logMessage(isSmallDisplay() ? "E" : "ERR ", COLOR_ERROR, fmt, args);
+    _logMessage(_levelLabel(LEVEL_ERROR), COLOR_ERROR, fmt, args);
     va_end(args);
 }
 
@@ -282,7 +304,7 @@ void LoggerScreen::debug(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    _logMessage(isSmallDisplay() ? "D" : "DBUG", COLOR_DEBUG, fmt, args);
+    _logMessage(_levelLabel(LEVEL_DEBUG), COLOR_DEBUG, fmt, args);
     va_end(args);
 }
 

@@ -41,6 +41,19 @@ private:
 
     void _logMessage(const char *level, uint16_t color, const char *fmt, va_list args); // Internal helper to format and display log messages
 
+public:
+    enum LogLevel
+    {
+        LEVEL_INFO,
+        LEVEL_WARN,
+        LEVEL_ERROR,
+        LEVEL_DEBUG
+    };
+
+    const char *_levelLabel(LogLevel level) const; // Level label sized for the current panel
+
+private:
+
     void _getTimestamp(char *buffer, size_t bufferSize); // Get current timestamp string for logging
 
     void _addToBuffer(const char *logLine, uint16_t color); // Add entry to circular buffer

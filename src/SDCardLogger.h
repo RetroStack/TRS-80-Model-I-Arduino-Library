@@ -18,7 +18,9 @@ private:
     const char *_filename;
     bool _silent = false; // Flag to suppress output when true
 
-    void _log(const char *fmt, va_list arguments); // Internal logging implementation with variable arguments
+    bool _warnedOpenFailed; // Only complain to Serial about an unopenable file once
+
+    void _log(const char *level, const char *fmt, va_list arguments); // Internal logging implementation with variable arguments
 
 public:
     SDCardLogger(const char *filename = "log.txt"); // Constructor with optional filename

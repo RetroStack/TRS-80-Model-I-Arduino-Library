@@ -11,6 +11,7 @@ SDCardLogger::SDCardLogger(const char *filename)
 {
     _filename = filename;
     _silent = false;
+    _warnedOpenFailed = false;
 }
 
 // Initialize SD card and prepare log file
@@ -26,19 +27,34 @@ bool SDCardLogger::begin()
 }
 
 // Internal logging method with format string and arguments
-void SDCardLogger::_log(const char *fmt, va_list arguments)
+void SDCardLogger::_log(const char *level, const char *fmt, va_list arguments)
 {
     const int LEN = 255;
     char buffer[LEN];
     vsnprintf(buffer, LEN, fmt, arguments);
 
-    // Open file in append mode
+    // One open per line, with the level prefix and the message written
+    // together. Writing the prefix in a separate open/close left an orphan
+    // "[INFO] " line behind whenever the second open failed, and doubled the
+    // card traffic for every line logged.
     File logFile = SD.open(_filename, FILE_WRITE);
-    if (logFile)
+    if (!logFile)
     {
-        logFile.println(buffer);
-        logFile.close();
+        // Logging appeared to work while nothing was recorded. Say so once,
+        // on the one output that is always available.
+        if (!_warnedOpenFailed)
+        {
+            _warnedOpenFailed = true;
+            Serial.print(F("SDCardLogger: cannot open "));
+            Serial.println(_filename);
+        }
+        return;
     }
+
+    _warnedOpenFailed = false;
+    logFile.print(level);
+    logFile.println(buffer);
+    logFile.close();
 }
 
 // Write single character to SD card log file
@@ -99,14 +115,7 @@ void SDCardLogger::info(const char *fmt, ...)
     va_list arguments;
     va_start(arguments, fmt);
 
-    File logFile = SD.open(_filename, FILE_WRITE);
-    if (logFile)
-    {
-        logFile.print("[INFO] ");
-        logFile.close();
-    }
-
-    _log(fmt, arguments);
+    _log("[INFO] ", fmt, arguments);
 
     va_end(arguments);
 }
@@ -120,14 +129,7 @@ void SDCardLogger::warn(const char *fmt, ...)
     va_list arguments;
     va_start(arguments, fmt);
 
-    File logFile = SD.open(_filename, FILE_WRITE);
-    if (logFile)
-    {
-        logFile.print("[WARN] ");
-        logFile.close();
-    }
-
-    _log(fmt, arguments);
+    _log("[WARN] ", fmt, arguments);
 
     va_end(arguments);
 }
@@ -141,14 +143,7 @@ void SDCardLogger::err(const char *fmt, ...)
     va_list arguments;
     va_start(arguments, fmt);
 
-    File logFile = SD.open(_filename, FILE_WRITE);
-    if (logFile)
-    {
-        logFile.print("[ERR ] ");
-        logFile.close();
-    }
-
-    _log(fmt, arguments);
+    _log("[ERR ] ", fmt, arguments);
 
     va_end(arguments);
 }
@@ -162,14 +157,7 @@ void SDCardLogger::debug(const char *fmt, ...)
     va_list arguments;
     va_start(arguments, fmt);
 
-    File logFile = SD.open(_filename, FILE_WRITE);
-    if (logFile)
-    {
-        logFile.print("[DBUG] ");
-        logFile.close();
-    }
-
-    _log(fmt, arguments);
+    _log("[DBUG] ", fmt, arguments);
 
     va_end(arguments);
 }
