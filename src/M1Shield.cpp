@@ -60,6 +60,7 @@ M1ShieldClass M1Shield;
 M1ShieldClass::M1ShieldClass() : _screen(nullptr),
                                  _displayProvider(nullptr),
                                  _logger(nullptr),
+                                 _displayTarget(nullptr),
                                  _menuPressed(0),
                                  _selectPressed(0),
                                  _upPressed(0),
@@ -82,6 +83,14 @@ M1ShieldClass::~M1ShieldClass()
         _screen->close();
         delete _screen;
         _screen = nullptr;
+    }
+
+    // Clean up display render target
+    if (_displayTarget)
+    {
+        _renderManager.removeRenderTarget(_displayTarget);
+        delete _displayTarget;
+        _displayTarget = nullptr;
     }
 
     // Clean up display instance if it exists through the provider
@@ -142,6 +151,34 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
     // Initialize display based on the selected type
     _screenWidth = provider.width();
     _screenHeight = provider.height();
+
+    // Create and add display render target
+    if (_displayTarget)
+    {
+        _renderManager.removeRenderTarget(_displayTarget);
+        delete _displayTarget;
+    }
+    
+    _displayTarget = new DisplayRenderTarget(&provider);
+    if (_displayTarget && _renderManager.addRenderTarget(_displayTarget))
+    {
+        if (_logger)
+        {
+            _logger->infoF(F("M1Shield: Display render target created and added"));
+        }
+    }
+    else
+    {
+        if (_logger)
+        {
+            _logger->warnF(F("M1Shield: Failed to create or add display render target"));
+        }
+        if (_displayTarget)
+        {
+            delete _displayTarget;
+            _displayTarget = nullptr;
+        }
+    }
 
     if (_logger)
     {
@@ -325,6 +362,12 @@ bool M1ShieldClass::setScreen(Screen *screen)
     }
 
     return true;
+}
+
+// Get reference to render manager
+RenderManager &M1ShieldClass::getRenderManager()
+{
+    return _renderManager;
 }
 
 // Set active LED state

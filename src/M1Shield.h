@@ -12,6 +12,8 @@
 #include "Screen.h"
 #include "DisplayProvider.h"
 #include "ILogger.h"
+#include "RenderManager.h"
+#include "DisplayRenderTarget.h"
 
 // RGB LED color enumeration for status indication
 enum LEDColor
@@ -47,6 +49,8 @@ private:
     Screen *_screen;                   // Currently active screen
     DisplayProvider *_displayProvider; // Display provider instance
     ILogger *_logger;                  // Logger instance for debugging output
+    RenderManager _renderManager;      // Manages multiple render targets
+    DisplayRenderTarget *_displayTarget; // Display render target (automatically created)
 
     // Button debouncing state tracking
     unsigned long _menuPressed;     // Last menu button press timestamp
@@ -95,6 +99,8 @@ public:
     uint16_t convertColor(uint16_t color); // Convert a color value for the current display type
 
     bool setScreen(Screen *screen); // Set the active screen and perform transition
+
+    RenderManager &getRenderManager(); // Get reference to render manager
 
     void setLEDColor(uint8_t r, uint8_t g, uint8_t b) const;         // Set RGB LED color using individual channel control
     void setLEDColor(LEDColor color, uint8_t intensity = 255) const; // Set RGB LED color using predefined color enumeration
