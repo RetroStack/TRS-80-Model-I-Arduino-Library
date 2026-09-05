@@ -38,3 +38,4 @@ ci-sketches/
 # Native test binaries
 extras/test/test_RenderManager
 extras/test/test_utils
+extras/test/*.d

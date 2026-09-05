@@ -94,11 +94,11 @@ int main() {
 
     // Capacity
     RenderManager full;
-    FakeTarget many[MAX_RENDER_TARGETS + 1] = {
+    FakeTarget many[RenderManager::MAX_RENDER_TARGETS + 1] = {
         {"0"},{"1"},{"2"},{"3"},{"4"},{"5"},{"6"},{"7"},{"8"}};
-    for (uint8_t i = 0; i < MAX_RENDER_TARGETS; i++) full.addRenderTarget(&many[i]);
-    CHECK(full.getRenderTargetCount() == MAX_RENDER_TARGETS, "fills to capacity");
-    CHECK(!full.addRenderTarget(&many[MAX_RENDER_TARGETS]), "rejects past capacity");
+    for (uint8_t i = 0; i < RenderManager::MAX_RENDER_TARGETS; i++) full.addRenderTarget(&many[i]);
+    CHECK(full.getRenderTargetCount() == RenderManager::MAX_RENDER_TARGETS, "fills to capacity");
+    CHECK(!full.addRenderTarget(&many[RenderManager::MAX_RENDER_TARGETS]), "rejects past capacity");
     CHECK(!full.addRenderTarget(nullptr), "rejects null");
 
     printf("Ordered insert keeps the layout authority at index 0\n");
