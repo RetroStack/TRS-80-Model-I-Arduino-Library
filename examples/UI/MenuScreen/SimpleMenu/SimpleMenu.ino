@@ -8,7 +8,9 @@
  * License: MIT
  */
 
-// STEP 1: Tell the system what display you have
+// First, tell the system which display you have.
+// Uncomment exactly one and comment out the rest.
+
 // For ST7789 240x320 displays (most common, landscape becomes 320x240)
 #include <Display_ST7789_320x240.h>
 Display_ST7789_320x240 displayProvider;

@@ -206,11 +206,12 @@ Display_ST7789_320x240 displayProvider;
 #include <M1Shield.h>
 #include "MyScreen.h"
 
-MyScreen myScreen;
-
 void setup() {
     M1Shield.begin(displayProvider);
-    M1Shield.setScreen(&myScreen);
+
+    // Always new, never a global: a global screen's constructor runs before
+    // begin() and before the display exists.
+    M1Shield.setScreen(new MyScreen());
 }
 
 void loop() {

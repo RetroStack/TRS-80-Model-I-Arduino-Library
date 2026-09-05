@@ -8,6 +8,7 @@
 #define RENDER_TARGET_H
 
 #include <Arduino.h>
+class DisplayProvider;
 #include <Adafruit_GFX.h>
 
 // A destination that screens can be drawn to.
@@ -37,7 +38,13 @@ public:
     virtual bool display() = 0;
 
     // Single home for the small-display rule, shared by every target.
-    bool isSmallDisplay() const { return getScreenHeight() <= 128; }
+    bool isSmallDisplay() const { return getScreenHeight() <= 128 || getScreenWidth() <= 128; }
+
+    // The provider behind this target, or nullptr for a target that is not a
+    // display panel -- a serial mirror, for instance. Lets M1Shield resolve the
+    // provider through the active target like every other display property,
+    // instead of answering from a field of its own that could disagree.
+    virtual DisplayProvider *getProvider() const { return nullptr; }
 };
 
 #endif /* RENDER_TARGET_H */

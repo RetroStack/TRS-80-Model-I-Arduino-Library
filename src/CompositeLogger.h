@@ -29,10 +29,10 @@ public:
     bool hasLogger(ILogger *logger) const; // Check if a specific logger is registered
 
     // ILogger interface implementation
-    void info(const char *fmt, ...) override;  // Log informational message to all registered loggers
-    void warn(const char *fmt, ...) override;  // Log warning message to all registered loggers
-    void err(const char *fmt, ...) override;   // Log error message to all registered loggers
-    void debug(const char *fmt, ...) override; // Log debug message to all registered loggers
+    void info(const char *fmt, ...) override __attribute__((format(printf, 2, 3)));  // Log informational message to all registered loggers
+    void warn(const char *fmt, ...) override __attribute__((format(printf, 2, 3)));  // Log warning message to all registered loggers
+    void err(const char *fmt, ...) override __attribute__((format(printf, 2, 3)));   // Log error message to all registered loggers
+    void debug(const char *fmt, ...) override __attribute__((format(printf, 2, 3))); // Log debug message to all registered loggers
 
     using ILogger::debug;
     using ILogger::err;

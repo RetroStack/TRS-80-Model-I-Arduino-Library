@@ -10,7 +10,7 @@ The `ILogger` interface provides a standardized logging system for the TRS-80 Mo
 - [Features](#features)
 - [Method Signatures](#method-signatures)
   - [Core Interface (Pure Virtual)](#core-interface-pure-virtual)
-  - [String Methods with Format Support](#string-methods-with-format-support)
+  - [String Methods](#string-methods)
   - [F() Macro Support (Flash Strings)](#f-macro-support-flash-strings)
   - [Print Interface](#print-interface)
 - [Usage Examples](#usage-examples)
@@ -33,7 +33,7 @@ The `ILogger` interface provides a standardized logging system for the TRS-80 Mo
 
 - **Multiple Log Levels**: `info()`, `warn()`, `err()`, and `debug()` methods for different message types
 - **Printf-style Formatting**: Support for format strings with variable arguments
-- **String Object Support**: Direct logging of Arduino `String` objects
+- **String Object Support**: Direct logging of Arduino `String` objects as plain messages
 - **F() Macro Support**: Memory-efficient logging of flash strings using the `F()` macro
 - **Print Interface**: Inherits from `Print` for direct character/buffer output
 
@@ -48,14 +48,21 @@ virtual void err(const char *fmt, ...) = 0;
 virtual void debug(const char *fmt, ...) = 0;
 ```
 
-### String Methods with Format Support
+### String Methods
 
 ```cpp
-void info(const String &fmt, ...);     // Log String format with arguments as info
-void warn(const String &fmt, ...);     // Log String format with arguments as warning
-void err(const String &fmt, ...);      // Log String format with arguments as error
-void debug(const String &fmt, ...);    // Log String format with arguments as debug
+void info(const String &message);      // Log a String as an info message
+void warn(const String &message);      // Log a String as a warning message
+void err(const String &message);       // Log a String as an error message
+void debug(const String &message);     // Log a String as a debug message
 ```
+
+These take the message itself, not a format string, and accept no additional
+arguments. A `String` is normally built at runtime, and treating runtime text as
+a format string turns any `%` it happens to contain -- in an SD filename, or a
+line read from a file -- into a directive that consumes arguments nobody passed.
+When you need formatting, put the format in a string literal or `F()` and pass
+the runtime value as an argument.
 
 ### F() Macro Support (Flash Strings)
 
@@ -105,12 +112,14 @@ logger->info(message);
 String errorMsg = "Failed to connect to " + serverName;
 logger->err(errorMsg);
 
-// String format strings with arguments
-String formatStr = "Sensor %d reading: %dC";
-logger->info(formatStr, sensorId, temperature);
+// Text that came from a file, a directory listing or a sensor name is safe to
+// log directly -- it is never interpreted as a format string.
+logger->info(entryName);
 
-String statusFormat = "Connection to %s: %s";
-logger->warn(statusFormat, serverName.c_str(), connected ? "OK" : "FAILED");
+// When you need formatting, the format itself is a literal or an F() string and
+// the runtime value is an argument.
+logger->info("Sensor %d reading: %dC", sensorId, temperature);
+logger->warnF(F("Connection to %s: %s"), serverName.c_str(), connected ? "OK" : "FAILED");
 ```
 
 ### F() Macro (Flash Strings)
@@ -142,7 +151,6 @@ logger->info("Temperature sensor initialized");                    // const char
 logger->infoF(F("Reading from sensor..."));                        // F() macro (simple)
 logger->info(String("Sensor: ") + sensor);                         // String object (simple)
 logger->info("Current temperature: %dC", temperature);            // const char* with formatting
-logger->info(String("Sensor %s temp: %dC"), sensor.c_str(), temperature); // String with formatting
 logger->infoF(F("Sensor %s reading: %dC"), sensor.c_str(), temperature);  // F() with formatting
 ```
 
@@ -150,7 +158,7 @@ logger->infoF(F("Sensor %s reading: %dC"), sensor.c_str(), temperature);  // F()
 
 - **const char\* methods**: No memory overhead, strings in program memory
 - **F() macro methods (`infoF`, `warnF`, `errF`)**: Format strings stored in flash memory, saves RAM significantly
-- **String object methods**: Use heap memory, convenient but less efficient
+- **String object methods**: Use heap memory, convenient but less efficient; they carry no format string, so they cost one extra `%s` pass and nothing more
 
 **Best Practices for Memory Efficiency:**
 

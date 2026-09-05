@@ -52,8 +52,8 @@
  * hardware architecture and timing requirements.
  */
 
-#ifndef MODEL1_LOWLEVEL_H
-#define MODEL1_LOWLEVEL_H
+#ifndef MODEL1_LOW_LEVEL_H
+#define MODEL1_LOW_LEVEL_H
 
 #include <Arduino.h>
 #include "port_config.h"
@@ -62,206 +62,46 @@
 class Model1LowLevel
 {
 public:
-    // ========== Control Signal Configuration Functions ==========
-    // Configure individual pins as INPUT or OUTPUT
-    // Parameters: outputMode - Use OUTPUT or INPUT constants
-
-    static inline void configWriteRAS(uint8_t outputMode)
-    {
-        if (outputMode == OUTPUT)
-            pinConfigWrite(RAS, OUTPUT);
-        else
-            pinConfigWrite(RAS, INPUT);
+    // ========== Control Signal Configuration and Write Functions ==========
+    //
+    // Four accessors per signal, identical but for the signal name, written out
+    // twelve times over. The pin macros in port_macros.h already paste tokens,
+    // so the same idiom generates them here: the emitted code, its `static
+    // inline` linkage and its inlining are exactly as before, but adding a
+    // signal is one line instead of four hand-copied functions.
+    //
+    // configWrite<SIG>(mode)  - configure the pin as INPUT or OUTPUT
+    // write<SIG>(value)       - drive the pin HIGH or LOW
+#define M1LL_SIGNAL(SIG)                                    \
+    static inline void configWrite##SIG(uint8_t outputMode) \
+    {                                                       \
+        if (outputMode == OUTPUT)                           \
+            pinConfigWrite(SIG, OUTPUT);                    \
+        else                                                \
+            pinConfigWrite(SIG, INPUT);                     \
+    }                                                       \
+    static inline void write##SIG(uint8_t value)            \
+    {                                                       \
+        if (value == HIGH)                                  \
+            pinWrite(SIG, HIGH);                            \
+        else                                                \
+            pinWrite(SIG, LOW);                             \
     }
 
-    static inline void configWriteCAS(uint8_t outputMode)
-    {
-        if (outputMode == OUTPUT)
-            pinConfigWrite(CAS, OUTPUT);
-        else
-            pinConfigWrite(CAS, INPUT);
-    }
+    M1LL_SIGNAL(RAS)
+    M1LL_SIGNAL(CAS)
+    M1LL_SIGNAL(MUX)
+    M1LL_SIGNAL(RD)
+    M1LL_SIGNAL(WR)
+    M1LL_SIGNAL(IN)
+    M1LL_SIGNAL(OUT)
+    M1LL_SIGNAL(INT)
+    M1LL_SIGNAL(TEST)
+    M1LL_SIGNAL(WAIT)
+    M1LL_SIGNAL(SYS_RES)
+    M1LL_SIGNAL(INT_ACK)
 
-    static inline void configWriteMUX(uint8_t outputMode)
-    {
-        if (outputMode == OUTPUT)
-            pinConfigWrite(MUX, OUTPUT);
-        else
-            pinConfigWrite(MUX, INPUT);
-    }
-
-    static inline void configWriteRD(uint8_t outputMode)
-    {
-        if (outputMode == OUTPUT)
-            pinConfigWrite(RD, OUTPUT);
-        else
-            pinConfigWrite(RD, INPUT);
-    }
-
-    static inline void configWriteWR(uint8_t outputMode)
-    {
-        if (outputMode == OUTPUT)
-            pinConfigWrite(WR, OUTPUT);
-        else
-            pinConfigWrite(WR, INPUT);
-    }
-
-    static inline void configWriteIN(uint8_t outputMode)
-    {
-        if (outputMode == OUTPUT)
-            pinConfigWrite(IN, OUTPUT);
-        else
-            pinConfigWrite(IN, INPUT);
-    }
-
-    static inline void configWriteOUT(uint8_t outputMode)
-    {
-        if (outputMode == OUTPUT)
-            pinConfigWrite(OUT, OUTPUT);
-        else
-            pinConfigWrite(OUT, INPUT);
-    }
-
-    static inline void configWriteINT(uint8_t outputMode)
-    {
-        if (outputMode == OUTPUT)
-            pinConfigWrite(INT, OUTPUT);
-        else
-            pinConfigWrite(INT, INPUT);
-    }
-
-    static inline void configWriteTEST(uint8_t outputMode)
-    {
-        if (outputMode == OUTPUT)
-            pinConfigWrite(TEST, OUTPUT);
-        else
-            pinConfigWrite(TEST, INPUT);
-    }
-
-    static inline void configWriteWAIT(uint8_t outputMode)
-    {
-        if (outputMode == OUTPUT)
-            pinConfigWrite(WAIT, OUTPUT);
-        else
-            pinConfigWrite(WAIT, INPUT);
-    }
-
-    static inline void configWriteSYS_RES(uint8_t outputMode)
-    {
-        if (outputMode == OUTPUT)
-            pinConfigWrite(SYS_RES, OUTPUT);
-        else
-            pinConfigWrite(SYS_RES, INPUT);
-    }
-
-    static inline void configWriteINT_ACK(uint8_t outputMode)
-    {
-        if (outputMode == OUTPUT)
-            pinConfigWrite(INT_ACK, OUTPUT);
-        else
-            pinConfigWrite(INT_ACK, INPUT);
-    }
-
-    // ========== Control Signal Writers ==========
-    // Set individual pins to HIGH or LOW state
-    // Parameters: value - Use HIGH or LOW constants
-    // Note: Pin must be configured as OUTPUT before setting
-
-    static inline void writeRAS(uint8_t value)
-    {
-        if (value == HIGH)
-            pinWrite(RAS, HIGH);
-        else
-            pinWrite(RAS, LOW);
-    }
-
-    static inline void writeCAS(uint8_t value)
-    {
-        if (value == HIGH)
-            pinWrite(CAS, HIGH);
-        else
-            pinWrite(CAS, LOW);
-    }
-
-    static inline void writeMUX(uint8_t value)
-    {
-        if (value == HIGH)
-            pinWrite(MUX, HIGH);
-        else
-            pinWrite(MUX, LOW);
-    }
-
-    static inline void writeRD(uint8_t value)
-    {
-        if (value == HIGH)
-            pinWrite(RD, HIGH);
-        else
-            pinWrite(RD, LOW);
-    }
-
-    static inline void writeWR(uint8_t value)
-    {
-        if (value == HIGH)
-            pinWrite(WR, HIGH);
-        else
-            pinWrite(WR, LOW);
-    }
-
-    static inline void writeIN(uint8_t value)
-    {
-        if (value == HIGH)
-            pinWrite(IN, HIGH);
-        else
-            pinWrite(IN, LOW);
-    }
-
-    static inline void writeOUT(uint8_t value)
-    {
-        if (value == HIGH)
-            pinWrite(OUT, HIGH);
-        else
-            pinWrite(OUT, LOW);
-    }
-
-    static inline void writeINT(uint8_t value)
-    {
-        if (value == HIGH)
-            pinWrite(INT, HIGH);
-        else
-            pinWrite(INT, LOW);
-    }
-
-    static inline void writeTEST(uint8_t value)
-    {
-        if (value == HIGH)
-            pinWrite(TEST, HIGH);
-        else
-            pinWrite(TEST, LOW);
-    }
-
-    static inline void writeWAIT(uint8_t value)
-    {
-        if (value == HIGH)
-            pinWrite(WAIT, HIGH);
-        else
-            pinWrite(WAIT, LOW);
-    }
-
-    static inline void writeSYS_RES(uint8_t value)
-    {
-        if (value == HIGH)
-            pinWrite(SYS_RES, HIGH);
-        else
-            pinWrite(SYS_RES, LOW);
-    }
-
-    static inline void writeINT_ACK(uint8_t value)
-    {
-        if (value == HIGH)
-            pinWrite(INT_ACK, HIGH);
-        else
-            pinWrite(INT_ACK, LOW);
-    }
+#undef M1LL_SIGNAL
 
     // ========== Control Signal Configuration Readers ==========
     // Read current pin configuration (INPUT/OUTPUT state)
@@ -441,4 +281,4 @@ public:
     }
 };
 
-#endif /* MODEL1_LOWLEVEL_H */
+#endif /* MODEL1_LOW_LEVEL_H */

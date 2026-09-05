@@ -4,26 +4,28 @@
  * Released under the MIT License.
  */
 
-#ifndef FILEBROWSER_H
-#define FILEBROWSER_H
+#ifndef FILE_BROWSER_H
+#define FILE_BROWSER_H
 
 #include <Arduino.h>
 #include <SD.h>
 #include "MenuScreen.h"
-#include "M1Shield.h"
 #include "TextFileViewer.h"
 #include "BinaryFileViewer.h"
-
-struct FileEntry
-{
-    String name;
-    bool isDirectory;
-    uint32_t size;
-};
 
 class FileBrowser : public MenuScreen
 {
 private:
+    // Private: this is FileBrowser's own record of a directory entry, not a
+    // type callers construct. It was at namespace scope and exported
+    // library-wide while being used only by the array below.
+    struct FileEntry
+    {
+        String name;
+        bool isDirectory;
+        uint32_t size;
+    };
+
     String _currentDirectory;       // Current directory path
     String _rootDirectory;          // Root directory (can't go above this)
     String _targetFilename;         // File to pre-select and scroll to
@@ -36,14 +38,13 @@ private:
     bool _hasRootRestriction;       // Whether root directory restriction is active
 
     // Dynamic array management
-    void _ensureFileCapacity(uint8_t minCapacity);          // Ensure _files array has minimum capacity
-    void _ensureTextExtensionCapacity(uint8_t minCapacity); // Ensure _textExtensions array has minimum capacity
+    bool _ensureFileCapacity(uint8_t minCapacity);          // Ensure _files array has minimum capacity; false if it could not grow
+    bool _ensureTextExtensionCapacity(uint8_t minCapacity); // Ensure _textExtensions array has minimum capacity; false if it could not grow
     void _cleanupArrays();                                  // Free allocated arrays
 
     // Directory operations
     bool _loadDirectoryContents();                                                    // Load files and directories into _files array
     bool _navigateToDirectory(const String &dir);                                     // Navigate to specified directory
-    bool _navigateUp();                                                               // Navigate to parent directory
     String _normalizePath(const String &path);                                        // Normalize directory path
     String _getParentDirectory(const String &path);                                   // Get parent directory path
     void _parseFilePath(const String &filePath, String &directory, String &filename); // Parse file path into directory and filename components
@@ -70,12 +71,13 @@ public:
     // Directory navigation
     bool navigateToDirectory(const String &directory); // Public method to navigate to directory
     String getCurrentDirectory() const;                // Get current directory path
-    void refresh();                                    // Refresh current directory contents
+    void reloadDirectory();                            // Reload the current directory from the card
 
 protected:
     bool open() override;                                        // Initialize and load directory
+    bool _isMenuItemEnabled(uint8_t index) const override; // The empty-folder placeholder is not selectable
     Screen *_getSelectedMenuItemScreen(int index) override;      // Handle file/directory selection
     const char *_getMenuItemConfigValue(uint8_t index) override; // Show file sizes
 };
 
-#endif /* FILEBROWSER_H */
+#endif /* FILE_BROWSER_H */

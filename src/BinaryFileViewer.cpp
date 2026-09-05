@@ -16,13 +16,15 @@ BinaryFileViewer::BinaryFileViewer(const char *filename)
     _fileOpen = false;
     _pageBuffer = nullptr;
     _bufferSize = 0;
+    _pageLines = 0;
+    _pageBytesPerLine = 0;
     _bytesInBuffer = 0;
 
     // Set default title
     setTitleF(F("Binary File Viewer"));
 
     // Set default button items
-    const char *buttons[] = {"Up:Prev", "Dn:Next"};
+    const char *buttons[] = {"[M] Back", "[^v] Page"};
     setButtonItems(buttons, 2);
 }
 
@@ -68,16 +70,25 @@ bool BinaryFileViewer::_loadCurrentPage()
         return false;
     }
 
-    // Calculate page size if not done yet
+    // Capture the page geometry once, from whatever target is authoritative at
+    // the time -- outside a render pass that is the primary. _drawContent()
+    // runs inside a pass and used to re-derive rows and bytes-per-row from the
+    // target being drawn, so a narrower secondary panel drew a different number
+    // of bytes than nextPage() advanced by: pages skipped bytes and the address
+    // column disagreed with the data beside it.
     if (_bufferSize == 0)
     {
-        _bufferSize = _getPageSize();
+        _pageLines = _getLinesPerPage();
+        _pageBytesPerLine = _getBytesPerLine();
+        _bufferSize = _pageLines * _pageBytesPerLine;
         _pageBuffer = (uint8_t *)malloc(_bufferSize);
         if (!_pageBuffer)
         {
             // Reset the size too - otherwise the guard above is skipped on the
             // next call and _file.read() is handed a null destination.
             _bufferSize = 0;
+            _pageLines = 0;
+            _pageBytesPerLine = 0;
             return false;
         }
     }
@@ -101,6 +112,8 @@ void BinaryFileViewer::_freePageBuffer()
         free(_pageBuffer);
         _pageBuffer = nullptr;
         _bufferSize = 0;
+        _pageLines = 0;
+        _pageBytesPerLine = 0;
         _bytesInBuffer = 0;
     }
 }
@@ -152,7 +165,14 @@ uint16_t BinaryFileViewer::_getBytesPerLine() const
 
 uint32_t BinaryFileViewer::_getPageSize() const
 {
-    return _getLinesPerPage() * _getBytesPerLine();
+    // The captured unit once a page has been loaded, so paging and drawing
+    // always agree; the derived one before that, to size the first buffer.
+    if (_bufferSize != 0)
+    {
+        return _bufferSize;
+    }
+
+    return (uint32_t)_getLinesPerPage() * _getBytesPerLine();
 }
 
 // Display methods
@@ -166,8 +186,8 @@ void BinaryFileViewer::_drawContent()
         // Try to open file first
         if (!_openFile())
         {
-            drawTextF(10, 10, F("Error: Could not open file"), M1Shield.convertColor(0xF800), 1);
-            drawText(10, 25, _filename, M1Shield.convertColor(0xF800), 1);
+            drawTextF(10, 10, F("Error: Could not open file"), 0xF800, 1);
+            drawText(10, 25, _filename, 0xF800, 1);
             return;
         }
     }
@@ -175,7 +195,7 @@ void BinaryFileViewer::_drawContent()
     // Load current page if needed
     if (!_loadCurrentPage())
     {
-        drawTextF(10, 10, F("Error loading file data"), M1Shield.convertColor(0xF800), 1);
+        drawTextF(10, 10, F("Error loading file data"), 0xF800, 1);
         return;
     }
 
@@ -186,15 +206,19 @@ void BinaryFileViewer::_displayBinaryContent()
 {
     if (!_fileOpen || !_pageBuffer)
     {
-        drawTextF(10, 10, F("File not available"), M1Shield.convertColor(0xFFFF), 1);
+        drawTextF(10, 10, F("File not available"), 0xFFFF, 1);
         return;
     }
 
-    uint16_t linesPerPage = _getLinesPerPage();
-    uint16_t bytesPerLine = _getBytesPerLine();
+    // Captured geometry, so every target draws the page that was actually
+    // loaded and simply clips if it is narrower.
+    uint16_t linesPerPage = (_pageLines > 0) ? _pageLines : _getLinesPerPage();
+    uint16_t bytesPerLine = (_pageBytesPerLine > 0) ? _pageBytesPerLine : _getBytesPerLine();
     uint16_t lineHeight = 8; // Text size 1 line height
-    uint16_t startX = _getContentLeft() + 5;
-    uint16_t startY = _getContentTop() + 5;
+    // drawText() adds the content origin itself; these were absolute, so the
+    // dump started a second header height down the panel.
+    uint16_t startX = 5;
+    uint16_t startY = 5;
 
     // Display hex dump
     for (uint16_t line = 0; line < linesPerPage; line++)
@@ -204,7 +228,7 @@ void BinaryFileViewer::_displayBinaryContent()
         uint16_t currentY = startY + (line * lineHeight);
 
         // Stop if we've reached end of buffer or content area
-        if (lineStartInBuffer >= _bytesInBuffer || currentY >= (_getContentTop() + _getContentHeight() - lineHeight))
+        if (lineStartInBuffer >= _bytesInBuffer || currentY >= (_getContentHeight() - lineHeight))
             break;
 
         uint16_t currentX = startX;
@@ -229,7 +253,7 @@ void BinaryFileViewer::_displayBinaryContent()
         addressPart += ": ";
 
         // Draw address in yellow
-        drawText(currentX, currentY, addressPart, M1Shield.convertColor(0xFFE0), 1);
+        drawText(currentX, currentY, addressPart, 0xFFE0, 1);
         currentX += addressPart.length() * 6; // 6 pixels per character
 
         // Build and display hex bytes
@@ -252,7 +276,7 @@ void BinaryFileViewer::_displayBinaryContent()
         }
 
         // Draw hex bytes in cyan
-        drawText(currentX, currentY, hexPart, M1Shield.convertColor(0x07FF), 1);
+        drawText(currentX, currentY, hexPart, 0x07FF, 1);
         currentX += hexPart.length() * 6;
 
         // Build and display ASCII representation
@@ -283,7 +307,7 @@ void BinaryFileViewer::_displayBinaryContent()
         }
 
         // Draw ASCII in white
-        drawText(currentX, currentY, asciiPart, M1Shield.convertColor(0xFFFF), 1);
+        drawText(currentX, currentY, asciiPart, 0xFFFF, 1);
     }
 }
 
@@ -393,11 +417,14 @@ bool BinaryFileViewer::open()
 
     if (_openFile())
     {
+        _clearErrorState();
         refresh();
     }
     else
     {
-        notifyF(F("Error: Could not open file"));
+        // A notification expires; this screen would then show an empty grid
+        // with no explanation. Keep the reason on screen instead.
+        _setErrorState(F("Cannot open file"));
     }
 
     return true;
@@ -413,10 +440,12 @@ Screen *BinaryFileViewer::actionTaken(ActionTaken action, int8_t offsetX, int8_t
         return nullptr;
     }
 
-    if (action & BUTTON_MENU)
+    // The menu button is advertised as back on every one of these screens; it
+    // used to fall through and return nullptr, leaving the screen with no exit.
+    Screen *backScreen = _handleBackAction(action);
+    if (backScreen != nullptr)
     {
-        // Return to previous screen or close
-        return nullptr;
+        return backScreen;
     }
 
     if (action & UP_ANY)
@@ -449,12 +478,6 @@ Screen *BinaryFileViewer::actionTaken(ActionTaken action, int8_t offsetX, int8_t
         return nullptr;
     }
 
-    if (action & BUTTON_SELECT)
-    {
-        // Future: Could implement search or goto offset functionality
-        notifyF(F("SELECT: Feature not implemented"));
-        return nullptr;
-    }
 
     return nullptr;
 }

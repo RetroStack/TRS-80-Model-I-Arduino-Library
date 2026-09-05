@@ -6,6 +6,7 @@
 
 #include "Screen.h"
 #include "M1Shield.h"
+#include "utils.h"
 #include <Adafruit_GFX.h>
 
 // Constructor - initialize screen as inactive
@@ -84,10 +85,19 @@ void Screen::refresh()
     }
 }
 
-// Check if current display is small (height <= 128 pixels)
+// Check if current display is small (either dimension <= 128 pixels)
 bool Screen::isSmallDisplay() const
 {
-    return M1Shield.getScreenHeight() <= 128;
+    // The rule lives on RenderTarget, which documents itself as its single
+    // home; this used to re-derive it, so there were two definitions and the
+    // documented one had no callers at all.
+    RenderTarget *target = M1Shield.getRenderManager().getActiveTarget();
+    if (target != nullptr)
+    {
+        return target->isSmallDisplay();
+    }
+
+    return M1Shield.getScreenHeight() <= 128 || M1Shield.getScreenWidth() <= 128;
 }
 
 // Set screen title/name
@@ -128,10 +138,8 @@ void Screen::setTitleF(const __FlashStringHelper *title)
         return;
     }
 
-    // Get length and allocate buffer
-    size_t len = strlen_P((const char *)title);
-    char *buffer = (char *)malloc(len + 1);
-    if (buffer == nullptr)
+    FlashBuffer copy(title);
+    if (!copy.valid())
     {
         if (getLogger())
         {
@@ -143,14 +151,7 @@ void Screen::setTitleF(const __FlashStringHelper *title)
         return;
     }
 
-    // Copy from flash to RAM buffer
-    strcpy_P(buffer, (const char *)title);
-
-    // Delegate to regular setTitle method
-    setTitle(buffer);
-
-    // Free temporary buffer
-    free(buffer);
+    setTitle(copy.c_str());
 }
 
 // Clear the current title

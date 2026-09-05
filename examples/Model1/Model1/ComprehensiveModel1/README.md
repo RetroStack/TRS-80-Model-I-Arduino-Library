@@ -6,7 +6,7 @@ This example demonstrates advanced Model1 class capabilities for comprehensive T
 
 - Advanced bus control techniques and timing optimization
 - Comprehensive system diagnostics and performance analysis
-- Interrupt handling and timing measurement
+- Interrupt handling and timing measurement (see the known limitation below)
 - Signal integrity testing and analysis
 - Power and timing measurements
 - Advanced hardware interface techniques
@@ -158,3 +158,11 @@ This comprehensive hardware analysis pairs well with:
 - **System Integration**: Foundation for complex applications
 
 The comprehensive Model1 example provides professional-grade hardware interface capabilities for advanced TRS-80 system development and analysis.
+
+## Known Limitation
+
+`demonstrateInterruptOperations()` currently reports `TIMEOUT` for every vector.
+The underlying `Model1.triggerInterrupt()` is fully implemented; whether the
+fault is the timeout window, the bus state the demonstration leaves behind, or
+the Model 1 side has not been established on hardware. The rest of the sketch is
+unaffected -- treat that section as a work in progress rather than a reference.

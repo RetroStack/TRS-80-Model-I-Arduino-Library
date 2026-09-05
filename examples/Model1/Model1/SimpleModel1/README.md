@@ -52,7 +52,7 @@ This simple example provides a foundation for TRS-80 hardware interface:
 #include <Model1.h>
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(115200);
     Model1.begin();                 // Initialize hardware
     Model1.activateTestSignal();    // Take bus control
 }

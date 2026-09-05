@@ -8,6 +8,33 @@
 #include <SD.h>
 #include "M1Shield.h"
 
+// Longest line this viewer will keep. A file with no newline in it -- any
+// binary renamed .txt -- otherwise grows a single String one realloc per byte
+// until only avr-libc's malloc margin separates the heap from the stack.
+constexpr uint16_t MAX_LINE_LENGTH = 512;
+
+// Read one newline-terminated line, discarding anything past the cap.
+static String readLineCapped(File &file)
+{
+    String line;
+    line.reserve(64);
+
+    while (file.available())
+    {
+        char c = (char)file.read();
+        if (c == '\n')
+        {
+            break;
+        }
+        if (line.length() < MAX_LINE_LENGTH)
+        {
+            line += c;
+        }
+    }
+
+    return line;
+}
+
 // Constructor
 TextFileViewer::TextFileViewer(const char *filename) : ContentScreen()
 {
@@ -39,8 +66,8 @@ TextFileViewer::TextFileViewer(const char *filename) : ContentScreen()
     setTitleF(F("Text File Viewer"));
 
     // Set default button items
-    const char *buttonLabels[] = {"Up/Dn:Page", "Lf/Rt:Scroll", "Sel:AutoPage"};
-    setButtonItems(buttonLabels, 3);
+    const char *buttonLabels[] = {"[M] Back", "[^v] Page", "[<>] Scroll", "[S] Auto"};
+    setButtonItems(buttonLabels, 4);
 }
 
 // Destructor
@@ -71,11 +98,26 @@ void TextFileViewer::setBackgroundColor(uint16_t color)
 
 void TextFileViewer::setTextSize(uint8_t size)
 {
+    if (size == 0)
+    {
+        return; // A zero size divides by zero in _calculateLayout()
+    }
+
     _textSize = size;
     _lineHeight = 8 * size; // Adjust line height based on text size
     _charWidth = 6 * size;  // Adjust character width based on text size
     _calculateLayout();     // Recalculate layout with new text size
-    _loadCurrentPage();     // Reload current page with new layout
+
+    // The page count depends on _maxLinesPerPage, which just changed. Leaving
+    // it stale made the tail of the file unreachable when the text grew, and
+    // underflowed the line count on the last page when it shrank.
+    _totalPages = _calculateTotalPages();
+    if (_totalPages > 0 && _currentPage >= _totalPages)
+    {
+        _currentPage = _totalPages - 1;
+    }
+
+    _loadCurrentPage(); // Reload current page with new layout
 }
 
 // Navigation methods
@@ -192,10 +234,12 @@ bool TextFileViewer::open()
 
     _calculateLayout();
 
+    // Returning false here deletes the screen and leaves the device with none,
+    // so a file the browser could not read froze it. Stay open and say so.
     if (!_countFileLines())
     {
-        notifyF(F("Failed to read file"));
-        return false;
+        _setErrorState(F("Cannot read file"));
+        return true;
     }
 
     _totalPages = _calculateTotalPages();
@@ -203,9 +247,11 @@ bool TextFileViewer::open()
 
     if (!_loadCurrentPage())
     {
-        notifyF(F("Failed to load file content"));
-        return false;
+        _setErrorState(F("Cannot load file"));
+        return true;
     }
+
+    _clearErrorState();
 
     // ContentScreen::open() drew the screen before the file was counted and
     // loaded, so the first frame showed an empty page. Redraw now that there
@@ -242,23 +288,29 @@ void TextFileViewer::loop()
 
 void TextFileViewer::_drawContent()
 {
+    // drawText()/drawTextF() take content-relative coordinates and add the
+    // content origin themselves; passing absolute ones shifted everything down
+    // by a second header height.
     if (!isFileLoaded())
     {
-        drawTextF(_getContentLeft() + 10, _getContentTop() + 20, F("No file loaded"), _textColor, _textSize);
+        drawTextF(10, 20, F("No file loaded"), _textColor, _textSize);
         return;
     }
 
     if (_linesOnCurrentPage == 0)
     {
-        drawTextF(_getContentLeft() + 10, _getContentTop() + 20, F("Page is empty"), _textColor, _textSize);
+        drawTextF(10, 20, F("Page is empty"), _textColor, _textSize);
         return;
     }
 
+    // Last row belongs to the status line
+    uint16_t textHeight = (_getContentHeight() > _lineHeight) ? (_getContentHeight() - _lineHeight) : 0;
+
     // Draw lines for current page
-    uint16_t yPos = _getContentTop();
+    uint16_t yPos = 0;
     for (uint16_t i = 0; i < _linesOnCurrentPage; i++)
     {
-        if (yPos + _lineHeight <= _getContentTop() + _getContentHeight())
+        if (yPos + _lineHeight <= textHeight)
         {
             String displayLine = _currentPageLines[i];
 
@@ -272,13 +324,13 @@ void TextFileViewer::_drawContent()
                 displayLine = ""; // Line is shorter than scroll offset
             }
 
-            drawText(_getContentLeft() + 5, yPos, displayLine, _textColor, _textSize);
+            drawText(5, yPos, displayLine, _textColor, _textSize);
             yPos += _lineHeight;
         }
     }
 
-    // Show status information in footer area if available
-    if (_getFooterHeight() > 0)
+    // Status line, in the row reserved for it at the bottom of the content
+    if (textHeight > 0)
     {
         String statusInfo = "Page " + String(getCurrentPage()) + "/" + String(getTotalPages());
         if (_horizontalOffset > 0)
@@ -290,14 +342,7 @@ void TextFileViewer::_drawContent()
             statusInfo += " | Auto";
         }
 
-        // Clear footer area first
-        M1Shield.getGFX().fillRect(0, _getFooterTop(), M1Shield.getScreenWidth(), _getFooterHeight(), M1Shield.convertColor(_backgroundColor));
-
-        // Draw status text
-        M1Shield.getGFX().setCursor(5, _getFooterTop() + 5);
-        M1Shield.getGFX().setTextColor(M1Shield.convertColor(0x7BEF));
-        M1Shield.getGFX().setTextSize(1);
-        M1Shield.getGFX().print(statusInfo);
+        drawText(5, textHeight, statusInfo, 0x7BEF, 1);
     }
 }
 
@@ -309,6 +354,14 @@ Screen *TextFileViewer::actionTaken(ActionTaken action, int8_t offsetX, int8_t o
     if (!isActive())
     {
         return nullptr;
+    }
+
+    // The menu button is advertised as back on every one of these screens; it
+    // used to fall through and return nullptr, leaving the screen with no exit.
+    Screen *backScreen = _handleBackAction(action);
+    if (backScreen != nullptr)
+    {
+        return backScreen;
     }
 
     // Handle navigation actions
@@ -390,14 +443,14 @@ bool TextFileViewer::_loadCurrentPage()
     uint32_t currentLine = 0;
     while (file.available() && currentLine < startLine)
     {
-        file.readStringUntil('\n');
+        readLineCapped(file);
         currentLine++;
     }
 
     // Read lines for current page
     while (file.available() && _linesOnCurrentPage < linesToRead)
     {
-        String line = file.readStringUntil('\n');
+        String line = readLineCapped(file);
         // Remove carriage return if present
         if (line.endsWith("\r"))
         {
@@ -450,15 +503,33 @@ bool TextFileViewer::_countFileLines()
         return false;
     }
 
-    // Count lines without loading content
+    // Count lines without loading content. This reads the whole file, which is
+    // seconds on a large one, and used to show nothing at all -- the progress
+    // bar existed but no library operation ever drove it.
     _totalFileLines = 0;
     _lastFileSize = file.size();
+    const uint32_t totalBytes = _lastFileSize;
+    uint8_t lastShown = 0;
+
+    setProgressValue(0);
 
     while (file.available())
     {
-        file.readStringUntil('\n');
+        readLineCapped(file);
         _totalFileLines++;
+
+        if (totalBytes > 0)
+        {
+            uint8_t percent = (uint8_t)(((uint32_t)file.position() * 100) / totalBytes);
+            if (percent != lastShown)
+            {
+                lastShown = percent;
+                setProgressValue(percent);
+            }
+        }
     }
+
+    setProgressValue(100);
 
     file.close();
     return true;
@@ -474,7 +545,11 @@ uint32_t TextFileViewer::_calculateTotalPages()
 
 void TextFileViewer::_calculateLayout()
 {
+    // The status line is drawn as the last row of the content area. It used to
+    // go into the footer rect, which _drawScreen() paints over immediately
+    // afterwards with the button labels, so it was never visible.
     uint16_t contentHeight = _getContentHeight();
+    contentHeight = (contentHeight > _lineHeight) ? (contentHeight - _lineHeight) : 0;
     _maxLinesPerPage = contentHeight / _lineHeight;
 
     // Ensure at least one line per page
@@ -511,8 +586,3 @@ bool TextFileViewer::_checkFileUpdate()
     return fileChanged;
 }
 
-void TextFileViewer::_updateMaxLineLength()
-{
-    // This is handled in _loadCurrentPage() for efficiency
-    // No need for separate implementation since we only load current page
-}

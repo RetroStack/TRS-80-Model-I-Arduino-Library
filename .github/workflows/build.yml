@@ -6,13 +6,17 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Nothing here writes to the repository; the default token scope is wider.
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Arduino Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: arduino/arduino-lint-action@v1
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: arduino/arduino-lint-action@e9a30879471dcbf7d9fe3481b26e60b652cca297 # v1.0.2
         with:
           library-manager: update
 
@@ -20,7 +24,7 @@ jobs:
     name: Native tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Run native tests
         run: make -C extras/test
 
@@ -28,8 +32,8 @@ jobs:
     name: Compile examples
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: arduino/compile-sketches@v1
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: arduino/compile-sketches@d7af6619a62e765d91f0a4d65b40cf061537a15d # v1.1.3
         with:
           fqbn: arduino:avr:mega
           sketch-paths: |
@@ -37,9 +41,17 @@ jobs:
           libraries: |
             - source-path: ./
             - name: Adafruit GFX Library
+              version: 1.12.6
             - name: Adafruit ST7735 and ST7789 Library
+              version: 1.11.0
             - name: Adafruit BusIO
+              version: 1.17.4
             - name: SD
+              version: 1.3.0
+          # Informational only: this reports warnings, it does not fail the
+          # job. A real gate would mean -Werror, and the Adafruit drivers
+          # themselves emit warnings (-Wdelete-non-virtual-dtor among them), so
+          # those would have to be quietened first. Read the report on a PR.
           enable-warnings-report: true
 
   compile-providers:
@@ -63,7 +75,7 @@ jobs:
           - Display_SSD1306
           - Display_SH1106
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Generate a sketch for ${{ matrix.provider }}
         run: |
@@ -86,7 +98,7 @@ jobs:
           sed -i "s/PROVIDER/${{ matrix.provider }}/g" "$dir/${{ matrix.provider }}.ino"
           cat "$dir/${{ matrix.provider }}.ino"
 
-      - uses: arduino/compile-sketches@v1
+      - uses: arduino/compile-sketches@d7af6619a62e765d91f0a4d65b40cf061537a15d # v1.1.3
         with:
           fqbn: arduino:avr:mega
           sketch-paths: |
@@ -94,10 +106,18 @@ jobs:
           libraries: |
             - source-path: ./
             - name: Adafruit GFX Library
+              version: 1.12.6
             - name: Adafruit ST7735 and ST7789 Library
+              version: 1.11.0
             - name: Adafruit BusIO
+              version: 1.17.4
             - name: Adafruit ILI9341
+              version: 1.6.3
             - name: Adafruit HX8357 Library
+              version: 1.1.20
             - name: Adafruit SSD1306
+              version: 2.5.17
             - name: Adafruit SH110X
+              version: 2.1.15
             - name: SD
+              version: 1.3.0

@@ -11,7 +11,6 @@
 #include "ILogger.h"
 #include "AddressBus.h"
 #include "DataBus.h"
-#include "M1Shield.h"
 
 // Print style enumeration for memory output formatting
 enum PRINT_STYLE
@@ -85,18 +84,18 @@ public:
 
     // ---------- Memory
     uint8_t readMemory(uint16_t address);             // Read byte from memory
-    void writeMemory(uint16_t address, uint8_t data); // Write byte to memory
+    bool writeMemory(uint16_t address, uint8_t data); // Write byte to memory; false if the bus is not mutable
     // Returns a newly allocated buffer; caller must free() the result
     uint8_t *readMemory(uint16_t address, uint16_t length);                                             // Read memory block
-    void writeMemory(uint16_t address, uint8_t *data, uint16_t length);                                 // Write memory block
-    void writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint16_t offset);                // Write memory block with offset
-    void copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length);                       // Copy memory between addresses
-    void fillMemory(uint8_t fill_data, uint16_t address, uint16_t length);                              // Fill memory with byte value
-    void fillMemory(uint8_t *fill_data, uint16_t length, uint16_t address, uint16_t length_in_bytes);   // Fill memory with repeating pattern
+    bool writeMemory(uint16_t address, uint8_t *data, uint16_t length);                                 // Write memory block; false if refused
+    bool writeMemory(uint16_t address, uint8_t *data, uint16_t length, uint16_t offset);                // Write memory block with offset; false if refused
+    bool copyMemory(uint16_t src_address, uint16_t dst_address, uint16_t length);                       // Copy memory between addresses; false if refused
+    bool fillMemory(uint8_t fill_data, uint16_t address, uint16_t length);                              // Fill memory with byte value; false if refused
+    bool fillMemory(uint8_t *fill_data, uint16_t length, uint16_t address, uint16_t length_in_bytes);   // Fill memory with repeating pattern; false if refused
 
     // ---------- IO
     uint8_t readIO(uint8_t address);             // Read from I/O port
-    void writeIO(uint8_t address, uint8_t data); // Write to I/O port
+    bool writeIO(uint8_t address, uint8_t data); // Write to I/O port; false if the bus is not mutable
 
     // ---------- System Control Signals
     bool readSystemResetSignal();          // Read system reset signal state
@@ -108,7 +107,7 @@ public:
     void deactivateInterruptRequestSignal();                           // Deactivate interrupt request signal
 
     // ---------- Test Signal
-    bool hasActiveTestSignal();  // Check if test signal is active
+    bool hasActiveTestSignal() const;  // Check if test signal is active
     void activateTestSignal();   // Activate test signal
     void deactivateTestSignal(); // Deactivate test signal
 
@@ -118,13 +117,13 @@ public:
 
     // ---------- State
     char *getState();              // Get current state as string
-    uint64_t getStateData();       // Get state data as 64-bit value
-    uint64_t getStateConfigData(); // Get configuration state data
+    uint64_t getStateData() const;       // Get state data as 64-bit value
+    uint64_t getStateConfigData() const; // Get configuration state data
     void logState();               // Log current state to logger
 
-    uint8_t getVersionMajor();    // Get major version number
-    uint8_t getVersionMinor();    // Get minor version number
-    uint8_t getVersionRevision(); // Get revision number
+    uint8_t getVersionMajor() const;    // Get major version number
+    uint8_t getVersionMinor() const;    // Get minor version number
+    uint8_t getVersionRevision() const; // Get revision number
     char *getVersion();           // Get full version string
 
     void printMemoryContents(uint16_t start, uint16_t length, PRINT_STYLE style = BOTH, bool relative = false, uint16_t bytesPerLine = 32);                // Print memory contents to serial

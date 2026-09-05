@@ -52,7 +52,6 @@ public:
     // Utility methods for demo functionality
     Screen *launchSelectedDemo();
     const char *getDemoName();
-    void drawNavigationInfo();
 };
 
 #endif /* COMPREHENSIVE_SCREEN_H */

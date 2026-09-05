@@ -52,7 +52,7 @@ This simple example provides a foundation for serial-based debugging:
 SerialLogger logger;
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(115200);
     Model1.begin();
     Model1.setLogger(logger);  // Register with Model1
 }

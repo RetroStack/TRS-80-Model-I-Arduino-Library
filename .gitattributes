@@ -1,0 +1,12 @@
+# Normalize line endings. Eight files in src/ were committed with CRLF while the
+# other thirty-two used LF, which nothing in the toolchain catches and which
+# turns an unrelated edit into a whole-file diff.
+* text=auto eol=lf
+
+# Binary assets must not be touched.
+*.stl    binary
+*.png    binary
+*.zip    binary
+*.kicad_pcb binary
+*.kicad_sch binary
+*.kicad_pro binary

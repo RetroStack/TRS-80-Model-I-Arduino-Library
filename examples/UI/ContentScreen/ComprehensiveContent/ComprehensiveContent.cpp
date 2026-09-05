@@ -458,7 +458,7 @@ Screen *ComprehensiveContent::actionTaken(ActionTaken action, int8_t offsetX, in
         }
         if (action & BUTTON_RIGHT)
         {
-            interactiveX = min(M1Shield.getDisplayProvider().width() - 30, interactiveX + 5);
+            interactiveX = min(M1Shield.getDisplayProvider().getScreenWidth() - 30, interactiveX + 5);
             refreshContent();
             return nullptr;
         }
@@ -630,21 +630,6 @@ const char *ComprehensiveContent::getModeTitle(ContentMode mode)
         return "Settings";
     default:
         return "About";
-    }
-}
-
-const char *ComprehensiveContent::getModeFooter(ContentMode mode)
-{
-    switch (mode)
-    {
-    case MODE_MAIN_MENU:
-        return "Up/Down: Navigate | Menu: Select";
-    case MODE_INTERACTIVE_DEMO:
-        return "Arrows: Move | Menu: Exit";
-    case MODE_SETTINGS:
-        return "Up/Down: Navigate | Menu: Toggle";
-    default:
-        return "Left: Back | Menu: Select";
     }
 }
 

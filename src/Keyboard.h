@@ -30,4 +30,4 @@ public:
   uint8_t getFirstJustPressedKey(); // Get first key that was just pressed (0 if none)
 };
 
-#endif // KEYBOARD_H
+#endif /* KEYBOARD_H */

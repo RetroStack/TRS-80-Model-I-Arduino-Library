@@ -5,18 +5,16 @@
  */
 
 #include "MenuScreen.h"
+#include "utils.h"
 #include "M1Shield.h"
 #include <Adafruit_GFX.h>
 
 // Display Configuration Constants
 constexpr uint8_t TEXT_SIZE_1_WIDTH = 6;       // Width of size-1 text characters
-constexpr uint8_t TEXT_SIZE_1_HALF_HEIGHT = 3; // Half-height of size-1 text for centering
 
 constexpr uint8_t TEXT_SIZE_2_WIDTH = 12;      // Width of size-2 text characters
 constexpr uint8_t TEXT_SIZE_2_HALF_HEIGHT = 6; // Half-height of size-2 text for centering
 
-constexpr uint8_t TEXT_SIZE_3_WIDTH = 18;      // Width of size-3 text characters
-constexpr uint8_t TEXT_SIZE_3_HALF_HEIGHT = 8; // Half-height of size-3 text for centering
 
 // Menu Layout Constants
 constexpr uint16_t ROW_HEIGHT = 26;                       // Height of each menu row in pixels
@@ -45,7 +43,7 @@ MenuScreen::MenuScreen() : ContentScreen()
 
     // Set default button labels - can be overridden by derived classes
     const char *buttonItems[2] = {
-        "[M/<] Exit ", "[>] Select"};
+        "[M] Exit", "[<>] Select"};
     setButtonItems(buttonItems, 2);
 }
 
@@ -67,38 +65,7 @@ uint8_t MenuScreen::_getItemsPerPage() const
 
 uint8_t MenuScreen::_findNextEnabledItem(uint8_t startIndex, bool forward) const
 {
-    if (_menuItemCount == 0)
-        return 0;
-
-    // Ensure start index is valid
-    if (startIndex >= _menuItemCount)
-    {
-        startIndex = _menuItemCount - 1;
-    }
-
-    uint8_t currentIndex = startIndex;
-    uint8_t attempts = 0;
-
-    do
-    {
-        if (_isMenuItemEnabled(currentIndex))
-        {
-            return currentIndex;
-        }
-
-        if (forward)
-        {
-            currentIndex = (currentIndex + 1) % _menuItemCount;
-        }
-        else
-        {
-            currentIndex = (currentIndex == 0) ? _menuItemCount - 1 : currentIndex - 1;
-        }
-        attempts++;
-    } while (attempts < _menuItemCount);
-
-    // If no enabled items found, return the original index
-    return startIndex;
+    return ContentScreen::_findNextEnabledItem(startIndex, forward, _menuItemCount);
 }
 
 // Input Handling and Navigation
@@ -243,6 +210,18 @@ void MenuScreen::_drawContent()
     }
 
     // Render up to itemsPerPage items for current page
+    // With nothing to show, the loop below painted blank alternating rows and
+    // left the user with no idea whether the menu had failed or was simply
+    // empty. Say which.
+    if (_menuItemCount == 0)
+    {
+        gfx.setTextSize(isSmall ? 1 : 2);
+        gfx.setTextColor(M1Shield.convertColor(ROW_COLOR_FG1));
+        _drawCenteredText("No items", left, top + (rowHeight / 2),
+                          width, isSmall ? TEXT_SIZE_1_WIDTH : TEXT_SIZE_2_WIDTH);
+        return;
+    }
+
     for (uint8_t i = 0; i < itemsPerPage; i++, itemIndex++)
     {
         int y = top + (i * rowHeight);
@@ -279,17 +258,15 @@ void MenuScreen::_drawContent()
             // Check FlashString version first, then fall back to regular string
             const __FlashStringHelper *configValueF = _getMenuItemConfigValueF(itemIndex);
             const char *configValue = nullptr;
-            char *tempConfigBuffer = nullptr;
+            // Released when this block ends; the explicit free lived about a
+            // hundred lines further down.
+            FlashBuffer configCopy(configValueF);
 
             if (configValueF != nullptr)
             {
-                // Convert FlashString to regular string for display
-                size_t len = strlen_P((const char *)configValueF);
-                tempConfigBuffer = (char *)malloc(len + 1);
-                if (tempConfigBuffer != nullptr)
+                if (configCopy.valid())
                 {
-                    strcpy_P(tempConfigBuffer, (const char *)configValueF);
-                    configValue = tempConfigBuffer;
+                    configValue = configCopy.c_str();
                 }
                 else if (getLogger())
                 {
@@ -330,38 +307,17 @@ void MenuScreen::_drawContent()
             String menuText = String(_menuItems[itemIndex]);
             uint16_t menuTextWidth = menuText.length() * textSizeWidth;
 
-            if (configValue != nullptr && menuTextWidth > availableWidth)
+            // Applied whether or not a config value is present: a plain long
+            // item used to run past the row and wrap onto the one below it.
+            // _truncateText() is ContentScreen's; this class used to carry its
+            // own copy, which had even invented a two-dot ellipsis.
+            if (menuTextWidth > availableWidth)
             {
-                // Calculate how many characters fit with "..."
-                if (isSmall)
+                char *truncated = _truncateText(menuText.c_str(), availableWidth, textSizeWidth);
+                menuText = (truncated != nullptr) ? String(truncated) : String();
+                if (truncated != nullptr)
                 {
-                    uint16_t ellipsisWidth = 2 * textSizeWidth;
-                    uint16_t maxCharsWidth = (ellipsisWidth < availableWidth) ? (availableWidth - ellipsisWidth) : 0;
-                    uint8_t maxChars = maxCharsWidth / textSizeWidth;
-
-                    if (maxChars > 0)
-                    {
-                        menuText = menuText.substring(0, maxChars) + "..";
-                    }
-                    else
-                    {
-                        menuText = ".."; // Fallback if space is extremely limited
-                    }
-                }
-                else
-                {
-                    uint16_t ellipsisWidth = 3 * textSizeWidth;
-                    uint16_t maxCharsWidth = (ellipsisWidth < availableWidth) ? (availableWidth - ellipsisWidth) : 0;
-                    uint8_t maxChars = maxCharsWidth / textSizeWidth;
-
-                    if (maxChars > 0)
-                    {
-                        menuText = menuText.substring(0, maxChars) + "...";
-                    }
-                    else
-                    {
-                        menuText = "..."; // Fallback if space is extremely limited
-                    }
+                    free(truncated);
                 }
             }
 
@@ -384,11 +340,6 @@ void MenuScreen::_drawContent()
                 gfx.print(configValue);
             }
 
-            // Clean up temporary buffer if it was allocated for FlashString
-            if (tempConfigBuffer != nullptr)
-            {
-                free(tempConfigBuffer);
-            }
         }
 
         itemsDrawn++;
@@ -537,8 +488,11 @@ void MenuScreen::setMenuItems(const char **menuItems, uint8_t menuItemCount)
             if (itemCopy != nullptr)
             {
                 strcpy(itemCopy, menuItems[i]);
-                _menuItems[i] = itemCopy;
-                successCount++;
+                // Store consecutively: _menuItemCount below is the number of
+                // successes, so an item left at its original index after a
+                // skipped entry would sit past the count -- invisible to the
+                // menu and missed by clearMenuItems().
+                _menuItems[successCount++] = itemCopy;
             }
             else if (getLogger())
             {
@@ -569,66 +523,34 @@ void MenuScreen::setMenuItems(const char **menuItems, uint8_t menuItemCount)
 // Set the menu items from an array of String objects
 void MenuScreen::setMenuItems(String *menuItems, uint8_t menuItemCount)
 {
-    // Clear any existing menu items first
-    clearMenuItems();
-
     if (menuItems == nullptr || menuItemCount == 0)
     {
-        return; // Just clear and exit
+        clearMenuItems();
+        return;
     }
 
-    // Allocate array of string pointers
-    _menuItems = (char **)malloc(menuItemCount * sizeof(char *));
-    if (_menuItems == nullptr)
+    // Delegate to the const char* form so the copying, the failure handling and
+    // the consecutive-slot rule all live in one place.
+    const char **items = (const char **)malloc(menuItemCount * sizeof(const char *));
+    if (items == nullptr)
     {
-        return; // Allocation failed
-    }
-
-    // Initialize all pointers to nullptr first
-    for (uint8_t i = 0; i < menuItemCount; i++)
-    {
-        _menuItems[i] = nullptr;
-    }
-
-    // Allocate and copy each menu item string
-    uint8_t successCount = 0;
-    for (uint8_t i = 0; i < menuItemCount; i++)
-    {
-        const char *cstr = menuItems[i].c_str();
-        if (cstr != nullptr)
+        clearMenuItems();
+        if (getLogger())
         {
-            size_t len = strlen(cstr);
-            char *itemCopy = (char *)malloc(len + 1);
-            if (itemCopy != nullptr)
-            {
-                strcpy(itemCopy, cstr);
-                _menuItems[i] = itemCopy;
-                successCount++;
-            }
-            else if (getLogger())
-            {
-                const char *currentTitle = getTitle();
-                getLogger()->errF(F("MenuScreen[%s]: Failed to allocate memory for menu item %d"),
-                                  currentTitle ? currentTitle : "Unknown", i);
-            }
+            const char *currentTitle = getTitle();
+            getLogger()->errF(F("MenuScreen[%s]: Failed to allocate memory for menu items array"),
+                              currentTitle ? currentTitle : "Unknown");
         }
+        return;
     }
 
-    // Update state
-    _menuItemCount = successCount;
-
-    // Set selection to first enabled item
-    if (successCount > 0)
+    for (uint8_t i = 0; i < menuItemCount; i++)
     {
-        _selectedMenuItemIndex = _findNextEnabledItem(0, true);
-    }
-    else
-    {
-        _selectedMenuItemIndex = 0;
+        items[i] = menuItems[i].c_str();
     }
 
-    // Update display if active
-    refreshMenu();
+    setMenuItems(items, menuItemCount);
+    free(items);
 }
 
 // Set the currently selected menu item by index

@@ -32,14 +32,48 @@ private:
     bool _notificationActive;             // Whether notification is currently active
     uint16_t _notificationBgColor;        // Custom notification background color
 
+    Screen *(*_backScreenFactory)(const String &context); // Builds the screen the menu button returns to
+    String _backScreenContext;                            // Passed to that factory when it runs
+    const __FlashStringHelper *_errorMessage;             // Drawn in place of the content when set
+
     uint8_t _getPadding() const;                                                       // Gets the padding between areas
     void _drawNotification();                                                          // Draw notification overlay in place of footer
     void _clearNotification();                                                         // Clear notification text and free memory
     void _drawAlert(const char *text);                                                 // Draw alert dialog overlay in place of footer
     void _drawConfirm(const char *text, const char *leftText, const char *rightText);  // Draw confirm dialog overlay in place of footer
-    char *_truncateText(const char *text, uint16_t availableWidth, uint8_t charWidth); // Create truncated copy of text with "..." if needed
+
+
+    // The band the notification and dialog overlays draw into. Normally the
+    // footer; on a small panel the footer has no height, so they borrow the
+    // bottom of the content area rather than not drawing at all.
+    uint16_t _getOverlayTop() const;    // Y coordinate of the overlay band
+    uint16_t _getOverlayHeight() const; // Height of the overlay band
+    uint8_t _getOverlayTextSize() const; // Text size the overlay band can carry
+
+
 
 protected:
+    // Text fitting. Protected because MenuScreen, ButtonScreen and
+    // ConsoleScreen each grew their own truncation when these were private.
+    char *_truncateText(const char *text, uint16_t availableWidth, uint8_t charWidth); // Truncated copy with "..." if needed
+    void _drawCenteredText(const char *text, uint16_t x0, uint16_t y,
+                           uint16_t availableWidth, uint8_t charWidth); // Centered, truncated and clipped to the region
+
+    Screen *_handleBackAction(ActionTaken action); // Back screen when the menu button was pressed, else nullptr
+
+    // Wrap-around scan for the next selectable item. MenuScreen and
+    // ButtonScreen had line-for-line identical copies of this, differing only
+    // in where the count came from and which predicate they asked.
+    virtual bool _isItemEnabled(uint8_t index) const { (void)index; return true; }
+    uint8_t _findNextEnabledItem(uint8_t startIndex, bool forward, uint8_t itemCount) const;
+
+    // A screen that cannot show its content -- no card, unreadable file --
+    // stays open and says so, rather than refusing to open and leaving the
+    // device with no screen at all.
+    void _setErrorState(const __FlashStringHelper *message); // Show this instead of the content
+    void _clearErrorState();                                 // Resume drawing content
+    bool _hasErrorState() const;                             // Whether an error is being shown
+
     void _drawHeader();         // Draw the header region with title
     virtual void _drawFooter(); // Draw the footer region with button labels (virtual for customization)
     void _refreshFooter();      // Redraw just the footer on every enabled render target
@@ -84,7 +118,15 @@ public:
 
     // Required Screen interface methods - must be implemented by derived classes
     virtual void loop() override;                                                        // Base implementation handles notification timeouts, derived classes can override
-    virtual Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) = 0; // Handle input events
+    Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override = 0; // Handle input events
+
+    // Where the menu button goes back to. A factory rather than a screen
+    // pointer: setScreen() closes and deletes the current screen before opening
+    // the next, so a stored pointer to the previous screen would already be
+    // dangling by the time the user pressed back.
+    typedef Screen *(*BackScreenFactory)(const String &context);
+    void setBackScreen(BackScreenFactory factory, const String &context = String()); // Set where back leads
+    bool hasBackScreen() const;                                                      // Whether a back destination is set
 
     // Progress control
     void setProgressValue(int value); // Set progress bar value (0-100)
@@ -92,6 +134,7 @@ public:
 
     // Button management
     void setButtonItems(const char **buttonItems, uint8_t buttonItemCount);                 // Set button labels for footer display
+    void setButtonItems(String *buttonItems, uint8_t buttonItemCount); // Arduino String array form
     void setButtonItemsF(const __FlashStringHelper **buttonItems, uint8_t buttonItemCount); // Set button labels from FlashString array
     void clearButtonItems();                                                                // Clear all button labels and free allocated memory
 

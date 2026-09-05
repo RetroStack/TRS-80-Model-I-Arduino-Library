@@ -192,7 +192,6 @@ class ComprehensiveContent : public ContentScreen
 void switchToMode(ContentMode newMode)     // Change display mode
 void updateModeProgress()                  // Update progress bar
 const char* getModeTitle(ContentMode)     // Get mode-specific title
-const char* getModeFooter(ContentMode)    // Get mode-specific footer
 ```
 
 #### Drawing Methods

@@ -31,4 +31,4 @@
 #define busWrite(_bus, _value) PORT_EXPAND(PORT, BUS_##_bus##_PORT) = _value
 #define busRead(_bus) PORT_EXPAND(PIN, BUS_##_bus##_PORT)
 
-#endif // PORT_MACROS_H
+#endif /* PORT_MACROS_H */

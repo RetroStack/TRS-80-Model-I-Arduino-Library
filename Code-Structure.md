@@ -114,15 +114,13 @@ RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::b
 - `void end()` // Deinitialize TRS-80 interface
 - `void setLogger(ILogger &logger)` // Set logger for debugging
 - `uint8_t readMemory(uint16_t address)` // Read byte from memory address
-- `void writeMemory(uint16_t address, uint8_t data)` // Write byte to memory address
+- `bool writeMemory(uint16_t address, uint8_t data)` // Write byte to memory address
 - `void readMemory(uint16_t address, uint8_t *buffer, uint16_t length)` // Read buffer from memory
-- `void writeMemory(uint16_t address, const uint8_t *buffer, uint16_t length)` // Write buffer to memory
-- `void fillMemory(uint8_t fill_data, uint16_t address, uint16_t length)` // Fill memory range with value
-- `void copyMemory(uint16_t sourceAddress, uint16_t destinationAddress, uint16_t length)` // Copy memory range
-- `bool verifyMemory(uint16_t address, const uint8_t *buffer, uint16_t length, uint16_t *errorAddress = nullptr)` // Verify memory contents
-- `void clearMemory(uint16_t address, uint16_t length)` // Clear memory range to zero
+- `bool writeMemory(uint16_t address, const uint8_t *buffer, uint16_t length)` // Write buffer to memory
+- `bool fillMemory(uint8_t fill_data, uint16_t address, uint16_t length)` // Fill memory range with value
+- `bool copyMemory(uint16_t sourceAddress, uint16_t destinationAddress, uint16_t length)` // Copy memory range
 - `uint8_t readIO(uint8_t address)` // Read from I/O port
-- `void writeIO(uint8_t address, uint8_t data)` // Write to I/O port
+- `bool writeIO(uint8_t address, uint8_t data)` // Write to I/O port
 - `bool readSystemResetSignal()` // Read system reset signal state
 - `bool readInterruptAcknowledgeSignal()` // Read interrupt acknowledge signal state
 - `bool triggerInterrupt(uint8_t interrupt, uint16_t timeout = 1000)` // Trigger interrupt with timeout
@@ -168,7 +166,7 @@ RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::b
 - `virtual void close()` // Deactivate screen and cleanup
 - `virtual void _drawScreen() = 0` // Pure virtual: initial screen rendering
 - `virtual void loop() = 0` // Pure virtual: main update loop
-- `virtual Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) = 0` // Pure virtual: input handling
+- `virtual Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) = 0` // Pure virtual: input handling
 
 **Enums:**
 
@@ -179,7 +177,7 @@ RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::b
 - `ContentScreen()` // Constructor with structured layout initialization
 - `virtual ~ContentScreen()` // Destructor with memory cleanup
 - `virtual void loop() = 0` // Pure virtual: main update loop for content logic
-- `virtual Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) = 0` // Pure virtual: input handler within structured layout
+- `virtual Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) = 0` // Pure virtual: input handler within structured layout
 - `void setProgressValue(int value)` // Set progress bar value (0-100)
 - `uint8_t getProgressValue() const` // Get current progress bar value
 - `void setButtonItems(const char** buttonItems, uint8_t buttonItemCount)` // Set button labels for footer with dynamic allocation
@@ -236,7 +234,7 @@ RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::b
 - `MenuScreen()` // Constructor with default menu state and button labels
 - `virtual ~MenuScreen()` // Destructor with dynamic memory cleanup
 - `virtual void loop()` // Main loop processing for menu screen updates
-- `Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)` // Handle user input for menu navigation (up/down/select/back)
+- `Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY)` // Handle user input for menu navigation (up/down/select/back)
 - `void setMenuItems(const char** menuItems, uint8_t menuItemCount)` // Set menu items from C-string array with deep copy
 - `void setMenuItems(String* menuItems, uint8_t menuItemCount)` // Set menu items from String array with deep copy
 - `void setMenuItemsF(const __FlashStringHelper** menuItems, uint8_t menuItemCount)` // Set menu items from FlashString array with deep copy
@@ -252,7 +250,7 @@ RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::b
 - `virtual ~ButtonScreen()` // Destructor - ContentScreen handles button items cleanup
 - `bool open()` // Initialize view when screen opens, finding first enabled item
 - `virtual void loop()` // Main loop processing for horizontal button screen updates
-- `Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)` // Handle user input for horizontal navigation (left/right/select/back)
+- `Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY)` // Handle user input for horizontal navigation (left/right/select/back)
 - `void refreshButtons()` // Refresh the horizontal button display
 - `uint16_t _getFooterHeight() const override` // Override to provide expanded footer height for horizontal buttons
 - `virtual Screen* _getSelectedButtonItemScreen(int index) = 0` // Pure virtual: get screen for selected button item
@@ -268,7 +266,7 @@ RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::b
 - `virtual ~ConsoleScreen()` // Destructor
 - `bool open()` // Override to initialize timing for one-time execution
 - `void loop()` // Main loop processing for console screen updates
-- `Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY)` // Handle user input actions with standard navigation
+- `Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY)` // Handle user input actions with standard navigation
 - `size_t write(uint8_t c)` // Write single character to console (Print interface requirement)
 - `size_t write(const uint8_t* buffer, size_t size)` // Write buffer of characters for bulk operations
 - `void cls()` // Clear screen and reset cursor to top-left
@@ -467,13 +465,7 @@ RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::b
 ## AddressBus (AddressBus.h)
 
 - `AddressBus()` // Constructor
-- `void begin()` // Initialize address bus
-- `void end()` // Deinitialize address bus
-- `void setLogger(ILogger& logger)` // Set logger for debugging output
-- `bool isReadable()` // Check if bus is in read mode
-- `bool isWritable()` // Check if bus is in write mode
-- `void setAsReadable()` // Set bus to read mode
-- `void setAsWritable()` // Set bus to write mode
+(begin, end, setLogger, isReadable, isWritable, setAsReadable, setAsWritable come from `BusBase`)
 - `uint16_t readMemoryAddress()` // Read 16-bit memory address from bus
 - `void writeMemoryAddress(uint16_t address)` // Write 16-bit memory address to bus
 - `void writeRefreshAddress(uint8_t address)` // Write refresh address to bus
@@ -481,18 +473,25 @@ RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::b
 - `void writeIOAddress(uint8_t address)` // Write 8-bit I/O address to bus
 - `char* getState()` // Get human-readable bus state string
 
+## BusBase (BusBase.h)
+
+Shared base for `AddressBus` and `DataBus`. CRTP rather than virtual, so it
+inlines away on the bus-cycle path.
+
+- `void begin()` // Initialize bus pins and configuration
+- `void end()` // Reset bus to default state
+- `void setLogger(ILogger& logger)` // Set logger for debugging output
+- `bool isReadable() const` // Check if bus is in read mode
+- `bool isWritable() const` // Check if bus is in write mode
+- `void setAsReadable()` // Configure bus pins as inputs
+- `void setAsWritable()` // Configure bus pins as outputs
+
 ## DataBus (DataBus.h)
 
 - `DataBus()` // Constructor
-- `void begin()` // Initialize data bus
-- `void end()` // Deinitialize data bus
-- `void setLogger(ILogger& logger)` // Set logger for debugging output
-- `bool isReadable()` // Check if bus is in read mode
-- `bool isWritable()` // Check if bus is in write mode
-- `void setAsReadable()` // Set bus to read mode
-- `void setAsWritable()` // Set bus to write mode
-- `uint8_t read()` // Read 8-bit data from bus
-- `void write(uint8_t data)` // Write 8-bit data to bus
+(begin, end, setLogger, isReadable, isWritable, setAsReadable, setAsWritable come from `BusBase`)
+- `uint8_t readData()` // Read 8-bit data from bus
+- `void writeData(uint8_t data)` // Write 8-bit data to bus
 - `char* getState()` // Get human-readable bus state string
 
 ## Model1LowLevel (Model1LowLevel.h)
@@ -606,6 +605,13 @@ RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::b
 - `size_t write(uint8_t ch)` // Forward character write to all registered loggers
 - `size_t write(const uint8_t* buffer, size_t size)` // Forward buffer write to all registered loggers
 
+## DisplayProviderTFT (DisplayProviderTFT.h)
+
+`DisplayProviderTFT<TDisplay>` - shared base for the eight SPI TFT providers.
+Holds the driver pointer and implements `getGFX()`, `display()`,
+`convertColor()` and `destroy()`; each provider supplies `create()`,
+`getName()`, `getScreenWidth()` and `getScreenHeight()`.
+
 ## DisplayProvider (DisplayProvider.h)
 
 - `virtual bool create(int8_t cs, int8_t dc, int8_t rst) = 0` // Create display instance with SPI pins
@@ -613,9 +619,9 @@ RenderTarget backed by a DisplayProvider. Created and registered by `M1Shield::b
 - `virtual Adafruit_GFX& getGFX() = 0` // Get Adafruit_GFX interface for drawing
 - `virtual bool display() = 0` // Update display with buffered content (for buffered displays)
 - `virtual uint16_t convertColor(uint16_t color) = 0` // Convert RGB565 color to display-specific format
-- `virtual const char* name() const = 0` // Get display driver name
-- `virtual uint16_t width() const = 0` // Get display width in pixels
-- `virtual uint16_t height() const = 0` // Get display height in pixels
+- `virtual const char* getName() const = 0` // Get display driver name
+- `virtual uint16_t getScreenWidth() const = 0` // Get display width in pixels
+- `virtual uint16_t getScreenHeight() const = 0` // Get display height in pixels
 
 **Available Display Drivers:**
 
@@ -648,3 +654,12 @@ Hardware pin mappings and port bit masks for TRS-80 Model 1 signal connections t
 - `char* uint16ToBinary(uint16_t value, char* buffer)` // Convert 16-bit value to binary string
 - `char pinStatus(bool value)` // Convert boolean to pin status character
 - `char busStatus(uint8_t value)` // Convert bus value to status character
+
+## Native Tests (extras/test/)
+
+Host-compiled tests, run with `make -C extras/test`. Everything else in `src/`
+reaches AVR registers or the Arduino core and can only be compile-checked.
+
+- `test_RenderManager.cpp` - the render-target registry and render-pass state
+- `test_utils.cpp` - `chunkLength()`, `normalizePath()` and `pathIsWithin()`
+- `stub/` - the minimum Arduino surface those two need

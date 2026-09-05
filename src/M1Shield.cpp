@@ -14,6 +14,9 @@
 // Hardware timing constants
 constexpr unsigned long DEBOUNCE_TIME = 250; // Button debounce time in milliseconds
 
+constexpr unsigned long JOYSTICK_REPEAT_DELAY = 400; // Hold time before a direction repeats
+constexpr unsigned long JOYSTICK_REPEAT_RATE = 120;  // Interval between repeats after that
+
 // RGB LED pin assignments
 constexpr uint8_t PIN_ACTIVE_LED = 13; // Activity indicator LED pin
 constexpr uint8_t PIN_LED_BLUE = 10;   // Blue channel of RGB LED
@@ -47,8 +50,7 @@ constexpr uint8_t PIN_CR2 = 42;       // Cassette Remote 2 (configurable input/o
 constexpr uint8_t PIN_CASS_IN = A14;  // Cassette input from the perspective of the Model 1
 constexpr uint8_t PIN_CASS_OUT = A15; // Cassette output from the perspective of the Model 1
 
-// Buzzer pin
-constexpr uint8_t PIN_BUZZER = 4; // Buzzer pin
+constexpr uint8_t PIN_BUZZER = 4; // Buzzer
 
 // SD Card pin
 constexpr uint8_t PIN_SD_SELECT = 49; // SD card chip select pin
@@ -68,6 +70,9 @@ M1ShieldClass::M1ShieldClass() : _screen(nullptr),
                                  _leftPressed(0),
                                  _rightPressed(0),
                                  _joystickPressed(0),
+                                 _joystickDirection(NONE),
+                                 _joystickRepeatTime(0),
+                                 _joystickRepeatDelay(0),
                                  _screenWidth(0),
                                  _screenHeight(0),
                                  _activeJoystick(false)
@@ -165,9 +170,14 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
 
     _displayProvider = &provider;
 
+    // Adafruit_GFX wraps text at the screen edge by default, so anything wider
+    // than the panel spilled onto the row below instead of being clipped. Every
+    // region here manages its own truncation, so wrapping is never wanted.
+    provider.getGFX().setTextWrap(false);
+
     // Initialize display based on the selected type
-    _screenWidth = provider.width();
-    _screenHeight = provider.height();
+    _screenWidth = provider.getScreenWidth();
+    _screenHeight = provider.getScreenHeight();
 
     // Create and add display render target
     if (_displayTarget)
@@ -176,8 +186,11 @@ bool M1ShieldClass::begin(DisplayProvider &provider)
         delete _displayTarget;
     }
     
+    // Index 0, not the tail: removing and re-appending demoted the panel below
+    // any target registered in between, and target 0 is the layout authority --
+    // the whole UI would reflow to the secondary panel's geometry.
     _displayTarget = new DisplayRenderTarget(provider);
-    if (_displayTarget && _renderManager.addRenderTarget(_displayTarget))
+    if (_displayTarget && _renderManager.insertRenderTarget(_displayTarget, 0))
     {
         if (_logger)
         {
@@ -220,6 +233,15 @@ void M1ShieldClass::deactivateJoystick()
 // Check if display has been properly initialized
 bool M1ShieldClass::isDisplayInitialized() const
 {
+    // Answered from _displayProvider while getGFX() answered from the render
+    // manager, so the two could disagree once a target was registered or its
+    // provider swapped. Both now ask the manager.
+    RenderTarget *active = _renderManager.getActiveTarget();
+    if (active != nullptr)
+    {
+        return active->getScreenWidth() > 0 && active->getScreenHeight() > 0;
+    }
+
     return (_displayProvider != nullptr && _screenWidth > 0 && _screenHeight > 0);
 }
 
@@ -262,6 +284,20 @@ uint16_t M1ShieldClass::getScreenHeight() const
 // Get reference to the display provider
 DisplayProvider &M1ShieldClass::getDisplayProvider() const
 {
+    // Every sibling accessor resolves through the active render target; this
+    // one answered from _displayProvider unconditionally, so under a render
+    // pass on a second panel it returned the primary's provider while
+    // getScreenWidth() beside it returned the secondary's width.
+    RenderTarget *active = _renderManager.getActiveTarget();
+    if (active != nullptr)
+    {
+        DisplayProvider *provider = active->getProvider();
+        if (provider != nullptr)
+        {
+            return *provider;
+        }
+    }
+
     if (!_displayProvider)
     {
         if (_logger)
@@ -478,34 +514,46 @@ void M1ShieldClass::setLEDColor(uint8_t r, uint8_t g, uint8_t b) const
 // Set RGB LED color using predefined color constants
 void M1ShieldClass::setLEDColor(LEDColor color, uint8_t intensity) const
 {
-    (void)intensity; // Parameter reserved for future use
+    // The header declares this with `intensity = 255` and says nothing about it
+    // being inert, so a caller passing 64 got full brightness and no
+    // diagnostic. Scale the channels instead of discarding it.
+    const uint8_t full = intensity;
     switch (color)
     {
     case LEDColor::COLOR_OFF:
         setLEDColor(0, 0, 0);
         break;
     case LEDColor::COLOR_RED:
-        setLEDColor(255, 0, 0);
+        setLEDColor(full, 0, 0);
         break;
     case LEDColor::COLOR_GREEN:
-        setLEDColor(0, 255, 0);
+        setLEDColor(0, full, 0);
         break;
     case LEDColor::COLOR_BLUE:
-        setLEDColor(0, 0, 255);
+        setLEDColor(0, 0, full);
         break;
     case LEDColor::COLOR_YELLOW:
-        setLEDColor(255, 255, 0);
+        setLEDColor(full, full, 0);
         break;
     case LEDColor::COLOR_MAGENTA:
-        setLEDColor(255, 0, 255);
+        setLEDColor(full, 0, full);
         break;
     case LEDColor::COLOR_CYAN:
-        setLEDColor(0, 255, 255);
+        setLEDColor(0, full, full);
         break;
     case LEDColor::COLOR_WHITE:
-        setLEDColor(255, 255, 255);
+        setLEDColor(full, full, full);
         break;
     }
+}
+
+// Edge-detect one button, advancing its stored state
+bool M1ShieldClass::_wasPressed(int pin, unsigned long &state)
+{
+    unsigned long newState = _getDebouncedState(pin, state);
+    bool pressed = (state == 0 && newState != 0);
+    state = newState;
+    return pressed;
 }
 
 // Get debounced button state with timing control
@@ -513,20 +561,21 @@ unsigned long M1ShieldClass::_getDebouncedState(int pin, unsigned long previousS
 {
     if (digitalRead(pin) == LOW)
     {
-        if (previousState == 0)
-        {
-            return millis(); // First detection
-        }
-        else if ((millis() - previousState) > DEBOUNCE_TIME)
-        {
-            return previousState; // Still pressed, stable
-        }
-        return previousState; // Still within debounce time
+        // First edge of a press is timestamped; later polls keep that stamp, so
+        // wasPressed() reports a held button exactly once.
+        return (previousState == 0) ? millis() : previousState;
     }
-    else
+
+    // Released. Contact bounce reads HIGH for a few milliseconds in the middle
+    // of a single physical press, and clearing the state on the first such read
+    // let the next LOW look like a fresh press -- so one press was reported
+    // several times. Hold it until the debounce window has actually elapsed.
+    if (previousState != 0 && (millis() - previousState) < DEBOUNCE_TIME)
     {
-        return 0; // Released
+        return previousState;
     }
+
+    return 0;
 }
 
 // --- Button Input ---
@@ -540,10 +589,7 @@ bool M1ShieldClass::isMenuPressed() const
 // Check if menu button was just pressed (debounced)
 bool M1ShieldClass::wasMenuPressed()
 {
-    unsigned long newState = _getDebouncedState(PIN_MENU, _menuPressed);
-    bool wasPressed = (_menuPressed == 0 && newState != 0);
-    _menuPressed = newState;
-    return wasPressed;
+    return _wasPressed(PIN_MENU, _menuPressed);
 }
 
 // Check if select button is currently pressed
@@ -555,10 +601,7 @@ bool M1ShieldClass::isSelectPressed() const
 // Check if select button was just pressed (debounced)
 bool M1ShieldClass::wasSelectPressed()
 {
-    unsigned long newState = _getDebouncedState(PIN_SELECT, _selectPressed);
-    bool wasPressed = (_selectPressed == 0 && newState != 0);
-    _selectPressed = newState;
-    return wasPressed;
+    return _wasPressed(PIN_SELECT, _selectPressed);
 }
 
 // Check if left button is currently pressed
@@ -570,10 +613,7 @@ bool M1ShieldClass::isLeftPressed() const
 // Check if left button was just pressed (debounced)
 bool M1ShieldClass::wasLeftPressed()
 {
-    unsigned long newState = _getDebouncedState(PIN_LEFT, _leftPressed);
-    bool wasPressed = (_leftPressed == 0 && newState != 0);
-    _leftPressed = newState;
-    return wasPressed;
+    return _wasPressed(PIN_LEFT, _leftPressed);
 }
 
 // Check if right button is currently pressed
@@ -585,10 +625,7 @@ bool M1ShieldClass::isRightPressed() const
 // Check if right button was just pressed (debounced)
 bool M1ShieldClass::wasRightPressed()
 {
-    unsigned long newState = _getDebouncedState(PIN_RIGHT, _rightPressed);
-    bool wasPressed = (_rightPressed == 0 && newState != 0);
-    _rightPressed = newState;
-    return wasPressed;
+    return _wasPressed(PIN_RIGHT, _rightPressed);
 }
 
 // Check if up button is currently pressed
@@ -600,10 +637,7 @@ bool M1ShieldClass::isUpPressed() const
 // Check if up button was just pressed (debounced)
 bool M1ShieldClass::wasUpPressed()
 {
-    unsigned long newState = _getDebouncedState(PIN_UP, _upPressed);
-    bool wasPressed = (_upPressed == 0 && newState != 0);
-    _upPressed = newState;
-    return wasPressed;
+    return _wasPressed(PIN_UP, _upPressed);
 }
 
 // Check if down button is currently pressed
@@ -615,10 +649,7 @@ bool M1ShieldClass::isDownPressed() const
 // Check if down button was just pressed (debounced)
 bool M1ShieldClass::wasDownPressed()
 {
-    unsigned long newState = _getDebouncedState(PIN_DOWN, _downPressed);
-    bool wasPressed = (_downPressed == 0 && newState != 0);
-    _downPressed = newState;
-    return wasPressed;
+    return _wasPressed(PIN_DOWN, _downPressed);
 }
 
 // --- Joystick Input ---
@@ -632,10 +663,7 @@ bool M1ShieldClass::isJoystickPressed() const
 // Check if joystick button was just pressed (debounced)
 bool M1ShieldClass::wasJoystickPressed()
 {
-    unsigned long newState = _getDebouncedState(PIN_JOYSTICK_BUTTON, _joystickPressed);
-    bool wasPressed = (_joystickPressed == 0 && newState != 0);
-    _joystickPressed = newState;
-    return wasPressed;
+    return _wasPressed(PIN_JOYSTICK_BUTTON, _joystickPressed);
 }
 
 // Get joystick direction based on analog position
@@ -805,6 +833,7 @@ void M1ShieldClass::loop()
     int8_t offsetX = 0;
     int8_t offsetY = 0;
     bool joystickMoved = false;
+    ActionTaken direction = NONE;
 
     if (_activeJoystick)
     {
@@ -834,38 +863,63 @@ void M1ShieldClass::loop()
             // Diagonal directions for Joystick
             if (x < JOYSTICK_CENTER_MIN && y < JOYSTICK_CENTER_MIN)
             {
-                action = static_cast<ActionTaken>(action | JOYSTICK_UP_LEFT);
+                direction = JOYSTICK_UP_LEFT;
             }
             else if (x > JOYSTICK_CENTER_MAX && y < JOYSTICK_CENTER_MIN)
             {
-                action = static_cast<ActionTaken>(action | JOYSTICK_UP_RIGHT);
+                direction = JOYSTICK_UP_RIGHT;
             }
             else if (x < JOYSTICK_CENTER_MIN && y > JOYSTICK_CENTER_MAX)
             {
-                action = static_cast<ActionTaken>(action | JOYSTICK_DOWN_LEFT);
+                direction = JOYSTICK_DOWN_LEFT;
             }
             else if (x > JOYSTICK_CENTER_MAX && y > JOYSTICK_CENTER_MAX)
             {
-                action = static_cast<ActionTaken>(action | JOYSTICK_DOWN_RIGHT);
+                direction = JOYSTICK_DOWN_RIGHT;
             }
 
             // Cardinal directions for Joystick
             else if (x < JOYSTICK_CENTER_MIN)
             {
-                action = static_cast<ActionTaken>(action | JOYSTICK_LEFT);
+                direction = JOYSTICK_LEFT;
             }
             else if (x > JOYSTICK_CENTER_MAX)
             {
-                action = static_cast<ActionTaken>(action | JOYSTICK_RIGHT);
+                direction = JOYSTICK_RIGHT;
             }
             else if (y < JOYSTICK_CENTER_MIN)
             {
-                action = static_cast<ActionTaken>(action | JOYSTICK_UP);
+                direction = JOYSTICK_UP;
             }
             else if (y > JOYSTICK_CENTER_MAX)
             {
-                action = static_cast<ActionTaken>(action | JOYSTICK_DOWN);
+                direction = JOYSTICK_DOWN;
             }
+        }
+
+        // The buttons run through _getDebouncedState(), which reports a held
+        // button once. The stick had no such gate: its direction was rebuilt
+        // from the current reading on every loop(), so holding it off-centre
+        // re-sent the direction hundreds of times a second -- and since LEFT is
+        // folded into the select mask, that re-triggered the selected item
+        // continuously. Fire on entering a direction, then auto-repeat.
+        unsigned long now = millis();
+        if (direction != _joystickDirection)
+        {
+            _joystickDirection = direction;
+            _joystickRepeatTime = now;
+            _joystickRepeatDelay = JOYSTICK_REPEAT_DELAY;
+
+            if (direction != NONE)
+            {
+                action = static_cast<ActionTaken>(action | direction);
+            }
+        }
+        else if (direction != NONE && (now - _joystickRepeatTime) >= _joystickRepeatDelay)
+        {
+            _joystickRepeatTime = now;
+            _joystickRepeatDelay = JOYSTICK_REPEAT_RATE;
+            action = static_cast<ActionTaken>(action | direction);
         }
 
         if (wasJoystickPressed())

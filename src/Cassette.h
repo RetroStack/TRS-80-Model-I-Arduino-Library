@@ -132,7 +132,7 @@ public:
     void setCharGenA(); // Set character generator to A variant
     void setCharGenB(); // Set character generator to B variant
 
-    bool is64CharacterMode();  // Check if display is in 64-character mode
+    bool is64CharacterMode(); // Not const: refreshes the cached state from hardware  // Check if display is in 64-character mode
     void set32CharacterMode(); // Set display to 32-character mode
     void set64CharacterMode(); // Set display to 64-character mode
 };

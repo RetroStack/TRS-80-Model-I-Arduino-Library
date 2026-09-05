@@ -13,28 +13,47 @@
 #include <M1Shield.h>
 #include <TextFileViewer.h>
 
-// Uncomment one of these display provider headers based on your hardware
-// #include <Display_ST7789_240x240.h>
-// #include <Display_ST7789_320x170.h>
-// #include <Display_ST7789_320x240.h>
-// #include <Display_ST7735.h>
-// #include <Display_ILI9341.h>
-// #include <Display_HX8357.h>
-// #include <Display_ILI9325.h>
-// #include <Display_ST7796.h>
-// #include <Display_SSD1306.h>
-#include <Display_SH1106.h>
+// First, tell the system which display you have.
+// Uncomment exactly one and comment out the rest.
 
-// Uncomment one of these display provider instances based on your hardware
-// Display_ST7789_240x240 displayProvider;
-// Display_ST7789_320x170 displayProvider;
+// For ST7789 240x320 displays (most common, landscape becomes 320x240)
+// #include <Display_ST7789_320x240.h>
 // Display_ST7789_320x240 displayProvider;
+
+// For ST7789 240x240 square displays
+// #include <Display_ST7789_240x240.h>
+// Display_ST7789_240x240 displayProvider;
+
+// For ST7789 320x170 wide displays (landscape)
+// #include <Display_ST7789_320x170.h>
+// Display_ST7789_320x170 displayProvider;
+
+// For smaller ST7735 128x160 displays
+// #include <Display_ST7735.h>
 // Display_ST7735 displayProvider;
-// Display_ILI9341 displayProvider;
-// Display_HX8357 displayProvider;
-// Display_ILI9325 displayProvider;
+
+// For large ST7796 320x480 displays (landscape becomes 480x320)
+// #include <Display_ST7796.h>
 // Display_ST7796 displayProvider;
+
+// For parallel ILI9325 240x320 displays (landscape becomes 320x240)
+// #include <Display_ILI9325.h>
+// Display_ILI9325 displayProvider;
+
+// For ILI9341 240x320 displays (landscape becomes 320x240)
+// #include <Display_ILI9341.h>
+// Display_ILI9341 displayProvider;
+
+// For large HX8357 320x480 displays
+// #include <Display_HX8357.h>
+// Display_HX8357 displayProvider;
+
+// For monochrome SSD1306 OLED displays (128x64)
+// #include <Display_SSD1306.h>
 // Display_SSD1306 displayProvider;
+
+// For monochrome SH1106 OLED displays (128x64)
+#include <Display_SH1106.h>
 Display_SH1106 displayProvider;
 
 void setup()
@@ -82,6 +101,7 @@ void setup()
 
 void loop()
 {
-    // M1Shield handles the screen updates automatically
-    delay(50);
+    // Drives input and redraw. Without this call nothing reaches the screen:
+    // the shield does not update itself.
+    M1Shield.loop();
 }

@@ -65,7 +65,9 @@ void TargetsScreen::_drawContent()
 
 void TargetsScreen::loop()
 {
-    // Nothing to animate - the screen only changes on input
+    // Nothing to animate here, but the parent still has work to do: notification
+    // timeouts never fire without this call.
+    ContentScreen::loop();
 }
 
 Screen *TargetsScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY)

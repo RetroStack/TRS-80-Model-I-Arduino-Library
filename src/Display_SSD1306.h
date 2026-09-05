@@ -15,12 +15,11 @@ class Display_SSD1306 : public DisplayProvider
 {
 private:
     Adafruit_SSD1306 *_display; // Pointer to the SSD1306 display instance
-    bool _isI2C;                // True for I2C mode, false for SPI mode
     uint8_t _i2cAddress;        // I2C address for the display (typically 0x3C)
 
 public:
     // Constructor
-    Display_SSD1306() : _display(nullptr), _isI2C(false), _i2cAddress(0x3C) {}
+    Display_SSD1306() : _display(nullptr), _i2cAddress(0x3C) {}
 
     // Create SSD1306 display instance with SPI interface
     bool create(int8_t cs, int8_t dc, int8_t rst) override
@@ -30,7 +29,6 @@ public:
             delete _display;
         }
         _display = new Adafruit_SSD1306(128, 64, &SPI, dc, rst, cs);
-        _isI2C = false;
         if (_display->begin(SSD1306_SWITCHCAPVCC))
         {
             _display->clearDisplay();
@@ -47,7 +45,6 @@ public:
             delete _display;
         }
         _display = new Adafruit_SSD1306(128, 64, &Wire, rst);
-        _isI2C = true;
         _i2cAddress = i2cAddress;
         if (_display->begin(SSD1306_SWITCHCAPVCC, _i2cAddress))
         {
@@ -88,8 +85,11 @@ public:
         // Calculate luminance using standard weights (ITU-R BT.709)
         uint16_t luminance = (uint16_t)(0.2126 * r + 0.7152 * g + 0.0722 * b);
 
-        // Use 50% threshold (127.5, rounded to 128)
-        return (luminance >= 128) ? SSD1306_WHITE : SSD1306_BLACK;
+        // A 50% threshold is right for dithering a photograph and wrong for a
+        // light-on-dark UI: pure red has a BT.709 luminance of 53, so an error
+        // message drawn in it disappeared into the black background. Anything
+        // meaningfully brighter than black is foreground on a 1-bit panel.
+        return (luminance >= 32) ? SSD1306_WHITE : SSD1306_BLACK;
     }
 
     void destroy() override
@@ -101,17 +101,17 @@ public:
         }
     }
 
-    const char *name() const override
+    const char *getName() const override
     {
         return "SSD1306";
     }
 
-    uint16_t width() const override
+    uint16_t getScreenWidth() const override
     {
         return 128;
     }
 
-    uint16_t height() const override
+    uint16_t getScreenHeight() const override
     {
         return 64;
     }
@@ -122,4 +122,4 @@ public:
     }
 };
 
-#endif // DISPLAY_SSD1306_H
+#endif /* DISPLAY_SSD1306_H */

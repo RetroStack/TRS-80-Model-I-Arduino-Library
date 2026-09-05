@@ -275,14 +275,14 @@ console.print("Temp:\t25.6C\n");
 
 ```cpp
 void cls();           // Clear screen and reset cursor to top
-void refresh();       // Redraw screen (clears and resets)
+void clearScreen();       // Redraw screen (clears and resets)
 ```
 
 **Usage:**
 
 ```cpp
 console.cls();        // Clear all text and start fresh
-console.refresh();    // Same as cls() - redraw screen
+console.clearScreen();    // Same as cls() - redraw screen
 ```
 
 ### Screen State
@@ -965,7 +965,7 @@ protected:
 
 public:
     DebugConsole() {
-        _setTitle("Debug Output");
+        setTitle("Debug Output");
         setConsoleBackground(M1Shield.convertColor(0x0000));
     }
 
@@ -1018,7 +1018,7 @@ protected:
 
 public:
     SerialConsole() {
-        _setTitle("Serial Monitor");
+        setTitle("Serial Monitor");
         setTabSize(4);
     }
 
@@ -1116,7 +1116,7 @@ protected:
 
 public:
     PagingConsole() {
-        _setTitle("Paging Demo");
+        setTitle("Paging Demo");
 
         // Configure paging for demo
         setPagingMode(PAGING_WAIT_BOTH);    // Button OR timeout

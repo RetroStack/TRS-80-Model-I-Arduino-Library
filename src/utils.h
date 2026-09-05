@@ -30,6 +30,31 @@ char pinStatus(bool value);    // Get pin status character ('o' for output, 'i' 
 char busStatus(uint8_t value); // Get bus status character ('o' for output, 'i' for input, '?' for unknown)
 
 void asmWait(uint16_t wait);                                    // Precise nanosecond delay using inline assembly (16MHz ATMega)
-void asmWait(uint16_t outerLoopCount, uint16_t innerLoopCount); // Nested loop delay for longer durations using inline assembly
 
-#endif // UTILS_H
+uint16_t chunkLength(uint32_t offset, uint16_t total, uint16_t chunkSize); // Length of the chunk at an offset, 0 when the range is exhausted
+
+bool normalizePath(const char *path, char *out, size_t outSize); // Collapse "." and ".." segments; returns false if the result does not fit
+bool pathIsWithin(const char *path, const char *root);           // Component-wise containment test for two normalized paths
+
+// Copies a flash string into RAM for the duration of a scope, then frees it.
+// The copy-out-of-flash-and-delegate idiom was hand-written at a dozen sites,
+// which had already drifted three ways: some used a heap buffer, one used a
+// runtime-sized stack array, and only some logged an allocation failure.
+class FlashBuffer
+{
+private:
+    char *_buffer;
+
+    // Copying would double-free; the buffer is owned by exactly one scope.
+    FlashBuffer(const FlashBuffer &);
+    FlashBuffer &operator=(const FlashBuffer &);
+
+public:
+    explicit FlashBuffer(const __FlashStringHelper *text);
+    ~FlashBuffer();
+
+    const char *c_str() const { return _buffer; } // nullptr if the copy failed
+    bool valid() const { return _buffer != nullptr; }
+};
+
+#endif /* UTILS_H */

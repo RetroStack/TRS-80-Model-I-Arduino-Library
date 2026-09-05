@@ -13,31 +13,6 @@ void AddressBus::_configurePort(uint16_t config)
     Model1LowLevel::configWriteAddressBus(config);
 }
 
-// Constructor - initialize address bus
-AddressBus::AddressBus()
-{
-    _logger = nullptr;
-    _writable = false;
-}
-
-// Initialize address bus as readable
-void AddressBus::begin()
-{
-    setAsReadable();
-}
-
-// Reset address bus to default readable state
-void AddressBus::end()
-{
-    setAsReadable();
-}
-
-// Set logger for debugging output
-void AddressBus::setLogger(ILogger &logger)
-{
-    _logger = &logger;
-}
-
 // Read 16-bit memory address from bus
 uint16_t AddressBus::readMemoryAddress()
 {
@@ -50,7 +25,7 @@ void AddressBus::writeMemoryAddress(uint16_t address)
     if (!_writable)
     {
         if (_logger)
-            _logger->errF(F("Address bus is not writable."));
+            _logger->errF(F("AddressBus: Address bus is not writable."));
         return;
     }
     Model1LowLevel::writeAddressBus(address);
@@ -74,34 +49,10 @@ void AddressBus::writeIOAddress(uint8_t address)
     if (!_writable)
     {
         if (_logger)
-            _logger->errF(F("IO address bus is not writable."));
+            _logger->errF(F("AddressBus: IO address bus is not writable."));
         return;
     }
     Model1LowLevel::writeAddressBus(address);
-}
-
-// Check if address bus is readable
-bool AddressBus::isReadable()
-{
-    return !_writable;
-}
-
-// Check if address bus is writable
-bool AddressBus::isWritable()
-{
-    return _writable;
-}
-
-// Set address bus to readable
-void AddressBus::setAsReadable()
-{
-    _setBus(false);
-}
-
-// Set address bus to writable
-void AddressBus::setAsWritable()
-{
-    _setBus(true);
 }
 
 // Get current state of address bus
@@ -130,19 +81,3 @@ char *AddressBus::getState()
     return buffer;
 }
 
-// Set address bus state
-void AddressBus::_setBus(bool writableOption)
-{
-    if (_writable == writableOption)
-        return;
-
-    if (writableOption)
-    { // Output
-        _configurePort(0xffff);
-    }
-    else
-    { // Input
-        _configurePort(0x0000);
-    }
-    _writable = writableOption;
-}

@@ -7,12 +7,13 @@
 #include "SerialLogger.h"
 
 // Internal logging method with format string and arguments
-void SerialLogger::_log(const char *fmt, va_list arguments)
+void SerialLogger::_log(const char *level, const char *fmt, va_list arguments)
 {
     const int LEN = 255;
     char buffer[LEN];
     vsnprintf(buffer, LEN, fmt, arguments);
 
+    Serial.print(level);
     Serial.println(buffer);
 }
 
@@ -49,8 +50,7 @@ void SerialLogger::info(const char *fmt, ...)
     va_list arguments;
     va_start(arguments, fmt);
 
-    Serial.print("[INFO] ");
-    _log(fmt, arguments);
+    _log("[INFO] ", fmt, arguments);
 
     va_end(arguments);
 }
@@ -64,8 +64,7 @@ void SerialLogger::warn(const char *fmt, ...)
     va_list arguments;
     va_start(arguments, fmt);
 
-    Serial.print("[WARN] ");
-    _log(fmt, arguments);
+    _log("[WARN] ", fmt, arguments);
 
     va_end(arguments);
 }
@@ -79,8 +78,7 @@ void SerialLogger::err(const char *fmt, ...)
     va_list arguments;
     va_start(arguments, fmt);
 
-    Serial.print("[ERR ] ");
-    _log(fmt, arguments);
+    _log("[ERR ] ", fmt, arguments);
 
     va_end(arguments);
 }
@@ -94,8 +92,7 @@ void SerialLogger::debug(const char *fmt, ...)
     va_list arguments;
     va_start(arguments, fmt);
 
-    Serial.print("[DBUG] ");
-    _log(fmt, arguments);
+    _log("[DBUG] ", fmt, arguments);
 
     va_end(arguments);
 }

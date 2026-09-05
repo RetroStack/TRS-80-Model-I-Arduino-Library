@@ -18,7 +18,7 @@ class ROM
 private:
   ILogger *_logger; // Logger instance for debugging output
 
-  bool _checkROMNumber(uint8_t rom) const; // Validate ROM number is within valid range (0-2)
+  bool _checkROMNumber(uint8_t rom) const; // Validate ROM number is within valid range (0-3)
 
 public:
   ROM(); // Constructor
@@ -38,4 +38,4 @@ public:
   void printROMContents(uint8_t rom, PRINT_STYLE style = BOTH, bool relative = true, uint16_t bytesPerLine = 32);
 };
 
-#endif // ROM_H
+#endif /* ROM_H */

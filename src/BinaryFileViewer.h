@@ -4,8 +4,8 @@
  * Released under the MIT License.
  */
 
-#ifndef BINARYFILEVIEWER_H
-#define BINARYFILEVIEWER_H
+#ifndef BINARY_FILE_VIEWER_H
+#define BINARY_FILE_VIEWER_H
 
 #include <Arduino.h>
 #include <SD.h>
@@ -23,6 +23,8 @@ private:
     // Display buffer for current page
     uint8_t *_pageBuffer;    // Buffer for current page data
     uint16_t _bufferSize;    // Size of page buffer
+    uint16_t _pageLines;     // Rows per page, captured with the buffer
+    uint16_t _pageBytesPerLine; // Bytes per row, captured with the buffer
     uint16_t _bytesInBuffer; // Actual bytes loaded in buffer
 
     // File operations
@@ -63,4 +65,4 @@ protected:
     Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override;
 };
 
-#endif /* BINARYFILEVIEWER_H */
+#endif /* BINARY_FILE_VIEWER_H */

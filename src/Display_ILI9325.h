@@ -8,76 +8,37 @@
 #define DISPLAY_ILI9325_H
 
 #include <Adafruit_ILI9325.h>
-#include "DisplayProvider.h"
+#include "DisplayProviderTFT.h"
 
-class Display_ILI9325 : public DisplayProvider
+class Display_ILI9325 : public DisplayProviderTFT<Adafruit_ILI9325>
 {
-private:
-    Adafruit_ILI9325 *_display;
-
 public:
-    // Constructor
-    Display_ILI9325() : _display(nullptr) {}
-
-    // Create ILI9325 display instance with specified pins
     bool create(int8_t cs, int8_t dc, int8_t rst) override
     {
-        if (_display)
+        if (!_reset(new Adafruit_ILI9325(cs, dc, rst)))
         {
-            delete _display;
+            return false;
         }
-        // ILI9325 uses SPI interface
-        _display = new Adafruit_ILI9325(cs, dc, rst);
+
         _display->begin();
         _display->setRotation(3);
-        return _display != nullptr;
+        return true;
     }
 
-    Adafruit_GFX &getGFX() override
+    const char *getName() const override
     {
-        return *_display;
+        return "ILI9325 320x240";
     }
 
-    bool display() override
+    uint16_t getScreenWidth() const override
     {
-        // TFT displays update immediately, no explicit display() call needed
-        return (_display != nullptr);
+        return 320;
     }
 
-    uint16_t convertColor(uint16_t color) override
+    uint16_t getScreenHeight() const override
     {
-        // ILI9325 uses 16-bit RGB565 format directly
-        return color;
-    }
-
-    void destroy() override
-    {
-        if (_display)
-        {
-            delete _display;
-            _display = nullptr;
-        }
-    }
-
-    const char *name() const override
-    {
-        return "ILI9325 240x320";
-    }
-
-    uint16_t width() const override
-    {
-        return 320; // After rotation 3
-    }
-
-    uint16_t height() const override
-    {
-        return 240; // After rotation 3
-    }
-
-    ~Display_ILI9325() override
-    {
-        destroy();
+        return 240;
     }
 };
 
-#endif // DISPLAY_ILI9325_H
+#endif /* DISPLAY_ILI9325_H */

@@ -116,9 +116,6 @@ private:
 
     // Utility methods
     const char *getModeTitle(ContentMode mode);
-    const char *getModeFooter(ContentMode mode);
-    uint16_t getRandomColor();
-    void drawTextWithBackground(int x, int y, const char *text, uint16_t textColor, uint16_t bgColor);
 
     // Secondary content area methods (status panel below main content)
     void drawSecondaryStatus();
@@ -126,4 +123,4 @@ private:
     void drawSecondaryDataSummary();
 };
 
-#endif // COMPREHENSIVE_CONTENT_H
+#endif /* COMPREHENSIVE_CONTENT_H */

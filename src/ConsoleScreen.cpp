@@ -136,7 +136,11 @@ void ConsoleScreen::loop()
             Screen *newScreen = actionTaken(BUTTON_MENU, 0, 0);
             if (newScreen != nullptr)
             {
+                // setScreen() closes and deletes the current screen before it
+                // opens the new one, and the current screen is this one. Nothing
+                // below this call may touch a member again.
                 M1Shield.setScreen(newScreen);
+                return;
             }
         }
     }
@@ -171,10 +175,12 @@ Screen *ConsoleScreen::actionTaken(ActionTaken action, int8_t offsetX, int8_t of
         }
     }
 
-    // Handle back/menu button to exit console
-    if (action & (BUTTON_MENU))
+    // Handle back/menu button to exit console. LoggerScreen inherits this, so
+    // both of the screens that advertise a back control are covered here.
+    Screen *backScreen = _handleBackAction(action);
+    if (backScreen != nullptr)
     {
-        return nullptr; // Let base class handle navigation
+        return backScreen;
     }
 
     // No navigation for other actions - stay on console
@@ -265,11 +271,20 @@ size_t ConsoleScreen::write(uint8_t c)
     // renderAll visits the primary last, so its post-write cursor survives.
     const uint16_t startX = _currentX;
     const uint16_t startY = _currentY;
+    const bool startWaiting = _isWaitingForPaging;
+    const unsigned long startWaitTime = _pagingWaitStartTime;
 
-    M1Shield.renderAll([this, c, startX, startY]
+    M1Shield.renderAll([this, c, startX, startY, startWaiting, startWaitTime]
                        {
                            _currentX = startX;
                            _currentY = startY;
+                           // Paging is per-target state too: a shorter panel
+                           // reaches the bottom first, and its paging wait used
+                           // to survive into the primary's pass and clear it
+                           // early. renderAll visits the primary last, so its
+                           // result is the one that stands.
+                           _isWaitingForPaging = startWaiting;
+                           _pagingWaitStartTime = startWaitTime;
                            _processChar((char)c);
                            if (isActive())
                            {
@@ -293,11 +308,16 @@ size_t ConsoleScreen::write(const uint8_t *buffer, size_t size)
     // renderAll visits the primary last, so its post-write cursor survives.
     const uint16_t startX = _currentX;
     const uint16_t startY = _currentY;
+    const bool startWaiting = _isWaitingForPaging;
+    const unsigned long startWaitTime = _pagingWaitStartTime;
 
-    M1Shield.renderAll([this, buffer, size, startX, startY]
+    M1Shield.renderAll([this, buffer, size, startX, startY, startWaiting, startWaitTime]
                        {
                            _currentX = startX;
                            _currentY = startY;
+                           // See write(uint8_t): paging state is per-target.
+                           _isWaitingForPaging = startWaiting;
+                           _pagingWaitStartTime = startWaitTime;
 
                            // Resolved per target - never hoist this out
                            Adafruit_GFX &gfx = M1Shield.getGFX();
@@ -354,7 +374,7 @@ void ConsoleScreen::cls()
                        });
 }
 
-void ConsoleScreen::refresh()
+void ConsoleScreen::clearScreen()
 {
     cls();
 }
@@ -608,12 +628,12 @@ void ConsoleScreen::_drawPagingMessage()
     case PAGING_WAIT_TIMEOUT:
         if (_pagingPaused)
         {
-            message = "PAUSED - RT to continue";
+            message = "Paused - [>] go";
         }
         else
         {
             unsigned long remaining = (_pagingTimeoutMs - (millis() - _pagingWaitStartTime)) / 1000 + 1;
-            message = "Auto in " + String(remaining) + "s - LT:pause RT:next";
+            message = "Next in " + String(remaining) + "s - [<] hold [>] go";
         }
         break;
 
@@ -624,12 +644,12 @@ void ConsoleScreen::_drawPagingMessage()
     case PAGING_WAIT_BOTH:
         if (_pagingPaused)
         {
-            message = "PAUSED - RT to continue";
+            message = "Paused - [>] go";
         }
         else
         {
             unsigned long remaining = (_pagingTimeoutMs - (millis() - _pagingWaitStartTime)) / 1000 + 1;
-            message = "Auto " + String(remaining) + "s - LT:pause RT:next";
+            message = "Next in " + String(remaining) + "s - [<] hold [>] go";
         }
         break;
 
@@ -705,12 +725,6 @@ ConsolePagingMode ConsoleScreen::getPagingMode() const
 uint16_t ConsoleScreen::getPagingTimeout() const
 {
     return _pagingTimeoutMs;
-}
-
-// Check if console is currently waiting for paging action
-bool ConsoleScreen::isPagingWaiting() const
-{
-    return _isWaitingForPaging;
 }
 
 // Check if console is currently waiting for paging action

@@ -128,7 +128,7 @@ ComprehensiveScreen::~ComprehensiveScreen() {
 ### Input Processing with ActionTaken Enum
 
 ```cpp
-Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override {
+Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override {
     // Handle specific buttons using bit flags
     if (action & BUTTON_MENU) {
         switchToNextDemo();

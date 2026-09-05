@@ -26,4 +26,4 @@ public:
     Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override;
 };
 
-#endif // SIMPLE_CONTENT_H
+#endif /* SIMPLE_CONTENT_H */

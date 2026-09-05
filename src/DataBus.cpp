@@ -14,31 +14,6 @@ void DataBus::_configurePort(uint8_t config)
   Model1LowLevel::configWriteDataBus(config);
 }
 
-// Constructor - initialize data bus
-DataBus::DataBus()
-{
-  _logger = nullptr;
-  _writable = false;
-}
-
-// Initialize data bus as readable
-void DataBus::begin()
-{
-  setAsReadable();
-}
-
-// Reset data bus to default readable state
-void DataBus::end()
-{
-  setAsReadable();
-}
-
-// Set logger for debugging output
-void DataBus::setLogger(ILogger &logger)
-{
-  _logger = &logger;
-}
-
 // Read 8-bit data value from bus
 uint8_t DataBus::readData()
 {
@@ -51,34 +26,10 @@ void DataBus::writeData(uint8_t data)
   if (!_writable)
   {
     if (_logger)
-      _logger->errF(F("Data bus is not writable."));
+      _logger->errF(F("DataBus: Data bus is not writable."));
     return;
   }
   Model1LowLevel::writeDataBus(data);
-}
-
-// Check if data bus is readable
-bool DataBus::isReadable()
-{
-  return !_writable;
-}
-
-// Check if data bus is writable
-bool DataBus::isWritable()
-{
-  return _writable;
-}
-
-// Set data bus to readable
-void DataBus::setAsReadable()
-{
-  _setBus(false);
-}
-
-// Set data bus to writable
-void DataBus::setAsWritable()
-{
-  _setBus(true);
 }
 
 // Get the current state of the data bus
@@ -107,19 +58,3 @@ char *DataBus::getState()
   return buffer;
 }
 
-// Set the data bus direction
-void DataBus::_setBus(bool writableOption)
-{
-  if (_writable == writableOption)
-    return;
-
-  if (writableOption)
-  { // Output
-    _configurePort(0xff);
-  }
-  else
-  { // Input
-    _configurePort(0x00);
-  }
-  _writable = writableOption;
-}

@@ -46,25 +46,25 @@ void Video::setViewPort(ViewPort viewPort)
   {
     viewPort.x = VIDEO_COLS - 1;
     if (_logger)
-      _logger->warnF(F("X coordinate of viewport is larger than there is space. Reset to %d."), viewPort.x);
+      _logger->warnF(F("Video: X coordinate of viewport is larger than there is space. Reset to %d."), viewPort.x);
   }
   if (viewPort.y >= VIDEO_ROWS)
   {
     viewPort.y = VIDEO_ROWS - 1;
     if (_logger)
-      _logger->warnF(F("Y coordinate of viewport is larger than there is space. Reset to %d."), viewPort.y);
+      _logger->warnF(F("Video: Y coordinate of viewport is larger than there is space. Reset to %d."), viewPort.y);
   }
   if (viewPort.x + viewPort.width > VIDEO_COLS)
   {
     viewPort.width = VIDEO_COLS - viewPort.x;
     if (_logger)
-      _logger->warnF(F("Width of viewport is larger than there is space. Reset to %d."), viewPort.width);
+      _logger->warnF(F("Video: Width of viewport is larger than there is space. Reset to %d."), viewPort.width);
   }
   if (viewPort.y + viewPort.height > VIDEO_ROWS)
   {
     viewPort.height = VIDEO_ROWS - viewPort.y;
     if (_logger)
-      _logger->warnF(F("Height of viewport is larger than there is space. Reset to %d."), viewPort.height);
+      _logger->warnF(F("Video: Height of viewport is larger than there is space. Reset to %d."), viewPort.height);
   }
 
   _viewPort = viewPort;
@@ -90,7 +90,7 @@ uint16_t Video::getAddress(uint8_t x, uint8_t y)
 }
 
 // Get current cursor X position
-uint8_t Video::getX()
+uint8_t Video::getX() const
 {
   return _cursorPositionX;
 }
@@ -111,7 +111,7 @@ void Video::setX(uint8_t x)
 }
 
 // Get current cursor Y position
-uint8_t Video::getY()
+uint8_t Video::getY() const
 {
   return _cursorPositionY;
 }
@@ -139,43 +139,43 @@ void Video::setXY(uint8_t x, uint8_t y)
 }
 
 // Get viewport start X coordinate
-uint8_t Video::getStartX()
+uint8_t Video::getStartX() const
 {
   return _viewPort.x;
 }
 
 // Get viewport end X coordinate
-uint8_t Video::getEndX()
+uint8_t Video::getEndX() const
 {
   return _viewPort.x + _viewPort.width;
 }
 
 // Get viewport start Y coordinate
-uint8_t Video::getStartY()
+uint8_t Video::getStartY() const
 {
   return _viewPort.y;
 }
 
 // Get viewport end Y coordinate
-uint8_t Video::getEndY()
+uint8_t Video::getEndY() const
 {
   return _viewPort.y + _viewPort.height;
 }
 
 // Get viewport width
-uint8_t Video::getWidth()
+uint8_t Video::getWidth() const
 {
   return _viewPort.width;
 }
 
 // Get viewport height
-uint8_t Video::getHeight()
+uint8_t Video::getHeight() const
 {
   return _viewPort.height;
 }
 
 // Get total size of viewport (width * height)
-uint16_t Video::getSize()
+uint16_t Video::getSize() const
 {
   return _viewPort.width * _viewPort.height;
 }
@@ -317,6 +317,20 @@ void Video::scroll(uint8_t rows)
 // Read a block of characters from the screen
 char *Video::read(uint8_t x, uint8_t y, uint16_t length, bool raw)
 {
+  // The read below stops at the end of the viewport regardless, so a longer
+  // length only inflates the allocation -- and length + 1 wraps to 0 at 65535,
+  // which avr-libc answers with a minimum-size block rather than a null
+  // pointer, leaving the guard below useless and the writes out of bounds.
+  uint16_t available = 0;
+  if (x < _viewPort.width && y < _viewPort.height)
+  {
+    available = (uint16_t)(_viewPort.height - y) * _viewPort.width - x;
+  }
+  if (length > available)
+  {
+    length = available;
+  }
+
   uint8_t *buffer = (uint8_t *)malloc((length + 1) * sizeof(uint8_t));
   if (!buffer)
   {

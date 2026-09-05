@@ -61,6 +61,10 @@ private:
     unsigned long _rightPressed;    // Last right button press timestamp
     unsigned long _joystickPressed; // Last joystick button press timestamp
 
+    ActionTaken _joystickDirection;    // Direction currently held on the stick, NONE when centered
+    unsigned long _joystickRepeatTime; // When the held direction last fired
+    unsigned long _joystickRepeatDelay; // Interval until it may fire again
+
     // Display properties
     uint16_t _screenWidth;  // Display width in pixels
     uint16_t _screenHeight; // Display height in pixels
@@ -69,6 +73,7 @@ private:
 
     // Internal debouncing helper for button state detection
     unsigned long _getDebouncedState(int pin, unsigned long pressedState) const;
+    bool _wasPressed(int pin, unsigned long &state); // Edge detection shared by every was*Pressed()
 
     void _active() const;   // Set shield to active state (internal)
     void _inactive() const; // Set shield to inactive state (internal)
@@ -104,6 +109,10 @@ public:
 
     bool setScreen(Screen *screen); // Set the active screen and perform transition
 
+    // The render-target registry. addRenderTarget() on it does not validate a
+    // reset pin or call begin() on the target -- addDisplay() above is the door
+    // for a display panel; use this one for targets that manage themselves,
+    // such as a serial mirror.
     RenderManager &getRenderManager(); // Get reference to render manager
 
     // Initialize an additional display panel and register it as a render

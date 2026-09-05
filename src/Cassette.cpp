@@ -6,7 +6,6 @@
 
 #include "Cassette.h"
 #include "Model1.h"
-#include "utils.h"
 
 // Local port
 #define CASSETTE_PORT 0xff
@@ -170,6 +169,15 @@ void Cassette::play(uint16_t frequency, uint32_t durationMs)
 // Play a song using the specified melody and durations
 void Cassette::playSong(int *melody, float *durations, size_t numNotes, int bpm)
 {
+  // Every other pointer-taking function in the hardware layer validates and
+  // logs; these two dereferenced whatever they were handed.
+  if (!melody || !durations)
+  {
+    if (_logger)
+      _logger->errF(F("Cassette: playSong called with a null melody or durations pointer"));
+    return;
+  }
+
     // Compute duration of a whole note in milliseconds
     float wholeNoteMs = (60000.0 * 4) / bpm;
 
@@ -193,6 +201,15 @@ void Cassette::playSong(int *melody, float *durations, size_t numNotes, int bpm)
 // Play a song using the specified melody and durations
 void Cassette::playSongPGM(const int *melody, const float *durations, size_t numNotes, int bpm)
 {
+  // Every other pointer-taking function in the hardware layer validates and
+  // logs; these two dereferenced whatever they were handed.
+  if (!melody || !durations)
+  {
+    if (_logger)
+      _logger->errF(F("Cassette: playSong called with a null melody or durations pointer"));
+    return;
+  }
+
     // Compute duration of a whole note in milliseconds
     float wholeNoteMs = (60000.0 * 4) / bpm;
 

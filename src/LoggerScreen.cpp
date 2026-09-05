@@ -22,7 +22,7 @@ public:
     {
         va_list args;
         va_start(args, fmt);
-        _parent->_logMessage("INFO", _parent->COLOR_INFO, fmt, args);
+        _parent->_logMessage(_parent->_levelLabel(LoggerScreen::LEVEL_INFO), _parent->COLOR_INFO, fmt, args);
         va_end(args);
     }
 
@@ -31,7 +31,7 @@ public:
     {
         va_list args;
         va_start(args, fmt);
-        _parent->_logMessage("WARN", _parent->COLOR_WARN, fmt, args);
+        _parent->_logMessage(_parent->_levelLabel(LoggerScreen::LEVEL_WARN), _parent->COLOR_WARN, fmt, args);
         va_end(args);
     }
 
@@ -40,7 +40,7 @@ public:
     {
         va_list args;
         va_start(args, fmt);
-        _parent->_logMessage("ERR ", _parent->COLOR_ERROR, fmt, args);
+        _parent->_logMessage(_parent->_levelLabel(LoggerScreen::LEVEL_ERROR), _parent->COLOR_ERROR, fmt, args);
         va_end(args);
     }
 
@@ -49,7 +49,7 @@ public:
     {
         va_list args;
         va_start(args, fmt);
-        _parent->_logMessage("DEBUG", _parent->COLOR_DEBUG, fmt, args);
+        _parent->_logMessage(_parent->_levelLabel(LoggerScreen::LEVEL_DEBUG), _parent->COLOR_DEBUG, fmt, args);
         va_end(args);
     }
 
@@ -101,7 +101,7 @@ LoggerScreen::LoggerScreen(const char *title) : ConsoleScreen(), _loggerAdapter(
     setTextSize(1);               // Small text for more lines
 
     // Update button labels for logger screen
-    const char *buttonItems[1] = {"[M] Close Log"};
+    const char *buttonItems[1] = {"[M] Close"};
     setButtonItems(buttonItems, 1);
 
     // Create the logger adapter
@@ -251,11 +251,133 @@ uint16_t LoggerScreen::getLogBufferCount() const
 }
 
 // Log informational messages
+// Log a String as a info message
+void LoggerScreen::info(const String &message)
+{
+    info("%s", message.c_str());
+}
+
+// Log a flash-held format string as a info message
+void LoggerScreen::infoF(const __FlashStringHelper *fmt, ...)
+{
+    if (fmt == nullptr)
+        return;
+
+    va_list args;
+    va_start(args, fmt);
+
+    // vsnprintf_P reads the format straight out of flash, so nothing is copied
+    // into RAM but the result.
+    char formatted[128];
+    vsnprintf_P(formatted, sizeof(formatted), (const char *)fmt, args);
+    formatted[sizeof(formatted) - 1] = '\0';
+    va_end(args);
+
+    info("%s", formatted);
+}
+
+// Log a String as a warn message
+void LoggerScreen::warn(const String &message)
+{
+    warn("%s", message.c_str());
+}
+
+// Log a flash-held format string as a warn message
+void LoggerScreen::warnF(const __FlashStringHelper *fmt, ...)
+{
+    if (fmt == nullptr)
+        return;
+
+    va_list args;
+    va_start(args, fmt);
+
+    // vsnprintf_P reads the format straight out of flash, so nothing is copied
+    // into RAM but the result.
+    char formatted[128];
+    vsnprintf_P(formatted, sizeof(formatted), (const char *)fmt, args);
+    formatted[sizeof(formatted) - 1] = '\0';
+    va_end(args);
+
+    warn("%s", formatted);
+}
+
+// Log a String as a err message
+void LoggerScreen::err(const String &message)
+{
+    err("%s", message.c_str());
+}
+
+// Log a flash-held format string as a err message
+void LoggerScreen::errF(const __FlashStringHelper *fmt, ...)
+{
+    if (fmt == nullptr)
+        return;
+
+    va_list args;
+    va_start(args, fmt);
+
+    // vsnprintf_P reads the format straight out of flash, so nothing is copied
+    // into RAM but the result.
+    char formatted[128];
+    vsnprintf_P(formatted, sizeof(formatted), (const char *)fmt, args);
+    formatted[sizeof(formatted) - 1] = '\0';
+    va_end(args);
+
+    err("%s", formatted);
+}
+
+// Log a String as a debug message
+void LoggerScreen::debug(const String &message)
+{
+    debug("%s", message.c_str());
+}
+
+// Log a flash-held format string as a debug message
+void LoggerScreen::debugF(const __FlashStringHelper *fmt, ...)
+{
+    if (fmt == nullptr)
+        return;
+
+    va_list args;
+    va_start(args, fmt);
+
+    // vsnprintf_P reads the format straight out of flash, so nothing is copied
+    // into RAM but the result.
+    char formatted[128];
+    vsnprintf_P(formatted, sizeof(formatted), (const char *)fmt, args);
+    formatted[sizeof(formatted) - 1] = '\0';
+    va_end(args);
+
+    debug("%s", formatted);
+}
+
+// Level label for the current panel width
+const char *LoggerScreen::_levelLabel(LogLevel level) const
+{
+    // Padded to four characters so the columns line up. The adapter used to
+    // carry its own copy of these, spelling debug "DEBUG" -- five characters,
+    // breaking the alignment -- and never abbreviating on a small panel.
+    const bool small = isSmallDisplay();
+    switch (level)
+    {
+    case LEVEL_INFO:
+        return small ? "I" : "INFO";
+    case LEVEL_WARN:
+        return small ? "W" : "WARN";
+    case LEVEL_ERROR:
+        return small ? "E" : "ERR ";
+    case LEVEL_DEBUG:
+        return small ? "D" : "DBUG";
+    }
+
+    return "";
+}
+
 void LoggerScreen::info(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    _logMessage(isSmallDisplay() ? "I" : "INFO", COLOR_INFO, fmt, args);
+    _logMessage(_levelLabel(LEVEL_INFO), COLOR_INFO, fmt, args);
     va_end(args);
 }
 
@@ -264,7 +386,7 @@ void LoggerScreen::warn(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    _logMessage(isSmallDisplay() ? "W" : "WARN", COLOR_WARN, fmt, args);
+    _logMessage(_levelLabel(LEVEL_WARN), COLOR_WARN, fmt, args);
     va_end(args);
 }
 
@@ -273,7 +395,7 @@ void LoggerScreen::err(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    _logMessage(isSmallDisplay() ? "E" : "ERR ", COLOR_ERROR, fmt, args);
+    _logMessage(_levelLabel(LEVEL_ERROR), COLOR_ERROR, fmt, args);
     va_end(args);
 }
 
@@ -282,7 +404,7 @@ void LoggerScreen::debug(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    _logMessage(isSmallDisplay() ? "D" : "DBUG", COLOR_DEBUG, fmt, args);
+    _logMessage(_levelLabel(LEVEL_DEBUG), COLOR_DEBUG, fmt, args);
     va_end(args);
 }
 

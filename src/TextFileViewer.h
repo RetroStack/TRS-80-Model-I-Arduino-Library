@@ -4,8 +4,8 @@
  * Released under the MIT License.
  */
 
-#ifndef TEXTFILEVIEWER_H
-#define TEXTFILEVIEWER_H
+#ifndef TEXT_FILE_VIEWER_H
+#define TEXT_FILE_VIEWER_H
 
 #include <Arduino.h>
 #include "ContentScreen.h"
@@ -44,7 +44,6 @@ private:
     uint32_t _calculateTotalPages(); // Calculate total pages based on lines per page
     void _calculateLayout();         // Calculate lines per page and layout
     bool _checkFileUpdate();         // Check if file has been updated (for auto-paging)
-    void _updateMaxLineLength();     // Update maximum line length for current page
 
 public:
     TextFileViewer(const char *filename); // Constructor with filename, sets default button items
@@ -83,4 +82,4 @@ protected:
     Screen *actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override; // Handle navigation input
 };
 
-#endif /* TEXTFILEVIEWER_H */
+#endif /* TEXT_FILE_VIEWER_H */

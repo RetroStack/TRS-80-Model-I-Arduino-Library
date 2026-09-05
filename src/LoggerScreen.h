@@ -41,6 +41,19 @@ private:
 
     void _logMessage(const char *level, uint16_t color, const char *fmt, va_list args); // Internal helper to format and display log messages
 
+public:
+    enum LogLevel
+    {
+        LEVEL_INFO,
+        LEVEL_WARN,
+        LEVEL_ERROR,
+        LEVEL_DEBUG
+    };
+
+    const char *_levelLabel(LogLevel level) const; // Level label sized for the current panel
+
+private:
+
     void _getTimestamp(char *buffer, size_t bufferSize); // Get current timestamp string for logging
 
     void _addToBuffer(const char *logLine, uint16_t color); // Add entry to circular buffer
@@ -67,10 +80,23 @@ public:
     uint16_t getLogBufferCount() const;   // Get number of entries currently in buffer
 
     // Logging interface (compatible with ILogger but not inheriting)
-    void info(const char *fmt, ...);
-    void warn(const char *fmt, ...);
-    void err(const char *fmt, ...);
-    void debug(const char *fmt, ...);
+    void info(const char *fmt, ...) __attribute__((format(printf, 2, 3)));
+    void warn(const char *fmt, ...) __attribute__((format(printf, 2, 3)));
+    void err(const char *fmt, ...) __attribute__((format(printf, 2, 3)));
+    void debug(const char *fmt, ...) __attribute__((format(printf, 2, 3)));
+
+    // The String and F() forms its three sibling loggers expose. LoggerScreen
+    // does not inherit ILogger, so it could not pick them up the way they do;
+    // without them the example kept every literal in SRAM.
+    void info(const String &message);
+    void warn(const String &message);
+    void err(const String &message);
+    void debug(const String &message);
+
+    void infoF(const __FlashStringHelper *fmt, ...);
+    void warnF(const __FlashStringHelper *fmt, ...);
+    void errF(const __FlashStringHelper *fmt, ...);
+    void debugF(const __FlashStringHelper *fmt, ...);
 
     ILogger *asLogger(); // Get an ILogger adapter for this LoggerScreen
 

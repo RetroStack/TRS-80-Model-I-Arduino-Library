@@ -35,6 +35,7 @@ public:
     // Swap the backing provider (does not take ownership of either)
     void setDisplayProvider(DisplayProvider &provider);
     DisplayProvider &getDisplayProvider() const;
+    DisplayProvider *getProvider() const override; // RenderTarget's optional accessor
 
     // RenderTarget interface
     const char *getName() const override;

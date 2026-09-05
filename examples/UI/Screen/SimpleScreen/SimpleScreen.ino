@@ -12,7 +12,9 @@
 #include <M1Shield.h>     // Main M1Shield functions
 #include "SimpleScreen.h" // Our simple screen
 
-// First, tell the system which display you have
+// First, tell the system which display you have.
+// Uncomment exactly one and comment out the rest.
+
 // For ST7789 240x320 displays (most common, landscape becomes 320x240)
 #include <Display_ST7789_320x240.h>
 Display_ST7789_320x240 displayProvider;
@@ -24,10 +26,6 @@ Display_ST7789_320x240 displayProvider;
 // For ST7789 320x170 wide displays (landscape)
 // #include <Display_ST7789_320x170.h>
 // Display_ST7789_320x170 displayProvider;
-
-// For ST7789 320x240 alternative displays (landscape)
-// #include <Display_ST7789_320x240.h>
-// Display_ST7789_320x240 displayProvider;
 
 // For smaller ST7735 128x160 displays
 // #include <Display_ST7735.h>

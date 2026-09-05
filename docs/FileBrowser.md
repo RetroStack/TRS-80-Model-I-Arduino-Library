@@ -38,6 +38,12 @@ Creates a FileBrowser with intelligent parameter handling that supports all usag
 - `targetFile` - Optional filename to pre-select (ignored if first parameter contains a file path)
 - `restrictToRoot` - If true, prevents navigation above the starting directory. Default: false
 
+  Paths are normalized before the check, so `.` and `..` segments are collapsed
+  rather than passed through to the card, and containment is compared one path
+  component at a time -- a root of `/logs` does not contain `/logsecret`. The
+  restriction applies to `navigateToDirectory()` as well as to the on-screen
+  navigation.
+
 **Smart Parameter Logic:**
 
 - If `targetFile` is empty and `directoryOrPath` contains a file extension, the path is automatically parsed
@@ -98,7 +104,7 @@ Get the current directory path.
 
 **Returns:** Current directory path as String
 
-#### `void refresh()`
+#### `void reloadDirectory()`
 
 Refresh the current directory contents and update the display.
 

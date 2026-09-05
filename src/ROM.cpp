@@ -6,7 +6,6 @@
 
 #include "ROM.h"
 #include "Model1.h"
-#include "utils.h"
 
 #define ROM_START 0x00
 #define ROM_1K_LENGTH 1024
@@ -235,7 +234,7 @@ bool ROM::_checkROMNumber(uint8_t rom) const
   if (rom > 3)
   {
     if (_logger)
-      _logger->errF(F("Invalid ROM number: %d. Valid range is 0-3."), rom);
+      _logger->errF(F("ROM: Invalid ROM number: %d. Valid range is 0-3."), rom);
     return false;
   }
   return true;

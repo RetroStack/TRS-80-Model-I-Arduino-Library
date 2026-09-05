@@ -100,7 +100,7 @@ public:
 
     // Console Control Methods
     void cls();     // Clear screen and reset cursor to top-left
-    void refresh(); // Refresh screen and reset cursor to top-left
+    void clearScreen(); // Clear the console and reset the cursor to top-left
 
     // Console Configuration Methods
     void setTextColor(uint16_t foreground, uint16_t background = 0x0000); // Set text color for subsequent output
@@ -113,7 +113,6 @@ public:
     void setPagingTimeout(uint16_t timeoutMs);                       // Set paging timeout duration
     ConsolePagingMode getPagingMode() const;                         // Get current paging mode
     uint16_t getPagingTimeout() const;                               // Get current paging timeout
-    bool isPagingWaiting() const;                                    // Check if console is currently waiting for paging action
     bool isWaitingForPaging() const;                                 // Check if console is currently waiting for paging action
     void setAutoForward(bool enabled, unsigned long delayMs = 5000); // Enable or disable auto-forward functionality
     bool isAutoForwardEnabled() const;                               // Check if auto-forward is currently enabled

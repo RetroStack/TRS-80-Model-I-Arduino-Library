@@ -24,98 +24,50 @@
 #include <M1Shield.h>
 #include <FileBrowser.h>
 #include <MenuScreen.h>
+#include "FileBrowserMenu.h"
 
-// Uncomment ONE of these display provider lines based on your hardware:
+// First, tell the system which display you have.
+// Uncomment exactly one and comment out the rest.
+
+// For ST7789 240x320 displays (most common, landscape becomes 320x240)
+// #include <Display_ST7789_320x240.h>
+// Display_ST7789_320x240 displayProvider;
+
+// For ST7789 240x240 square displays
+// #include <Display_ST7789_240x240.h>
+// Display_ST7789_240x240 displayProvider;
+
+// For ST7789 320x170 wide displays (landscape)
+// #include <Display_ST7789_320x170.h>
+// Display_ST7789_320x170 displayProvider;
+
+// For smaller ST7735 128x160 displays
+// #include <Display_ST7735.h>
+// Display_ST7735 displayProvider;
+
+// For large ST7796 320x480 displays (landscape becomes 480x320)
+// #include <Display_ST7796.h>
+// Display_ST7796 displayProvider;
+
+// For parallel ILI9325 240x320 displays (landscape becomes 320x240)
+// #include <Display_ILI9325.h>
+// Display_ILI9325 displayProvider;
+
+// For ILI9341 240x320 displays (landscape becomes 320x240)
 #include <Display_ILI9341.h>
 Display_ILI9341 displayProvider;
 
-// Main menu for selecting different browser configurations
-class FileBrowserMenu : public MenuScreen
-{
-public:
-    FileBrowserMenu() : MenuScreen()
-    {
-        // Set up menu items
-        const char *items[] = {
-            "Browse Root Directory",
-            "Browse Logs (Restricted)",
-            "Browse Data (Pre-select)",
-            "Browse with Custom Types",
-            "Browse Documents Only"};
-        setMenuItems(items, 5);
+// For large HX8357 320x480 displays
+// #include <Display_HX8357.h>
+// Display_HX8357 displayProvider;
 
-        setTitleF(F("FileBrowser Examples"));
+// For monochrome SSD1306 OLED displays (128x64)
+// #include <Display_SSD1306.h>
+// Display_SSD1306 displayProvider;
 
-        const char *buttons[] = {"Exit", "Select >"};
-        setButtonItems(buttons, 2);
-    }
-
-protected:
-    Screen *_getSelectedMenuItemScreen(int index) override
-    {
-        switch (index)
-        {
-        case 0:
-            // Basic browsing from root
-            return new FileBrowser();
-
-        case 1:
-            // Browse logs directory with root restriction
-            // User cannot navigate above /logs directory
-            return new FileBrowser("/logs", "", true);
-
-        case 2:
-            // Browse data directory and pre-select "config.txt"
-            return new FileBrowser("/data", "config.txt");
-
-        case 3:
-        {
-            // Custom file type configuration
-            FileBrowser *browser = new FileBrowser("/");
-            browser->clearTextExtensions();
-            browser->addTextExtension("cfg");
-            browser->addTextExtension("ini");
-            browser->addTextExtension("conf");
-            browser->addTextExtension("log");
-            browser->addTextExtension("txt");
-            return browser;
-        }
-
-        case 4:
-        {
-            // Documents-only browser (restricted to documents folder)
-            FileBrowser *browser = new FileBrowser("/documents", "", true);
-            browser->clearTextExtensions();
-            browser->addTextExtension("txt");
-            browser->addTextExtension("md");
-            browser->addTextExtension("doc");
-            return browser;
-        }
-
-        default:
-            return nullptr;
-        }
-    }
-
-    const char *_getMenuItemConfigValue(uint8_t index) override
-    {
-        switch (index)
-        {
-        case 0:
-            return "Full Access";
-        case 1:
-            return "Restricted";
-        case 2:
-            return "Pre-select";
-        case 3:
-            return "Custom Types";
-        case 4:
-            return "Docs Only";
-        default:
-            return nullptr;
-        }
-    }
-};
+// For monochrome SH1106 OLED displays (128x64)
+// #include <Display_SH1106.h>
+// Display_SH1106 displayProvider;
 
 void setup()
 {

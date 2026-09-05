@@ -38,4 +38,4 @@ private:
     void showControls();
 };
 
-#endif // SIMPLE_CONSOLE_H
+#endif /* SIMPLE_CONSOLE_H */

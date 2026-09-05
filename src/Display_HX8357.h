@@ -8,76 +8,38 @@
 #define DISPLAY_HX8357_H
 
 #include <Adafruit_HX8357.h>
-#include "DisplayProvider.h"
+#include "DisplayProviderTFT.h"
 
-class Display_HX8357 : public DisplayProvider
+class Display_HX8357 : public DisplayProviderTFT<Adafruit_HX8357>
 {
-private:
-    Adafruit_HX8357 *_display;
-
 public:
-    // Constructor
-    Display_HX8357() : _display(nullptr) {}
-
-    // Create HX8357 display instance with specified pins
     bool create(int8_t cs, int8_t dc, int8_t rst) override
     {
-        if (_display)
+        if (!_reset(new Adafruit_HX8357(cs, dc, rst)))
         {
-            delete _display;
+            return false;
         }
-        _display = new Adafruit_HX8357(cs, dc, rst);
+
         _display->begin(HX8357D);
         _display->setRotation(0);
         _display->invertDisplay(false);
-        return _display != nullptr;
+        return true;
     }
 
-    Adafruit_GFX &getGFX() override
-    {
-        return *_display;
-    }
-
-    bool display() override
-    {
-        // TFT displays update immediately, no explicit display() call needed
-        return (_display != nullptr);
-    }
-
-    uint16_t convertColor(uint16_t color) override
-    {
-        // HX8357 uses 16-bit RGB565 format directly
-        return color;
-    }
-
-    void destroy() override
-    {
-        if (_display)
-        {
-            delete _display;
-            _display = nullptr;
-        }
-    }
-
-    const char *name() const override
+    const char *getName() const override
     {
         return "HX8357D 320x480";
     }
 
-    uint16_t width() const override
+    uint16_t getScreenWidth() const override
     {
         return 320;
     }
 
-    uint16_t height() const override
+    uint16_t getScreenHeight() const override
     {
         return 480;
     }
-
-    ~Display_HX8357() override
-    {
-        destroy();
-    }
 };
 
-#endif // DISPLAY_HX8357_H
+#endif /* DISPLAY_HX8357_H */

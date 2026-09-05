@@ -40,15 +40,12 @@ This library is ideal for:
 
 The library is organized into several key areas:
 
-## Library Architecture
-
-The library is organized into several key areas:
-
 ### Core TRS-80 Interface
 
 - [**Model1**](Model1.md) - High-level interface for memory access, bus control, and system management. Start here for most applications.
 - [**Model1LowLevel**](Model1LowLevel.md) - Direct hardware control for advanced users requiring precise signal timing (WARNING: Expert level).
 - [**Cassette**](Cassette.md) - Cassette tape interface emulation and video mode control for authentic TRS-80 operation.
+- [**KeyboardChangeIterator**](KeyboardChangeIterator.md) - Walks the differences between two keyboard snapshots, one changed key at a time.
 - [**Keyboard**](Keyboard.md) - Matrix keyboard reading with change detection and key mapping.
 - [**Video**](Video.md) - Video memory manipulation, text display, and character encoding with viewport support.
 - [**ROM**](ROM.md) - ROM analysis tools including reading, checksumming, and automatic identification of known ROM versions.
@@ -72,7 +69,9 @@ The library is organized into several key areas:
 The M1Shield provides a safe, reliable connection method with integrated display and user interface:
 
 - [**M1Shield**](M1Shield.md) - Main shield interface for display, input controls, LED indicators, screen management, and cassette interface (WARNING: Advanced).
-- [**RenderTarget**](RenderTarget.md) - Render target abstraction and RenderManager for driving one or more output destinations.
+- [**RenderTarget**](RenderTarget.md) - The interface for a destination that screens can be drawn to.
+- [**RenderManager**](RenderManager.md) - The registry of render targets and the render pass that drives them.
+- [**DisplayRenderTarget**](DisplayRenderTarget.md) - The built-in render target backed by a display panel.
 - [**DisplayProvider**](DisplayProvider.md) - Adaptive display system supporting multiple controller types (TFT: ST7789, ST7735, ILI9341, ST7796, HX8357, ILI9325; OLED: SSD1306, SH1106).
 
 ### User Interface Framework
@@ -91,7 +90,7 @@ A complete screen management system for building interactive applications:
 Comprehensive SD card file operations with integrated browsing and viewing capabilities:
 
 - [**FileBrowser**](FileBrowser.md) - SD card file and directory browser with automatic file type detection and viewer selection.
-- [**TextFileViewer**](TextFileViewer.md) - Scrollable text file viewer with syntax highlighting and search capabilities for displaying SD card text files.
+- [**TextFileViewer**](TextFileViewer.md) - Paged text file viewer with horizontal scrolling and optional auto-paging for displaying SD card text files.
 - [**BinaryFileViewer**](BinaryFileViewer.md) - Hexadecimal binary file viewer with ASCII representation for examining SD card binary files.
 
 ## Quick Start Guide
@@ -116,15 +115,19 @@ void setup() {
 
 ```cpp
 #include <M1Shield.h>
-#include <MenuScreen.h>
 #include <Display_ST7789_320x240.h>  // Or your preferred display
+#include "MyMenu.h"                  // Your MenuScreen subclass
 
 Display_ST7789_320x240 displayProvider;
-MenuScreen menuScreen;
 
 void setup() {
   M1Shield.begin(displayProvider);
-  M1Shield.setScreen(&menuScreen);
+
+  // Screens are created with new, never as globals: a global constructor runs
+  // before begin(), so the screen would be built before there is a display to
+  // measure. MenuScreen is abstract -- subclass it and implement
+  // _getSelectedMenuItemScreen().
+  M1Shield.setScreen(new MyMenu());
 }
 
 void loop() {

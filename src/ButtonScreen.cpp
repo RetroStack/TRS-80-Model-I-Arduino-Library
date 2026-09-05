@@ -6,19 +6,14 @@
 
 #include "ButtonScreen.h"
 #include "M1Shield.h"
+#include "utils.h"
 #include <Adafruit_GFX.h>
 
 // Display Configuration Constants
-constexpr uint8_t TEXT_SIZE_2_WIDTH = 12;      // Width of size-2 text characters
-constexpr uint8_t TEXT_SIZE_2_HEIGHT = 16;     // Height of size-2 text characters
-constexpr uint8_t TEXT_SIZE_2_HALF_HEIGHT = 8; // Half-height of size-2 text for centering
 
 // Horizontal Button Layout Constants
 constexpr uint16_t BUTTON_FOOTER_HEIGHT = 26;       // Height of expanded footer for horizontal buttons (2 rows of size-2 text)
 constexpr uint16_t BUTTON_SMALL_FOOTER_HEIGHT = 20; // Height of expanded footer for small displays
-constexpr uint16_t BUTTON_ITEM_HEIGHT = 16;         // Height of each button item row
-constexpr uint16_t BUTTON_CONFIG_HEIGHT = 16;       // Height of config value row
-constexpr uint16_t BUTTON_PADDING = 2;              // Padding between button items horizontally
 constexpr uint16_t BUTTON_MIN_WIDTH = 100;          // Minimum width of button items to calculate number of buttons
 
 // Color Constants
@@ -68,39 +63,7 @@ uint8_t ButtonScreen::_getMaxVisibleItems() const
 // Find the next enabled button item
 uint8_t ButtonScreen::_findNextEnabledItem(uint8_t startIndex, bool forward) const
 {
-    uint8_t buttonItemCount = _getButtonItemCount();
-    if (buttonItemCount == 0)
-        return 0;
-
-    // Ensure start index is valid
-    if (startIndex >= buttonItemCount)
-    {
-        startIndex = buttonItemCount - 1;
-    }
-
-    uint8_t currentIndex = startIndex;
-    uint8_t attempts = 0;
-
-    do
-    {
-        if (_isButtonItemEnabled(currentIndex))
-        {
-            return currentIndex;
-        }
-
-        if (forward)
-        {
-            currentIndex = (currentIndex + 1) % buttonItemCount;
-        }
-        else
-        {
-            currentIndex = (currentIndex == 0) ? buttonItemCount - 1 : currentIndex - 1;
-        }
-        attempts++;
-    } while (attempts < buttonItemCount);
-
-    // If no enabled items found, return the original index
-    return startIndex;
+    return ContentScreen::_findNextEnabledItem(startIndex, forward, _getButtonItemCount());
 }
 
 // Adjust view window to ensure selected item is visible
@@ -355,27 +318,21 @@ void ButtonScreen::_drawFooter()
         // Draw config value (second row)
         const __FlashStringHelper *configValueF = _getButtonItemConfigValueF(itemIndex);
         const char *configValue = nullptr;
-        char *tempConfigBuffer = nullptr;
+        // Released when this block ends; the explicit free lived about a
+        // hundred lines further down.
+        FlashBuffer configCopy(configValueF);
 
         if (configValueF != nullptr)
         {
-            // Convert FlashString to regular string for display
-            size_t len = strlen_P((const char *)configValueF);
-            tempConfigBuffer = (char *)malloc(len + 1);
-            if (tempConfigBuffer != nullptr)
+            if (configCopy.valid())
             {
-                strcpy_P(tempConfigBuffer, (const char *)configValueF);
-                configValue = tempConfigBuffer;
+                configValue = configCopy.c_str();
             }
-            else
+            else if (getLogger())
             {
-                // Log malloc failure with screen title context
-                if (getLogger())
-                {
-                    const char *title = getTitle();
-                    getLogger()->errF(F("ButtonScreen[%s]: Failed to allocate %d bytes for config value display"),
-                                      title ? title : "Unknown", len + 1);
-                }
+                const char *title = getTitle();
+                getLogger()->errF(F("ButtonScreen[%s]: Failed to allocate memory for config value display"),
+                                  title ? title : "Unknown");
             }
         }
         else
@@ -415,11 +372,6 @@ void ButtonScreen::_drawFooter()
             gfx.setTextSize(textSize);
         }
 
-        // Free temporary config buffer
-        if (tempConfigBuffer != nullptr)
-        {
-            free(tempConfigBuffer);
-        }
 
         // Draw border between items (except last one)
         if (i < itemsToShow - 1 && !isSmall)

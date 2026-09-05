@@ -332,3 +332,21 @@ void loop() {
 - Always call `activateTestSignal()` before memory or I/O operations.
 - Remember to `free()` buffers returned by `readMemory()` block operations.
 - Use proper timer interrupt handlers when enabling memory refresh.
+
+## Dumping Memory to SD Card
+
+```cpp
+bool dumpMemoryToSD(uint16_t address, uint16_t length, const char *filename);
+```
+
+Writes `length` bytes starting at `address` to a file as raw binary, reading in
+64-byte chunks so the whole region is never held in RAM at once. Returns
+`false` if the bus is not mutable, the card cannot be initialised, a read
+fails, or a write is short.
+
+```cpp
+Model1.activateTestSignal();
+Model1.dumpMemoryToSD(0x3C00, 1024, "video.bin");  // Video RAM
+Model1.dumpMemoryToSD(0x0000, 0xFFFF, "all.bin");  // The whole address space
+Model1.deactivateTestSignal();
+```

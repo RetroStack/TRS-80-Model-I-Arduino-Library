@@ -535,13 +535,14 @@ if (choice == CONFIRM_RIGHT) {
 }
 ```
 
-#### `ConfirmResult confirmF(const __FlashStringHelper* text, const char* leftText = "Cancel", const char* rightText = "OK")`
+#### `ConfirmResult confirmF(const __FlashStringHelper* text, const __FlashStringHelper* leftText, const __FlashStringHelper* rightText)`
 
 Shows a blocking confirmation dialog from FlashString (F() macro).
 
 **Parameters:**
 
-- `text`: FlashString main message (automatically converted)
+- `text`: FlashString main message
+- `leftText`, `rightText`: FlashString button labels; both are required
 - `leftText`: Left button text (default: "Cancel")
 - `rightText`: Right button text (default: "OK")
 
@@ -550,8 +551,10 @@ Shows a blocking confirmation dialog from FlashString (F() macro).
 **Example:**
 
 ```cpp
-// Memory-efficient confirmation
-ConfirmResult result = confirmF(F("Format disk?"), "Cancel", "Format");
+// Memory-efficient confirmation. All three arguments are FlashStrings and
+// none has a default: mixing F() with plain literals is exactly the pattern
+// the project's own rules forbid, and it does not compile.
+ConfirmResult result = confirmF(F("Format disk?"), F("Cancel"), F("Format"));
 if (result == CONFIRM_RIGHT) {
     formatDisk();
 }
@@ -732,7 +735,7 @@ public:
         if (_currentValue > 100) _currentValue = 0;
     }
 
-    Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override {
+    Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override {
         if (action & BUTTON_MENU) {
             return nullptr;  // Handle back navigation
         }
@@ -795,7 +798,7 @@ public:
         }
     }
 
-    Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override {
+    Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override {
         if (action & BUTTON_MENU) {
             return previousScreen;  // Navigate back
         }
@@ -845,7 +848,7 @@ protected:
         setButtonItemsF(flashButtons, 4);
     }
 
-    Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override {
+    Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override {
         if (action & BUTTON_MENU) {
             // Change title dynamically using FlashString
             setTitleF(F("Menu Pressed!"));
@@ -920,7 +923,7 @@ public:
         }
     }
 
-    Screen* actionTaken(ActionTaken action, uint8_t offsetX, uint8_t offsetY) override {
+    Screen* actionTaken(ActionTaken action, int8_t offsetX, int8_t offsetY) override {
         if (action & BUTTON_LEFT) {
             // Save operation
             _operationCount++;

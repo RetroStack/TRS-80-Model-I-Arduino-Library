@@ -6,6 +6,19 @@
 
 #include "FileBrowser.h"
 #include "M1Shield.h"
+#include "utils.h"
+
+// Longest path this browser will build. SD short names are 12 characters, so
+// this allows deep nesting while keeping the working buffer off the heap.
+constexpr size_t MAX_PATH_LENGTH = 128;
+
+// Rebuilds a browser at a given directory. Handed to the file viewers as their
+// back destination -- a factory rather than a pointer, because setScreen()
+// destroys this browser before the viewer opens.
+static Screen *createFileBrowserAt(const String &directory)
+{
+    return new FileBrowser(directory);
+}
 
 // Constructor - handles all usage patterns intelligently
 FileBrowser::FileBrowser(const String &directoryOrPath, const String &targetFile, bool restrictToRoot) : MenuScreen()
@@ -45,14 +58,16 @@ FileBrowser::FileBrowser(const String &directoryOrPath, const String &targetFile
     }
 
     // Set default text file extensions
-    _ensureTextExtensionCapacity(2);
-    _textExtensions[0] = "log";
-    _textExtensions[1] = "txt";
-    _textExtensionCount = 2;
+    if (_ensureTextExtensionCapacity(2))
+    {
+        _textExtensions[0] = "log";
+        _textExtensions[1] = "txt";
+        _textExtensionCount = 2;
+    }
 
     // Set title and button items
     setTitleF(F("File Browser"));
-    const char *buttons[] = {"[M/<] Back", "[>] Select"};
+    const char *buttons[] = {"[M] Back", "[<>] Open"};
     setButtonItems(buttons, 2);
 }
 
@@ -83,10 +98,10 @@ void FileBrowser::_cleanupArrays()
 }
 
 // Ensure _files array has minimum capacity
-void FileBrowser::_ensureFileCapacity(uint8_t minCapacity)
+bool FileBrowser::_ensureFileCapacity(uint8_t minCapacity)
 {
     if (_fileCapacity >= minCapacity)
-        return;
+        return true;
 
     // Calculate new capacity (grow by 50% or minimum needed)
     uint8_t newCapacity = _fileCapacity + (_fileCapacity >> 1);
@@ -97,7 +112,7 @@ void FileBrowser::_ensureFileCapacity(uint8_t minCapacity)
     if (!newFiles)
     {
         // Out of memory - keep the existing array rather than losing it
-        return;
+        return false;
     }
 
     // Copy existing data
@@ -114,13 +129,14 @@ void FileBrowser::_ensureFileCapacity(uint8_t minCapacity)
 
     _files = newFiles;
     _fileCapacity = newCapacity;
+    return true;
 }
 
 // Ensure _textExtensions array has minimum capacity
-void FileBrowser::_ensureTextExtensionCapacity(uint8_t minCapacity)
+bool FileBrowser::_ensureTextExtensionCapacity(uint8_t minCapacity)
 {
     if (_textExtensionCapacity >= minCapacity)
-        return;
+        return true;
 
     // Calculate new capacity (grow by 50% or minimum needed)
     uint8_t newCapacity = _textExtensionCapacity + (_textExtensionCapacity >> 1);
@@ -131,7 +147,7 @@ void FileBrowser::_ensureTextExtensionCapacity(uint8_t minCapacity)
     if (!newExtensions)
     {
         // Out of memory - keep the existing array rather than losing it
-        return;
+        return false;
     }
 
     // Copy existing data
@@ -148,6 +164,7 @@ void FileBrowser::_ensureTextExtensionCapacity(uint8_t minCapacity)
 
     _textExtensions = newExtensions;
     _textExtensionCapacity = newCapacity;
+    return true;
 }
 
 // Initialize and load directory
@@ -159,19 +176,23 @@ bool FileBrowser::open()
         return false;
     }
 
-    // Initialize SD card if not already done
+    // A failure here used to return false, which makes setScreen() delete this
+    // screen and leave _screen null -- a frozen panel that no button reaches.
+    // Stay open and say what is wrong instead; the menu button still leads out
+    // if a back destination was set.
     if (!SD.begin(M1Shield.getSDCardSelectPin()))
     {
-        notifyF(F("Error: Failed to initialize SD card"));
-        return false;
+        _setErrorState(F("No SD card"));
+        return true;
     }
 
-    // Load directory contents
     if (!_loadDirectoryContents())
     {
-        notifyF(F("Error: Could not read directory"));
-        return false;
+        _setErrorState(F("Cannot read folder"));
+        return true;
     }
+
+    _clearErrorState();
 
     // Update menu items from loaded files
     _updateMenuItems();
@@ -239,6 +260,8 @@ bool FileBrowser::_loadDirectoryContents()
         entry = dir.openNextFile();
     }
 
+    setProgressValue(50); // Counting pass done; the reading pass follows
+
     // Ensure we have enough capacity (capped at what uint8_t indices allow)
     if (entryCount > 255)
     {
@@ -288,6 +311,8 @@ bool FileBrowser::_loadDirectoryContents()
         entry.close();
         entry = dir.openNextFile();
     }
+
+    setProgressValue(100);
 
     dir.close();
 
@@ -357,10 +382,11 @@ bool FileBrowser::_navigateToDirectory(const String &dir)
         newPath = _normalizePath(newPath);
     }
 
-    // Check root restriction
-    if (_hasRootRestriction && !newPath.startsWith(_rootDirectory))
+    // Check root restriction. Compared component-wise: a plain prefix test
+    // accepts "/logsecret" for a root of "/logs".
+    if (_hasRootRestriction && !pathIsWithin(newPath.c_str(), _rootDirectory.c_str()))
     {
-        notifyF(F("Access restricted to root directory"));
+        notifyF(F("Outside root folder"));
         return false;
     }
 
@@ -370,7 +396,7 @@ bool FileBrowser::_navigateToDirectory(const String &dir)
     {
         if (testDir)
             testDir.close();
-        notifyF(F("Directory not found"));
+        notifyF(F("Folder not found"));
         return false;
     }
     testDir.close();
@@ -379,30 +405,19 @@ bool FileBrowser::_navigateToDirectory(const String &dir)
     return true;
 }
 
-// Navigate to parent directory
-bool FileBrowser::_navigateUp()
-{
-    return _navigateToDirectory("..");
-}
-
 // Normalize directory path
 String FileBrowser::_normalizePath(const String &path)
 {
-    String normalized = path;
+    char buffer[MAX_PATH_LENGTH];
 
-    // Ensure starts with /
-    if (!normalized.startsWith("/"))
+    if (!normalizePath(path.c_str(), buffer, sizeof(buffer)))
     {
-        normalized = "/" + normalized;
+        // Too long to represent. Fall back to root rather than returning a
+        // half-collapsed path that the containment check would then accept.
+        return String("/");
     }
 
-    // Remove trailing slash unless it's the root
-    if (normalized.length() > 1 && normalized.endsWith("/"))
-    {
-        normalized = normalized.substring(0, normalized.length() - 1);
-    }
-
-    return normalized;
+    return String(buffer);
 }
 
 // Get parent directory path
@@ -421,9 +436,10 @@ String FileBrowser::_getParentDirectory(const String &path)
 // Check if file should be shown
 bool FileBrowser::_isValidFile(const String &filename)
 {
-    // For now, show all files
-    // Could be extended to filter by extension or size
-    return true;
+    // Everything except the FAT volume label, which is not a file the user can
+    // open. This used to be `return true` with the argument unread, which read
+    // at both call sites as though a filter were being applied.
+    return filename.length() > 0;
 }
 
 // Check if file should open with TextFileViewer
@@ -463,8 +479,11 @@ void FileBrowser::_updateMenuItems()
 {
     if (_fileCount == 0)
     {
-        // Show empty directory message
-        const char *emptyItems[] = {"<Empty Directory>"};
+        // A placeholder row, not a file. _isMenuItemEnabled() below reports it
+        // disabled so it draws greyed and without the selection marker --
+        // before, it carried the highlight and the "> " selector and read as
+        // something you could open.
+        const char *emptyItems[] = {"Folder is empty"};
         setMenuItems(emptyItems, 1);
         return;
     }
@@ -514,8 +533,13 @@ void FileBrowser::addTextExtension(const String &extension)
             return;
     }
 
-    // Ensure we have capacity for one more extension
-    _ensureTextExtensionCapacity(_textExtensionCount + 1);
+    // A uint8_t count saturates at 255, where +1 truncates to 0 and skips the
+    // grow entirely, leaving the write below past the end of the array.
+    if (_textExtensionCount == 255)
+        return;
+
+    if (!_ensureTextExtensionCapacity((uint8_t)(_textExtensionCount + 1)))
+        return;
 
     _textExtensions[_textExtensionCount] = ext;
     _textExtensionCount++;
@@ -530,8 +554,14 @@ void FileBrowser::clearTextExtensions()
 // Set text extensions array
 void FileBrowser::setTextExtensions(const String *extensions, uint8_t count)
 {
-    // Ensure we have enough capacity
+    if (!extensions)
+        return;
+
+    // A failed grow leaves the old, smaller array in place. Store what fits
+    // rather than assigning the requested count and writing past the end.
     _ensureTextExtensionCapacity(count);
+    if (count > _textExtensionCapacity)
+        count = _textExtensionCapacity;
 
     _textExtensionCount = count;
 
@@ -567,7 +597,7 @@ String FileBrowser::getCurrentDirectory() const
 }
 
 // Refresh current directory contents
-void FileBrowser::refresh()
+void FileBrowser::reloadDirectory()
 {
     if (_loadDirectoryContents())
     {
@@ -580,6 +610,13 @@ void FileBrowser::refresh()
 }
 
 // Handle file/directory selection
+// The empty-folder placeholder is a message, not a file
+bool FileBrowser::_isMenuItemEnabled(uint8_t index) const
+{
+    (void)index;
+    return _fileCount > 0;
+}
+
 Screen *FileBrowser::_getSelectedMenuItemScreen(int index)
 {
     if (index < 0 || index >= (int)_fileCount)
@@ -589,7 +626,7 @@ Screen *FileBrowser::_getSelectedMenuItemScreen(int index)
 
     if (_fileCount == 0)
     {
-        notifyF(F("Directory is empty"));
+        notifyF(F("Folder is empty"));
         return nullptr;
     }
 
@@ -604,11 +641,11 @@ Screen *FileBrowser::_getSelectedMenuItemScreen(int index)
             {
                 _updateMenuItems();
                 refreshMenu();
-                notifyF(F("Directory changed"));
+                notifyF(F("Folder opened"));
             }
             else
             {
-                notifyF(F("Error reading directory"));
+                notifyF(F("Cannot read folder"));
             }
         }
         return nullptr; // Stay on this screen
@@ -621,16 +658,24 @@ Screen *FileBrowser::_getSelectedMenuItemScreen(int index)
             fullPath += "/";
         fullPath += selected.name;
 
+        // Give the viewer a way back here; without one, opening a file from
+        // the browser was a one-way trip that only a reset escaped.
+        ContentScreen *viewer;
         if (_isTextFile(selected.name))
         {
-            // Open with TextFileViewer
-            return new TextFileViewer(fullPath.c_str());
+            viewer = new TextFileViewer(fullPath.c_str());
         }
         else
         {
-            // Open with BinaryFileViewer
-            return new BinaryFileViewer(fullPath.c_str());
+            viewer = new BinaryFileViewer(fullPath.c_str());
         }
+
+        if (viewer != nullptr)
+        {
+            viewer->setBackScreen(createFileBrowserAt, _currentDirectory);
+        }
+
+        return viewer;
     }
 }
 
