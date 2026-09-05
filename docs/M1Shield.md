@@ -112,11 +112,11 @@ void setup() {
 
     // Get display information
     Serial.print("Display: ");
-    Serial.println(displayProvider.name());        // "ILI9341 240x320"
+    Serial.println(displayProvider.getName());        // "ILI9341 240x320"
     Serial.print("Size: ");
-    Serial.print(displayProvider.width());         // 320 (after rotation)
+    Serial.print(displayProvider.getScreenWidth());         // 320 (after rotation)
     Serial.print("x");
-    Serial.println(displayProvider.height());      // 240 (after rotation)
+    Serial.println(displayProvider.getScreenHeight());      // 240 (after rotation)
 }
 ```
 
@@ -710,13 +710,13 @@ Display_ILI9341 displayProvider;
 M1Shield.begin(displayProvider);
 
 // Access display info
-const char* name = displayProvider.name();      // "ILI9341 240x320"
-uint16_t width = displayProvider.width();       // 320 (after rotation)
-uint16_t height = displayProvider.height();     // 240 (after rotation)
+const char* name = displayProvider.getName();      // "ILI9341 240x320"
+uint16_t width = displayProvider.getScreenWidth();       // 320 (after rotation)
+uint16_t height = displayProvider.getScreenHeight();     // 240 (after rotation)
 
 // Also available from M1Shield
-uint16_t w = M1Shield.getScreenWidth();         // Same as provider.width()
-uint16_t h = M1Shield.getScreenHeight();        // Same as provider.height()
+uint16_t w = M1Shield.getScreenWidth();         // Same as provider.getScreenWidth()
+uint16_t h = M1Shield.getScreenHeight();        // Same as provider.getScreenHeight()
 ```
 
 ## Notes
@@ -749,11 +749,11 @@ void setup() {
     // Verify initialization
     if (M1Shield.isDisplayInitialized()) {
         Serial.print("Display ready: ");
-        Serial.println(displayProvider.name());
+        Serial.println(displayProvider.getName());
         Serial.print("Resolution: ");
-        Serial.print(displayProvider.width());
+        Serial.print(displayProvider.getScreenWidth());
         Serial.print("x");
-        Serial.println(displayProvider.height());
+        Serial.println(displayProvider.getScreenHeight());
 
         // Draw welcome message
         Adafruit_GFX& gfx = M1Shield.getGFX();
@@ -767,7 +767,7 @@ void setup() {
         gfx.setTextSize(1);
         gfx.setCursor(10, 40);
         gfx.print("Provider: ");
-        gfx.print(displayProvider.name());
+        gfx.print(displayProvider.getName());
 
         M1Shield.setLEDColor(COLOR_GREEN);
     } else {
@@ -783,11 +783,11 @@ void displayInfo() {
         DisplayProvider& provider = M1Shield.getDisplayProvider();
 
         Serial.print("Current display: ");
-        Serial.println(provider.name());
+        Serial.println(provider.getName());
         Serial.print("Dimensions: ");
-        Serial.print(provider.width());
+        Serial.print(provider.getScreenWidth());
         Serial.print("x");
-        Serial.println(provider.height());
+        Serial.println(provider.getScreenHeight());
 
         // You can also access the graphics context through the provider
         Adafruit_GFX& gfx = provider.getGFX();
@@ -795,7 +795,7 @@ void displayInfo() {
         gfx.setTextColor(M1Shield.convertColor(0xFFFF));
         gfx.setCursor(10, 10);
         gfx.print("Display: ");
-        gfx.println(provider.name());
+        gfx.println(provider.getName());
 
         // Update the display (important for OLED displays)
         if (provider.display()) {

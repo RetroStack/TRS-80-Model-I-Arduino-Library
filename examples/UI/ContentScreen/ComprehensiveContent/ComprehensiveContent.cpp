@@ -458,7 +458,7 @@ Screen *ComprehensiveContent::actionTaken(ActionTaken action, int8_t offsetX, in
         }
         if (action & BUTTON_RIGHT)
         {
-            interactiveX = min(M1Shield.getDisplayProvider().width() - 30, interactiveX + 5);
+            interactiveX = min(M1Shield.getDisplayProvider().getScreenWidth() - 30, interactiveX + 5);
             refreshContent();
             return nullptr;
         }
